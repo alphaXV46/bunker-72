@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>72 Jam Pertama (Bunker 72) - Narrative Survival Game</title>
+  <meta name="description" content="Setelah bencana besar melanda kota, sebuah keluarga harus bertahan selama 72 jam pertama di dalam bunker. Ambil keputusan terbaik untuk keselamatan keluarga Anda.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+  <main id="game-container">
+    <section id="menu-view" class="view-screen active">
+      <div class="menu-title-container">
+        <div class="menu-kicker">SATGAS SIMULASI DARURAT / PROTOKOL 72</div>
+        <h1 class="game-title">72 JAM PERTAMA</h1>
+        <p class="game-subtitle">BUNKER 72 - NARRATIVE SURVIVAL</p>
+      </div>
+
+      <div class="menu-decor">
+        <div class="flashing-warning">AMARAN: RADIASI EKSTERNAL TINGGI</div>
+        <div class="bunker-status-lights">
+          <span class="light active-red"></span>
+          <span class="light active-green"></span>
+          <span class="light"></span>
+        </div>
+        <div class="menu-readout">
+          <span>Durasi simulasi: 72 jam</span>
+          <span>Parameter utama: kesiapsiagaan</span>
+          <span>Target: keluarga selamat sampai evakuasi resmi</span>
+        </div>
+      </div>
+
+      <div class="menu-buttons-container choices-panel">
+        <button id="new-game-btn" class="choice-btn text-center">BARU (NEW GAME)</button>
+        <button id="continue-btn" class="choice-btn text-center" disabled>LANJUTKAN (CONTINUE)</button>
+      </div>
+    </section>
+
+    <section id="game-view" class="view-screen">
+      <div class="status-panel">
+        <div class="status-item">
+          <span>WAKTU: </span>
+          <span id="status-time" class="highlight-val">0 JAM</span>
+          <span class="muted-text"> / 72 JAM</span>
+        </div>
+        <div class="status-item">
+          <span>HARI: </span>
+          <span id="status-day" class="highlight-val">1</span>
+        </div>
+        <div class="status-item">
+          <span>KESIAPSIAGAAN: </span>
+          <span id="status-knowledge" class="highlight-val">5</span>
+          <span class="muted-text">/10</span>
+        </div>
+      </div>
+
+      <div class="mission-panel">
+        <div class="progress-shell">
+          <span id="status-progress-bar" class="progress-fill"></span>
+        </div>
+        <div id="status-objective" class="objective-text">Masuk bunker dan amankan keluarga.</div>
+      </div>
+
+      <div class="resource-panel" aria-label="Inventaris bunker">
+        <div class="resource-item" data-resource="food">
+          <img src="/src/assets/food_icon.png" alt="Makanan">
+          <span>Makanan</span>
+        </div>
+        <div class="resource-item" data-resource="drink">
+          <img src="/src/assets/drink_icon.png" alt="Air">
+          <span>Air</span>
+        </div>
+        <div class="resource-item" data-resource="kit">
+          <img src="/src/assets/kit_icon.png" alt="P3K">
+          <span>P3K</span>
+        </div>
+        <div class="resource-item" data-resource="radio">
+          <img src="/src/assets/radio_icon.png" alt="Radio">
+          <span>Radio</span>
+        </div>
+      </div>
+
+      <div class="story-box" id="story-box">
+        <div class="scene-vignette"></div>
+        <div class="scene-atmosphere">
+          <span class="ceiling-light"></span>
+          <span class="dust dust-a"></span>
+          <span class="dust dust-b"></span>
+          <span class="warning-sweep"></span>
+        </div>
+        <div class="environment-readout">
+          <div><span>UDARA</span><strong id="status-air">STABIL</strong></div>
+          <div><span>STRUKTUR</span><strong id="status-structure">AMAN</strong></div>
+          <div><span>DAYA</span><strong id="status-power">NORMAL</strong></div>
+        </div>
+
+        <div class="dialogue-overlay">
+          <div id="speaker-name" class="speaker-name">Narator</div>
+          <div class="dialogue-body">
+            <div class="avatar-container" id="avatar-container">
+              <img id="speaker-avatar" class="speaker-avatar" src="" alt="Speaker Avatar">
+            </div>
+            <div id="dialogue-text" class="dialogue-text">Mempersiapkan sistem bunker...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="command-deck">
+        <div class="choices-panel" id="choices-panel"></div>
+        <aside class="protocol-log">
+          <div class="panel-label">LOG PROTOKOL</div>
+          <div id="protocol-log-list" class="protocol-log-list">
+            <p>Menunggu keputusan pertama...</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="ending-view" class="view-screen">
+      <div class="ending-header">
+        <h1 class="ending-alert-title">SIMULASI BERAKHIR</h1>
+        <h2 id="ending-title" class="ending-type">ENDING TYPE</h2>
+      </div>
+
+      <div class="ending-content-box">
+        <p id="ending-desc" class="ending-description">Deskripsi akhir kisah keluarga Anda di Bunker 72...</p>
+      </div>
+
+      <div class="ending-stats">
+        <p>Skor Kesiapsiagaan Bencana: <span id="ending-knowledge" class="highlight-val">0</span> / 10</p>
+        <p id="ending-grade-text" class="ending-grade">Peringkat Kesiapan: SANGAT BURUK</p>
+        <p id="ending-summary" class="ending-summary">Ringkasan protokol akan muncul di sini.</p>
+      </div>
+
+      <div class="choices-panel">
+        <button id="restart-btn" class="choice-btn text-center">KEMBALI KE MENU UTAMA</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/js/main.js"></script>
+</body>
+</html>
