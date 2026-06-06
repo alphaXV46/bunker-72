@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-CYhpK-SG.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DZHRMY6a.css">
+  <script type="module" crossorigin src="/assets/index-DS0-b4hC.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DvbsLKi-.css">
 </head>
 <body>
   <main id="game-container">
@@ -70,18 +70,22 @@
         <div class="resource-item" data-resource="food">
           <img src="/assets/food_icon-BopotsrU.png" alt="Makanan">
           <span>Makanan</span>
+          <span class="resource-count" id="count-food">2</span>
         </div>
         <div class="resource-item" data-resource="drink">
           <img src="/assets/drink_icon-9wtC0rb4.png" alt="Air">
           <span>Air</span>
+          <span class="resource-count" id="count-drink">2</span>
         </div>
         <div class="resource-item" data-resource="kit">
           <img src="/assets/kit_icon-BOTlvyBy.png" alt="P3K">
           <span>P3K</span>
+          <span class="resource-count" id="count-kit">1</span>
         </div>
         <div class="resource-item" data-resource="radio">
           <img src="/assets/radio_icon-D3V4Nb57.png" alt="Radio">
           <span>Radio</span>
+          <span class="resource-count" id="count-radio">∞</span>
         </div>
       </div>
 
@@ -141,6 +145,8 @@
         <button id="restart-btn" class="choice-btn text-center">KEMBALI KE MENU UTAMA</button>
       </div>
     </section>
+    <div class="crt-overlay"></div>
+    <div class="crt-flicker"></div>
   </main>
 
 </body>

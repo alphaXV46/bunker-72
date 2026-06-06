@@ -99,8 +99,8 @@ function initGame() {
     },
     
     // Callback to save progress
-    onSave: (sceneId, knowledge, history) => {
-      const saveData = { sceneId, knowledge, history };
+    onSave: (sceneId, knowledge, history, flags, inventory) => {
+      const saveData = { sceneId, knowledge, history, flags, inventory };
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     },
     
@@ -173,7 +173,7 @@ function initGame() {
     const saveData = checkSaveData();
     if (saveData) {
       showScreen('game');
-      storyEngine.start(saveData.sceneId, saveData.knowledge, saveData.history || []);
+      storyEngine.start(saveData.sceneId, saveData.knowledge, saveData.history || [], saveData.flags || null, saveData.inventory || null);
     }
   });
 
@@ -184,6 +184,17 @@ function initGame() {
 
   // Initial load check
   checkSaveData();
+
+  // Resume or initialize audio context on first user click
+  const initAudioOnFirstClick = () => {
+    if (storyEngine && storyEngine.audio) {
+      storyEngine.audio.init();
+    }
+    document.removeEventListener('click', initAudioOnFirstClick);
+    document.removeEventListener('keydown', initAudioOnFirstClick);
+  };
+  document.addEventListener('click', initAudioOnFirstClick);
+  document.addEventListener('keydown', initAudioOnFirstClick);
 }
 
 // Start when document is ready

@@ -256,7 +256,8 @@
           "text": "Panik dan berlari ke pintu keluar untuk membukanya.",
           "nextSceneId": "day2_panic_exit",
           "knowledgeEffect": -3,
-          "log": "Hampir membuka pintu keluar dalam kondisi panik."
+          "log": "Hampir membuka pintu keluar dalam kondisi panik.",
+          "setFlags": ["structural_damage"]
         },
         {
           "text": "Berlindung di bawah ranjang bunker baja bersama keluarga.",
@@ -398,7 +399,8 @@
           "text": "Jadwalkan transmisi radio selama 10 menit setiap 6 jam.",
           "nextSceneId": "day2_radio_save",
           "knowledgeEffect": 2,
-          "log": "Radio dipakai dengan jadwal hemat baterai."
+          "log": "Radio dipakai dengan jadwal hemat baterai.",
+          "setFlags": ["radio_saved"]
         },
         {
           "text": "Hubungkan radio ke generator utama dengan menaikkan tegangan.",
@@ -421,7 +423,8 @@
           "text": "Matikan lampu utama dan sisakan lampu darurat koridor.",
           "nextSceneId": "day2_power_good",
           "knowledgeEffect": 1,
-          "log": "Daya bunker dialihkan ke mode hemat."
+          "log": "Daya bunker dialihkan ke mode hemat.",
+          "setFlags": ["power_saved"]
         },
         {
           "text": "Biarkan semua lampu menyala agar Anak tidak takut.",
@@ -451,7 +454,8 @@
           "text": "Matikan lampu utama dan sisakan lampu darurat koridor.",
           "nextSceneId": "day2_power_good",
           "knowledgeEffect": 1,
-          "log": "Daya bunker dialihkan ke mode hemat."
+          "log": "Daya bunker dialihkan ke mode hemat.",
+          "setFlags": ["power_saved"]
         },
         {
           "text": "Biarkan semua lampu menyala agar Anak tidak takut.",
@@ -535,7 +539,8 @@
           "text": "Gunakan filter karbon aktif dan tablet klorin pemurni.",
           "nextSceneId": "day3_water_filter",
           "knowledgeEffect": 2,
-          "log": "Air disaring filter karbon dan klorin."
+          "log": "Air disaring filter karbon dan klorin.",
+          "setFlags": ["water_filtered"]
         },
         {
           "text": "Biarkan air mengendap 12 jam di wadah terbuka tanpa disaring.",
@@ -648,7 +653,8 @@
           "text": "Buka pintu langsung untuk menolong suara wanita di luar.",
           "nextSceneId": "day3_knock_open",
           "knowledgeEffect": -3,
-          "log": "Pintu dibuka untuk pihak tak terverifikasi."
+          "log": "Pintu dibuka untuk pihak tak verifikasi.",
+          "setFlags": ["door_opened"]
         },
         {
           "text": "Arahkan kamera intip dan tanyakan sandi evakuasi resmi.",
