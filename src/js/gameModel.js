@@ -13,14 +13,20 @@ export class GameModel {
   constructor() {
     this.currentSceneId = 'day1_start';
     this.knowledge = 5;
+    this.hunger = 100;
+    this.thirst = 100;
+    this.health = 100;
     this.history = [];
     this.flags = {};
     this.inventory = { food: 2, drink: 2, kit: 1 };
   }
 
-  init(sceneId, knowledge, history = [], flags = null, inventory = null) {
+  init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
     this.currentSceneId = sceneId || 'day1_start';
     this.knowledge = typeof knowledge === 'number' ? knowledge : 5;
+    this.hunger = typeof hunger === 'number' ? hunger : 100;
+    this.thirst = typeof thirst === 'number' ? thirst : 100;
+    this.health = typeof health === 'number' ? health : 100;
     this.history = Array.isArray(history) ? history : [];
     this.inventory = inventory || { food: 2, drink: 2, kit: 1 };
 
@@ -56,13 +62,47 @@ export class GameModel {
     return disabledScenes.includes(sceneId) || ENDING_IDS.includes(sceneId);
   }
 
+  updateSurvivalStats(elapsedHours) {
+    if (elapsedHours <= 0) return;
+    
+    // Kurangi hunger dan thirst (-5 per 6 jam)
+    const decay = (elapsedHours / 6) * 5;
+    this.hunger = clamp(this.hunger - decay, 0, 100);
+    this.thirst = clamp(this.thirst - decay, 0, 100);
+    
+    // Kurangi health jika hunger/thirst mencapai 0
+    let healthPenalty = 0;
+    if (this.hunger <= 0) {
+      healthPenalty += (elapsedHours / 6) * 10;
+    }
+    if (this.thirst <= 0) {
+      healthPenalty += (elapsedHours / 6) * 15;
+    }
+    
+    if (healthPenalty > 0) {
+      this.health = clamp(this.health - healthPenalty, 0, 100);
+    }
+  }
+
   useInventoryItem(key) {
     if (this.inventory[key] && this.inventory[key] > 0) {
       this.inventory[key] -= 1;
-      const effect = (key === 'kit') ? 2 : 1;
-      this.knowledge = clamp(this.knowledge + effect, 0, 15);
-      const label = key === 'food' ? 'Makanan' : key === 'drink' ? 'Air' : 'P3K';
-      return { effect, label };
+      let label = '';
+      let effectText = '';
+      if (key === 'food') {
+        this.hunger = clamp(this.hunger + 30, 0, 100);
+        label = 'Makanan';
+        effectText = '+30 Lapar';
+      } else if (key === 'drink') {
+        this.thirst = clamp(this.thirst + 30, 0, 100);
+        label = 'Air';
+        effectText = '+30 Dahaga';
+      } else if (key === 'kit') {
+        this.health = clamp(this.health + 40, 0, 100);
+        label = 'P3K';
+        effectText = '+40 Kesehatan';
+      }
+      return { label, effectText };
     }
     return null;
   }
@@ -76,7 +116,7 @@ export class GameModel {
       return 'day4_intro';
     } else {
       const doorOpened = this.flags.door_opened === true;
-      if (this.knowledge === 0 || doorOpened) {
+      if (this.knowledge === 0 || doorOpened || this.health <= 0) {
         return 'ending_fatal';
       } else if (this.knowledge >= 1 && this.knowledge <= 4) {
         return 'ending_bad';
@@ -90,7 +130,7 @@ export class GameModel {
 
   evaluateSecretEnding() {
     const hasStructuralDamage = this.flags.structural_damage === true;
-    if (this.knowledge >= 12 && !hasStructuralDamage) {
+    if (this.knowledge >= 12 && !hasStructuralDamage && this.health > 0) {
       return 'ending_secret_best';
     } else {
       return 'ending_secret_bad';

@@ -98,7 +98,7 @@ export class GameView {
     });
   }
 
-  renderHud(scene, knowledge, currentSceneId, flags) {
+  renderHud(scene, knowledge, currentSceneId, flags, hunger = 100, thirst = 100, health = 100) {
     const hour = parseHour(scene.hour);
     const day = clamp(Math.floor(hour / 24) + 1, 1, 4);
 
@@ -109,6 +109,11 @@ export class GameView {
     this.dom.statusTime.textContent = scene.hour;
     this.dom.statusDay.textContent = day;
     this.dom.statusKnowledge.textContent = knowledge;
+    
+    if (this.dom.statusHunger) this.dom.statusHunger.textContent = Math.round(hunger);
+    if (this.dom.statusThirst) this.dom.statusThirst.textContent = Math.round(thirst);
+    if (this.dom.statusHealth) this.dom.statusHealth.textContent = Math.round(health);
+
     this.dom.statusProgressBar.style.width = `${progress}%`;
     this.dom.statusObjective.textContent = scene.objective || 'Ambil keputusan paling aman untuk keluarga.';
 
@@ -221,7 +226,6 @@ export class GameView {
     const CHAR_INTERVAL = 32; // ms per karakter
 
     const frame = (timestamp) => {
-      // Guard untuk menghentikan loop jika bukan lagi isTyping (misal sudah di-skip)
       if (!this.isTyping) return;
 
       if (!lastTimestamp) lastTimestamp = timestamp;
@@ -265,7 +269,6 @@ export class GameView {
     this.dom.dialogueText.textContent = this.activeText;
     this.isTyping = false;
     
-    // Panggil callback choices rendering secara instan
     const scene = this.controller.storyData.scenes[this.controller.model.currentSceneId];
     if (scene) {
       this.renderChoices(
@@ -342,12 +345,58 @@ export class GameView {
       muteIcon.textContent = isMuted ? '🔇' : '🔊';
     });
 
-    // Pulihkan preferensi volume dari localStorage
     const savedVolume = parseFloat(localStorage.getItem('bunker72_volume'));
     if (!isNaN(savedVolume)) {
       lastVolume = savedVolume;
       volumeSlider.value = savedVolume;
       audio._lastVolume = savedVolume;
+    }
+  }
+
+  renderEnding(endingId, finalKnowledge, endingText) {
+    this.dom.endingKnowledge.textContent = finalKnowledge;
+    this.dom.endingDesc.textContent = endingText;
+    this.dom.endingSummary.textContent = this.controller.getEndingSummary();
+    
+    this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
+    this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best');
+    
+    if (endingId === 'ending_bad') {
+      this.dom.endingTitle.textContent = "ENDING BURUK: PENYELAMATAN DARURAT KRITIS";
+      this.dom.endingTitle.classList.add('ending-bad');
+      this.dom.endingView.classList.add('ending-bg-bad');
+      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: KURANG (Keluarga Butuh Perawatan Intensif)";
+      this.dom.endingGradeText.style.color = "var(--accent-red-border)";
+    } else if (endingId === 'ending_normal') {
+      this.dom.endingTitle.textContent = "ENDING NORMAL: BERTAHAN HIDUP DENGAN LUKA";
+      this.dom.endingTitle.classList.add('ending-normal');
+      this.dom.endingView.classList.add('ending-bg-normal');
+      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka/Dehidrasi)";
+      this.dom.endingGradeText.style.color = "var(--warning-yellow-border)";
+    } else if (endingId === 'ending_best') {
+      this.dom.endingTitle.textContent = "ENDING TERBAIK: SELAMAT & PRIMA";
+      this.dom.endingTitle.classList.add('ending-best');
+      this.dom.endingView.classList.add('ending-bg-best');
+      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BAIK (Keluarga Sehat & Selamat)";
+      this.dom.endingGradeText.style.color = "var(--accent-green-border)";
+    } else if (endingId === 'ending_fatal') {
+      this.dom.endingTitle.textContent = "ENDING FATAL: MAKAM BUNKER 72";
+      this.dom.endingTitle.classList.add('ending-bad');
+      this.dom.endingView.classList.add('ending-bg-bad');
+      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)";
+      this.dom.endingGradeText.style.color = "var(--accent-red-border)";
+    } else if (endingId === 'ending_secret_best') {
+      this.dom.endingTitle.textContent = "ENDING RAHASIA: PENYELAMATAN SEMPURNA";
+      this.dom.endingTitle.classList.add('ending-best');
+      this.dom.endingView.classList.add('ending-bg-best');
+      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: LEGENDA (Keluarga Sehat, Aman & Selamat 96 Jam)";
+      this.dom.endingGradeText.style.color = "var(--accent-green-border)";
+    } else if (endingId === 'ending_secret_bad') {
+      this.dom.endingTitle.textContent = "ENDING RAHASIA: GUGUR DI GARIS AKHIR";
+      this.dom.endingTitle.classList.add('ending-bad');
+      this.dom.endingView.classList.add('ending-bg-bad');
+      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)";
+      this.dom.endingGradeText.style.color = "var(--accent-red-border)";
     }
   }
 }

@@ -183,7 +183,7 @@ body {
   right: clamp(12px, 1.2vw, 20px);
   z-index: 8;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: repeat(6, 1fr);
   gap: 8px;
   border-bottom: 0;
   padding: 0;
@@ -344,7 +344,7 @@ body {
   image-rendering: crisp-edges;
 }
 
-.resource-item span {
+.resource-item > span:not(.resource-count) {
   position: absolute;
   left: calc(100% + 8px);
   top: 50%;
@@ -358,9 +358,9 @@ body {
   text-transform: uppercase;
 }
 
-.resource-item:hover span,
-.resource-item.resource-active span,
-.resource-item.resource-low span {
+.resource-item:hover > span:not(.resource-count),
+.resource-item.resource-active > span:not(.resource-count),
+.resource-item.resource-low > span:not(.resource-count) {
   display: block;
 }
 
@@ -1035,7 +1035,7 @@ body {
     height: 18px;
   }
 
-  .resource-item span {
+  .resource-item > span:not(.resource-count) {
     font-size: 0.52rem;
   }
 
@@ -1141,15 +1141,15 @@ body {
   .status-panel {
     position: relative;
     top: 0; left: 0; right: 0;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
     gap: 4px;
     font-size: 0.7rem;
     margin-bottom: 4px;
   }
 
   .status-item {
-    flex: 1;
     min-height: 28px;
     padding: 2px 4px;
     font-size: 0.65rem;
@@ -1164,11 +1164,57 @@ body {
   }
 
   /* Sembunyikan resource panel & environment readout */
-  .resource-panel,
   .environment-readout,
   #journal-btn,
   .journal-panel,
   .volume-control { display: none; }
+
+  .resource-panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    position: relative;
+    top: 0; left: 0;
+    width: 100%;
+    margin-bottom: 6px;
+    gap: 6px;
+    z-index: 8;
+  }
+
+  .resource-item {
+    flex: 1;
+    min-height: 44px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    background: rgba(9, 11, 14, 0.88);
+  }
+
+  .resource-item img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .resource-item > span:not(.resource-count) {
+    display: inline;
+    position: static;
+    transform: none;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: var(--text-pixel);
+  }
+
+  .resource-count {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    font-size: 0.75rem;
+  }
 
   /* Story box mengisi ruang tersisa */
   .story-box {

@@ -14,6 +14,9 @@ const dom = {
   statusTime: document.getElementById('status-time'),
   statusDay: document.getElementById('status-day'),
   statusKnowledge: document.getElementById('status-knowledge'),
+  statusHunger: document.getElementById('status-hunger'),
+  statusThirst: document.getElementById('status-thirst'),
+  statusHealth: document.getElementById('status-health'),
   statusProgressBar: document.getElementById('status-progress-bar'),
   statusObjective: document.getElementById('status-objective'),
   statusAir: document.getElementById('status-air'),
@@ -83,6 +86,9 @@ function initGame() {
       statusTime: dom.statusTime,
       statusDay: dom.statusDay,
       statusKnowledge: dom.statusKnowledge,
+      statusHunger: dom.statusHunger,
+      statusThirst: dom.statusThirst,
+      statusHealth: dom.statusHealth,
       statusProgressBar: dom.statusProgressBar,
       statusObjective: dom.statusObjective,
       statusAir: dom.statusAir,
@@ -95,12 +101,19 @@ function initGame() {
       avatarContainer: dom.avatarContainer,
       dialogueText: dom.dialogueText,
       choicesPanel: dom.choicesPanel,
-      protocolLogList: dom.protocolLogList
+      protocolLogList: dom.protocolLogList,
+      
+      endingTitle: dom.endingTitle,
+      endingDesc: dom.endingDesc,
+      endingKnowledge: dom.endingKnowledge,
+      endingGradeText: dom.endingGradeText,
+      endingSummary: dom.endingSummary,
+      endingView: dom.endingView
     },
     
     // Callback to save progress
-    onSave: (sceneId, knowledge, history, flags, inventory) => {
-      const saveData = { sceneId, knowledge, history, flags, inventory };
+    onSave: (sceneId, knowledge, history, flags, inventory, hunger, thirst, health) => {
+      const saveData = { sceneId, knowledge, history, flags, inventory, hunger, thirst, health };
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     },
     
@@ -109,52 +122,8 @@ function initGame() {
       // Clear save file since game is completed
       localStorage.removeItem(SAVE_KEY);
       
-      // Update ending screen details
-      dom.endingKnowledge.textContent = finalKnowledge;
-      dom.endingDesc.textContent = endingText;
-      dom.endingSummary.textContent = storyEngine.getEndingSummary();
-      
-      // Clear any prior ending classes
-      dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
-      dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best');
-      
-      if (endingId === 'ending_bad') {
-        dom.endingTitle.textContent = "ENDING BURUK: PENYELAMATAN DARURAT KRITIS";
-        dom.endingTitle.classList.add('ending-bad');
-        dom.endingView.classList.add('ending-bg-bad');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: KURANG (Keluarga Butuh Perawatan Intensif)";
-        dom.endingGradeText.style.color = "var(--accent-red-border)";
-      } else if (endingId === 'ending_normal') {
-        dom.endingTitle.textContent = "ENDING NORMAL: BERTAHAN HIDUP DENGAN LUKA";
-        dom.endingTitle.classList.add('ending-normal');
-        dom.endingView.classList.add('ending-bg-normal');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka/Dehidrasi)";
-        dom.endingGradeText.style.color = "var(--warning-yellow-border)";
-      } else if (endingId === 'ending_best') {
-        dom.endingTitle.textContent = "ENDING TERBAIK: SELAMAT & PRIMA";
-        dom.endingTitle.classList.add('ending-best');
-        dom.endingView.classList.add('ending-bg-best');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BAIK (Keluarga Sehat & Selamat)";
-        dom.endingGradeText.style.color = "var(--accent-green-border)";
-      } else if (endingId === 'ending_fatal') {
-        dom.endingTitle.textContent = "ENDING FATAL: MAKAM BUNKER 72";
-        dom.endingTitle.classList.add('ending-bad');
-        dom.endingView.classList.add('ending-bg-bad');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)";
-        dom.endingGradeText.style.color = "var(--accent-red-border)";
-      } else if (endingId === 'ending_secret_best') {
-        dom.endingTitle.textContent = "ENDING RAHASIA: PENYELAMATAN SEMPURNA";
-        dom.endingTitle.classList.add('ending-best');
-        dom.endingView.classList.add('ending-bg-best');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: LEGENDA (Keluarga Sehat, Aman & Selamat 96 Jam)";
-        dom.endingGradeText.style.color = "var(--accent-green-border)";
-      } else if (endingId === 'ending_secret_bad') {
-        dom.endingTitle.textContent = "ENDING RAHASIA: GUGUR DI GARIS AKHIR";
-        dom.endingTitle.classList.add('ending-bad');
-        dom.endingView.classList.add('ending-bg-bad');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)";
-        dom.endingGradeText.style.color = "var(--accent-red-border)";
-      }
+      // Update ending screen details via GameView
+      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText);
       
       // Transition screen
       showScreen('ending');
@@ -165,15 +134,24 @@ function initGame() {
   dom.newGameBtn.addEventListener('click', () => {
     localStorage.removeItem(SAVE_KEY);
     showScreen('game');
-    // Start with 5 knowledge points out of 10
-    storyEngine.start('day1_start', 5);
+    // Start with 5 knowledge points, and full survival stats
+    storyEngine.start('day1_start', 5, [], null, null, 100, 100, 100);
   });
 
   dom.continueBtn.addEventListener('click', () => {
     const saveData = checkSaveData();
     if (saveData) {
       showScreen('game');
-      storyEngine.start(saveData.sceneId, saveData.knowledge, saveData.history || [], saveData.flags || null, saveData.inventory || null);
+      storyEngine.start(
+        saveData.sceneId,
+        saveData.knowledge,
+        saveData.history || [],
+        saveData.flags || null,
+        saveData.inventory || null,
+        saveData.hunger,
+        saveData.thirst,
+        saveData.health
+      );
     }
   });
 
