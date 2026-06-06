@@ -1,4 +1,4 @@
-const ENDING_IDS = ['ending_bad', 'ending_normal', 'ending_best'];
+const ENDING_IDS = ['ending_bad', 'ending_normal', 'ending_best', 'ending_fatal', 'ending_secret_best', 'ending_secret_bad'];
 const AVATARS = {
   ayah: new URL('../assets/avatar_ayah.png', import.meta.url).href,
   ibu: new URL('../assets/avatar_ibu.png', import.meta.url).href,
@@ -68,6 +68,10 @@ export class StoryEngine {
       this.evaluateEnding();
       return;
     }
+    if (sceneId === 'trigger_secret_ending_eval') {
+      this.evaluateSecretEnding();
+      return;
+    }
 
     const scene = this.storyData.scenes[sceneId];
     if (!scene) {
@@ -97,8 +101,11 @@ export class StoryEngine {
 
   renderHud(scene) {
     const hour = parseHour(scene.hour);
-    const day = clamp(Math.floor(hour / 24) + 1, 1, 3);
-    const progress = clamp((hour / 72) * 100, 0, 100);
+    const day = clamp(Math.floor(hour / 24) + 1, 1, 4);
+
+    const isDay4 = hour > 72 || this.currentSceneId.startsWith('day4');
+    const maxHour = isDay4 ? 96 : 72;
+    const progress = clamp((hour / maxHour) * 100, 0, 100);
 
     this.dom.statusTime.textContent = scene.hour;
     this.dom.statusDay.textContent = day;
@@ -106,10 +113,29 @@ export class StoryEngine {
     this.dom.statusProgressBar.style.width = `${progress}%`;
     this.dom.statusObjective.textContent = scene.objective || 'Ambil keputusan paling aman untuk keluarga.';
 
-    const compromised = scene.background === 'rusak';
-    this.dom.statusAir.textContent = this.knowledge <= 3 ? 'KRITIS' : this.knowledge <= 6 ? 'WASPADA' : 'STABIL';
-    this.dom.statusStructure.textContent = compromised ? 'RETAK' : 'AMAN';
-    this.dom.statusPower.textContent = hour >= 54 ? 'DARURAT' : hour >= 44 ? 'HEMAT' : 'NORMAL';
+    this.dom.statusAir.textContent = this.knowledge <= 4 ? 'KRITIS' : this.knowledge <= 8 ? 'WASPADA' : 'STABIL';
+    
+    const hasStructuralDamage = this.history.some(h => h.text === "Hampir membuka pintu keluar dalam kondisi panik.");
+    let structureText = 'AMAN';
+    if (this.currentSceneId === 'ending_secret_bad' || this.currentSceneId === 'ending_fatal') {
+      structureText = 'RUNTUH';
+    } else if (hasStructuralDamage || scene.background === 'rusak') {
+      structureText = 'RETAK';
+    }
+    this.dom.statusStructure.textContent = structureText;
+
+    let powerText = 'NORMAL';
+    if (hour >= 78) {
+      const hasSavedPower = this.history.some(h => h.text === "Daya bunker dialihkan ke mode hemat.");
+      powerText = hasSavedPower ? 'DARURAT' : 'PADAM';
+    } else if (hour >= 54) {
+      powerText = 'DARURAT';
+    } else if (hour >= 44) {
+      powerText = 'HEMAT';
+    } else {
+      powerText = 'NORMAL';
+    }
+    this.dom.statusPower.textContent = powerText;
   }
 
   renderSceneArt(scene) {
@@ -186,7 +212,7 @@ export class StoryEngine {
           return;
         }
 
-        this.knowledge = clamp(this.knowledge + effect, 0, 10);
+        this.knowledge = clamp(this.knowledge + effect, 0, 15);
         this.history.push({
           hour: this.storyData.scenes[this.currentSceneId]?.hour || '--',
           text: choice.log || choice.text,
@@ -240,9 +266,38 @@ export class StoryEngine {
   }
 
   evaluateEnding() {
-    let endingId = 'ending_normal';
-    if (this.knowledge <= 3) endingId = 'ending_bad';
-    if (this.knowledge >= 8) endingId = 'ending_best';
+    const hasRadioSave = this.history.some(h => h.text === "Radio dipakai dengan jadwal hemat baterai.");
+    const hasWaterFilter = this.history.some(h => h.text === "Air disaring filter karbon dan klorin.");
+    const qualifiesForDay4 = this.knowledge >= 8 && hasRadioSave && hasWaterFilter;
+
+    if (qualifiesForDay4) {
+      this.renderScene('day4_intro');
+    } else {
+      const doorOpened = this.history.some(h => h.text === "Pintu dibuka untuk pihak tak verifikasi.");
+      
+      let endingId = 'ending_normal';
+      if (this.knowledge === 0 || doorOpened) {
+        endingId = 'ending_fatal';
+      } else if (this.knowledge >= 1 && this.knowledge <= 4) {
+        endingId = 'ending_bad';
+      } else if (this.knowledge >= 5 && this.knowledge <= 7) {
+        endingId = 'ending_normal';
+      } else {
+        endingId = 'ending_best';
+      }
+      this.renderScene(endingId);
+    }
+  }
+
+  evaluateSecretEnding() {
+    const hasStructuralDamage = this.history.some(h => h.text === "Hampir membuka pintu keluar dalam kondisi panik.");
+    
+    let endingId = 'ending_secret_bad';
+    if (this.knowledge >= 12 && !hasStructuralDamage) {
+      endingId = 'ending_secret_best';
+    } else {
+      endingId = 'ending_secret_bad';
+    }
     this.renderScene(endingId);
   }
 

@@ -119,16 +119,16 @@ function initGame() {
       dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best');
       
       if (endingId === 'ending_bad') {
-        dom.endingTitle.textContent = "ENDING BURUK: KEGAGALAN FATAL";
+        dom.endingTitle.textContent = "ENDING BURUK: PENYELAMATAN DARURAT KRITIS";
         dom.endingTitle.classList.add('ending-bad');
         dom.endingView.classList.add('ending-bg-bad');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Tidak Selamat)";
+        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: KURANG (Keluarga Butuh Perawatan Intensif)";
         dom.endingGradeText.style.color = "var(--accent-red-border)";
       } else if (endingId === 'ending_normal') {
-        dom.endingTitle.textContent = "ENDING NORMAL: BERTAHAN DENGAN LUKA";
+        dom.endingTitle.textContent = "ENDING NORMAL: BERTAHAN HIDUP DENGAN LUKA";
         dom.endingTitle.classList.add('ending-normal');
         dom.endingView.classList.add('ending-bg-normal');
-        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka)";
+        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka/Dehidrasi)";
         dom.endingGradeText.style.color = "var(--warning-yellow-border)";
       } else if (endingId === 'ending_best') {
         dom.endingTitle.textContent = "ENDING TERBAIK: SELAMAT & PRIMA";
@@ -136,6 +136,24 @@ function initGame() {
         dom.endingView.classList.add('ending-bg-best');
         dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BAIK (Keluarga Sehat & Selamat)";
         dom.endingGradeText.style.color = "var(--accent-green-border)";
+      } else if (endingId === 'ending_fatal') {
+        dom.endingTitle.textContent = "ENDING FATAL: MAKAM BUNKER 72";
+        dom.endingTitle.classList.add('ending-bad');
+        dom.endingView.classList.add('ending-bg-bad');
+        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)";
+        dom.endingGradeText.style.color = "var(--accent-red-border)";
+      } else if (endingId === 'ending_secret_best') {
+        dom.endingTitle.textContent = "ENDING RAHASIA: PENYELAMATAN SEMPURNA";
+        dom.endingTitle.classList.add('ending-best');
+        dom.endingView.classList.add('ending-bg-best');
+        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: LEGENDA (Keluarga Sehat, Aman & Selamat 96 Jam)";
+        dom.endingGradeText.style.color = "var(--accent-green-border)";
+      } else if (endingId === 'ending_secret_bad') {
+        dom.endingTitle.textContent = "ENDING RAHASIA: GUGUR DI GARIS AKHIR";
+        dom.endingTitle.classList.add('ending-bad');
+        dom.endingView.classList.add('ending-bg-bad');
+        dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)";
+        dom.endingGradeText.style.color = "var(--accent-red-border)";
       }
       
       // Transition screen
