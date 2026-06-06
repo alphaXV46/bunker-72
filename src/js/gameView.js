@@ -36,6 +36,7 @@ export class GameView {
     this.controller = controller;
     this.setupListeners();
     this.setupInventoryListeners();
+    this.setupSettingsModal();
   }
 
   setupListeners() {
@@ -309,6 +310,39 @@ export class GameView {
     if (journalCloseBtn) {
       journalCloseBtn.addEventListener('click', closeJournal);
     }
+  }
+
+  setupSettingsModal() {
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+    const crtToggle = document.getElementById('crt-toggle');
+
+    if (!settingsBtn || !settingsModal || !settingsCloseBtn || !crtToggle) return;
+
+    settingsBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('hidden');
+    });
+
+    settingsCloseBtn.addEventListener('click', () => {
+      settingsModal.classList.add('hidden');
+    });
+
+    const isCrtDisabled = localStorage.getItem('bunker72_crt_disabled');
+    if (isCrtDisabled === 'true') {
+      crtToggle.checked = false;
+      document.body.classList.add('disable-crt');
+    }
+
+    crtToggle.addEventListener('change', () => {
+      if (!crtToggle.checked) {
+        document.body.classList.add('disable-crt');
+        localStorage.setItem('bunker72_crt_disabled', 'true');
+      } else {
+        document.body.classList.remove('disable-crt');
+        localStorage.setItem('bunker72_crt_disabled', 'false');
+      }
+    });
   }
 
   setupVolumeControl(audio) {

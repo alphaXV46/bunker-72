@@ -1243,3 +1243,13 @@ body {
     font-size: 0.82rem;
   }
 }
+
+/* ── SETTINGS MODAL & UTILS ── */
+.modal.hidden {
+  display: none !important;
+}
+
+body.disable-crt .crt-overlay,
+body.disable-crt .crt-flicker {
+  display: none !important;
+}

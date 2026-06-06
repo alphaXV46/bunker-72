@@ -41,7 +41,9 @@ const dom = {
   endingKnowledge: document.getElementById('ending-knowledge'),
   endingGradeText: document.getElementById('ending-grade-text'),
   endingSummary: document.getElementById('ending-summary'),
-  resourceItems: Array.from(document.querySelectorAll('.resource-item'))
+  resourceItems: Array.from(document.querySelectorAll('.resource-item')),
+  settingsMenuBtn: document.getElementById('settings-menu-btn'),
+  settingsModal: document.getElementById('settings-modal')
 };
 
 const SAVE_KEY = 'bunker72_save_v1';
@@ -175,6 +177,14 @@ function initGame() {
 
   if (dom.closeCreditsBtn) {
     dom.closeCreditsBtn.addEventListener('click', () => {
+      showScreen('menu');
+    });
+  }
+
+  if (dom.settingsMenuBtn && dom.settingsModal) {
+    dom.settingsMenuBtn.addEventListener('click', () => {
+      dom.settingsModal.classList.add('hidden');
+      checkSaveData();
       showScreen('menu');
     });
   }
