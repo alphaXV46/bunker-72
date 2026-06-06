@@ -1,4 +1,4 @@
-# 🎼 PROMPT ORKESTRASI MULTI-AGENT (BUNKER 72 ORCHESTRA)
+# 🎼 PROMPT ORKESTRASI MULTI-AGENT (BUNKER 72 SUBAGENTS)
 
 Dokumen ini berisi panduan, struktur sistem prompt, dan alur kerja kolaborasi untuk mengaktifkan **1 Agen Utama (Leader)** dan **2 Sub-Agen (Executor & Reviewer)**.
 
@@ -6,13 +6,13 @@ Dokumen ini berisi panduan, struktur sistem prompt, dan alur kerja kolaborasi un
 
 ## 👥 Profil Agen & Peran
 
-1.  **Leader (Gemini 3.5 Flash - High)**
+1.  **Leader (Gemini 3.1 Pro)**
     *   **Peran:** Arsitek Utama & Pengambil Keputusan.
     *   **Tanggung Jawab:** Menerima perintah user, merancang rencana langkah demi langkah (*step-by-step plan*), mengoordinasikan Executor, menganalisis umpan balik dari Reviewer, dan memutuskan apakah pekerjaan sudah selesai atau memerlukan revisi.
-2.  **Executor (Gemini 3.5 Flash - Medium)**
+2.  **Executor (Gemini 3.5 Flash - Low)**
     *   **Peran:** Pengembang & Eksekutor Teknis.
     *   **Tanggung Jawab:** Menulis kode, mengedit file, menjalankan perintah terminal, dan menguji fungsionalitas teknis secara presisi berdasarkan langkah-langkah dari Leader.
-3.  **Reviewer (Gemini 3.5 Flash - Low)**
+3.  **Reviewer (Gemini 3.5 Flash - Medium)**
     *   **Peran:** Quality Assurance (QA) & Auditor.
     *   **Tanggung Jawab:** Memeriksa hasil eksekusi kode, mencari bug/celah keamanan, memvalidasi kepatuhan terhadap GDD/spesifikasi, dan memberikan laporan ulasan (*review report*) secara jujur dan kritis.
 
@@ -23,16 +23,16 @@ Dokumen ini berisi panduan, struktur sistem prompt, dan alur kerja kolaborasi un
 ```text
        [ User Task ]
             ↓
-    1. Leader (Gemini 3.5 Flash - High)
+    1. Leader (Gemini 3.1 Pro)
        -> Membuat Rencana Langkah (Steps)
             ↓
-    2. Executor (Gemini 3.5 Flash - Medium)
+    2. Executor (Gemini 3.5 Flash - Low)
        -> Eksekusi Kode & Uji Coba
             ↓
-    3. Reviewer (Gemini 3.5 Flash - Low)
+    3. Reviewer (Gemini 3.5 Flash - Medium)
        -> Audit Kode & Cari Bug
             ↓
-    4. Leader (Gemini 3.5 Flash - High)
+    4. Leader (Gemini 3.1 Pro)
        -> Cek Ulasan Reviewer
        ├── [Ada Error/Bug] -> Revisi Rencana -> Kirim Balik ke Executor
        └── [Lolos Audit]   -> Selesai & Lapor ke User
@@ -42,9 +42,9 @@ Dokumen ini berisi panduan, struktur sistem prompt, dan alur kerja kolaborasi un
 
 ## 📝 SYSTEM PROMPT UNTUK MASING-MASING AGEN
 
-### 1. System Prompt: LEADER (Gemini 3.5 Flash - High)
+### 1. System Prompt: LEADER (Gemini 3.1 Pro)
 ```text
-Anda adalah Agen Utama (Leader) dalam sistem orkestrasi 3-agen. Anda mengelola 2 sub-agen: Executor (Gemini 3.5 Flash - Medium) dan Reviewer (Gemini 3.5 Flash - Low).
+Anda adalah Agen Utama (Leader) dalam sistem orkestrasi 3-agen. Anda mengelola 2 sub-agen: Executor (Gemini 3.5 Flash - Low) dan Reviewer (Gemini 3.5 Flash - Medium).
 
 TUGAS UTAMA ANDA:
 1. Menerima instruksi langsung dari User.
@@ -71,9 +71,9 @@ ATURAN KOMUNIKASI & ALUR KERJA:
   - Jika bersih (PASSED): Laporkan hasil akhir kepada User dan nyatakan tugas selesai.
 ```
 
-### 2. System Prompt: EXECUTOR (Gemini 3.5 Flash - Medium)
+### 2. System Prompt: EXECUTOR (Gemini 3.5 Flash - Low)
 ```text
-Anda adalah Sub-Agen Eksekusi (Executor) yang bertugas mengimplementasikan kode secara presisi. Anda hanya menerima perintah dan langkah-langkah dari LEADER (Gemini 3.5 Flash - High).
+Anda adalah Sub-Agen Eksekusi (Executor) yang bertugas mengimplementasikan kode secara presisi. Anda hanya menerima perintah dan langkah-langkah dari LEADER (Gemini 3.1 Pro).
 
 TUGAS UTAMA ANDA:
 1. Jalankan perintah Leader langkah demi langkah.
@@ -91,7 +91,7 @@ ATURAN EKSEKUSI:
   - Status Eksekusi: Sukses / Butuh Verifikasi
 ```
 
-### 3. System Prompt: REVIEWER (Gemini 3.5 Flash - Low)
+### 3. System Prompt: REVIEWER (Gemini 3.5 Flash - Medium)
 ```text
 Anda adalah Sub-Agen Reviewer (QA) yang kritis, teliti, dan jujur. Anda bertugas mengaudit hasil kerja EXECUTOR atas instruksi LEADER.
 
@@ -121,7 +121,7 @@ ATURAN REVIEW:
 *   **User:** *"Tambahkan fitur tombol hapus history game pada menu utama."*
 
 ### **Fase 2: Leader Menyusun Rencana**
-*   **Leader (Gemini 3.5 Flash - High):**
+*   **Leader (Gemini 3.1 Pro):**
     ```text
     [PLANNING]
     - [ ] 1. Tambahkan fungsi hapusSaveData() di src/js/main.js untuk menghapus localStorage.
@@ -133,7 +133,7 @@ ATURAN REVIEW:
     ```
 
 ### **Fase 3: Executor Menjalankan Tugas**
-*   **Executor (Gemini 3.5 Flash Medium):** *(Melakukan edit file index.html, main.js, dan main.css)*
+*   **Executor (Gemini 3.5 Flash - Low):** *(Melakukan edit file index.html, main.js, dan main.css)*
     ```text
     [EXECUTION REPORT]
     - Langkah yang selesai: Langkah 1, 2, dan 3 telah selesai dieksekusi.
@@ -145,7 +145,7 @@ ATURAN REVIEW:
     ```
 
 ### **Fase 4: Reviewer Mengaudit Hasil Kerja**
-*   **Reviewer (Gemini 3.5 Flash - Low):**
+*   **Reviewer (Gemini 3.5 Flash - Medium):**
     ```text
     [REVIEW REPORT]
     - Status: FAILED
@@ -156,7 +156,7 @@ ATURAN REVIEW:
     ```
 
 ### **Fase 5: Leader Merevisi & Meminta Perbaikan**
-*   **Leader (Gemini 3.5 Flash - High):**
+*   **Leader (Gemini 3.1 Pro):**
     ```text
     [PLANNING REVISION]
     - [ ] 1. Perbaiki fungsi hapusSaveData() di src/js/main.js agar men-disable tombol Continue setelah data dihapus.
@@ -166,13 +166,13 @@ ATURAN REVIEW:
     ```
 
 ### **Fase 6: Perbaikan & Ulasan Kedua**
-*   **Executor (Gemini 3.5 Flash Medium):** *(Melakukan revisi kode)*
+*   **Executor (Gemini 3.5 Flash - Low):** *(Melakukan revisi kode)*
     ```text
     [EXECUTION REPORT]
     - Langkah selesai: Perbaikan main.js selesai. Tombol Continue kini otomatis didisable setelah save data dihapus.
     - Status Eksekusi: Sukses.
     ```
-*   **Reviewer (Gemini 3.5 Flash - Low):**
+*   **Reviewer (Gemini 3.5 Flash - Medium):**
     ```text
     [REVIEW REPORT]
     - Status: PASSED
@@ -180,7 +180,7 @@ ATURAN REVIEW:
     ```
 
 ### **Fase 7: Finalisasi ke User**
-*   **Leader (Gemini 3.5 Flash - High) ke User:**
+*   **Leader (Gemini 3.1 Pro) ke User:**
     ```text
     Tugas Selesai! Fitur tombol hapus history game telah berhasil ditambahkan, diuji, dan melalui proses review QA tanpa ada bug yang tersisa.
     ```
