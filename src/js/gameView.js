@@ -14,11 +14,7 @@ function parseHour(hourText) {
   return match ? Number(match[0]) : 0;
 }
 
-function labelForEffect(effect) {
-  if (effect > 0) return `+${effect} kesiapsiagaan`;
-  if (effect < 0) return `${effect} kesiapsiagaan`;
-  return 'netral';
-}
+
 
 const ENDING_IDS = ['ending_bad', 'ending_normal', 'ending_best', 'ending_fatal', 'ending_secret_best', 'ending_secret_bad'];
 

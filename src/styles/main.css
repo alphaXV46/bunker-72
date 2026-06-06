@@ -708,10 +708,6 @@ body {
 
 /* ── VOLUME CONTROL ── */
 .volume-control {
-  position: absolute;
-  top: clamp(54px, 6.5vh, 72px);
-  right: clamp(12px, 1.2vw, 20px);
-  z-index: 10;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1078,10 +1074,6 @@ body {
     display: none;
   }
 
-  .volume-control {
-    display: none;
-  }
-
   .dialogue-text,
   .choice-btn {
     font-size: 0.55rem;
@@ -1166,8 +1158,7 @@ body {
   /* Sembunyikan resource panel & environment readout */
   .environment-readout,
   #journal-btn,
-  .journal-panel,
-  .volume-control { display: none; }
+  .journal-panel { display: none; }
 
   .resource-panel {
     display: flex;
