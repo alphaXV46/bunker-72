@@ -179,11 +179,10 @@ export class GameView {
 
       const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
       const button = document.createElement('button');
-      button.className = `choice-btn ${effect > 0 ? 'choice-good' : effect < 0 ? 'choice-risk' : 'choice-neutral'}`;
+      button.className = `choice-btn choice-neutral`;
       button.innerHTML = `
         <span class="choice-index">${renderedIndex}</span>
         <span class="choice-copy">${choice.text}</span>
-        <span class="choice-impact">${labelForEffect(effect)}</span>
       `;
       renderedIndex++;
       if (choice.item) button.dataset.item = choice.item;

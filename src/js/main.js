@@ -9,7 +9,11 @@ const dom = {
   
   newGameBtn: document.getElementById('new-game-btn'),
   continueBtn: document.getElementById('continue-btn'),
+  creditsBtn: document.getElementById('credits-btn'),
   restartBtn: document.getElementById('restart-btn'),
+  
+  creditsView: document.getElementById('credits-view'),
+  closeCreditsBtn: document.getElementById('close-credits-btn'),
   
   statusTime: document.getElementById('status-time'),
   statusDay: document.getElementById('status-day'),
@@ -67,6 +71,7 @@ function showScreen(screenKey) {
   dom.menuView.classList.remove('active');
   dom.gameView.classList.remove('active');
   dom.endingView.classList.remove('active');
+  if (dom.creditsView) dom.creditsView.classList.remove('active');
   
   if (screenKey === 'menu') {
     dom.menuView.classList.add('active');
@@ -74,6 +79,8 @@ function showScreen(screenKey) {
     dom.gameView.classList.add('active');
   } else if (screenKey === 'ending') {
     dom.endingView.classList.add('active');
+  } else if (screenKey === 'credits') {
+    dom.creditsView.classList.add('active');
   }
 }
 
@@ -159,6 +166,18 @@ function initGame() {
     checkSaveData(); // Refresh Continue button state
     showScreen('menu');
   });
+
+  if (dom.creditsBtn) {
+    dom.creditsBtn.addEventListener('click', () => {
+      showScreen('credits');
+    });
+  }
+
+  if (dom.closeCreditsBtn) {
+    dom.closeCreditsBtn.addEventListener('click', () => {
+      showScreen('menu');
+    });
+  }
 
   // Initial load check
   checkSaveData();
