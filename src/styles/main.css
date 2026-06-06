@@ -192,8 +192,7 @@ body {
 
 .status-item,
 .mission-panel,
-.environment-readout,
-.protocol-log {
+.environment-readout {
   background: var(--panel);
   border: 2px solid var(--line);
 }
@@ -670,15 +669,157 @@ body {
   transform: none;
 }
 
-.protocol-log {
-  justify-self: end;
-  width: min(100%, 360px);
-  max-height: 82px;
-  padding: 9px;
-  min-height: 0;
-  overflow: hidden;
-  background: rgba(9, 11, 14, 0.72);
+
+/* ── TOMBOL JURNAL ── */
+#journal-btn {
+  position: absolute;
+  left: clamp(90px, 7.5vw, 120px);
+  bottom: clamp(18px, 2vh, 26px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(9, 11, 14, 0.82);
+  border: 2px solid var(--line);
+  color: var(--cyan);
+  font-family: inherit;
+  font-size: clamp(0.68rem, 0.8vw, 0.82rem);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: border-color 0.15s ease, background 0.15s ease;
   backdrop-filter: blur(3px);
+}
+
+#journal-btn:hover {
+  border-color: var(--cyan);
+  background: rgba(26, 44, 48, 0.88);
+}
+
+.journal-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.journal-label {
+  font-size: clamp(0.62rem, 0.75vw, 0.78rem);
+  letter-spacing: 2px;
+}
+
+/* ── VOLUME CONTROL ── */
+.volume-control {
+  position: absolute;
+  top: clamp(54px, 6.5vh, 72px);
+  right: clamp(12px, 1.2vw, 20px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(9, 11, 14, 0.82);
+  border: 2px solid var(--line);
+  padding: 5px 8px;
+  backdrop-filter: blur(3px);
+}
+
+.mute-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+  color: var(--text-pixel);
+  transition: opacity 0.15s ease;
+}
+
+.mute-btn:hover { opacity: 0.7; }
+
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: clamp(60px, 6vw, 90px);
+  height: 4px;
+  background: var(--line);
+  outline: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--cyan);
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--cyan);
+  border: none;
+  cursor: pointer;
+}
+
+/* ── PANEL JURNAL ── */
+.journal-panel {
+  position: absolute;
+  left: clamp(90px, 7.5vw, 120px);
+  bottom: clamp(56px, 7vh, 72px);
+  z-index: 11;
+  width: min(34%, 380px);
+  max-height: 210px;
+  background: rgba(9, 11, 14, 0.94);
+  border: 2px solid var(--line-bright);
+  border-left: 4px solid var(--cyan);
+  backdrop-filter: blur(6px);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  /* Animasi masuk/keluar */
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.journal-panel.journal-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.journal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.journal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.1s ease;
+}
+
+.journal-close:hover {
+  color: var(--accent-red-border);
+}
+
+.journal-panel .protocol-log-list {
+  padding: 8px 10px;
+  overflow-y: auto;
+  max-height: 160px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 
 .protocol-log-list {
@@ -928,8 +1069,16 @@ body {
     gap: 4px;
   }
 
-  .environment-readout,
-  .protocol-log {
+  .environment-readout {
+    display: none;
+  }
+
+  #journal-btn,
+  .journal-panel {
+    display: none;
+  }
+
+  .volume-control {
     display: none;
   }
 
@@ -961,5 +1110,90 @@ body {
   .choice-impact {
     grid-column: 2;
     font-size: 0.48rem;
+  }
+}
+
+/* ── PORTRAIT MOBILE REFLOW ── */
+@media (max-width: 600px), (max-height: 480px) {
+  body {
+    align-items: flex-start;
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  #game-container {
+    width: 100vw;
+    height: auto;
+    min-height: 100vh;
+    aspect-ratio: unset;
+    border-radius: 0;
+    border: none;
+    flex-direction: column;
+    padding: 8px;
+    overflow-y: auto;
+  }
+
+  /* Sembunyikan overlay CRT di portrait (terlalu berat) */
+  .crt-overlay, .crt-flicker { display: none; }
+
+  /* Status panel horizontal kompak di atas */
+  .status-panel {
+    position: relative;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+  }
+
+  .status-item {
+    flex: 1;
+    min-height: 28px;
+    padding: 2px 4px;
+    font-size: 0.65rem;
+  }
+
+  /* Mission panel di bawah status, full-width */
+  .mission-panel {
+    position: relative;
+    top: 0; left: 0;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  /* Sembunyikan resource panel & environment readout */
+  .resource-panel,
+  .environment-readout,
+  #journal-btn,
+  .journal-panel,
+  .volume-control { display: none; }
+
+  /* Story box mengisi ruang tersisa */
+  .story-box {
+    flex: 1;
+    min-height: 40vh;
+    margin-bottom: 6px;
+  }
+
+  /* Dialogue overlay full-width */
+  .dialogue-overlay {
+    width: calc(100% - 16px);
+    margin: 0 8px 8px;
+    min-height: 80px;
+  }
+
+  /* Command deck tidak absolute — ikut flow */
+  .command-deck {
+    position: relative;
+    right: 0; bottom: 0;
+    width: 100%;
+    padding: 0 8px 8px;
+  }
+
+  .choice-btn {
+    min-height: 44px;
+    font-size: 0.82rem;
   }
 }

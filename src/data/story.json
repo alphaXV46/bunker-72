@@ -10,18 +10,21 @@
       "focusItems": ["food", "drink", "kit", "radio"],
       "choices": [
         {
+          "id": "c_day1_lock_auto",
           "text": "Kunci pintu otomatis & aktifkan sistem filtrasi.",
           "nextSceneId": "day1_lockdoor",
           "knowledgeEffect": 1,
           "log": "Pintu dikunci otomatis."
         },
         {
+          "id": "c_day1_lock_open",
           "text": "Biarkan pintu sedikit terbuka untuk memantau tetangga.",
           "nextSceneId": "day1_lockdoor",
           "knowledgeEffect": -2,
           "log": "Pintu dibiarkan sedikit terbuka sebelum akhirnya dikunci."
         },
         {
+          "id": "c_day1_lock_manual",
           "text": "Kunci manual dengan palang darurat baja.",
           "nextSceneId": "day1_lockdoor",
           "knowledgeEffect": 2,
@@ -39,18 +42,21 @@
       "focusItems": ["kit"],
       "choices": [
         {
+          "id": "c_day1_air_noinspect",
           "text": "Segera nyalakan penyaring udara tanpa memeriksa segel katup.",
           "nextSceneId": "day1_air_unsafe",
           "knowledgeEffect": -1,
           "log": "Penyaring dinyalakan tanpa inspeksi katup."
         },
         {
+          "id": "c_day1_air_newseal",
           "text": "Ganti segel katup karbon dengan cadangan baru.",
           "nextSceneId": "day1_air_safe",
           "knowledgeEffect": 2,
           "log": "Katup udara diperiksa dan diganti segel baru sebelum mesin aktif."
         },
         {
+          "id": "c_day1_air_wetmask",
           "text": "Gunakan masker kain basah sebagai filter alternatif.",
           "nextSceneId": "day1_air_safe",
           "knowledgeEffect": 0,
@@ -67,6 +73,7 @@
       "objective": "Lakukan inventaris awal.",
       "choices": [
         {
+          "id": "c_day1_air_safe_inventory",
           "text": "Atur persediaan logistik makanan, air, baterai, dan P3K.",
           "nextSceneId": "day1_supplies",
           "knowledgeEffect": 0,
@@ -84,6 +91,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day1_air_fix",
           "text": "Matikan mesin, perbaiki segel katup yang longgar, lalu nyalakan kembali.",
           "nextSceneId": "day1_air_fix",
           "knowledgeEffect": 1,
@@ -100,6 +108,7 @@
       "objective": "Lakukan inventaris awal.",
       "choices": [
         {
+          "id": "c_day1_airfix_inventory",
           "text": "Atur persediaan logistik makanan, air, baterai, dan P3K.",
           "nextSceneId": "day1_supplies",
           "knowledgeEffect": 0,
@@ -117,18 +126,21 @@
       "focusItems": ["food", "drink"],
       "choices": [
         {
+          "id": "c_day1_water_waste",
           "text": "Minum sepuasnya agar tubuh tetap bugar dan terhidrasi penuh.",
           "nextSceneId": "day1_water_waste",
           "knowledgeEffect": -1,
           "log": "Air dipakai terlalu longgar."
         },
         {
+          "id": "c_day1_water_rational",
           "text": "Rasionalkan air: 1.5 sampai 2 liter per orang per hari, dengan cadangan darurat.",
           "nextSceneId": "day1_water_rational",
           "knowledgeEffect": 1,
           "log": "Ransum air dihitung dengan cadangan."
         },
         {
+          "id": "c_day1_water_noschedule",
           "text": "Minum air seadanya saja tanpa membuat jadwal ketat.",
           "nextSceneId": "day1_water_rational",
           "knowledgeEffect": 0,
@@ -146,18 +158,21 @@
       "focusItems": ["food", "drink", "kit"],
       "choices": [
         {
+          "id": "c_day1_sanitation_good",
           "text": "Pisahkan area tidur, area makan, dan area limbah dengan kantong tertutup.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
           "log": "Zona bersih dan limbah dipisahkan."
         },
         {
+          "id": "c_day1_sanitation_door",
           "text": "Biarkan semua barang dekat pintu agar mudah diambil jika harus keluar cepat.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu."
         },
         {
+          "id": "c_day1_sanitation_corner",
           "text": "Tumpuk seluruh limbah di sudut terbuka untuk menghemat kantong.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -2,
@@ -175,18 +190,21 @@
       "focusItems": ["drink", "drink-warning", "food"],
       "choices": [
         {
+          "id": "c_day1_waterwaste_sanitation_good",
           "text": "Pisahkan area tidur, area makan, dan area limbah dengan kantong tertutup.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
           "log": "Zona bersih dan limbah dipisahkan."
         },
         {
+          "id": "c_day1_waterwaste_sanitation_door",
           "text": "Biarkan semua barang dekat pintu agar mudah diambil jika harus keluar cepat.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu."
         },
         {
+          "id": "c_day1_waterwaste_sanitation_corner",
           "text": "Tumpuk seluruh limbah di sudut terbuka untuk menghemat kantong.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -2,
@@ -203,6 +221,7 @@
       "objective": "Pulihkan tenaga untuk hari kedua.",
       "choices": [
         {
+          "id": "c_day1_rest_good",
           "text": "Bagi giliran jaga pendek, lalu istirahat bergantian.",
           "nextSceneId": "day2_start",
           "knowledgeEffect": 1,
@@ -220,6 +239,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day1_rest_bad",
           "text": "Tidur seadanya dan berharap besok bisa dibereskan.",
           "nextSceneId": "day2_start",
           "knowledgeEffect": -1,
@@ -237,6 +257,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day2_check_structure",
           "text": "Periksa kondisi struktural bunker.",
           "nextSceneId": "day2_damage_check",
           "knowledgeEffect": 0,
@@ -253,6 +274,7 @@
       "objective": "Redam panik dan cari sumber kebocoran.",
       "choices": [
         {
+          "id": "c_day2_panic_exit",
           "text": "Panik dan berlari ke pintu keluar untuk membukanya.",
           "nextSceneId": "day2_panic_exit",
           "knowledgeEffect": -3,
@@ -260,12 +282,14 @@
           "setFlags": ["structural_damage"]
         },
         {
+          "id": "c_day2_shelter_bed",
           "text": "Berlindung di bawah ranjang bunker baja bersama keluarga.",
           "nextSceneId": "day2_calm_check",
           "knowledgeEffect": 1,
           "log": "Berlindung di bawah ranjang bunker baja."
         },
         {
+          "id": "c_day2_hydraulic",
           "text": "Aktifkan penyangga struktural hidrolik di panel kontrol utama.",
           "nextSceneId": "day2_calm_check",
           "knowledgeEffect": 2,
@@ -283,6 +307,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day2_panic_find_leak",
           "text": "Cari kebocoran udara setelah semua kembali tenang.",
           "nextSceneId": "day2_find_leak",
           "knowledgeEffect": 0,
@@ -299,6 +324,7 @@
       "objective": "Tutup retakan ventilasi dengan aman.",
       "choices": [
         {
+          "id": "c_day2_calm_seal",
           "text": "Gunakan masker dan sealant darurat untuk menutup retakan.",
           "nextSceneId": "day2_seal_leak",
           "knowledgeEffect": 1,
@@ -315,18 +341,21 @@
       "objective": "Pilih metode perbaikan kebocoran.",
       "choices": [
         {
+          "id": "c_day2_leak_cloth",
           "text": "Sumbat retakan dengan kain basah tanpa masker pelindung.",
           "nextSceneId": "day2_leak_poor_fix",
           "knowledgeEffect": -1,
           "log": "Retakan disumbat tanpa pelindung napas."
         },
         {
+          "id": "c_day2_leak_sealant",
           "text": "Gunakan masker dan sealant darurat untuk menutup retakan.",
           "nextSceneId": "day2_seal_leak",
           "knowledgeEffect": 1,
           "log": "Retakan ditutup dengan masker dan sealant."
         },
         {
+          "id": "c_day2_leak_fan",
           "text": "Abaikan retakan kecil dan gunakan kipas angin kecil untuk meniup asap.",
           "nextSceneId": "day2_leak_poor_fix",
           "knowledgeEffect": -2,
@@ -344,18 +373,21 @@
       "focusItems": ["kit", "radio"],
       "choices": [
         {
+          "id": "c_day2_smoke_water",
           "text": "Minum air banyak untuk meredakan batuk dan langsung pakai radio.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": -1,
           "log": "Paparan asap ditangani seadanya."
         },
         {
+          "id": "c_day2_smoke_firstaid",
           "text": "Bersihkan mata, gunakan masker baru, catat gejala, lalu pakai radio.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": 1,
           "log": "Paparan asap ditangani dengan P3K dasar."
         },
         {
+          "id": "c_day2_smoke_chemical",
           "text": "Gunakan cairan pembersih kimia keras untuk menghilangkan bau asap.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": -2,
@@ -373,6 +405,7 @@
       "focusItems": ["radio", "kit"],
       "choices": [
         {
+          "id": "c_day2_seal_radio",
           "text": "Coba gunakan radio darurat untuk memantau situasi.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": 0,
@@ -390,12 +423,14 @@
       "focusItems": ["radio"],
       "choices": [
         {
+          "id": "c_day2_radio_always_on",
           "text": "Biarkan radio menyala terus-menerus untuk mencari sinyal bantuan.",
           "nextSceneId": "day2_radio_drain",
           "knowledgeEffect": -2,
           "log": "Radio dinyalakan terus-menerus."
         },
         {
+          "id": "c_day2_radio_schedule",
           "text": "Jadwalkan transmisi radio selama 10 menit setiap 6 jam.",
           "nextSceneId": "day2_radio_save",
           "knowledgeEffect": 2,
@@ -403,6 +438,7 @@
           "setFlags": ["radio_saved"]
         },
         {
+          "id": "c_day2_radio_generator",
           "text": "Hubungkan radio ke generator utama dengan menaikkan tegangan.",
           "nextSceneId": "day2_radio_save",
           "knowledgeEffect": 1,
@@ -420,6 +456,7 @@
       "focusItems": ["radio"],
       "choices": [
         {
+          "id": "c_day2_power_save",
           "text": "Matikan lampu utama dan sisakan lampu darurat koridor.",
           "nextSceneId": "day2_power_good",
           "knowledgeEffect": 1,
@@ -427,12 +464,14 @@
           "setFlags": ["power_saved"]
         },
         {
+          "id": "c_day2_power_alllight",
           "text": "Biarkan semua lampu menyala agar Anak tidak takut.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -1,
           "log": "Daya dipakai berlebihan untuk kenyamanan."
         },
         {
+          "id": "c_day2_power_modify",
           "text": "Modifikasi generator untuk memaksa daya lampu tetap terang maksimal.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -2,
@@ -451,6 +490,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day2_power_save_drain",
           "text": "Matikan lampu utama dan sisakan lampu darurat koridor.",
           "nextSceneId": "day2_power_good",
           "knowledgeEffect": 1,
@@ -458,12 +498,14 @@
           "setFlags": ["power_saved"]
         },
         {
+          "id": "c_day2_drain_alllight",
           "text": "Biarkan semua lampu menyala agar Anak tidak takut.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -1,
           "log": "Daya dipakai berlebihan untuk kenyamanan."
         },
         {
+          "id": "c_day2_drain_modify",
           "text": "Modifikasi generator untuk memaksa daya lampu tetap terang maksimal.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -2,
@@ -480,6 +522,7 @@
       "objective": "Masuki hari ketiga dengan cadangan daya.",
       "choices": [
         {
+          "id": "c_day2_powergood_next",
           "text": "Lanjutkan ke Hari Ketiga.",
           "nextSceneId": "day3_start",
           "knowledgeEffect": 0,
@@ -497,6 +540,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day2_powerbad_next",
           "text": "Lanjutkan ke Hari Ketiga.",
           "nextSceneId": "day3_start",
           "knowledgeEffect": -1,
@@ -513,6 +557,7 @@
       "objective": "Amankan air minum terakhir.",
       "choices": [
         {
+          "id": "c_day3_check_water",
           "text": "Periksa pasokan air minum.",
           "nextSceneId": "day3_water_issue",
           "knowledgeEffect": 0,
@@ -530,12 +575,14 @@
       "focusItems": ["drink", "kit"],
       "choices": [
         {
+          "id": "c_day3_water_boil",
           "text": "Rebus air keruh berbau logam dengan kompor gas.",
           "nextSceneId": "day3_water_boil",
           "knowledgeEffect": -1,
           "log": "Air logam direbus tanpa filter."
         },
         {
+          "id": "c_day3_water_filter",
           "text": "Gunakan filter karbon aktif dan tablet klorin pemurni.",
           "nextSceneId": "day3_water_filter",
           "knowledgeEffect": 2,
@@ -543,6 +590,7 @@
           "setFlags": ["water_filtered"]
         },
         {
+          "id": "c_day3_water_settle",
           "text": "Biarkan air mengendap 12 jam di wadah terbuka tanpa disaring.",
           "nextSceneId": "day3_water_boil",
           "knowledgeEffect": -2,
@@ -560,18 +608,21 @@
       "focusItems": ["drink", "radio"],
       "choices": [
         {
+          "id": "c_day3_signal_knock",
           "text": "Pukul pintu bunker berkali-kali agar siapa pun di luar mendengar.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -1,
           "log": "Sinyal dibuat dengan suara berisiko."
         },
         {
+          "id": "c_day3_signal_cloth",
           "text": "Pasang kain reflektif di lubang intip dan siapkan catatan kode sandi.",
           "nextSceneId": "day3_signal_good",
           "knowledgeEffect": 1,
           "log": "Sinyal visual disiapkan tanpa membuka pintu."
         },
         {
+          "id": "c_day3_signal_fire",
           "text": "Bakar sisa kemasan karton di bawah ventilasi untuk memicu asap keluar.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -2,
@@ -589,18 +640,21 @@
       "focusItems": ["drink", "kit", "radio"],
       "choices": [
         {
+          "id": "c_day3_filter_signal_knock",
           "text": "Pukul pintu bunker berkali-kali agar siapa pun di luar mendengar.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -1,
           "log": "Sinyal dibuat dengan suara berisiko."
         },
         {
+          "id": "c_day3_filter_signal_cloth",
           "text": "Pasang kain reflektif di lubang intip dan siapkan catatan kode sandi.",
           "nextSceneId": "day3_signal_good",
           "knowledgeEffect": 1,
           "log": "Sinyal visual disiapkan tanpa membuka pintu."
         },
         {
+          "id": "c_day3_filter_signal_fire",
           "text": "Bakar sisa kemasan karton di bawah ventilasi untuk memicu asap keluar.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -2,
@@ -618,6 +672,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day3_signal_bad_listen",
           "text": "Dengarkan siapa yang mengetuk.",
           "nextSceneId": "day3_knock_hear",
           "knowledgeEffect": 0,
@@ -634,6 +689,7 @@
       "objective": "Tunggu kontak sampai protokol evakuasi aktif.",
       "choices": [
         {
+          "id": "c_day3_signal_good_listen",
           "text": "Dengarkan siapa yang mengetuk.",
           "nextSceneId": "day3_knock_hear",
           "knowledgeEffect": 0,
@@ -650,6 +706,7 @@
       "objective": "Verifikasi identitas sebelum membuka pintu.",
       "choices": [
         {
+          "id": "c_day3_door_open",
           "text": "Buka pintu langsung untuk menolong suara wanita di luar.",
           "nextSceneId": "day3_knock_open",
           "knowledgeEffect": -3,
@@ -657,12 +714,14 @@
           "setFlags": ["door_opened"]
         },
         {
+          "id": "c_day3_door_verify",
           "text": "Arahkan kamera intip dan tanyakan sandi evakuasi resmi.",
           "nextSceneId": "day3_knock_verify",
           "knowledgeEffect": 2,
           "log": "Identitas luar diverifikasi dengan kode sandi."
         },
         {
+          "id": "c_day3_door_ignore",
           "text": "Abaikan ketukan dan matikan seluruh lampu di dalam bunker.",
           "nextSceneId": "day3_knock_verify",
           "knowledgeEffect": 1,
@@ -679,6 +738,7 @@
       "objective": "Tunggu hingga jam ke-72.",
       "choices": [
         {
+          "id": "c_day3_verify_wait",
           "text": "Tunggu hingga jam ke-72.",
           "nextSceneId": "ending_eval",
           "knowledgeEffect": 0,
@@ -696,6 +756,7 @@
       "alert": true,
       "choices": [
         {
+          "id": "c_day3_open_survive",
           "text": "Berusaha bertahan di tengah kekacauan hingga jam ke-72.",
           "nextSceneId": "ending_eval",
           "knowledgeEffect": 0,
@@ -712,6 +773,7 @@
       "objective": "Lihat hasil akhir penyelamatan.",
       "choices": [
         {
+          "id": "c_ending_eval_trigger",
           "text": "Lihat hasil akhir penyelamatan.",
           "nextSceneId": "trigger_ending_eval",
           "knowledgeEffect": 0,
@@ -729,6 +791,7 @@
       "focusItems": ["food", "drink", "kit", "radio"],
       "choices": [
         {
+          "id": "c_day4_intro_start",
           "text": "Mulai Hari ke-4: Protokol Evakuasi Tertunda.",
           "nextSceneId": "day4_oxygen",
           "knowledgeEffect": 0,
@@ -746,18 +809,21 @@
       "focusItems": ["kit"],
       "choices": [
         {
+          "id": "c_day4_oxygen_rest",
           "text": "Batasi aktivitas fisik keluarga dan minta semua orang berbaring diam.",
           "nextSceneId": "day4_looters",
           "knowledgeEffect": 1,
           "log": "Aktivitas dibatasi untuk menghemat oksigen."
         },
         {
+          "id": "c_day4_oxygen_vent",
           "text": "Buka ventilasi darurat luar untuk menarik udara segar dari permukaan.",
           "nextSceneId": "day4_looters",
           "knowledgeEffect": -3,
           "log": "Ventilasi luar dibuka paksa, menghirup udara beracun."
         },
         {
+          "id": "c_day4_oxygen_tank",
           "text": "Gunakan tabung oksigen cadangan medis dari kotak P3K.",
           "nextSceneId": "day4_looters",
           "knowledgeEffect": 2,
@@ -775,18 +841,21 @@
       "focusItems": ["radio"],
       "choices": [
         {
+          "id": "c_day4_looters_shock",
           "text": "Aktifkan sistem listrik kejut pada gagang pintu luar melalui panel kendali.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": 2,
           "log": "Listrik kejut diaktifkan di pintu luar."
         },
         {
+          "id": "c_day4_looters_intercom",
           "text": "Gunakan pengeras suara interkom untuk menggertak mereka bahwa Satgas sudah dekat.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": 0,
           "log": "Interkom digunakan untuk menggertak penjarah."
         },
         {
+          "id": "c_day4_looters_barter",
           "text": "Buka sedikit pintu untuk bernegosiasi barter sisa makanan.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": -3,
@@ -803,6 +872,7 @@
       "objective": "Lihat hasil akhir penyelamatan 96 jam.",
       "choices": [
         {
+          "id": "c_day4_eval_trigger",
           "text": "Lihat hasil akhir penyelamatan 96 jam.",
           "nextSceneId": "trigger_secret_ending_eval",
           "knowledgeEffect": 0,

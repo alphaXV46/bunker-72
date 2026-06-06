@@ -115,13 +115,33 @@
 
       <div class="command-deck">
         <div class="choices-panel" id="choices-panel"></div>
-        <aside class="protocol-log">
-          <div class="panel-label">LOG PROTOKOL</div>
-          <div id="protocol-log-list" class="protocol-log-list">
-            <p>Menunggu keputusan pertama...</p>
-          </div>
-        </aside>
       </div>
+
+      <!-- Tombol Toggle Jurnal -->
+      <button id="journal-btn" aria-label="Buka Jurnal Bunker" title="Jurnal Bunker">
+        <span class="journal-icon">📋</span>
+        <span class="journal-label">JURNAL</span>
+      </button>
+
+      <!-- Panel Kontrol Volume -->
+      <div id="volume-control" class="volume-control">
+        <button id="mute-btn" class="mute-btn" aria-label="Mute/Unmute Audio" title="Mute/Unmute">
+          <span id="mute-icon">🔊</span>
+        </button>
+        <input type="range" id="volume-slider" class="volume-slider"
+          min="0" max="1" step="0.05" value="0.6" aria-label="Volume Audio">
+      </div>
+
+      <!-- Panel Jurnal — awalnya tersembunyi, muncul saat di-toggle -->
+      <aside id="journal-panel" class="journal-panel" aria-hidden="true">
+        <div class="journal-header">
+          <div class="panel-label">LOG PROTOKOL</div>
+          <button id="journal-close-btn" class="journal-close" aria-label="Tutup Jurnal">✕</button>
+        </div>
+        <div id="protocol-log-list" class="protocol-log-list">
+          <p>Menunggu keputusan pertama...</p>
+        </div>
+      </aside>
     </section>
 
     <section id="ending-view" class="view-screen">
