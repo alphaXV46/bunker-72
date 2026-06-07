@@ -3,7 +3,7 @@
     "prolog_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pukul 18.07, langit kota berubah merah. Sirene darurat meraung di antara debu, lampu ambulans, dan suara kendaraan yang saling berebut jalan. Satu keluarga hanya punya satu tujuan: mencapai pintu baja bertanda BUNKER 72 sebelum gelombang susulan datang.",
+      "text": "Pukul 18.07, langit Cilegon berubah merah membara. Sirene darurat kota meraung-raung bersahutan di tengah kepulan abu vulkanik dan kemacetan kendaraan yang panik. Keluarga Anda hanya memiliki satu tujuan: mencapai pintu baja BUNKER 72 sebelum gelombang kejut letusan susulan datang.",
       "background": "prolog",
       "hour": "0 Jam",
       "objective": "Capai Bunker 72 sebelum gelombang susulan tiba.",
@@ -21,7 +21,7 @@
     "day1_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sirene kota terputus-putus di balik debu. Anda, Ibu, dan Anak berhasil mencapai Bunker 72 tepat sebelum gelombang ledakan kedua. Panel pintu berkedip merah: sistem harus disegel dalam hitungan menit.",
+      "text": "Sirene darurat Cilegon terputus-putus di balik pekatnya hujan abu. Anda, Ibu, dan Anak berhasil mencapai Bunker 72 tepat sesaat sebelum gemuruh gelombang kejut letusan kedua Krakatau menghempas permukaan. Panel pintu berkedip merah: sistem harus disegel dalam hitungan menit.",
       "background": "hari1",
       "hour": "0 Jam",
       "objective": "Segel bunker dan mulai protokol 72 jam.",
@@ -318,7 +318,7 @@
     "day2_panic_exit": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Jangan buka! Radiasi dan gas beracun di luar masih tinggi. Pintu tetap terkunci, tapi kepanikan membuat Anak menangis makin keras.",
+      "text": "Jangan buka! Awan abu vulkanik panas dan gas beracun di luar masih sangat tinggi. Pintu tetap terkunci, tapi kepanikan membuat Anak menangis makin keras.",
       "background": "rusak",
       "hour": "36 Jam",
       "objective": "Cari kebocoran yang membuat udara berubah.",
@@ -802,7 +802,7 @@
     "day4_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Tiba-tiba, statis radio terpecah. Suara dari Satgas terdengar: 'Panggilan untuk Bunker 72. Helikopter penyelamat terhambat badai debu radioaktif ekstrem di permukaan. Evakuasi ditunda 24 jam! Bertahanlah!' Layar bergetar hebat saat gempa susulan mengguncang struktur bunker.",
+      "text": "Tiba-tiba, statis radio terpecah. Suara dari Satgas terdengar: 'Panggilan untuk Bunker 72. Helikopter penyelamat terhambat kolom abu vulkanik pekat dan gas sulfur dioksida ekstrem di permukaan. Evakuasi ditunda 24 jam! Bertahanlah!' Layar bergetar hebat saat gempa susulan mengguncang struktur bunker.",
       "background": "rusak",
       "hour": "72 Jam",
       "objective": "Bertahan ekstra 24 jam dalam kondisi darurat.",
@@ -884,7 +884,7 @@
     "day4_eval": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-96 tiba. Badai debu di permukaan mereda. Gemuruh baling-baling helikopter berat terdengar tepat di atas pintu keluar. Tim Satgas bersenjata lengkap akhirnya tiba untuk mengevakuasi keluarga Anda.",
+      "text": "Jam ke-96 tiba. Badai abu di permukaan mereda. Gemuruh baling-baling helikopter berat terdengar tepat di atas pintu keluar. Tim Penyelamat Gabungan akhirnya tiba untuk mengevakuasi keluarga Anda.",
       "background": "rusak",
       "hour": "96 Jam",
       "objective": "Lihat hasil akhir penyelamatan 96 jam.",
@@ -925,7 +925,7 @@
     "ending_fatal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Makam Bunker 72. Keluarga Anda gugur di dalam bunker sebelum tim penyelamat berhasil membuka pintu. Bunker terkontaminasi parah oleh gas beracun akibat kebocoran atau penjarahan paksa yang merusak sistem penopang hidup.",
+      "text": "Makam Bunker 72. Keluarga Anda gugur di dalam bunker sebelum tim penyelamat berhasil membuka pintu. Bunker terkontaminasi parah oleh abu vulkanik asam dan sulfur akibat kebocoran atau kerusakan sistem penopang hidup.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -941,7 +941,7 @@
     "ending_secret_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Gugur di Garis Akhir. Bencana melanda di saat-saat terakhir. Keluarga Anda gagal mengatasi kelangkaan oksigen atau membiarkan pintu luar ditembus oleh penjarah bersenjata. Ketika helikopter penyelamat tiba, Bunker 72 hanya menyisakan kegelapan dan keheningan.",
+      "text": "Gugur di Garis Akhir. Bencana melanda di saat-saat terakhir. Keluarga Anda gagal mengatasi kelangkaan oksigen atau membiarkan pintu luar ditembus oleh penjarah bersenjata di tengah kepungan abu panas. Ketika tim penyelamat tiba, Bunker 72 hanya menyisakan kegelapan dan keheningan.",
       "background": "rusak",
       "hour": "96 Jam",
       "choices": []
