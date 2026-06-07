@@ -1878,3 +1878,7 @@ body.disable-crt .crt-flicker { display: none !important; }
 .debrief-box::-webkit-scrollbar-thumb:hover {
   background: var(--line-bright);
 }
+
+.shake-effect {
+  animation: shake 0.45s steps(2, end) 2;
+}

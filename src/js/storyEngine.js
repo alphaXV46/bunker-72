@@ -16,7 +16,7 @@ import { ENDING_IDS, SURVIVAL, parseHour } from './constants.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
-const RADIO_SCENES = new Set(['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad']);
+const RADIO_SCENES = new Set(['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad', 'day3_start', 'day3_water_issue']);
 
 export class StoryEngine {
   /**
@@ -216,6 +216,8 @@ export class StoryEngine {
       return;
     }
 
+    const prevHealth = this.model.health;
+
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
     this.model.knowledge = Math.max(0, Math.min(SURVIVAL.KNOWLEDGE_MAX, this.model.knowledge + effect));
@@ -257,6 +259,12 @@ export class StoryEngine {
     }
 
     this.view.renderProtocolLog(this.model.history);
+
+    const healthDelta = prevHealth - this.model.health;
+    if (healthDelta > 15) {
+      this.view.triggerShake();
+      this.audio.playDamageAlert();
+    }
 
     // Play appropriate SFX.
     const isBadChoice = effect < 0 || choice.id === 'c_day2_panic_exit'
@@ -348,16 +356,39 @@ export class StoryEngine {
     let processedText = rawText;
 
     const scene = this.storyData.scenes[sceneId];
-    if (scene && Array.isArray(scene.conditionalText)) {
-      scene.conditionalText.forEach((cond) => {
-        if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === true) {
-          if (cond.position === 'prepend') {
-            processedText = cond.text + processedText;
-          } else {
-            processedText = processedText + cond.text;
+    if (scene) {
+      if (Array.isArray(scene.conditionalText)) {
+        scene.conditionalText.forEach((cond) => {
+          if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === true) {
+            if (cond.position === 'prepend') {
+              processedText = cond.text + processedText;
+            } else {
+              processedText = processedText + cond.text;
+            }
           }
-        }
-      });
+        });
+      }
+
+      if (Array.isArray(scene.statConditions)) {
+        scene.statConditions.forEach((cond) => {
+          const actualVal = this.model[cond.stat];
+          let met = false;
+          switch (cond.operator) {
+            case 'lt': met = actualVal < cond.value; break;
+            case 'lte': met = actualVal <= cond.value; break;
+            case 'gt': met = actualVal > cond.value; break;
+            case 'gte': met = actualVal >= cond.value; break;
+            case 'eq': met = actualVal === cond.value; break;
+          }
+          if (met) {
+            if (cond.position === 'prepend') {
+              processedText = cond.text + processedText;
+            } else {
+              processedText = processedText + cond.text;
+            }
+          }
+        });
+      }
     }
 
     return processedText;

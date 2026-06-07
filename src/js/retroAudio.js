@@ -268,4 +268,28 @@ export class RetroAudio {
     osc.start();
     osc.stop(now + 2.0);
   }
+
+  async playDamageAlert() {
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(100, now);
+    osc1.frequency.linearRampToValueAtTime(70, now + 0.6);
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(105, now);
+    osc2.frequency.linearRampToValueAtTime(73, now + 0.6);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.masterGain);
+    osc1.start();
+    osc2.start();
+    osc1.stop(now + 0.6);
+    osc2.stop(now + 0.6);
+  }
 }

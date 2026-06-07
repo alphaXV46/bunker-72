@@ -194,6 +194,14 @@ export class GameModel {
       return 'ending_near_miss';
     }
 
+    // Communication Blackout Gate (conditionsMet <= 1):
+    // If the player failed BOTH radio management AND water filtration,
+    // they are stranded with no comms and poisoned water — a distinct
+    // failure mode from generic low-knowledge endings.
+    if (!hasRadioSave && !hasWaterFilter) {
+      return 'ending_stranded_bad';
+    }
+
     // Standard Ending Matrix based on knowledge score
     if (this.knowledge >= 8) return 'ending_best';
     if (this.knowledge >= 4) return 'ending_normal';

@@ -287,6 +287,17 @@ export class GameView {
     }, 1000);
   }
 
+  triggerShake() {
+    const container = document.getElementById('game-container');
+    if (!container) return;
+    container.classList.remove('shake-effect');
+    void container.offsetWidth; // force reflow
+    container.classList.add('shake-effect');
+    setTimeout(() => {
+      container.classList.remove('shake-effect');
+    }, 900);
+  }
+
   /**
    * Updates inventory UI slots.
    * Receives `isDisabledScene` as a pre-computed boolean — no model access.
