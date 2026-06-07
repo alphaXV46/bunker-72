@@ -97,12 +97,8 @@ export class StoryEngine {
       return;
     }
     if (sceneId === 'day3_pinch_vent_inspected') {
-      this.model.flags.water_ruined = true;
-      this.model.flags.water_filtered = false;
-      if (this.model.inventory.drink > 0) {
-        this.model.inventory.drink -= 1;
-      }
-      this.renderScene('day3_water_poisoned');
+      // Optimal choice: vent secured successfully without punishing the player.
+      this.renderScene('day3_vent_success_water_check');
       return;
     }
 

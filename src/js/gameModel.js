@@ -174,11 +174,18 @@ export class GameModel {
     const hasRadioSave   = this.flags.radio_saved    === true;
     const hasWaterFilter = this.flags.water_filtered === true;
 
-    if (this.knowledge >= 8 && hasRadioSave && hasWaterFilter) {
-      return 'day4_intro';
+    // Day 4 Secret Gate Evaluation
+    if (hasRadioSave && hasWaterFilter) {
+      if (this.knowledge >= 8) {
+        return 'day4_intro'; // Gate success
+      }
+      return 'ending_stranded_bad'; // Distinct branch for failing the secret gate
     }
 
-    return 'ending_stranded_bad';
+    // Standard Ending Matrix based on knowledge score
+    if (this.knowledge >= 8) return 'ending_best';
+    if (this.knowledge >= 4) return 'ending_normal';
+    return 'ending_bad';
   }
 
   /**
