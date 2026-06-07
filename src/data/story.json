@@ -595,7 +595,7 @@
         {
           "id": "c_day3_water_boil",
           "text": "Rebus air keruh berbau logam dengan kompor gas.",
-          "nextSceneId": "day3_water_boil",
+          "nextSceneId": "day3_water_poisoned",
           "knowledgeEffect": -1,
           "log": "Air logam direbus tanpa filter."
         },
@@ -604,15 +604,33 @@
           "text": "Gunakan filter karbon aktif dan tablet klorin pemurni.",
           "nextSceneId": "day3_water_filter",
           "knowledgeEffect": 2,
-          "log": "Air disaring filter karbon dan klorin.",
+          "log": "Air disaring filter karbon and klorin.",
           "setFlags": ["water_filtered"]
         },
         {
           "id": "c_day3_water_settle",
           "text": "Biarkan air mengendap 12 jam di wadah terbuka tanpa disaring.",
-          "nextSceneId": "day3_water_boil",
+          "nextSceneId": "day3_water_poisoned",
           "knowledgeEffect": -2,
           "log": "Air diendapkan terbuka tanpa filter."
+        }
+      ]
+    },
+    "day3_water_poisoned": {
+      "speaker": "Ibu",
+      "avatar": "ibu",
+      "text": "[KERACUNAN AKUT] Tubuh Anak dan Ayah tiba-tiba menggigil hebat, disusul rasa mual ekstrem dan perih membakar di lambung akibat logam berat dari air yang tidak difilter! Kondisi fisik mereka merosot tajam. Kita harus segera menggunakan P3K dari panel inventaris untuk menetralisir racun!",
+      "background": "rusak",
+      "hour": "62 Jam",
+      "objective": "Gunakan P3K dari panel inventaris secepatnya!",
+      "focusItems": ["kit"],
+      "choices": [
+        {
+          "id": "c_day3_poisoned_continue",
+          "text": "Lanjutkan ke pencarian sinyal evakuasi.",
+          "nextSceneId": "day3_water_boil",
+          "knowledgeEffect": 0,
+          "log": "Keluarga melanjutkan penanganan darurat di bawah pengaruh gejala keracunan."
         }
       ]
     },
@@ -838,7 +856,8 @@
           "text": "Buka ventilasi darurat luar untuk menarik udara segar dari permukaan.",
           "nextSceneId": "day4_looters",
           "knowledgeEffect": -3,
-          "log": "Ventilasi luar dibuka paksa, menghirup udara beracun."
+          "log": "Ventilasi luar dibuka paksa, menghirup udara beracun.",
+          "setFlags": ["oxygen_depleted"]
         },
         {
           "id": "c_day4_oxygen_tank",
@@ -877,7 +896,8 @@
           "text": "Buka sedikit pintu untuk bernegosiasi barter sisa makanan.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": -3,
-          "log": "Membuka pintu sedikit untuk barter makanan dengan penjarah."
+          "log": "Membuka pintu sedikit untuk barter makanan dengan penjarah.",
+          "setFlags": ["looters_breached"]
         }
       ]
     },

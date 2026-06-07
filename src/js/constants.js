@@ -29,7 +29,7 @@ export const SURVIVAL = Object.freeze({
   DECAY_INTERVAL_HOURS: 6,
 
   /** Hunger points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  HUNGER_DECAY_PER_INTERVAL: 5,
+  HUNGER_DECAY_PER_INTERVAL: 25,
 
   /** Health points lost per DECAY_INTERVAL_HOURS when hunger reaches zero. */
   HEALTH_PENALTY_HUNGER: 10,

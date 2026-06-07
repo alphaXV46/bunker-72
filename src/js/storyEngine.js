@@ -126,7 +126,11 @@ export class StoryEngine {
     // ── Ending path ──
     if (isEnding) {
       if (this.onEnd) {
-        this.onEnd(sceneId, this.model.knowledge, scene.text, this.model.getEndingSummary());
+        let endingText = scene.text;
+        if (sceneId === 'ending_secret_bad') {
+          endingText = this.model.getSecretBadEndingText();
+        }
+        this.onEnd(sceneId, this.model.knowledge, endingText, this.model.getEndingSummary());
       }
       return;
     }
@@ -150,9 +154,12 @@ export class StoryEngine {
       onChoiceClick: (choice) => this.handleChoiceSelect(choice),
     };
 
+    // Intercept text streams with physical distress markers if stats are low
+    const modifiedText = this.injectDistressMarkers(scene.text, scene.speaker, this.model.hunger, this.model.thirst);
+
     this.view.dom.choicesPanel.innerHTML = '';
     // Pass choicesPayload so skipTyping can render choices without model access.
-    this.view.typeText(scene.text, () => {
+    this.view.typeText(modifiedText, () => {
       this.view.renderChoices(
         scene.choices, sceneId, this.model.flags,
         (choice) => this.handleChoiceSelect(choice)
@@ -176,6 +183,23 @@ export class StoryEngine {
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
     this.model.knowledge = Math.max(0, Math.min(SURVIVAL.KNOWLEDGE_MAX, this.model.knowledge + effect));
+
+    // Severe Choice Consequences mapping
+    if (choice.id === 'c_day3_water_boil' || choice.id === 'c_day3_water_settle') {
+      this.model.health = Math.max(0, this.model.health - 30);
+      this.model.flags.water_poisoned = true;
+    }
+    if (choice.id === 'c_day2_leak_cloth' || choice.id === 'c_day2_leak_fan') {
+      this.model.health = Math.max(0, this.model.health - 20);
+      this.model.flags.smoke_poisoned = true;
+    }
+    if (choice.id === 'c_day4_oxygen_vent') {
+      this.model.health = Math.max(0, this.model.health - 30);
+      this.model.flags.oxygen_depleted = true;
+    }
+    if (choice.id === 'c_day4_looters_barter') {
+      this.model.flags.looters_breached = true;
+    }
 
     // Panic-exit incurs a direct health penalty.
     if (choice.id === 'c_day2_panic_exit') {
@@ -274,5 +298,30 @@ export class StoryEngine {
    */
   _isCollapseEnding(sceneId) {
     return sceneId === 'ending_secret_bad' || sceneId === 'ending_fatal';
+  }
+
+  /**
+   * Intercepts and modifies the dialogue text to inject physical distress markers if stats are low.
+   * @param {string} text
+   * @param {string} speaker
+   * @param {number} hunger
+   * @param {number} thirst
+   * @returns {string}
+   */
+  injectDistressMarkers(text, speaker, hunger, thirst) {
+    if (hunger >= 40 && thirst >= 40) return text;
+    if (speaker === "Narator" || !speaker) {
+      const physicalState = hunger < 40 && thirst < 40
+        ? " [Keluarga tampak sangat pucat, lemas karena lapar dan dahaga ekstrem] "
+        : hunger < 40
+        ? " [Keluarga bergerak lambat, menahan lapar yang membakar] "
+        : " [Bibir keluarga pecah-pecah karena dehidrasi parah] ";
+      return physicalState + text;
+    } else {
+      const strains = [];
+      if (thirst < 40) strains.push("*Uhuk!* *Uhuk!*.. (tenggorokan kering tercekat).. ");
+      if (hunger < 40) strains.push("*(lemas menahan lapar)*.. ");
+      return strains.join("") + text;
+    }
   }
 }

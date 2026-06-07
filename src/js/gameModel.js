@@ -139,6 +139,9 @@ export class GameModel {
    * @returns {string} sceneId
    */
   evaluateEnding() {
+    const doorOpened = this.flags.door_opened === true;
+    if (this.knowledge === 0 || doorOpened || this.health <= 0) return 'ending_fatal';
+
     const hasRadioSave   = this.flags.radio_saved    === true;
     const hasWaterFilter = this.flags.water_filtered === true;
 
@@ -146,8 +149,6 @@ export class GameModel {
       return 'day4_intro';
     }
 
-    const doorOpened = this.flags.door_opened === true;
-    if (this.knowledge === 0 || doorOpened || this.health <= 0) return 'ending_fatal';
     if (this.knowledge >= 1 && this.knowledge <= 4)             return 'ending_bad';
     if (this.knowledge >= 5 && this.knowledge <= 7)             return 'ending_normal';
     return 'ending_best';
@@ -163,6 +164,35 @@ export class GameModel {
     return (this.knowledge >= 12 && !hasStructuralDamage && this.health > 0)
       ? 'ending_secret_best'
       : 'ending_secret_bad';
+  }
+
+  /**
+   * Returns a dynamically constructed text describing the specific reasons for failing Day 4.
+   * @returns {string}
+   */
+  getSecretBadEndingText() {
+    const reasons = [];
+    if (this.flags.structural_damage) {
+      reasons.push("bunker mengalami kerusakan struktural parah akibat guncangan hari kedua yang tidak diantisipasi dengan baik");
+    }
+    if (this.flags.oxygen_depleted) {
+      reasons.push("kegagalan fatal dalam mengelola sirkulasi oksigen darurat (membuka ventilasi luar saat udara luar masih beracun)");
+    }
+    if (this.flags.looters_breached) {
+      reasons.push("penjarah berhasil menerobos masuk karena keputusan membuka pintu untuk barter makanan");
+    }
+    if (this.knowledge < 12) {
+      reasons.push("tingkat kesiapsiagaan keluarga yang kurang memadai untuk menghadapi prosedur evakuasi akhir");
+    }
+    if (this.health <= 50) {
+      reasons.push("kondisi fisik keluarga yang sangat kritis dan cedera parah");
+    }
+
+    const reasonStr = reasons.length > 0 
+      ? reasons.join(", serta ")
+      : "kombinasi kelelahan fisik dan kegagalan protokol darurat di saat-saat terakhir";
+
+    return `Gugur di Garis Akhir. Bencana melanda di saat-saat terakhir karena ${reasonStr}. Ketika tim penyelamat tiba di jam ke-96, Bunker 72 hanya menyisakan kegelapan dan keheningan.`;
   }
 
   /**
