@@ -1,33 +1,59 @@
-import { GameModel } from './gameModel.js';
-import { GameView } from './gameView.js';
-import { RetroAudio } from './retroAudio.js';
+/**
+ * storyEngine.js — Controller Layer
+ *
+ * Responsibilities:
+ *  - Orchestrate flow between GameModel (state), GameView (DOM), and RetroAudio (audio).
+ *  - Translate user events into model mutations and view updates.
+ *  - Never touch the DOM directly — delegate all rendering to GameView.
+ *
+ * Dependencies: GameModel, GameView, RetroAudio, constants.js.
+ */
 
-const ENDING_IDS = ['ending_bad', 'ending_normal', 'ending_best', 'ending_fatal', 'ending_secret_best', 'ending_secret_bad'];
+import { GameModel  } from './gameModel.js';
+import { GameView   } from './gameView.js';
+import { RetroAudio } from './retroAudio.js';
+import { ENDING_IDS, SURVIVAL, parseHour } from './constants.js';
+
+// ─── RADIO SCENES ───────────────────────────────────────────────────────────
+// Scenes during which the radio SFX should play on entry.
+const RADIO_SCENES = new Set(['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad']);
 
 export class StoryEngine {
+  /**
+   * @param {object}   options
+   * @param {object}   options.storyData  - Parsed story.json content.
+   * @param {object}   options.dom        - DOM element references passed from main.js.
+   * @param {Function} options.onSave     - Callback receiving a single saveData object.
+   * @param {Function} options.onEnd      - Callback invoked when the game reaches an ending.
+   */
   constructor(options) {
     this.storyData = options.storyData;
-    this.dom = options.dom;
-    this.onSave = options.onSave;
-    this.onEnd = options.onEnd;
+    this.dom       = options.dom;
+    this.onSave    = options.onSave;
+    this.onEnd     = options.onEnd;
 
     this.model = new GameModel();
-    this.view = new GameView(this.dom);
+    this.view  = new GameView(this.dom);
     this.audio = new RetroAudio();
+
     this._journalSetup = false;
-    this._volumeSetup = false;
+    this._volumeSetup  = false;
 
     this.view.init(this);
   }
 
+  /**
+   * Initializes the model and begins rendering from the given scene.
+   * Called for both new games and save-file loads.
+   */
   start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
     this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health);
 
+    // One-time UI setups — guarded so restarting doesn't re-bind listeners.
     if (!this._journalSetup) {
       this.view.setupJournalToggle();
       this._journalSetup = true;
     }
-
     if (!this._volumeSetup) {
       this.view.setupVolumeControl(this.audio);
       this._volumeSetup = true;
@@ -37,7 +63,200 @@ export class StoryEngine {
     this.renderScene(this.model.currentSceneId);
   }
 
-  checkFatalCondition(sceneId) {
+  // ─── SCENE RENDERING ──────────────────────────────────────────────────────
+
+  /**
+   * Resolves trigger scenes, updates model state, fires audio, and commands
+   * the view to render the new scene.
+   * @param {string} sceneId
+   */
+  renderScene(sceneId) {
+    // Check health-zero fatal condition first, regardless of incoming scene.
+    if (this._checkFatalCondition(sceneId)) return;
+
+    // Resolve logic-trigger pseudo-scenes before doing anything else.
+    if (sceneId === 'trigger_ending_eval') {
+      this.renderScene(this.model.evaluateEnding());
+      return;
+    }
+    if (sceneId === 'trigger_secret_ending_eval') {
+      this.renderScene(this.model.evaluateSecretEnding());
+      return;
+    }
+
+    const scene = this.storyData.scenes[sceneId];
+    if (!scene) {
+      console.error(`[StoryEngine] Scene "${sceneId}" not found in story data.`);
+      return;
+    }
+
+    // Apply time-based survival stat decay for non-ending scenes.
+    const prevHour   = parseHour(this.storyData.scenes[this.model.currentSceneId]?.hour);
+    const currHour   = parseHour(scene.hour);
+    const elapsed    = currHour - prevHour;
+    const isEnding   = ENDING_IDS.includes(sceneId);
+
+    if (elapsed > 0 && !isEnding && sceneId !== 'day1_start') {
+      this.model.updateSurvivalStats(elapsed);
+      if (this._checkFatalCondition(sceneId)) return;
+    }
+
+    // Commit new scene to model.
+    this.model.currentSceneId = sceneId;
+
+    // ── Audio ──
+    if (!isEnding && RADIO_SCENES.has(sceneId)) {
+      this.audio.playRadioSound();
+    } else {
+      this.audio.stopRadioSound();
+    }
+    if (['day2_start', 'day2_damage_check', 'day4_intro'].includes(sceneId)) {
+      this.audio.playRumble();
+    }
+    if (this.model.knowledge <= 4 || isEnding && this._isCollapseEnding(sceneId) || scene.alert === true) {
+      this.audio.playAlarm();
+    }
+
+    // ── Save ──
+    if (!isEnding && this.onSave) {
+      // ✅ Single-object save: model serializes itself via toSaveData().
+      this.onSave(this.model.toSaveData());
+    }
+
+    // ── Ending path ──
+    if (isEnding) {
+      if (this.onEnd) {
+        this.onEnd(sceneId, this.model.knowledge, scene.text, this.model.getEndingSummary());
+      }
+      return;
+    }
+
+    // ── View updates ──
+    const isDisabledScene = this.model.isInventoryDisabledScene(sceneId);
+
+    this.view.renderHud(scene, this.model.knowledge, sceneId, this.model.flags,
+      this.model.hunger, this.model.thirst, this.model.health);
+
+    // Pass pre-computed boolean — View does not need the model reference.
+    this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
+    this.view.renderSceneArt(scene);
+    this.view.renderSpeaker(scene);
+
+    // Build choices payload for use by typeText and skipTyping.
+    const choicesPayload = {
+      choices:       scene.choices,
+      currentSceneId: sceneId,
+      flags:         this.model.flags,
+      onChoiceClick: (choice) => this.handleChoiceSelect(choice),
+    };
+
+    this.view.dom.choicesPanel.innerHTML = '';
+    // Pass choicesPayload so skipTyping can render choices without model access.
+    this.view.typeText(scene.text, () => {
+      this.view.renderChoices(
+        scene.choices, sceneId, this.model.flags,
+        (choice) => this.handleChoiceSelect(choice)
+      );
+    }, choicesPayload);
+  }
+
+  // ─── USER EVENT HANDLERS ──────────────────────────────────────────────────
+
+  /**
+   * Handles a player's choice selection.
+   * If text is still typing, skip it and defer the actual choice.
+   * @param {object} choice - Choice object from story.json.
+   */
+  handleChoiceSelect(choice) {
+    if (this.view.isTyping) {
+      this.view.skipTyping();
+      return;
+    }
+
+    // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
+    const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
+    this.model.knowledge = Math.max(0, Math.min(SURVIVAL.KNOWLEDGE_MAX, this.model.knowledge + effect));
+
+    // Panic-exit incurs a direct health penalty.
+    if (choice.id === 'c_day2_panic_exit') {
+      this.model.health = Math.max(0, this.model.health - SURVIVAL.PANIC_HEALTH_PENALTY);
+    }
+
+    // Record decision in history.
+    this.model.history.push({
+      hour:     this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
+      text:     choice.log || choice.text,
+      choiceId: choice.id  ?? null,
+      effect,
+    });
+
+    // Activate any flags declared on this choice.
+    if (choice.setFlags?.length) {
+      choice.setFlags.forEach((f) => { this.model.flags[f] = true; });
+    }
+
+    this.view.renderProtocolLog(this.model.history);
+
+    // Play appropriate SFX.
+    const isBadChoice = effect < 0 || choice.id === 'c_day2_panic_exit'
+      || (choice.nextSceneId?.includes('bad') ?? false);
+    isBadChoice ? this.audio.playBadChoice() : this.audio.playClick();
+
+    this.renderScene(choice.nextSceneId);
+  }
+
+  /**
+   * Handles a player clicking an inventory item.
+   * Delegates scene-disabled check to the model; view receives results via parameters.
+   * @param {string} key - Inventory item key ('food', 'drink', 'kit', 'radio').
+   */
+  handleInventoryClick(key) {
+    // Guard: inventory is disabled during ending/eval scenes.
+    if (this.model.isInventoryDisabledScene(this.model.currentSceneId)) return;
+
+    if (key === 'radio') {
+      // Radio always plays its sound when clicked — no duplicate branch needed.
+      this.audio.playRadioSound();
+      return;
+    }
+
+    const result = this.model.useInventoryItem(key);
+    if (!result) return; // Item not available
+
+    const scene = this.storyData.scenes[this.model.currentSceneId];
+    this.model.history.push({
+      hour:     scene?.hour ?? '--',
+      text:     `Menggunakan ${result.label} dari inventaris: ${result.effectText}`,
+      choiceId: null,
+      effect:   0,
+    });
+
+    this.audio.playClick();
+    this.view.renderProtocolLog(this.model.history);
+
+    if (this._checkFatalCondition(this.model.currentSceneId)) return;
+
+    const isDisabledScene = this.model.isInventoryDisabledScene(this.model.currentSceneId);
+    if (scene) {
+      this.view.renderHud(scene, this.model.knowledge, this.model.currentSceneId, this.model.flags,
+        this.model.hunger, this.model.thirst, this.model.health);
+      this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
+    }
+
+    if (!ENDING_IDS.includes(this.model.currentSceneId) && this.onSave) {
+      this.onSave(this.model.toSaveData());
+    }
+  }
+
+  // ─── PRIVATE HELPERS ──────────────────────────────────────────────────────
+
+  /**
+   * If health has reached zero, redirect to the fatal ending immediately.
+   * @param {string} sceneId
+   * @returns {boolean} true if a redirect was triggered.
+   * @private
+   */
+  _checkFatalCondition(sceneId) {
     if (this.model.health <= 0 && sceneId !== 'ending_fatal') {
       this.model.health = 0;
       this.renderScene('ending_fatal');
@@ -46,202 +265,14 @@ export class StoryEngine {
     return false;
   }
 
-  renderScene(sceneId) {
-    if (this.checkFatalCondition(sceneId)) return;
-
-    if (sceneId === 'trigger_ending_eval') {
-      const targetSceneId = this.model.evaluateEnding();
-      this.renderScene(targetSceneId);
-      return;
-    }
-    if (sceneId === 'trigger_secret_ending_eval') {
-      const targetSceneId = this.model.evaluateSecretEnding();
-      this.renderScene(targetSceneId);
-      return;
-    }
-
-    const scene = this.storyData.scenes[sceneId];
-    if (!scene) {
-      console.error(`Scene ${sceneId} not found in story data.`);
-      return;
-    }
-
-    // Hitung waktu berlalu dan perbarui status survival
-    const prevHour = this.storyData.scenes[this.model.currentSceneId] ? parseHour(this.storyData.scenes[this.model.currentSceneId].hour) : 0;
-    const currHour = parseHour(scene.hour);
-    const elapsed = currHour - prevHour;
-    
-    if (elapsed > 0 && !ENDING_IDS.includes(sceneId) && sceneId !== 'day1_start') {
-      this.model.updateSurvivalStats(elapsed);
-      if (this.checkFatalCondition(sceneId)) return;
-    }
-
-    this.model.currentSceneId = sceneId;
-    this.view.updateInventoryUI(this.model.currentSceneId, this.model.inventory);
-
-    const isEnding = ENDING_IDS.includes(sceneId);
-    const isRadioScene = ['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad'].includes(sceneId);
-
-    if (!isEnding && isRadioScene) {
-      this.audio.playRadioSound(false);
-    } else {
-      this.audio.stopRadioSound();
-    }
-
-    if (!isEnding && this.onSave) {
-      this.onSave(
-        this.model.currentSceneId,
-        this.model.knowledge,
-        this.model.history,
-        this.model.flags,
-        this.model.inventory,
-        this.model.hunger,
-        this.model.thirst,
-        this.model.health
-      );
-    }
-
-    if (isEnding) {
-      if (this.onEnd) this.onEnd(sceneId, this.model.knowledge, scene.text);
-      return;
-    }
-
-    if (['day2_start', 'day2_damage_check', 'day4_intro'].includes(sceneId)) {
-      this.audio.playRumble();
-    }
-    const isStructureCollapse = (sceneId === 'ending_secret_bad' || sceneId === 'ending_fatal');
-    if (this.model.knowledge <= 4 || isStructureCollapse || scene.alert === true) {
-      this.audio.playAlarm();
-    }
-
-    this.view.renderHud(
-      scene,
-      this.model.knowledge,
-      this.model.currentSceneId,
-      this.model.flags,
-      this.model.hunger,
-      this.model.thirst,
-      this.model.health
-    );
-    this.view.renderResources(scene, this.model.inventory, this.model.knowledge, this.model.currentSceneId);
-    this.view.renderSceneArt(scene, this.model.currentSceneId);
-    this.view.renderSpeaker(scene);
-
-    this.view.dom.choicesPanel.innerHTML = '';
-    this.view.typeText(scene.text, () => {
-      this.view.renderChoices(
-        scene.choices,
-        this.model.currentSceneId,
-        this.storyData,
-        this.model.flags,
-        (choice) => this.handleChoiceSelect(choice)
-      );
-    });
+  /**
+   * Returns true for endings that visually represent structure collapse.
+   * Used to conditionally trigger alarm audio.
+   * @param {string} sceneId
+   * @returns {boolean}
+   * @private
+   */
+  _isCollapseEnding(sceneId) {
+    return sceneId === 'ending_secret_bad' || sceneId === 'ending_fatal';
   }
-
-  handleChoiceSelect(choice) {
-    if (this.view.isTyping) {
-      this.view.skipTyping();
-      return;
-    }
-
-    const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
-    this.model.knowledge = Math.max(0, Math.min(15, this.model.knowledge + effect));
-    
-    // Peristiwa gempa tanpa perlindungan mengurangi Health sebesar 30
-    if (choice.id === 'c_day2_panic_exit') {
-      this.model.health = Math.max(0, this.model.health - 30);
-    }
-
-    this.model.history.push({
-      hour: this.storyData.scenes[this.model.currentSceneId]?.hour || '--',
-      text: choice.log || choice.text,
-      choiceId: choice.id || null,
-      effect
-    });
-
-    if (choice.setFlags && Array.isArray(choice.setFlags)) {
-      choice.setFlags.forEach(f => {
-        this.model.flags[f] = true;
-      });
-    }
-
-    this.view.renderProtocolLog(this.model.history);
-
-    const isBadChoice = (choice.knowledgeEffect < 0) || 
-                        (choice.id === 'c_day2_panic_exit') || 
-                        (choice.nextSceneId && choice.nextSceneId.includes('bad'));
-
-    if (isBadChoice) {
-      this.audio.playBadChoice();
-    } else {
-      this.audio.playClick();
-    }
-
-    this.renderScene(choice.nextSceneId);
-  }
-
-  handleInventoryClick(key) {
-    if (key === 'radio') {
-      const scene = this.storyData.scenes[this.model.currentSceneId];
-      const hour = scene ? parseHour(scene.hour) : 0;
-      if (hour >= 48 && this.model.knowledge <= 6) {
-        this.audio.playRadioSound(false);
-        return;
-      }
-      this.audio.playRadioSound(false);
-      return;
-    }
-
-    const result = this.model.useInventoryItem(key);
-    if (result) {
-      const scene = this.storyData.scenes[this.model.currentSceneId];
-      const hour = scene ? scene.hour : '--';
-      this.model.history.push({
-        hour: hour,
-        text: `Menggunakan ${result.label} dari inventaris: ${result.effectText}`,
-        effect: 0
-      });
-
-      this.audio.playClick();
-      this.view.renderProtocolLog(this.model.history);
-      
-      if (this.checkFatalCondition(this.model.currentSceneId)) return;
-
-      if (scene) {
-        this.view.renderHud(
-          scene,
-          this.model.knowledge,
-          this.model.currentSceneId,
-          this.model.flags,
-          this.model.hunger,
-          this.model.thirst,
-          this.model.health
-        );
-        this.view.renderResources(scene, this.model.inventory, this.model.knowledge, this.model.currentSceneId);
-      }
-
-      if (this.onSave && !ENDING_IDS.includes(this.model.currentSceneId)) {
-        this.onSave(
-          this.model.currentSceneId,
-          this.model.knowledge,
-          this.model.history,
-          this.model.flags,
-          this.model.inventory,
-          this.model.hunger,
-          this.model.thirst,
-          this.model.health
-        );
-      }
-    }
-  }
-
-  getEndingSummary() {
-    return this.model.getEndingSummary();
-  }
-}
-
-function parseHour(hourText) {
-  const match = String(hourText || '0').match(/\d+/);
-  return match ? Number(match[0]) : 0;
 }

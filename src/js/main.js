@@ -1,66 +1,91 @@
+/**
+ * main.js — Application Entry Point
+ *
+ * Responsibilities:
+ *  - Cache DOM element references.
+ *  - Manage top-level screen transitions (menu / game / ending / credits).
+ *  - Initialize StoryEngine and wire menu button callbacks.
+ *  - Own the save/load lifecycle via localStorage.
+ *
+ * Does NOT contain game logic. All game decisions belong to StoryEngine.
+ */
+
 import storyData from '../data/story.json';
 import { StoryEngine } from './storyEngine.js';
+import { SAVE_KEY, SURVIVAL } from './constants.js';
 
-// DOM Element Selectors
+// ─── DOM REFERENCES ──────────────────────────────────────────────────────────
 const dom = {
-  menuView: document.getElementById('menu-view'),
-  gameView: document.getElementById('game-view'),
-  endingView: document.getElementById('ending-view'),
-  
-  newGameBtn: document.getElementById('new-game-btn'),
-  continueBtn: document.getElementById('continue-btn'),
-  creditsBtn: document.getElementById('credits-btn'),
-  restartBtn: document.getElementById('restart-btn'),
-  
+  // Screens
+  menuView:    document.getElementById('menu-view'),
+  gameView:    document.getElementById('game-view'),
+  endingView:  document.getElementById('ending-view'),
   creditsView: document.getElementById('credits-view'),
+
+  // Menu buttons
+  newGameBtn:  document.getElementById('new-game-btn'),
+  continueBtn: document.getElementById('continue-btn'),
+  creditsBtn:  document.getElementById('credits-btn'),
+  restartBtn:  document.getElementById('restart-btn'),
+
+  // Credits / settings overlay buttons
   closeCreditsBtn: document.getElementById('close-credits-btn'),
-  
-  statusTime: document.getElementById('status-time'),
-  statusDay: document.getElementById('status-day'),
-  statusKnowledge: document.getElementById('status-knowledge'),
-  statusHunger: document.getElementById('status-hunger'),
-  statusThirst: document.getElementById('status-thirst'),
-  statusHealth: document.getElementById('status-health'),
+  settingsMenuBtn: document.getElementById('settings-menu-btn'),
+  settingsModal:   document.getElementById('settings-modal'),
+
+  // HUD — status bar
+  statusTime:        document.getElementById('status-time'),
+  statusDay:         document.getElementById('status-day'),
+  statusKnowledge:   document.getElementById('status-knowledge'),
+  statusHunger:      document.getElementById('status-hunger'),
+  statusThirst:      document.getElementById('status-thirst'),
+  statusHealth:      document.getElementById('status-health'),
   statusProgressBar: document.getElementById('status-progress-bar'),
-  statusObjective: document.getElementById('status-objective'),
-  statusAir: document.getElementById('status-air'),
-  statusStructure: document.getElementById('status-structure'),
-  statusPower: document.getElementById('status-power'),
-  
-  storyBox: document.getElementById('story-box'),
-  speakerName: document.getElementById('speaker-name'),
-  speakerAvatar: document.getElementById('speaker-avatar'),
+  statusObjective:   document.getElementById('status-objective'),
+  statusAir:         document.getElementById('status-air'),
+  statusStructure:   document.getElementById('status-structure'),
+  statusPower:       document.getElementById('status-power'),
+
+  // Dialogue
+  storyBox:        document.getElementById('story-box'),
+  speakerName:     document.getElementById('speaker-name'),
+  speakerAvatar:   document.getElementById('speaker-avatar'),
   avatarContainer: document.getElementById('avatar-container'),
-  dialogueText: document.getElementById('dialogue-text'),
-  
-  choicesPanel: document.getElementById('choices-panel'),
-  protocolLogList: document.getElementById('protocol-log-list'),
-  
-  endingTitle: document.getElementById('ending-title'),
-  endingDesc: document.getElementById('ending-desc'),
+  dialogueText:    document.getElementById('dialogue-text'),
+
+  // Choices / log
+  choicesPanel:     document.getElementById('choices-panel'),
+  protocolLogList:  document.getElementById('protocol-log-list'),
+
+  // Ending screen
+  endingTitle:     document.getElementById('ending-title'),
+  endingDesc:      document.getElementById('ending-desc'),
   endingKnowledge: document.getElementById('ending-knowledge'),
   endingGradeText: document.getElementById('ending-grade-text'),
-  endingSummary: document.getElementById('ending-summary'),
+  endingSummary:   document.getElementById('ending-summary'),
+
+  // Inventory icons
   resourceItems: Array.from(document.querySelectorAll('.resource-item')),
-  settingsMenuBtn: document.getElementById('settings-menu-btn'),
-  settingsModal: document.getElementById('settings-modal')
 };
 
-const SAVE_KEY = 'bunker72_save_v1';
-let storyEngine = null;
+// ─── SAVE HELPERS ────────────────────────────────────────────────────────────
 
-// Check if a saved game exists in localStorage
+/**
+ * Reads and validates a save from localStorage.
+ * Enables or disables the Continue button accordingly.
+ * @returns {object|null} Parsed save data, or null if none/invalid.
+ */
 function checkSaveData() {
-  const saveRaw = localStorage.getItem(SAVE_KEY);
-  if (saveRaw) {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (raw) {
     try {
-      const saveData = JSON.parse(saveRaw);
-      if (saveData && saveData.sceneId && typeof saveData.knowledge === 'number') {
+      const save = JSON.parse(raw);
+      if (save?.sceneId && typeof save.knowledge === 'number') {
         dom.continueBtn.disabled = false;
-        return saveData;
+        return save;
       }
     } catch (e) {
-      console.error("Corrupted save data found:", e);
+      console.error('[main] Corrupted save data — clearing:', e);
       localStorage.removeItem(SAVE_KEY);
     }
   }
@@ -68,118 +93,99 @@ function checkSaveData() {
   return null;
 }
 
-// Switch between screen views
+// ─── SCREEN MANAGER ──────────────────────────────────────────────────────────
+
+const SCREENS = ['menuView', 'gameView', 'endingView', 'creditsView'];
+
+/**
+ * Deactivates all screens and activates the requested one.
+ * @param {'menu'|'game'|'ending'|'credits'} screenKey
+ */
 function showScreen(screenKey) {
-  dom.menuView.classList.remove('active');
-  dom.gameView.classList.remove('active');
-  dom.endingView.classList.remove('active');
-  if (dom.creditsView) dom.creditsView.classList.remove('active');
-  
-  if (screenKey === 'menu') {
-    dom.menuView.classList.add('active');
-  } else if (screenKey === 'game') {
-    dom.gameView.classList.add('active');
-  } else if (screenKey === 'ending') {
-    dom.endingView.classList.add('active');
-  } else if (screenKey === 'credits') {
-    dom.creditsView.classList.add('active');
-  }
+  SCREENS.forEach((key) => dom[key]?.classList.remove('active'));
+  const target = dom[`${screenKey}View`];
+  if (target) target.classList.add('active');
 }
 
-// Initialize the Game
+// ─── INITIALISATION ──────────────────────────────────────────────────────────
+
+let storyEngine = null;
+
 function initGame() {
-  // Create Story Engine instance
   storyEngine = new StoryEngine({
-    storyData: storyData,
+    storyData,
     dom: {
-      statusTime: dom.statusTime,
-      statusDay: dom.statusDay,
-      statusKnowledge: dom.statusKnowledge,
-      statusHunger: dom.statusHunger,
-      statusThirst: dom.statusThirst,
-      statusHealth: dom.statusHealth,
+      statusTime:        dom.statusTime,
+      statusDay:         dom.statusDay,
+      statusKnowledge:   dom.statusKnowledge,
+      statusHunger:      dom.statusHunger,
+      statusThirst:      dom.statusThirst,
+      statusHealth:      dom.statusHealth,
       statusProgressBar: dom.statusProgressBar,
-      statusObjective: dom.statusObjective,
-      statusAir: dom.statusAir,
-      statusStructure: dom.statusStructure,
-      statusPower: dom.statusPower,
-      resourceItems: dom.resourceItems,
-      storyBox: dom.storyBox,
-      speakerName: dom.speakerName,
-      speakerAvatar: dom.speakerAvatar,
-      avatarContainer: dom.avatarContainer,
-      dialogueText: dom.dialogueText,
-      choicesPanel: dom.choicesPanel,
-      protocolLogList: dom.protocolLogList,
-      
-      endingTitle: dom.endingTitle,
-      endingDesc: dom.endingDesc,
-      endingKnowledge: dom.endingKnowledge,
-      endingGradeText: dom.endingGradeText,
-      endingSummary: dom.endingSummary,
-      endingView: dom.endingView
+      statusObjective:   dom.statusObjective,
+      statusAir:         dom.statusAir,
+      statusStructure:   dom.statusStructure,
+      statusPower:       dom.statusPower,
+      resourceItems:     dom.resourceItems,
+      storyBox:          dom.storyBox,
+      speakerName:       dom.speakerName,
+      speakerAvatar:     dom.speakerAvatar,
+      avatarContainer:   dom.avatarContainer,
+      dialogueText:      dom.dialogueText,
+      choicesPanel:      dom.choicesPanel,
+      protocolLogList:   dom.protocolLogList,
+      endingTitle:       dom.endingTitle,
+      endingDesc:        dom.endingDesc,
+      endingKnowledge:   dom.endingKnowledge,
+      endingGradeText:   dom.endingGradeText,
+      endingSummary:     dom.endingSummary,
+      endingView:        dom.endingView,
     },
-    
-    // Callback to save progress
-    onSave: (sceneId, knowledge, history, flags, inventory, hunger, thirst, health) => {
-      const saveData = { sceneId, knowledge, history, flags, inventory, hunger, thirst, health };
+
+    // ✅ Single-object save callback — matches GameModel.toSaveData() shape.
+    onSave: (saveData) => {
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     },
-    
-    // Callback when game ends
-    onEnd: (endingId, finalKnowledge, endingText) => {
-      // Clear save file since game is completed
-      localStorage.removeItem(SAVE_KEY);
-      
-      // Update ending screen details via GameView
-      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText);
-      
-      // Transition screen
+
+    // ✅ endingSummary is now a 4th argument — no circular call from view to controller.
+    onEnd: (endingId, finalKnowledge, endingText, endingSummary) => {
+      localStorage.removeItem(SAVE_KEY); // clear save on completion
+      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary);
       showScreen('ending');
-    }
+    },
   });
 
-  // Setup Menu Button Listeners
+  // ── Menu buttons ──
   dom.newGameBtn.addEventListener('click', () => {
     localStorage.removeItem(SAVE_KEY);
     showScreen('game');
-    // Start with 5 knowledge points, and full survival stats
-    storyEngine.start('prolog_intro', 5, [], null, null, 100, 100, 100);
+    const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
+    storyEngine.start('prolog_intro', knowledge, [], null, null, hunger, thirst, health);
   });
 
   dom.continueBtn.addEventListener('click', () => {
-    const saveData = checkSaveData();
-    if (saveData) {
-      showScreen('game');
-      storyEngine.start(
-        saveData.sceneId,
-        saveData.knowledge,
-        saveData.history || [],
-        saveData.flags || null,
-        saveData.inventory || null,
-        saveData.hunger,
-        saveData.thirst,
-        saveData.health
-      );
-    }
+    const save = checkSaveData();
+    if (!save) return;
+    showScreen('game');
+    storyEngine.start(
+      save.sceneId,
+      save.knowledge,
+      save.history  ?? [],
+      save.flags    ?? null,
+      save.inventory ?? null,
+      save.hunger,
+      save.thirst,
+      save.health,
+    );
   });
 
   dom.restartBtn.addEventListener('click', () => {
-    checkSaveData(); // Refresh Continue button state
+    checkSaveData(); // refresh Continue button state
     showScreen('menu');
   });
 
-  if (dom.creditsBtn) {
-    dom.creditsBtn.addEventListener('click', () => {
-      showScreen('credits');
-    });
-  }
-
-  if (dom.closeCreditsBtn) {
-    dom.closeCreditsBtn.addEventListener('click', () => {
-      showScreen('menu');
-    });
-  }
+  dom.creditsBtn?.addEventListener('click',      () => showScreen('credits'));
+  dom.closeCreditsBtn?.addEventListener('click', () => showScreen('menu'));
 
   if (dom.settingsMenuBtn && dom.settingsModal) {
     dom.settingsMenuBtn.addEventListener('click', () => {
@@ -189,20 +195,19 @@ function initGame() {
     });
   }
 
-  // Initial load check
+  // Initial state check
   checkSaveData();
 
-  // Resume or initialize audio context on first user click
-  const initAudioOnFirstClick = () => {
-    if (storyEngine && storyEngine.audio) {
-      storyEngine.audio.init();
-    }
-    document.removeEventListener('click', initAudioOnFirstClick);
-    document.removeEventListener('keydown', initAudioOnFirstClick);
+  // ── Audio context bootstrap ──
+  // AudioContext must be created (or resumed) in response to a user gesture.
+  // This one-shot handler fires on the very first interaction.
+  const initAudioOnFirstInteraction = () => {
+    storyEngine?.audio.init();
+    document.removeEventListener('click',   initAudioOnFirstInteraction);
+    document.removeEventListener('keydown', initAudioOnFirstInteraction);
   };
-  document.addEventListener('click', initAudioOnFirstClick);
-  document.addEventListener('keydown', initAudioOnFirstClick);
+  document.addEventListener('click',   initAudioOnFirstInteraction);
+  document.addEventListener('keydown', initAudioOnFirstInteraction);
 }
 
-// Start when document is ready
 document.addEventListener('DOMContentLoaded', initGame);

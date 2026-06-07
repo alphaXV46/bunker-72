@@ -1,50 +1,63 @@
+/**
+ * gameView.js — View Layer (DOM rendering only)
+ *
+ * Responsibilities:
+ *  - Read from the DOM and write to the DOM.
+ *  - Accept all data as explicit parameters from the Controller.
+ *  - Never navigate the controller's object graph (no this.controller.model.*).
+ *
+ * Dependencies: constants.js only (for POWER_THRESHOLDS and parseHour/clamp).
+ */
+
+import { clamp, parseHour, POWER_THRESHOLDS } from './constants.js';
+
+// ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
-  ayah: new URL('../assets/avatar_ayah.png', import.meta.url).href,
-  ibu: new URL('../assets/avatar_ibu.png', import.meta.url).href,
-  anak: new URL('../assets/avatar_anak.png', import.meta.url).href,
-  narrator: new URL('../assets/avatar_narrator.png', import.meta.url).href
+  ayah:     new URL('../assets/avatar_ayah.png',     import.meta.url).href,
+  ibu:      new URL('../assets/avatar_ibu.png',      import.meta.url).href,
+  anak:     new URL('../assets/avatar_anak.png',     import.meta.url).href,
+  narrator: new URL('../assets/avatar_narrator.png', import.meta.url).href,
 };
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function parseHour(hourText) {
-  const match = String(hourText || '0').match(/\d+/);
-  return match ? Number(match[0]) : 0;
-}
-
-
-
-const ENDING_IDS = ['ending_bad', 'ending_normal', 'ending_best', 'ending_fatal', 'ending_secret_best', 'ending_secret_bad'];
-
 export class GameView {
+  /**
+   * @param {object} dom - Object map of pre-selected DOM element references.
+   */
   constructor(dom) {
-    this.dom = dom;
-    this.controller = null;
-    this.isTyping = false;
+    this.dom            = dom;
+    this.controller     = null;
+    this.isTyping       = false;
     this.typingTimeoutId = null;
-    this.typingRafId = null;
-    this.activeText = '';
+    this.typingRafId    = null;
+    this.activeText     = '';
+    this._pendingChoicesPayload = null; // stored so skipTyping can re-render
   }
 
+  /**
+   * Wires the view to its controller and initializes all UI listeners.
+   * @param {object} controller - The StoryEngine instance.
+   */
   init(controller) {
     this.controller = controller;
-    this.setupListeners();
-    this.setupInventoryListeners();
-    this.setupSettingsModal();
+    this._setupDialogueClickListener();
+    this._setupKeyboardShortcuts();
+    this._setupInventoryListeners();
+    this._setupSettingsModal();
   }
 
-  setupListeners() {
-    const dialogueOverlay = this.dom.storyBox.querySelector('.dialogue-overlay');
-    if (dialogueOverlay) {
-      dialogueOverlay.addEventListener('click', () => {
-        if (this.isTyping) this.skipTyping();
-      });
-    }
+  // ─── LISTENER SETUP (private) ─────────────────────────────────────────────
 
+  _setupDialogueClickListener() {
+    const dialogueOverlay = this.dom.storyBox.querySelector('.dialogue-overlay');
+    if (!dialogueOverlay) return;
+    dialogueOverlay.addEventListener('click', () => {
+      if (this.isTyping) this.skipTyping();
+    });
+  }
+
+  _setupKeyboardShortcuts() {
     window.addEventListener('keydown', (event) => {
-      if (!this.dom.choicesPanel || !this.dom.choicesPanel.children.length) return;
+      if (!this.dom.choicesPanel?.children.length) return;
       const keyNumber = Number(event.key);
       if (!Number.isInteger(keyNumber) || keyNumber < 1 || keyNumber > 3) return;
       const button = this.dom.choicesPanel.children[keyNumber - 1];
@@ -52,214 +65,336 @@ export class GameView {
     });
   }
 
-  setupInventoryListeners() {
+  _setupInventoryListeners() {
     this.dom.resourceItems.forEach((item) => {
       item.addEventListener('click', () => {
-        const isDisabledScene = this.controller.model.isInventoryDisabledScene(this.controller.model.currentSceneId);
-        if (isDisabledScene) {
-          return;
-        }
         const key = item.dataset.resource;
+        // Controller decides whether the click is valid for the current scene.
         this.controller.handleInventoryClick(key);
       });
     });
   }
 
-  updateInventoryUI(currentSceneId, inventory) {
-    if (!this.dom.resourceItems) return;
+  _setupSettingsModal() {
+    const settingsBtn      = document.getElementById('settings-btn');
+    const settingsModal    = document.getElementById('settings-modal');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+    const crtToggle        = document.getElementById('crt-toggle');
 
-    const isDisabledScene = this.controller.model.isInventoryDisabledScene(currentSceneId);
+    if (!settingsBtn || !settingsModal || !settingsCloseBtn || !crtToggle) return;
 
-    this.dom.resourceItems.forEach((item) => {
-      const key = item.dataset.resource;
-      const countEl = document.getElementById(`count-${key}`);
-      
-      if (key === 'radio') {
-        if (countEl) countEl.textContent = '∞';
-        if (isDisabledScene) {
-          item.classList.add('disabled');
-        } else {
-          item.classList.remove('disabled');
-        }
-        return;
-      }
+    settingsBtn.addEventListener('click',      () => settingsModal.classList.remove('hidden'));
+    settingsCloseBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
 
-      const count = inventory[key] || 0;
-      if (countEl) countEl.textContent = count;
+    // Restore persisted CRT preference
+    if (localStorage.getItem('bunker72_crt_disabled') === 'true') {
+      crtToggle.checked = false;
+      document.body.classList.add('disable-crt');
+    }
 
-      if (isDisabledScene || count <= 0) {
-        item.classList.add('disabled');
-      } else {
-        item.classList.remove('disabled');
-      }
+    crtToggle.addEventListener('change', () => {
+      const disabled = !crtToggle.checked;
+      document.body.classList.toggle('disable-crt', disabled);
+      localStorage.setItem('bunker72_crt_disabled', String(disabled));
     });
   }
 
-  renderHud(scene, knowledge, currentSceneId, flags, hunger = 100, thirst = 100, health = 100) {
-    const hour = parseHour(scene.hour);
-    const day = clamp(Math.floor(hour / 24) + 1, 1, 4);
+  // ─── ONE-TIME SETUPS (called by StoryEngine.start) ───────────────────────
 
-    const isDay4 = hour > 72 || currentSceneId.startsWith('day4');
+  setupJournalToggle() {
+    const journalBtn      = document.getElementById('journal-btn');
+    const journalPanel    = document.getElementById('journal-panel');
+    const journalCloseBtn = document.getElementById('journal-close-btn');
+
+    if (!journalBtn || !journalPanel) return;
+
+    const open  = () => {
+      journalPanel.classList.add('journal-open');
+      journalPanel.setAttribute('aria-hidden', 'false');
+      journalBtn.style.opacity       = '0';
+      journalBtn.style.pointerEvents = 'none';
+    };
+    const close = () => {
+      journalPanel.classList.remove('journal-open');
+      journalPanel.setAttribute('aria-hidden', 'true');
+      journalBtn.style.opacity       = '1';
+      journalBtn.style.pointerEvents = 'auto';
+    };
+
+    journalBtn.addEventListener('click', () => {
+      journalPanel.classList.contains('journal-open') ? close() : open();
+    });
+    if (journalCloseBtn) journalCloseBtn.addEventListener('click', close);
+  }
+
+  /**
+   * Wires volume slider and mute button to the audio engine.
+   * Audio init is NOT called here — the AudioContext is guaranteed to already
+   * exist via the first-interaction handler in main.js before this UI is opened.
+   * @param {object} audio - The RetroAudio instance.
+   */
+  setupVolumeControl(audio) {
+    const volumeSlider = document.getElementById('volume-slider');
+    const muteBtn      = document.getElementById('mute-btn');
+    const muteIcon     = document.getElementById('mute-icon');
+
+    if (!volumeSlider || !muteBtn) return;
+
+    let isMuted     = false;
+    let lastVolume  = 0.6;
+
+    // Restore persisted volume before attaching listeners
+    const savedVolume = parseFloat(localStorage.getItem('bunker72_volume'));
+    if (!isNaN(savedVolume)) {
+      lastVolume            = savedVolume;
+      volumeSlider.value    = savedVolume;
+      audio._lastVolume     = savedVolume;
+    }
+
+    volumeSlider.addEventListener('input', () => {
+      lastVolume        = parseFloat(volumeSlider.value);
+      audio._lastVolume = lastVolume;
+      // ✅ No audio.init() here — context is already running.
+      audio.setVolume(lastVolume);
+      isMuted           = lastVolume === 0;
+      muteIcon.textContent = isMuted ? '🔇' : '🔊';
+      localStorage.setItem('bunker72_volume', lastVolume);
+    });
+
+    muteBtn.addEventListener('click', () => {
+      isMuted              = !isMuted;
+      audio._lastVolume    = lastVolume;
+      audio.setMuted(isMuted);
+      muteIcon.textContent = isMuted ? '🔇' : '🔊';
+    });
+  }
+
+  // ─── RENDER METHODS ───────────────────────────────────────────────────────
+
+  /**
+   * Updates all HUD status bar values.
+   * Receives all data it needs as explicit parameters — no model access.
+   *
+   * @param {object} scene           - Current scene data object from story.json.
+   * @param {number} knowledge
+   * @param {string} currentSceneId
+   * @param {object} flags
+   * @param {number} hunger
+   * @param {number} thirst
+   * @param {number} health
+   */
+  renderHud(scene, knowledge, currentSceneId, flags, hunger = 100, thirst = 100, health = 100) {
+    const hour    = parseHour(scene.hour);
+    const isDay4  = hour > 72 || currentSceneId.startsWith('day4');
     const maxHour = isDay4 ? 96 : 72;
+    const day     = clamp(Math.floor(hour / 24) + 1, 1, 4);
     const progress = clamp((hour / maxHour) * 100, 0, 100);
 
-    this.dom.statusTime.textContent = scene.hour;
-    this.dom.statusDay.textContent = day;
+    this.dom.statusTime.textContent      = scene.hour;
+    this.dom.statusDay.textContent       = day;
     this.dom.statusKnowledge.textContent = knowledge;
-    
+
     if (this.dom.statusHunger) this.dom.statusHunger.textContent = Math.round(hunger);
     if (this.dom.statusThirst) this.dom.statusThirst.textContent = Math.round(thirst);
     if (this.dom.statusHealth) this.dom.statusHealth.textContent = Math.round(health);
 
-    this.dom.statusProgressBar.style.width = `${progress}%`;
-    this.dom.statusObjective.textContent = scene.objective || 'Ambil keputusan paling aman untuk keluarga.';
+    this.dom.statusProgressBar.style.width   = `${progress}%`;
+    this.dom.statusObjective.textContent     = scene.objective || 'Ambil keputusan paling aman untuk keluarga.';
+    this.dom.statusAir.textContent           = knowledge <= 4 ? 'KRITIS' : knowledge <= 8 ? 'WASPADA' : 'STABIL';
 
-    this.dom.statusAir.textContent = knowledge <= 4 ? 'KRITIS' : knowledge <= 8 ? 'WASPADA' : 'STABIL';
-    
-    const hasStructuralDamage = flags.structural_damage === true;
+    // Structure status
     let structureText = 'AMAN';
     if (currentSceneId === 'ending_secret_bad' || currentSceneId === 'ending_fatal') {
       structureText = 'RUNTUH';
-    } else if (hasStructuralDamage || scene.background === 'rusak') {
+    } else if (flags.structural_damage === true || scene.background === 'rusak') {
       structureText = 'RETAK';
     }
     this.dom.statusStructure.textContent = structureText;
 
+    // Power status — thresholds sourced from constants, not magic numbers
+    const { EMERGENCY_CUTOFF, EMERGENCY_START, ECONOMY_START } = POWER_THRESHOLDS;
     let powerText = 'NORMAL';
-    if (hour >= 78) {
-      const hasSavedPower = flags.power_saved === true;
-      powerText = hasSavedPower ? 'DARURAT' : 'PADAM';
-    } else if (hour >= 54) {
+    if (hour >= EMERGENCY_CUTOFF) {
+      powerText = flags.power_saved === true ? 'DARURAT' : 'PADAM';
+    } else if (hour >= EMERGENCY_START) {
       powerText = 'DARURAT';
-    } else if (hour >= 44) {
+    } else if (hour >= ECONOMY_START) {
       powerText = 'HEMAT';
-    } else {
-      powerText = 'NORMAL';
     }
     this.dom.statusPower.textContent = powerText;
   }
 
-  renderResources(scene, inventory, knowledge, currentSceneId) {
-    this.updateInventoryUI(currentSceneId, inventory);
+  /**
+   * Updates inventory UI slots.
+   * Receives `isDisabledScene` as a pre-computed boolean — no model access.
+   *
+   * @param {boolean} isDisabledScene
+   * @param {object}  inventory
+   */
+  updateInventoryUI(isDisabledScene, inventory) {
+    if (!this.dom.resourceItems) return;
+
+    this.dom.resourceItems.forEach((item) => {
+      const key      = item.dataset.resource;
+      const countEl  = document.getElementById(`count-${key}`);
+
+      if (key === 'radio') {
+        if (countEl) countEl.textContent = '∞';
+        item.classList.toggle('disabled', isDisabledScene);
+        return;
+      }
+
+      const count = inventory[key] ?? 0;
+      if (countEl) countEl.textContent = count;
+      item.classList.toggle('disabled', isDisabledScene || count <= 0);
+    });
   }
 
-  renderSceneArt(scene, currentSceneId) {
-    this.dom.storyBox.classList.remove(
-      'bg-prolog',
-      'bg-hari1',
-      'bg-normal',
-      'bg-rusak',
-      'scene-alert',
-      'speaker-ayah',
-      'speaker-ibu',
-      'speaker-anak',
-      'speaker-narrator'
-    );
+  /** Delegates to updateInventoryUI — kept for call-site compatibility in StoryEngine. */
+  renderResources(isDisabledScene, inventory) {
+    this.updateInventoryUI(isDisabledScene, inventory);
+  }
+
+  /**
+   * Applies background and alert CSS classes to the story box.
+   * @param {object} scene
+   */
+  renderSceneArt(scene) {
+    const bgClassMap = { prolog: 'bg-prolog', hari1: 'bg-hari1', normal: 'bg-hari1', rusak: 'bg-rusak' };
+
+    this.dom.storyBox.classList.remove('bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert',
+      'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator');
+
     this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', scene.background === 'prolog');
     document.body.classList.toggle('prolog-active', scene.background === 'prolog');
 
-    const bgClassMap = {
-      prolog: 'bg-prolog',
-      hari1: 'bg-hari1',
-      normal: 'bg-hari1',
-      rusak: 'bg-rusak'
-    };
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-hari1');
     if (scene.alert) this.dom.storyBox.classList.add('scene-alert');
   }
 
+  /**
+   * Updates speaker name, avatar image, and dialogue box speaker CSS class.
+   * @param {object} scene
+   */
   renderSpeaker(scene) {
-    this.dom.speakerName.textContent = scene.speaker;
-    const avatarKey = scene.avatar || 'narrator';
-    const avatarUrl = AVATARS[avatarKey];
+    const avatarKey   = scene.avatar || 'narrator';
+    const avatarUrl   = AVATARS[avatarKey];
     const speakerClass = ['ayah', 'ibu', 'anak'].includes(avatarKey) ? `speaker-${avatarKey}` : 'speaker-narrator';
+
+    this.dom.speakerName.textContent = scene.speaker;
     this.dom.storyBox.classList.remove('speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator');
     this.dom.storyBox.classList.add(speakerClass);
 
     if (avatarUrl) {
-      this.dom.speakerAvatar.src = avatarUrl;
-      this.dom.speakerAvatar.alt = `${scene.speaker} Avatar`;
+      this.dom.speakerAvatar.src        = avatarUrl;
+      this.dom.speakerAvatar.alt        = `${scene.speaker} Avatar`;
       this.dom.avatarContainer.style.display = 'flex';
     } else {
       this.dom.avatarContainer.style.display = 'none';
     }
   }
 
-  renderChoices(choices, currentSceneId, storyData, flags, onChoiceClick) {
+  /**
+   * Renders interactive choice buttons.
+   * Receives all data as parameters — no internal story data or model access.
+   *
+   * @param {Array}    choices
+   * @param {string}   currentSceneId
+   * @param {object}   flags
+   * @param {Function} onChoiceClick
+   */
+  renderChoices(choices, currentSceneId, flags, onChoiceClick) {
     this.dom.choicesPanel.innerHTML = '';
-    if (!choices || choices.length === 0) return;
+    if (!choices?.length) return;
 
+    // Prolog gets a special full-width continue button
     if (currentSceneId === 'prolog_intro') {
-      const button = document.createElement('button');
-      button.className = 'prolog-continue';
-      button.textContent = 'Klik untuk masuk ke bunker';
-      button.addEventListener('click', () => {
-        onChoiceClick(choices[0]);
-      });
-      this.dom.choicesPanel.appendChild(button);
+      const btn       = document.createElement('button');
+      btn.className   = 'prolog-continue';
+      btn.textContent = 'Klik untuk masuk ke bunker';
+      btn.addEventListener('click', () => onChoiceClick(choices[0]));
+      this.dom.choicesPanel.appendChild(btn);
       return;
     }
 
     let renderedIndex = 1;
     choices.forEach((choice) => {
-      if (choice.requireFlags && Array.isArray(choice.requireFlags)) {
-        const meetAll = choice.requireFlags.every(f => flags[f] === true);
-        if (!meetAll) return;
+      // Skip choices gated behind unmet flags
+      if (choice.requireFlags?.length) {
+        const meetsAll = choice.requireFlags.every((f) => flags[f] === true);
+        if (!meetsAll) return;
       }
 
       const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
-      const button = document.createElement('button');
-      button.className = `choice-btn choice-neutral`;
-      button.innerHTML = `
+
+      // Wire up visual impact class based on knowledge effect
+      let impactClass = 'choice-neutral';
+      if (effect > 0) impactClass = 'choice-good';
+      if (effect < 0) impactClass = 'choice-risk';
+
+      const btn       = document.createElement('button');
+      btn.className   = `choice-btn ${impactClass}`;
+      btn.innerHTML   = `
         <span class="choice-index">${renderedIndex}</span>
         <span class="choice-copy">${choice.text}</span>
       `;
       renderedIndex++;
-      if (choice.item) button.dataset.item = choice.item;
 
-      button.addEventListener('click', () => {
-        onChoiceClick(choice);
-      });
-
-      this.dom.choicesPanel.appendChild(button);
+      if (choice.item) btn.dataset.item = choice.item;
+      btn.addEventListener('click', () => onChoiceClick(choice));
+      this.dom.choicesPanel.appendChild(btn);
     });
   }
 
+  /**
+   * Renders the last 5 protocol log entries into the journal panel.
+   * @param {Array} history
+   */
   renderProtocolLog(history) {
     if (!this.dom.protocolLogList) return;
 
-    if (!history || history.length === 0) {
+    if (!history?.length) {
       this.dom.protocolLogList.innerHTML = '<p>Menunggu keputusan pertama...</p>';
       return;
     }
 
     this.dom.protocolLogList.innerHTML = history
       .slice(-5)
-      .map((entry) => {
-        const spanClass = entry.effect > 0 ? 'log-good' : entry.effect < 0 ? 'log-risk' : '';
-        return `<p><span>[${entry.hour}]</span><span class="${spanClass}">${entry.text}</span></p>`;
+      .map(({ hour, text, effect }) => {
+        const spanClass = effect > 0 ? 'log-good' : effect < 0 ? 'log-risk' : '';
+        return `<p><span>[${hour}]</span><span class="${spanClass}">${text}</span></p>`;
       })
       .join('');
   }
 
-  typeText(text, callback) {
-    if (this.typingRafId) cancelAnimationFrame(this.typingRafId);
+  // ─── TYPEWRITER ───────────────────────────────────────────────────────────
+
+  /**
+   * Types `text` character-by-character using requestAnimationFrame + delta time.
+   * Stores the choices payload so skipTyping() can render them immediately.
+   *
+   * @param {string}   text
+   * @param {Function} callback - Called when typing completes naturally.
+   * @param {object}   choicesPayload - { choices, currentSceneId, flags, onChoiceClick }
+   */
+  typeText(text, callback, choicesPayload = null) {
+    if (this.typingRafId)     cancelAnimationFrame(this.typingRafId);
     if (this.typingTimeoutId) clearTimeout(this.typingTimeoutId);
 
-    this.activeText = text;
-    this.isTyping = true;
+    this.activeText           = text;
+    this.isTyping             = true;
+    this._pendingChoicesPayload = choicesPayload;
     this.dom.dialogueText.textContent = '';
 
-    let currentIndex = 0;
-    let lastTimestamp = null;
-    const CHAR_INTERVAL = 32; // ms per karakter
+    let currentIndex   = 0;
+    let lastTimestamp  = null;
+    const CHAR_INTERVAL = 32; // ms per character
 
     const frame = (timestamp) => {
       if (!this.isTyping) return;
 
       if (!lastTimestamp) lastTimestamp = timestamp;
-      const elapsed = timestamp - lastTimestamp;
-
+      const elapsed    = timestamp - lastTimestamp;
       const charsToAdd = Math.floor(elapsed / CHAR_INTERVAL);
 
       if (charsToAdd > 0) {
@@ -267,6 +402,7 @@ export class GameView {
         for (let i = 0; i < charsToAdd && currentIndex < text.length; i++) {
           const char = text[currentIndex];
           this.dom.dialogueText.textContent += char;
+          // Emit a click sound on every other non-whitespace character
           if (char.trim() && currentIndex % 2 === 0) {
             this.controller.audio.playClick();
           }
@@ -277,7 +413,7 @@ export class GameView {
       if (currentIndex < text.length) {
         this.typingRafId = requestAnimationFrame(frame);
       } else {
-        this.isTyping = false;
+        this.isTyping    = false;
         this.typingRafId = null;
         if (callback) callback();
       }
@@ -286,179 +422,97 @@ export class GameView {
     this.typingRafId = requestAnimationFrame(frame);
   }
 
+  /**
+   * Instantly completes any in-progress typewriter animation and renders
+   * the pending choices using the payload stored at typeText() call time.
+   * No controller or model traversal required.
+   */
   skipTyping() {
-    if (this.typingRafId) {
-      cancelAnimationFrame(this.typingRafId);
-      this.typingRafId = null;
-    }
-    if (this.typingTimeoutId) {
-      clearTimeout(this.typingTimeoutId);
-      this.typingTimeoutId = null;
-    }
+    if (this.typingRafId)     { cancelAnimationFrame(this.typingRafId); this.typingRafId = null; }
+    if (this.typingTimeoutId) { clearTimeout(this.typingTimeoutId);      this.typingTimeoutId = null; }
+
     this.dom.dialogueText.textContent = this.activeText;
-    this.isTyping = false;
-    
-    const scene = this.controller.storyData.scenes[this.controller.model.currentSceneId];
-    if (scene) {
-      this.renderChoices(
-        scene.choices,
-        this.controller.model.currentSceneId,
-        this.controller.storyData,
-        this.controller.model.flags,
-        (choice) => this.controller.handleChoiceSelect(choice)
-      );
+    this.isTyping                     = false;
+
+    // Re-render choices from the payload stored when typeText() was called.
+    const p = this._pendingChoicesPayload;
+    if (p) {
+      this.renderChoices(p.choices, p.currentSceneId, p.flags, p.onChoiceClick);
     }
+    this._pendingChoicesPayload = null;
   }
 
-  setupJournalToggle() {
-    const journalBtn = document.getElementById('journal-btn');
-    const journalPanel = document.getElementById('journal-panel');
-    const journalCloseBtn = document.getElementById('journal-close-btn');
+  // ─── ENDING SCREEN ────────────────────────────────────────────────────────
 
-    if (!journalBtn || !journalPanel) return;
-
-    const openJournal = () => {
-      journalPanel.classList.add('journal-open');
-      journalPanel.setAttribute('aria-hidden', 'false');
-      journalBtn.style.opacity = '0';
-      journalBtn.style.pointerEvents = 'none';
-    };
-
-    const closeJournal = () => {
-      journalPanel.classList.remove('journal-open');
-      journalPanel.setAttribute('aria-hidden', 'true');
-      journalBtn.style.opacity = '1';
-      journalBtn.style.pointerEvents = 'auto';
-    };
-
-    journalBtn.addEventListener('click', () => {
-      const isOpen = journalPanel.classList.contains('journal-open');
-      isOpen ? closeJournal() : openJournal();
-    });
-
-    if (journalCloseBtn) {
-      journalCloseBtn.addEventListener('click', closeJournal);
-    }
-  }
-
-  setupSettingsModal() {
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const settingsCloseBtn = document.getElementById('settings-close-btn');
-    const crtToggle = document.getElementById('crt-toggle');
-
-    if (!settingsBtn || !settingsModal || !settingsCloseBtn || !crtToggle) return;
-
-    settingsBtn.addEventListener('click', () => {
-      settingsModal.classList.remove('hidden');
-    });
-
-    settingsCloseBtn.addEventListener('click', () => {
-      settingsModal.classList.add('hidden');
-    });
-
-    const isCrtDisabled = localStorage.getItem('bunker72_crt_disabled');
-    if (isCrtDisabled === 'true') {
-      crtToggle.checked = false;
-      document.body.classList.add('disable-crt');
-    }
-
-    crtToggle.addEventListener('change', () => {
-      if (!crtToggle.checked) {
-        document.body.classList.add('disable-crt');
-        localStorage.setItem('bunker72_crt_disabled', 'true');
-      } else {
-        document.body.classList.remove('disable-crt');
-        localStorage.setItem('bunker72_crt_disabled', 'false');
-      }
-    });
-  }
-
-  setupVolumeControl(audio) {
-    const volumeSlider = document.getElementById('volume-slider');
-    const muteBtn = document.getElementById('mute-btn');
-    const muteIcon = document.getElementById('mute-icon');
-
-    if (!volumeSlider || !muteBtn) return;
-
-    let isMuted = false;
-    let lastVolume = 0.6;
-
-    volumeSlider.addEventListener('input', () => {
-      lastVolume = parseFloat(volumeSlider.value);
-      audio._lastVolume = lastVolume;
-      audio.init();
-      audio.setVolume(lastVolume);
-      if (lastVolume === 0) {
-        isMuted = true;
-        muteIcon.textContent = '🔇';
-      } else {
-        isMuted = false;
-        muteIcon.textContent = '🔊';
-      }
-      localStorage.setItem('bunker72_volume', lastVolume);
-    });
-
-    muteBtn.addEventListener('click', () => {
-      isMuted = !isMuted;
-      audio._lastVolume = lastVolume;
-      audio.init();
-      audio.setMuted(isMuted);
-      muteIcon.textContent = isMuted ? '🔇' : '🔊';
-    });
-
-    const savedVolume = parseFloat(localStorage.getItem('bunker72_volume'));
-    if (!isNaN(savedVolume)) {
-      lastVolume = savedVolume;
-      volumeSlider.value = savedVolume;
-      audio._lastVolume = savedVolume;
-    }
-  }
-
-  renderEnding(endingId, finalKnowledge, endingText) {
+  /**
+   * Renders the ending screen with all outcome data.
+   * All data is passed as explicit parameters — no controller callback required.
+   *
+   * @param {string} endingId
+   * @param {number} finalKnowledge
+   * @param {string} endingText
+   * @param {string} endingSummary    - Pre-computed by GameModel.getEndingSummary().
+   */
+  renderEnding(endingId, finalKnowledge, endingText, endingSummary) {
     this.dom.endingKnowledge.textContent = finalKnowledge;
-    this.dom.endingDesc.textContent = endingText;
-    this.dom.endingSummary.textContent = this.controller.getEndingSummary();
-    
+    this.dom.endingDesc.textContent      = endingText;
+    this.dom.endingSummary.textContent   = endingSummary; // ✅ passed in, no circular call
+
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
-    
-    if (endingId === 'ending_bad') {
-      this.dom.endingTitle.textContent = "ENDING BURUK: PENYELAMATAN DARURAT KRITIS";
-      this.dom.endingTitle.classList.add('ending-bad');
-      this.dom.endingView.classList.add('ending-bg-bad');
-      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: KURANG (Keluarga Butuh Perawatan Intensif)";
-      this.dom.endingGradeText.style.color = "var(--accent-red-border)";
-    } else if (endingId === 'ending_normal') {
-      this.dom.endingTitle.textContent = "ENDING NORMAL: BERTAHAN HIDUP DENGAN LUKA";
-      this.dom.endingTitle.classList.add('ending-normal');
-      this.dom.endingView.classList.add('ending-bg-normal');
-      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka/Dehidrasi)";
-      this.dom.endingGradeText.style.color = "var(--warning-yellow-border)";
-    } else if (endingId === 'ending_best') {
-      this.dom.endingTitle.textContent = "ENDING TERBAIK: SELAMAT & PRIMA";
-      this.dom.endingTitle.classList.add('ending-best');
-      this.dom.endingView.classList.add('ending-bg-best');
-      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BAIK (Keluarga Sehat & Selamat)";
-      this.dom.endingGradeText.style.color = "var(--accent-green-border)";
-    } else if (endingId === 'ending_fatal') {
-      this.dom.endingTitle.textContent = "ENDING FATAL: MAKAM BUNKER 72";
-      this.dom.endingTitle.classList.add('ending-bad');
-      this.dom.endingView.classList.add('ending-bg-fatal');
-      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)";
-      this.dom.endingGradeText.style.color = "var(--accent-red-border)";
-    } else if (endingId === 'ending_secret_best') {
-      this.dom.endingTitle.textContent = "ENDING RAHASIA: PENYELAMATAN SEMPURNA";
-      this.dom.endingTitle.classList.add('ending-best');
-      this.dom.endingView.classList.add('ending-bg-best');
-      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: LEGENDA (Keluarga Sehat, Aman & Selamat 96 Jam)";
-      this.dom.endingGradeText.style.color = "var(--accent-green-border)";
-    } else if (endingId === 'ending_secret_bad') {
-      this.dom.endingTitle.textContent = "ENDING RAHASIA: GUGUR DI GARIS AKHIR";
-      this.dom.endingTitle.classList.add('ending-bad');
-      this.dom.endingView.classList.add('ending-bg-fatal');
-      this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)";
-      this.dom.endingGradeText.style.color = "var(--accent-red-border)";
-    }
+
+    const ENDING_CONFIG = {
+      ending_bad: {
+        title:      'ENDING BURUK: PENYELAMATAN DARURAT KRITIS',
+        titleClass: 'ending-bad',
+        bgClass:    'ending-bg-bad',
+        grade:      'PERINGKAT KESIAPSIAGAAN: KURANG (Keluarga Butuh Perawatan Intensif)',
+        gradeColor: 'var(--accent-red-border)',
+      },
+      ending_normal: {
+        title:      'ENDING NORMAL: BERTAHAN HIDUP DENGAN LUKA',
+        titleClass: 'ending-normal',
+        bgClass:    'ending-bg-normal',
+        grade:      'PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka/Dehidrasi)',
+        gradeColor: 'var(--warning-yellow-border)',
+      },
+      ending_best: {
+        title:      'ENDING TERBAIK: SELAMAT & PRIMA',
+        titleClass: 'ending-best',
+        bgClass:    'ending-bg-best',
+        grade:      'PERINGKAT KESIAPSIAGAAN: SANGAT BAIK (Keluarga Sehat & Selamat)',
+        gradeColor: 'var(--accent-green-border)',
+      },
+      ending_fatal: {
+        title:      'ENDING FATAL: MAKAM BUNKER 72',
+        titleClass: 'ending-bad',
+        bgClass:    'ending-bg-fatal',
+        grade:      'PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)',
+        gradeColor: 'var(--accent-red-border)',
+      },
+      ending_secret_best: {
+        title:      'ENDING RAHASIA: PENYELAMATAN SEMPURNA',
+        titleClass: 'ending-best',
+        bgClass:    'ending-bg-best',
+        grade:      'PERINGKAT KESIAPSIAGAAN: LEGENDA (Keluarga Sehat, Aman & Selamat 96 Jam)',
+        gradeColor: 'var(--accent-green-border)',
+      },
+      ending_secret_bad: {
+        title:      'ENDING RAHASIA: GUGUR DI GARIS AKHIR',
+        titleClass: 'ending-bad',
+        bgClass:    'ending-bg-fatal',
+        grade:      'PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)',
+        gradeColor: 'var(--accent-red-border)',
+      },
+    };
+
+    const cfg = ENDING_CONFIG[endingId];
+    if (!cfg) return;
+
+    this.dom.endingTitle.textContent         = cfg.title;
+    this.dom.endingTitle.classList.add(cfg.titleClass);
+    this.dom.endingView.classList.add(cfg.bgClass);
+    this.dom.endingGradeText.textContent     = cfg.grade;
+    this.dom.endingGradeText.style.color     = cfg.gradeColor;
   }
 }
