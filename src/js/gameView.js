@@ -176,6 +176,17 @@ export class GameView {
     this.dom.choicesPanel.innerHTML = '';
     if (!choices || choices.length === 0) return;
 
+    if (currentSceneId === 'prolog_intro') {
+      const button = document.createElement('button');
+      button.className = 'prolog-continue';
+      button.textContent = 'Klik untuk masuk ke bunker';
+      button.addEventListener('click', () => {
+        onChoiceClick(choices[0]);
+      });
+      this.dom.choicesPanel.appendChild(button);
+      return;
+    }
+
     let renderedIndex = 1;
     choices.forEach((choice) => {
       if (choice.requireFlags && Array.isArray(choice.requireFlags)) {
