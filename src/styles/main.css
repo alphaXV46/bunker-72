@@ -90,7 +90,7 @@ body {
   padding: 36px;
   background:
     linear-gradient(rgba(8,9,11,0.18), rgba(8,9,11,0.5)),
-    url('../assets/bg_menu.png') center / cover no-repeat;
+    url('../assets/bg_menu_baru.png') center / cover no-repeat;
 }
 
 .menu-title-container {
@@ -396,12 +396,19 @@ body {
   box-shadow: inset 0 0 0 2px rgba(114, 128, 138, 0.48);
 }
 
+.story-box.bg-prolog {
+  background-image: url('../assets/bg_prolog.png');
+}
+
+.story-box.bg-hari1,
 .story-box.bg-normal {
-  background-image: url('../assets/bg_bunker_normal.png');
+  background-image: url('../assets/bg_hari1.png');
 }
 
 .story-box.bg-rusak {
-  background-image: url('../assets/bg_bunker_rusak.png');
+  background-image:
+    linear-gradient(rgba(20, 8, 8, 0.22), rgba(0, 0, 0, 0.12)),
+    url('../assets/bg_hari1.png');
 }
 
 .story-box.scene-alert {
@@ -851,25 +858,31 @@ body {
   padding: 28px;
   background:
     linear-gradient(rgba(8,9,11,0.2), rgba(8,9,11,0.72)),
-    url('../assets/bg_bunker_rusak.png') center / cover no-repeat;
+    url('../assets/bg_fatal_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-bad {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.76)),
-    url('../assets/bg_bad_ending.png') center / cover no-repeat;
+    url('../assets/bg_bad_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-normal {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.72)),
-    url('../assets/bg_normal_ending.png') center / cover no-repeat;
+    url('../assets/bg_normal_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-best {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.65)),
-    url('../assets/bg_good_ending.png') center / cover no-repeat;
+    url('../assets/bg_good_end.png') center / cover no-repeat;
+}
+
+#ending-view.ending-bg-fatal {
+  background:
+    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.78)),
+    url('../assets/bg_fatal_end.png') center / cover no-repeat;
 }
 
 .ending-header {

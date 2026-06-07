@@ -1,10 +1,28 @@
 {
   "scenes": {
+    "prolog_intro": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Pukul 18.07, kota berubah menjadi siluet merah di balik sirene dan debu. Siaran darurat memerintahkan seluruh warga menuju ruang perlindungan bawah tanah. Di tengah kepanikan, satu keluarga berlari membawa tas evakuasi kecil menuju pintu baja bertanda BUNKER 72.",
+      "background": "prolog",
+      "hour": "0 Jam",
+      "objective": "Capai Bunker 72 sebelum gelombang susulan tiba.",
+      "focusItems": ["food", "drink", "kit", "radio"],
+      "choices": [
+        {
+          "id": "c_prolog_enter",
+          "text": "Masuk ke Bunker 72 dan mulai protokol bertahan hidup.",
+          "nextSceneId": "day1_start",
+          "knowledgeEffect": 0,
+          "log": "Keluarga mencapai pintu Bunker 72."
+        }
+      ]
+    },
     "day1_start": {
       "speaker": "Narator",
       "avatar": null,
       "text": "Sirene kota terputus-putus di balik debu. Anda, Ibu, dan Anak berhasil mencapai Bunker 72 tepat sebelum gelombang ledakan kedua. Panel pintu berkedip merah: sistem harus disegel dalam hitungan menit.",
-      "background": "normal",
+      "background": "hari1",
       "hour": "0 Jam",
       "objective": "Segel bunker dan mulai protokol 72 jam.",
       "focusItems": ["food", "drink", "kit", "radio"],

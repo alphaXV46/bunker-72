@@ -144,8 +144,15 @@ export class GameView {
   }
 
   renderSceneArt(scene, currentSceneId) {
-    this.dom.storyBox.classList.remove('bg-normal', 'bg-rusak', 'scene-alert');
-    this.dom.storyBox.classList.add(scene.background === 'rusak' ? 'bg-rusak' : 'bg-normal');
+    this.dom.storyBox.classList.remove('bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert');
+
+    const bgClassMap = {
+      prolog: 'bg-prolog',
+      hari1: 'bg-hari1',
+      normal: 'bg-hari1',
+      rusak: 'bg-rusak'
+    };
+    this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-hari1');
     if (scene.alert) this.dom.storyBox.classList.add('scene-alert');
   }
 
@@ -388,7 +395,7 @@ export class GameView {
     this.dom.endingSummary.textContent = this.controller.getEndingSummary();
     
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
-    this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best');
+    this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
     
     if (endingId === 'ending_bad') {
       this.dom.endingTitle.textContent = "ENDING BURUK: PENYELAMATAN DARURAT KRITIS";
@@ -411,7 +418,7 @@ export class GameView {
     } else if (endingId === 'ending_fatal') {
       this.dom.endingTitle.textContent = "ENDING FATAL: MAKAM BUNKER 72";
       this.dom.endingTitle.classList.add('ending-bad');
-      this.dom.endingView.classList.add('ending-bg-bad');
+      this.dom.endingView.classList.add('ending-bg-fatal');
       this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)";
       this.dom.endingGradeText.style.color = "var(--accent-red-border)";
     } else if (endingId === 'ending_secret_best') {
@@ -423,7 +430,7 @@ export class GameView {
     } else if (endingId === 'ending_secret_bad') {
       this.dom.endingTitle.textContent = "ENDING RAHASIA: GUGUR DI GARIS AKHIR";
       this.dom.endingTitle.classList.add('ending-bad');
-      this.dom.endingView.classList.add('ending-bg-bad');
+      this.dom.endingView.classList.add('ending-bg-fatal');
       this.dom.endingGradeText.textContent = "PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)";
       this.dom.endingGradeText.style.color = "var(--accent-red-border)";
     }

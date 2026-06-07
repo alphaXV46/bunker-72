@@ -144,7 +144,7 @@ function initGame() {
     localStorage.removeItem(SAVE_KEY);
     showScreen('game');
     // Start with 5 knowledge points, and full survival stats
-    storyEngine.start('day1_start', 5, [], null, null, 100, 100, 100);
+    storyEngine.start('prolog_intro', 5, [], null, null, 100, 100, 100);
   });
 
   dom.continueBtn.addEventListener('click', () => {
