@@ -411,6 +411,85 @@ body {
     url('../assets/bg_hari1.png');
 }
 
+#game-view.prolog-mode .status-panel,
+#game-view.prolog-mode .mission-panel,
+#game-view.prolog-mode .resource-panel,
+#game-view.prolog-mode .environment-readout,
+#game-view.prolog-mode #journal-btn,
+#game-view.prolog-mode .journal-panel,
+#game-view.prolog-mode #settings-btn {
+  display: none !important;
+}
+
+body.prolog-active #settings-btn {
+  display: none !important;
+}
+
+#game-view.prolog-mode .story-box {
+  padding: clamp(28px, 3vw, 48px);
+  justify-content: flex-end;
+}
+
+#game-view.prolog-mode .scene-vignette {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.44) 36%, rgba(0,0,0,0.14) 66%, rgba(0,0,0,0.36) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.18) 0%, transparent 36%, rgba(0,0,0,0.72) 100%);
+}
+
+#game-view.prolog-mode .dialogue-overlay {
+  width: min(48%, 680px);
+  min-height: auto;
+  margin: 0 0 clamp(72px, 9vh, 112px) clamp(34px, 4vw, 72px);
+  padding: clamp(22px, 2vw, 34px);
+  border-left: 0;
+  border-color: rgba(255, 209, 102, 0.7);
+  background:
+    linear-gradient(180deg, rgba(19, 18, 16, 0.72), rgba(7, 8, 10, 0.86));
+  box-shadow: 12px 12px 0 rgba(0,0,0,0.38), 0 0 42px rgba(0,0,0,0.46);
+}
+
+#game-view.prolog-mode .dialogue-overlay::before {
+  content: 'PROLOG';
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  margin-bottom: 12px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--warning-yellow-border);
+  font-size: clamp(0.8rem, 1vw, 1rem);
+  letter-spacing: 5px;
+}
+
+#game-view.prolog-mode .speaker-name,
+#game-view.prolog-mode .avatar-container {
+  display: none !important;
+}
+
+#game-view.prolog-mode .dialogue-body {
+  display: block;
+}
+
+#game-view.prolog-mode .dialogue-text {
+  font-size: clamp(1.05rem, 1.45vw, 1.55rem);
+  line-height: 1.58;
+  color: #f3ead2;
+}
+
+#game-view.prolog-mode .command-deck {
+  width: min(42%, 560px);
+  right: clamp(34px, 4vw, 72px);
+  bottom: clamp(42px, 5vh, 70px);
+}
+
+#game-view.prolog-mode .choice-btn {
+  min-height: clamp(54px, 6vh, 72px);
+  border-color: rgba(255, 209, 102, 0.72);
+  background:
+    linear-gradient(90deg, rgba(45, 30, 19, 0.92), rgba(13, 14, 16, 0.9));
+}
+
 .story-box.scene-alert {
   animation: shake 0.45s steps(2, end) 2;
 }

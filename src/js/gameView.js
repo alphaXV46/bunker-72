@@ -145,6 +145,8 @@ export class GameView {
 
   renderSceneArt(scene, currentSceneId) {
     this.dom.storyBox.classList.remove('bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert');
+    this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', scene.background === 'prolog');
+    document.body.classList.toggle('prolog-active', scene.background === 'prolog');
 
     const bgClassMap = {
       prolog: 'bg-prolog',
