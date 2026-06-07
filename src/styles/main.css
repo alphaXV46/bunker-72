@@ -1,22 +1,41 @@
+/* ============================================================
+   main.css — Bunker 72 · Global Stylesheet
+   Organized into clearly demarcated sections.
+   All component styles are centralized here; zero inline styles
+   in HTML (settings modal included).
+   ============================================================ */
+
+
+/* ============================================================
+   SECTION 1: DESIGN TOKENS / CSS CUSTOM PROPERTIES
+   ============================================================ */
+
 :root {
-  --bg-color: #08090b;
-  --bunker-dark: #111318;
-  --panel: rgba(15, 18, 22, 0.94);
-  --panel-solid: #171b21;
-  --text-pixel: #e7edf0;
-  --text-muted: #89939a;
-  --line: #424a50;
-  --line-bright: #72808a;
-  --accent-red: #8f1d23;
-  --accent-red-border: #ff5d5d;
-  --accent-green: #1f6f4a;
-  --accent-green-border: #66e08e;
-  --warning-yellow: #b37d20;
+  --bg-color:              #08090b;
+  --bunker-dark:           #111318;
+  --panel:                 rgba(15, 18, 22, 0.94);
+  --panel-solid:           #171b21;
+  --text-pixel:            #e7edf0;
+  --text-muted:            #89939a;
+  --line:                  #424a50;
+  --line-bright:           #72808a;
+  --accent-red:            #8f1d23;
+  --accent-red-border:     #ff5d5d;
+  --accent-green:          #1f6f4a;
+  --accent-green-border:   #66e08e;
+  --warning-yellow:        #b37d20;
   --warning-yellow-border: #ffd166;
-  --cyan: #5bc0be;
+  --cyan:                  #5bc0be;
+
+  /* Pixel-art cursors encoded inline — no external file dependency */
   --cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath fill='%23050709' d='M4 2h4v4h4v4h4v4h4v4h4v4h4v8h-8v-4h-4v8h-8V6H4z'/%3E%3Cpath fill='%23f8f1d9' d='M8 6h4v4h4v4h4v4h4v4h4v4h-8v-4h-4v8h-4V10H8z'/%3E%3Cpath fill='%235bc0be' d='M12 10h4v4h-4zM16 14h4v4h-4z'/%3E%3Cpath fill='%23ffd166' d='M20 22h4v4h-4z'/%3E%3C/svg%3E") 5 3, auto;
   --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath fill='%23050709' d='M6 3h4v4h4v4h4v4h4v4h4v4h4v10h-9v-4h-4v8h-9V7H6z'/%3E%3Cpath fill='%23ffd166' d='M10 7h4v4h4v4h4v4h4v4h4v6h-9v-4h-4v8h-5V11h-4z'/%3E%3Cpath fill='%23fff7d7' d='M14 11h4v4h-4zM18 15h4v4h-4zM22 19h4v4h-4z'/%3E%3Cpath fill='%235bc0be' d='M25 29h4v4h-4z'/%3E%3C/svg%3E") 6 4, pointer;
 }
+
+
+/* ============================================================
+   SECTION 2: RESET & BASE
+   ============================================================ */
 
 * {
   box-sizing: border-box;
@@ -26,7 +45,7 @@ body {
   margin: 0;
   background:
     linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(0deg,  rgba(255,255,255,0.02)  1px, transparent 1px),
     var(--bg-color);
   background-size: 18px 18px;
   color: var(--text-pixel);
@@ -40,6 +59,7 @@ body {
   cursor: var(--cursor-default);
 }
 
+/* Pointer cursor for all interactive elements */
 button,
 .choice-btn,
 .resource-item,
@@ -51,6 +71,11 @@ input[type="range"] {
   cursor: var(--cursor-pointer);
 }
 
+
+/* ============================================================
+   SECTION 3: GAME CONTAINER & CRT SHELL
+   ============================================================ */
+
 #game-container {
   width: min(100vw, calc(100vh * 16 / 9));
   height: min(100vh, calc(100vw * 9 / 16));
@@ -59,7 +84,7 @@ input[type="range"] {
   background: var(--bunker-dark);
   border: 4px solid #2f3840;
   border-radius: 24px;
-  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.75), inset 0 0 0 4px #090a0c;
+  box-shadow: 0 18px 55px rgba(0,0,0,0.75), inset 0 0 0 4px #090a0c;
   display: flex;
   flex-direction: column;
   padding: clamp(12px, 1.4vw, 22px);
@@ -69,14 +94,52 @@ input[type="range"] {
   image-rendering: crisp-edges;
 }
 
+/* Scanline texture overlay */
 #game-container::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025), rgba(255,255,255,0.025) 1px, transparent 1px, transparent 4px);
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.025), rgba(255,255,255,0.025) 1px,
+    transparent 1px, transparent 4px
+  );
   mix-blend-mode: screen;
 }
+
+/* CRT vignette + flicker */
+.crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.3) 75%, rgba(0,0,0,0.8) 100%);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.95);
+  mix-blend-mode: multiply;
+}
+
+.crt-flicker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: rgba(255,255,255,0.012);
+  animation: screen-flicker 0.15s infinite;
+}
+
+@keyframes screen-flicker {
+  0%   { opacity: 0.45; }
+  25%  { opacity: 0.85; }
+  50%  { opacity: 0.55; }
+  75%  { opacity: 0.95; }
+  100% { opacity: 0.45; }
+}
+
+
+/* ============================================================
+   SECTION 4: SCREEN / VIEW MANAGEMENT
+   ============================================================ */
 
 .view-screen {
   display: none;
@@ -96,6 +159,11 @@ input[type="range"] {
   justify-content: stretch;
   isolation: isolate;
 }
+
+
+/* ============================================================
+   SECTION 5: MENU SCREEN
+   ============================================================ */
 
 #menu-view {
   align-items: center;
@@ -190,6 +258,11 @@ input[type="range"] {
   max-width: 340px;
 }
 
+
+/* ============================================================
+   SECTION 6: HUD — STATUS BAR
+   ============================================================ */
+
 .status-panel {
   position: absolute;
   top: clamp(12px, 1.2vw, 20px);
@@ -199,8 +272,6 @@ input[type="range"] {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 8px;
-  border-bottom: 0;
-  padding: 0;
   font-size: clamp(0.75rem, 1vw, 1rem);
 }
 
@@ -220,7 +291,7 @@ input[type="range"] {
   padding: 0 clamp(8px, 1vw, 14px);
   white-space: nowrap;
   backdrop-filter: blur(3px);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
 }
 
 .highlight-val {
@@ -232,6 +303,11 @@ input[type="range"] {
   color: var(--text-muted);
 }
 
+
+/* ============================================================
+   SECTION 7: HUD — MISSION / PROGRESS PANEL
+   ============================================================ */
+
 .mission-panel {
   position: absolute;
   top: clamp(52px, 6.5vh, 70px);
@@ -242,7 +318,6 @@ input[type="range"] {
   grid-template-columns: minmax(92px, 30%) 1fr;
   gap: 10px;
   align-items: center;
-  margin-top: 0;
   padding: 7px 9px;
   background: rgba(9, 11, 14, 0.72);
   backdrop-filter: blur(3px);
@@ -271,6 +346,11 @@ input[type="range"] {
   font-size: clamp(0.72rem, 0.9vw, 0.92rem);
 }
 
+
+/* ============================================================
+   SECTION 8: HUD — RESOURCE / INVENTORY PANEL
+   ============================================================ */
+
 .resource-panel {
   position: absolute;
   top: clamp(102px, 12.5vh, 134px);
@@ -279,7 +359,6 @@ input[type="range"] {
   display: grid;
   grid-template-columns: 1fr;
   gap: 7px;
-  margin-top: 0;
   width: clamp(58px, 5.6vw, 78px);
 }
 
@@ -288,7 +367,6 @@ input[type="range"] {
   display: grid;
   place-items: center;
   align-items: center;
-  gap: 0;
   padding: 6px;
   background: rgba(9, 11, 14, 0.66);
   border: 2px solid #303941;
@@ -323,33 +401,6 @@ input[type="range"] {
   z-index: 10;
 }
 
-.crt-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-  background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.3) 75%, rgba(0,0,0,0.8) 100%);
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95);
-  mix-blend-mode: multiply;
-}
-
-.crt-flicker {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  background: rgba(255, 255, 255, 0.012);
-  animation: screen-flicker 0.15s infinite;
-}
-
-@keyframes screen-flicker {
-  0% { opacity: 0.45; }
-  25% { opacity: 0.85; }
-  50% { opacity: 0.55; }
-  75% { opacity: 0.95; }
-  100% { opacity: 0.45; }
-}
-
 .resource-item img {
   width: clamp(26px, 3vw, 38px);
   height: clamp(26px, 3vw, 38px);
@@ -358,6 +409,7 @@ input[type="range"] {
   image-rendering: crisp-edges;
 }
 
+/* Tooltip label — visible on hover and active states */
 .resource-item > span:not(.resource-count) {
   position: absolute;
   left: calc(100% + 8px);
@@ -392,9 +444,48 @@ input[type="range"] {
   animation: flash 1.5s infinite;
 }
 
+
+/* ============================================================
+   SECTION 9: HUD — ENVIRONMENT READOUT (Air / Structure / Power)
+   ============================================================ */
+
+.environment-readout {
+  position: absolute;
+  top: clamp(104px, 12.5vh, 136px);
+  right: clamp(14px, 1.5vw, 24px);
+  z-index: 8;
+  display: grid;
+  grid-template-columns: repeat(3, 92px);
+  gap: 6px;
+  padding: 8px;
+  background: rgba(9, 11, 14, 0.68);
+  backdrop-filter: blur(3px);
+}
+
+.environment-readout div {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+  border-left: 2px solid #2d343a;
+}
+
+.environment-readout span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.environment-readout strong {
+  color: var(--cyan);
+  font-size: 0.86rem;
+}
+
+
+/* ============================================================
+   SECTION 10: STORY BOX & SCENE ART
+   ============================================================ */
+
 .story-box {
   flex: 1;
-  margin: 0;
   min-height: 100%;
   padding: clamp(14px, 1.5vw, 24px);
   background-color: #1a1a20;
@@ -410,20 +501,316 @@ input[type="range"] {
   box-shadow: inset 0 0 0 2px rgba(114, 128, 138, 0.48);
 }
 
-.story-box.bg-prolog {
-  background-image: url('../assets/bg_prolog.png');
-}
-
+/* Scene background classes */
+.story-box.bg-prolog { background-image: url('../assets/bg_prolog.png'); }
 .story-box.bg-hari1,
-.story-box.bg-normal {
-  background-image: url('../assets/bg_hari1.png');
-}
-
-.story-box.bg-rusak {
+.story-box.bg-normal  { background-image: url('../assets/bg_hari1.png'); }
+.story-box.bg-rusak   {
   background-image:
-    linear-gradient(rgba(20, 8, 8, 0.22), rgba(0, 0, 0, 0.12)),
+    linear-gradient(rgba(20,8,8,0.22), rgba(0,0,0,0.12)),
     url('../assets/bg_hari1.png');
 }
+
+/* Scene vignette gradient */
+.scene-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.12) 0%, transparent 22%, rgba(0,0,0,0.42) 82%, rgba(0,0,0,0.7) 100%),
+    radial-gradient(circle at 58% 42%, transparent 0 43%, rgba(0,0,0,0.62) 100%);
+  pointer-events: none;
+}
+
+/* Atmospheric particle layer */
+.scene-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ceiling-light {
+  position: absolute;
+  top: -12%;
+  left: 46%;
+  width: 22%;
+  height: 72%;
+  background: radial-gradient(ellipse at top, rgba(255,210,118,0.34), rgba(255,210,118,0.08) 42%, transparent 70%);
+  filter: blur(2px);
+  opacity: 0.7;
+  animation: lightFlicker 4s infinite steps(2, end);
+}
+
+.dust,
+.warning-sweep {
+  position: absolute;
+  display: block;
+}
+
+.dust {
+  width: 38%;
+  height: 34%;
+  background-image: radial-gradient(rgba(236,224,174,0.22) 1px, transparent 2px);
+  background-size: 18px 18px;
+  opacity: 0.34;
+  animation: dustDrift 12s linear infinite;
+}
+
+.dust-a { top: 22%; left: 18%; }
+.dust-b { top: 42%; right: 12%; animation-duration: 16s; opacity: 0.22; }
+
+.warning-sweep {
+  inset: 0;
+  background: linear-gradient(100deg, transparent 0 38%, rgba(255,72,72,0.11) 48%, transparent 58% 100%);
+  transform: translateX(-90%);
+  animation: warningSweep 7s infinite;
+  opacity: 0.6;
+}
+
+/* Alert shake */
+.story-box.scene-alert {
+  animation: shake 0.45s steps(2, end) 2;
+}
+
+
+/* ============================================================
+   SECTION 11: DIALOGUE OVERLAY & SPEAKER SYSTEM
+   ============================================================ */
+
+.dialogue-overlay {
+  width: min(44%, 680px);
+  min-height: clamp(112px, 16vh, 166px);
+  background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
+  border: 2px solid var(--line-bright);
+  border-left: 6px solid var(--accent-red-border);
+  padding: clamp(12px, 1.2vw, 18px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
+  position: relative;
+  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
+  backdrop-filter: blur(4px);
+}
+
+.dialogue-overlay::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  width: 72px;
+  height: 8px;
+  background: var(--warning-yellow-border);
+  box-shadow: 86px 0 0 rgba(91,192,190,0.8);
+}
+
+.speaker-name {
+  width: fit-content;
+  font-size: clamp(0.86rem, 1vw, 1.05rem);
+  color: var(--accent-red-border);
+  letter-spacing: 2px;
+  font-weight: bold;
+  padding: 0 12px 4px 0;
+  text-transform: uppercase;
+}
+
+.dialogue-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.avatar-container {
+  width: clamp(68px, 6.5vw, 94px);
+  height: clamp(68px, 6.5vw, 94px);
+  border: 2px solid var(--line-bright);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.08), transparent 55%),
+    #090a0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: inset 0 -10px 0 rgba(0,0,0,0.25);
+}
+
+.speaker-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dialogue-text {
+  color: var(--text-pixel);
+  font-size: clamp(0.92rem, 1.12vw, 1.25rem);
+  line-height: 1.45;
+  min-height: 62px;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.5);
+}
+
+/* Blinking cursor after text */
+.dialogue-text::after {
+  content: '_';
+  color: var(--text-pixel);
+  margin-left: 2px;
+  animation: blink 0.8s step-end infinite;
+}
+
+
+/* ─── Character Speech Bubbles (ayah / ibu / anak) ─── */
+
+.story-box.speaker-ayah .dialogue-overlay,
+.story-box.speaker-ibu .dialogue-overlay,
+.story-box.speaker-anak .dialogue-overlay {
+  position: absolute;
+  z-index: 10;
+  width: min(26%, 400px);
+  min-height: auto;
+  margin: 0;
+  padding: clamp(10px, 1vw, 15px) clamp(12px, 1.1vw, 18px);
+  border: 2px solid rgba(231,237,240,0.74);
+  border-left: 2px solid rgba(231,237,240,0.74);
+  background: linear-gradient(180deg, rgba(18,23,27,0.92), rgba(8,10,12,0.94));
+  box-shadow: 7px 7px 0 rgba(0,0,0,0.42), 0 0 22px rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  transform: translate(-50%, -100%);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.story-box.speaker-ayah .dialogue-overlay:hover,
+.story-box.speaker-ibu .dialogue-overlay:hover,
+.story-box.speaker-anak .dialogue-overlay:hover {
+  border-color: var(--warning-yellow-border);
+  transform: translate(-50%, calc(-100% - 3px));
+}
+
+.story-box.speaker-ayah .dialogue-overlay  { left: 34%; top: 52%; }
+.story-box.speaker-ibu  .dialogue-overlay  { left: 68%; top: 50%; }
+.story-box.speaker-anak .dialogue-overlay  { left: 54%; top: 50%; width: min(25%, 360px); }
+
+/* Bubble tail */
+.story-box.speaker-ayah .dialogue-overlay::before,
+.story-box.speaker-ibu  .dialogue-overlay::before,
+.story-box.speaker-anak .dialogue-overlay::before {
+  content: '';
+  position: absolute;
+  left: 46%;
+  bottom: -14px;
+  width: 20px;
+  height: 20px;
+  background: rgba(8,10,12,0.94);
+  border-right: 2px solid rgba(231,237,240,0.74);
+  border-bottom: 2px solid rgba(231,237,240,0.74);
+  transform: rotate(45deg);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.26);
+}
+
+.story-box.speaker-ayah .dialogue-overlay::before { left: 54%; }
+.story-box.speaker-ibu  .dialogue-overlay::before { left: 42%; }
+.story-box.speaker-anak .dialogue-overlay::before { left: 50%; }
+
+.story-box.speaker-ayah .dialogue-body,
+.story-box.speaker-ibu  .dialogue-body,
+.story-box.speaker-anak .dialogue-body { display: block; }
+
+.story-box.speaker-ayah .avatar-container,
+.story-box.speaker-ibu  .avatar-container,
+.story-box.speaker-anak .avatar-container { display: none !important; }
+
+.story-box.speaker-ayah .speaker-name,
+.story-box.speaker-ibu  .speaker-name,
+.story-box.speaker-anak .speaker-name {
+  margin-bottom: 5px;
+  padding: 0;
+  color: var(--warning-yellow-border);
+  font-size: clamp(0.72rem, 0.82vw, 0.92rem);
+  letter-spacing: 2px;
+}
+
+.story-box.speaker-ayah .dialogue-text,
+.story-box.speaker-ibu  .dialogue-text,
+.story-box.speaker-anak .dialogue-text {
+  min-height: 0;
+  font-size: clamp(0.78rem, 0.92vw, 1.04rem);
+  line-height: 1.36;
+}
+
+/* ─── Desktop revert for character bubbles (from old breakpoint) ─── */
+
+.story-box.speaker-ayah .dialogue-overlay,
+.story-box.speaker-ibu  .dialogue-overlay,
+.story-box.speaker-anak .dialogue-overlay {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  width: min(44%, 680px);
+  min-height: clamp(112px, 16vh, 166px);
+  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
+  padding: clamp(12px, 1.2vw, 18px);
+  border: 2px solid var(--line-bright);
+  border-left: 6px solid var(--accent-red-border);
+  background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  transform: none;
+}
+
+.story-box.speaker-ayah .dialogue-overlay:hover,
+.story-box.speaker-ibu  .dialogue-overlay:hover,
+.story-box.speaker-anak .dialogue-overlay:hover {
+  border-color: var(--line-bright);
+  border-left-color: var(--accent-red-border);
+  transform: none;
+}
+
+.story-box.speaker-ayah .dialogue-overlay::before,
+.story-box.speaker-ibu  .dialogue-overlay::before,
+.story-box.speaker-anak .dialogue-overlay::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  bottom: auto;
+  width: 72px;
+  height: 8px;
+  background: var(--warning-yellow-border);
+  border: 0;
+  box-shadow: 86px 0 0 rgba(91,192,190,0.8);
+  transform: none;
+}
+
+.story-box.speaker-ayah .dialogue-body,
+.story-box.speaker-ibu  .dialogue-body,
+.story-box.speaker-anak .dialogue-body { display: flex; }
+
+.story-box.speaker-ayah .avatar-container,
+.story-box.speaker-ibu  .avatar-container,
+.story-box.speaker-anak .avatar-container { display: flex !important; }
+
+.story-box.speaker-ayah .speaker-name,
+.story-box.speaker-ibu  .speaker-name,
+.story-box.speaker-anak .speaker-name {
+  width: fit-content;
+  margin-bottom: 0;
+  padding: 0 12px 4px 0;
+  color: var(--accent-red-border);
+  font-size: clamp(0.86rem, 1vw, 1.05rem);
+  letter-spacing: 2px;
+}
+
+.story-box.speaker-ayah .dialogue-text,
+.story-box.speaker-ibu  .dialogue-text,
+.story-box.speaker-anak .dialogue-text {
+  min-height: 62px;
+  font-size: clamp(0.92rem, 1.12vw, 1.25rem);
+  line-height: 1.45;
+}
+
+
+/* ============================================================
+   SECTION 12: PROLOG MODE
+   ============================================================ */
 
 #game-view.prolog-mode .status-panel,
 #game-view.prolog-mode .mission-panel,
@@ -431,13 +818,9 @@ input[type="range"] {
 #game-view.prolog-mode .environment-readout,
 #game-view.prolog-mode #journal-btn,
 #game-view.prolog-mode .journal-panel,
-#game-view.prolog-mode #settings-btn {
-  display: none !important;
-}
+#game-view.prolog-mode #settings-btn { display: none !important; }
 
-body.prolog-active #settings-btn {
-  display: none !important;
-}
+body.prolog-active #settings-btn { display: none !important; }
 
 #game-view.prolog-mode .story-box {
   padding: clamp(28px, 3vw, 48px);
@@ -478,13 +861,9 @@ body.prolog-active #settings-btn {
 }
 
 #game-view.prolog-mode .speaker-name,
-#game-view.prolog-mode .avatar-container {
-  display: none !important;
-}
+#game-view.prolog-mode .avatar-container { display: none !important; }
 
-#game-view.prolog-mode .dialogue-body {
-  display: block;
-}
+#game-view.prolog-mode .dialogue-body { display: block; }
 
 #game-view.prolog-mode .dialogue-text {
   font-size: clamp(0.98rem, 1.22vw, 1.32rem);
@@ -500,14 +879,12 @@ body.prolog-active #settings-btn {
   bottom: clamp(54px, 6.5vh, 88px);
 }
 
-#game-view.prolog-mode .choices-panel {
-  align-items: flex-start;
-}
+#game-view.prolog-mode .choices-panel { align-items: flex-start; }
 
 .prolog-continue {
   appearance: none;
   border: 0;
-  border-bottom: 2px solid rgba(255, 209, 102, 0.78);
+  border-bottom: 2px solid rgba(255,209,102,0.78);
   background: transparent;
   color: #ffe4a8;
   cursor: pointer;
@@ -520,9 +897,7 @@ body.prolog-active #settings-btn {
   transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-.prolog-continue::after {
-  content: '  >';
-}
+.prolog-continue::after { content: '  >'; }
 
 .prolog-continue:hover {
   color: #ffffff;
@@ -530,357 +905,10 @@ body.prolog-active #settings-btn {
   transform: translateX(4px);
 }
 
-.story-box.scene-alert {
-  animation: shake 0.45s steps(2, end) 2;
-}
 
-.scene-vignette {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.12) 0%, transparent 22%, rgba(0,0,0,0.42) 82%, rgba(0,0,0,0.7) 100%),
-    radial-gradient(circle at 58% 42%, transparent 0 43%, rgba(0,0,0,0.62) 100%);
-  pointer-events: none;
-}
-
-.scene-atmosphere {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.ceiling-light {
-  position: absolute;
-  top: -12%;
-  left: 46%;
-  width: 22%;
-  height: 72%;
-  background: radial-gradient(ellipse at top, rgba(255, 210, 118, 0.34), rgba(255, 210, 118, 0.08) 42%, transparent 70%);
-  filter: blur(2px);
-  opacity: 0.7;
-  animation: lightFlicker 4s infinite steps(2, end);
-}
-
-.dust,
-.warning-sweep {
-  position: absolute;
-  display: block;
-}
-
-.dust {
-  width: 38%;
-  height: 34%;
-  background-image: radial-gradient(rgba(236, 224, 174, 0.22) 1px, transparent 2px);
-  background-size: 18px 18px;
-  opacity: 0.34;
-  animation: dustDrift 12s linear infinite;
-}
-
-.dust-a {
-  top: 22%;
-  left: 18%;
-}
-
-.dust-b {
-  top: 42%;
-  right: 12%;
-  animation-duration: 16s;
-  opacity: 0.22;
-}
-
-.warning-sweep {
-  inset: 0;
-  background: linear-gradient(100deg, transparent 0 38%, rgba(255, 72, 72, 0.11) 48%, transparent 58% 100%);
-  transform: translateX(-90%);
-  animation: warningSweep 7s infinite;
-  opacity: 0.6;
-}
-
-.environment-readout {
-  position: absolute;
-  top: clamp(104px, 12.5vh, 136px);
-  right: clamp(14px, 1.5vw, 24px);
-  z-index: 8;
-  display: grid;
-  grid-template-columns: repeat(3, 92px);
-  gap: 6px;
-  padding: 8px;
-  background: rgba(9, 11, 14, 0.68);
-  backdrop-filter: blur(3px);
-}
-
-.environment-readout div {
-  display: grid;
-  gap: 3px;
-  text-align: center;
-  border-left: 2px solid #2d343a;
-}
-
-.environment-readout span {
-  color: var(--text-muted);
-  font-size: 0.72rem;
-}
-
-.environment-readout strong {
-  color: var(--cyan);
-  font-size: 0.86rem;
-}
-
-.dialogue-overlay {
-  width: min(44%, 680px);
-  min-height: clamp(112px, 16vh, 166px);
-  background:
-    linear-gradient(180deg, rgba(19, 24, 30, 0.9), rgba(7, 9, 12, 0.94));
-  border: 2px solid var(--line-bright);
-  border-left: 6px solid var(--accent-red-border);
-  padding: clamp(12px, 1.2vw, 18px);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
-  position: relative;
-  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
-  backdrop-filter: blur(4px);
-}
-
-.dialogue-overlay::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 24px;
-  width: 72px;
-  height: 8px;
-  background: var(--warning-yellow-border);
-  box-shadow: 86px 0 0 rgba(91, 192, 190, 0.8);
-}
-
-.speaker-name {
-  width: fit-content;
-  font-size: clamp(0.86rem, 1vw, 1.05rem);
-  color: var(--accent-red-border);
-  letter-spacing: 2px;
-  font-weight: bold;
-  border-bottom: 0;
-  padding: 0 12px 4px 0;
-  text-transform: uppercase;
-}
-
-.dialogue-body {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.avatar-container {
-  width: clamp(68px, 6.5vw, 94px);
-  height: clamp(68px, 6.5vw, 94px);
-  border: 2px solid var(--line-bright);
-  background:
-    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.08), transparent 55%),
-    #090a0c;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
-  box-shadow: inset 0 -10px 0 rgba(0,0,0,0.25);
-}
-
-.speaker-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.dialogue-text {
-  color: var(--text-pixel);
-  font-size: clamp(0.92rem, 1.12vw, 1.25rem);
-  line-height: 1.45;
-  min-height: 62px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.5);
-}
-
-.dialogue-text::after {
-  content: '_';
-  color: var(--text-pixel);
-  margin-left: 2px;
-  animation: blink 0.8s step-end infinite;
-}
-
-.story-box.speaker-ayah .dialogue-overlay,
-.story-box.speaker-ibu .dialogue-overlay,
-.story-box.speaker-anak .dialogue-overlay {
-  position: absolute;
-  z-index: 10;
-  width: min(26%, 400px);
-  min-height: auto;
-  margin: 0;
-  padding: clamp(10px, 1vw, 15px) clamp(12px, 1.1vw, 18px);
-  border: 2px solid rgba(231, 237, 240, 0.74);
-  border-left: 2px solid rgba(231, 237, 240, 0.74);
-  background:
-    linear-gradient(180deg, rgba(18, 23, 27, 0.92), rgba(8, 10, 12, 0.94));
-  box-shadow: 7px 7px 0 rgba(0, 0, 0, 0.42), 0 0 22px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(3px);
-  transform: translate(-50%, -100%);
-  transition: transform 0.16s ease, border-color 0.16s ease;
-}
-
-.story-box.speaker-ayah .dialogue-overlay:hover,
-.story-box.speaker-ibu .dialogue-overlay:hover,
-.story-box.speaker-anak .dialogue-overlay:hover {
-  border-color: var(--warning-yellow-border);
-  transform: translate(-50%, calc(-100% - 3px));
-}
-
-.story-box.speaker-ayah .dialogue-overlay {
-  left: 34%;
-  top: 52%;
-}
-
-.story-box.speaker-ibu .dialogue-overlay {
-  left: 68%;
-  top: 50%;
-}
-
-.story-box.speaker-anak .dialogue-overlay {
-  left: 54%;
-  top: 50%;
-  width: min(25%, 360px);
-}
-
-.story-box.speaker-ayah .dialogue-overlay::before,
-.story-box.speaker-ibu .dialogue-overlay::before,
-.story-box.speaker-anak .dialogue-overlay::before {
-  content: '';
-  position: absolute;
-  left: 46%;
-  bottom: -14px;
-  width: 20px;
-  height: 20px;
-  background: rgba(8, 10, 12, 0.94);
-  border-right: 2px solid rgba(231, 237, 240, 0.74);
-  border-bottom: 2px solid rgba(231, 237, 240, 0.74);
-  transform: rotate(45deg);
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.26);
-}
-
-.story-box.speaker-ayah .dialogue-overlay::before {
-  left: 54%;
-}
-
-.story-box.speaker-ibu .dialogue-overlay::before {
-  left: 42%;
-}
-
-.story-box.speaker-anak .dialogue-overlay::before {
-  left: 50%;
-}
-
-.story-box.speaker-ayah .dialogue-body,
-.story-box.speaker-ibu .dialogue-body,
-.story-box.speaker-anak .dialogue-body {
-  display: block;
-}
-
-.story-box.speaker-ayah .avatar-container,
-.story-box.speaker-ibu .avatar-container,
-.story-box.speaker-anak .avatar-container {
-  display: none !important;
-}
-
-.story-box.speaker-ayah .speaker-name,
-.story-box.speaker-ibu .speaker-name,
-.story-box.speaker-anak .speaker-name {
-  margin-bottom: 5px;
-  padding: 0;
-  color: var(--warning-yellow-border);
-  font-size: clamp(0.72rem, 0.82vw, 0.92rem);
-  letter-spacing: 2px;
-}
-
-.story-box.speaker-ayah .dialogue-text,
-.story-box.speaker-ibu .dialogue-text,
-.story-box.speaker-anak .dialogue-text {
-  min-height: 0;
-  font-size: clamp(0.78rem, 0.92vw, 1.04rem);
-  line-height: 1.36;
-}
-
-.story-box.speaker-ayah .dialogue-overlay,
-.story-box.speaker-ibu .dialogue-overlay,
-.story-box.speaker-anak .dialogue-overlay {
-  position: relative;
-  inset: auto;
-  z-index: 1;
-  width: min(44%, 680px);
-  min-height: clamp(112px, 16vh, 166px);
-  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
-  padding: clamp(12px, 1.2vw, 18px);
-  border: 2px solid var(--line-bright);
-  border-left: 6px solid var(--accent-red-border);
-  background:
-    linear-gradient(180deg, rgba(19, 24, 30, 0.9), rgba(7, 9, 12, 0.94));
-  box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
-  transform: none;
-}
-
-.story-box.speaker-ayah .dialogue-overlay:hover,
-.story-box.speaker-ibu .dialogue-overlay:hover,
-.story-box.speaker-anak .dialogue-overlay:hover {
-  border-color: var(--line-bright);
-  border-left-color: var(--accent-red-border);
-  transform: none;
-}
-
-.story-box.speaker-ayah .dialogue-overlay::before,
-.story-box.speaker-ibu .dialogue-overlay::before,
-.story-box.speaker-anak .dialogue-overlay::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 24px;
-  bottom: auto;
-  width: 72px;
-  height: 8px;
-  background: var(--warning-yellow-border);
-  border: 0;
-  box-shadow: 86px 0 0 rgba(91, 192, 190, 0.8);
-  transform: none;
-}
-
-.story-box.speaker-ayah .dialogue-body,
-.story-box.speaker-ibu .dialogue-body,
-.story-box.speaker-anak .dialogue-body {
-  display: flex;
-}
-
-.story-box.speaker-ayah .avatar-container,
-.story-box.speaker-ibu .avatar-container,
-.story-box.speaker-anak .avatar-container {
-  display: flex !important;
-}
-
-.story-box.speaker-ayah .speaker-name,
-.story-box.speaker-ibu .speaker-name,
-.story-box.speaker-anak .speaker-name {
-  width: fit-content;
-  margin-bottom: 0;
-  padding: 0 12px 4px 0;
-  color: var(--accent-red-border);
-  font-size: clamp(0.86rem, 1vw, 1.05rem);
-  letter-spacing: 2px;
-}
-
-.story-box.speaker-ayah .dialogue-text,
-.story-box.speaker-ibu .dialogue-text,
-.story-box.speaker-anak .dialogue-text {
-  min-height: 62px;
-  font-size: clamp(0.92rem, 1.12vw, 1.25rem);
-  line-height: 1.45;
-}
+/* ============================================================
+   SECTION 13: COMMAND DECK & CHOICES
+   ============================================================ */
 
 .command-deck {
   position: absolute;
@@ -891,7 +919,6 @@ body.prolog-active #settings-btn {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  min-height: 0;
 }
 
 .choices-panel {
@@ -902,8 +929,7 @@ body.prolog-active #settings-btn {
 
 .choice-btn {
   min-height: clamp(44px, 5.4vh, 60px);
-  background:
-    linear-gradient(90deg, rgba(23,27,33,0.95), rgba(16,18,22,0.88));
+  background: linear-gradient(90deg, rgba(23,27,33,0.95), rgba(16,18,22,0.88));
   color: var(--text-pixel);
   border: 2px solid var(--line);
   padding: clamp(8px, 1vw, 12px);
@@ -927,10 +953,12 @@ body.prolog-active #settings-btn {
   transform: translateX(4px);
 }
 
-.choice-btn:disabled {
-  opacity: 0.36;
-  cursor: not-allowed;
-}
+.choice-btn:disabled { opacity: 0.36; cursor: not-allowed; }
+
+/* Choice impact colour coding */
+.choice-btn.choice-good  { border-left: 4px solid var(--accent-green-border); }
+.choice-btn.choice-risk  { border-left: 4px solid var(--accent-red-border); }
+.choice-btn.choice-neutral { border-left: 4px solid var(--line); }
 
 .choice-index {
   width: 24px;
@@ -941,9 +969,7 @@ body.prolog-active #settings-btn {
   color: var(--cyan);
 }
 
-.choice-copy {
-  min-width: 0;
-}
+.choice-copy  { min-width: 0; }
 
 .choice-impact {
   color: var(--text-muted);
@@ -951,13 +977,8 @@ body.prolog-active #settings-btn {
   white-space: nowrap;
 }
 
-.choice-good .choice-impact {
-  color: var(--accent-green-border);
-}
-
-.choice-risk .choice-impact {
-  color: var(--accent-red-border);
-}
+.choice-good .choice-impact { color: var(--accent-green-border); }
+.choice-risk .choice-impact { color: var(--accent-red-border); }
 
 .text-center {
   text-align: center;
@@ -965,12 +986,14 @@ body.prolog-active #settings-btn {
   grid-template-columns: 1fr;
 }
 
-.text-center:hover:not(:disabled) {
-  transform: none;
-}
+.text-center:hover:not(:disabled) { transform: none; }
 
 
-/* ── TOMBOL JURNAL ── */
+/* ============================================================
+   SECTION 14: JOURNAL PANEL & PROTOCOL LOG
+   ============================================================ */
+
+/* Toggle button */
 #journal-btn {
   position: absolute;
   left: clamp(90px, 7.5vw, 120px);
@@ -996,17 +1019,86 @@ body.prolog-active #settings-btn {
   background: rgba(26, 44, 48, 0.88);
 }
 
-.journal-icon {
+.journal-icon  { font-size: 0.9rem; line-height: 1; }
+.journal-label { font-size: clamp(0.62rem, 0.75vw, 0.78rem); letter-spacing: 2px; }
+
+/* Slide-in panel */
+.journal-panel {
+  position: absolute;
+  left: clamp(90px, 7.5vw, 120px);
+  bottom: clamp(56px, 7vh, 72px);
+  z-index: 11;
+  width: min(34%, 380px);
+  max-height: 210px;
+  background: rgba(9, 11, 14, 0.94);
+  border: 2px solid var(--line-bright);
+  border-left: 4px solid var(--cyan);
+  backdrop-filter: blur(6px);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.journal-panel.journal-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.journal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.journal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
   font-size: 0.9rem;
+  padding: 0 4px;
   line-height: 1;
+  transition: color 0.1s ease;
 }
 
-.journal-label {
-  font-size: clamp(0.62rem, 0.75vw, 0.78rem);
-  letter-spacing: 2px;
+.journal-close:hover { color: var(--accent-red-border); }
+
+.journal-panel .protocol-log-list {
+  padding: 8px 10px;
+  overflow-y: auto;
+  max-height: 160px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 
-/* ── VOLUME CONTROL ── */
+.protocol-log-list {
+  display: grid;
+  gap: 3px;
+  margin-top: 6px;
+  font-size: clamp(0.62rem, 0.72vw, 0.78rem);
+  color: var(--text-muted);
+}
+
+.protocol-log-list p { margin: 0; line-height: 1.3; }
+.protocol-log-list span { color: var(--cyan); margin-right: 7px; }
+
+.log-good { color: var(--accent-green-border) !important; }
+.log-risk  { color: var(--accent-red-border)   !important; }
+
+
+/* ============================================================
+   SECTION 15: VOLUME CONTROL
+   ============================================================ */
+
 .volume-control {
   display: flex;
   align-items: center;
@@ -1056,93 +1148,86 @@ body.prolog-active #settings-btn {
   cursor: pointer;
 }
 
-/* ── PANEL JURNAL ── */
-.journal-panel {
+
+/* ============================================================
+   SECTION 16: SETTINGS MODAL
+   All styles live here — zero inline styles in index.html.
+   ============================================================ */
+
+/* Full-screen backdrop */
+.modal {
   position: absolute;
-  left: clamp(90px, 7.5vw, 120px);
-  bottom: clamp(56px, 7vh, 72px);
-  z-index: 11;
-  width: min(34%, 380px);
-  max-height: 210px;
-  background: rgba(9, 11, 14, 0.94);
-  border: 2px solid var(--line-bright);
-  border-left: 4px solid var(--cyan);
-  backdrop-filter: blur(6px);
-  box-shadow: 8px 8px 0 rgba(0,0,0,0.4);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-
-  /* Animasi masuk/keluar */
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.journal-panel.journal-open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.journal-header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--line);
-  flex-shrink: 0;
+  justify-content: center;
 }
 
-.journal-close {
-  background: none;
+/* Inner card */
+.modal-content {
+  background: var(--panel-solid);
+  border: 2px solid var(--line);
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h2 {
+  font-family: 'VT323', monospace;
+  color: var(--warning-yellow-border);
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+/* Volume row inside modal */
+.modal-content .volume-control {
+  position: relative;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  margin-bottom: 1rem;
   border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 0 4px;
-  line-height: 1;
-  transition: color 0.1s ease;
+  background: transparent;
 }
 
-.journal-close:hover {
-  color: var(--accent-red-border);
+.modal-content .volume-control .volume-slider {
+  width: 150px;
 }
 
-.journal-panel .protocol-log-list {
-  padding: 8px 10px;
-  overflow-y: auto;
-  max-height: 160px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
+.modal-content .mute-btn {
+  font-size: 1.5rem;
 }
 
-.protocol-log-list {
-  display: grid;
-  gap: 3px;
-  margin-top: 6px;
-  font-size: clamp(0.62rem, 0.72vw, 0.78rem);
-  color: var(--text-muted);
+/* CRT toggle row */
+.settings-option {
+  margin: 1.5rem 0;
 }
 
-.protocol-log-list p {
-  margin: 0;
-  line-height: 1.3;
+.settings-option label {
+  color: var(--text-pixel);
 }
 
-.protocol-log-list span {
-  color: var(--cyan);
-  margin-right: 7px;
+/* Action buttons column */
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.log-good {
-  color: var(--accent-green-border) !important;
-}
+/* Utility: hide modal */
+.modal.hidden { display: none !important; }
 
-.log-risk {
-  color: var(--accent-red-border) !important;
-}
+
+/* ============================================================
+   SECTION 17: ENDING SCREEN
+   ============================================================ */
 
 #ending-view {
   align-items: center;
@@ -1178,9 +1263,7 @@ body.prolog-active #settings-btn {
     url('../assets/bg_fatal_end.png') center / cover no-repeat;
 }
 
-.ending-header {
-  text-align: center;
-}
+.ending-header     { text-align: center; }
 
 .ending-alert-title {
   font-size: 1rem;
@@ -1195,17 +1278,9 @@ body.prolog-active #settings-btn {
   margin: 8px 0 0;
 }
 
-.ending-bad {
-  color: var(--accent-red-border) !important;
-}
-
-.ending-normal {
-  color: var(--warning-yellow-border) !important;
-}
-
-.ending-best {
-  color: var(--accent-green-border) !important;
-}
+.ending-bad    { color: var(--accent-red-border)     !important; }
+.ending-normal { color: var(--warning-yellow-border) !important; }
+.ending-best   { color: var(--accent-green-border)   !important; }
 
 .ending-content-box {
   width: 100%;
@@ -1231,115 +1306,91 @@ body.prolog-active #settings-btn {
   padding: 12px;
 }
 
-.ending-stats p {
-  margin: 5px 0;
-}
+.ending-stats p   { margin: 5px 0; }
+.ending-grade     { font-weight: bold; letter-spacing: 1px; }
+.ending-summary   { color: var(--text-muted); font-size: 0.88rem; }
 
-.ending-grade {
-  font-weight: bold;
-  letter-spacing: 1px;
-}
 
-.ending-summary {
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
+/* ============================================================
+   SECTION 18: KEYFRAME ANIMATIONS
+   ============================================================ */
 
 @keyframes flash {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50%       { opacity: 0.35; }
 }
 
 @keyframes blink {
-  from, to { color: transparent; }
-  50% { color: var(--text-pixel); }
+  from, to  { color: transparent; }
+  50%       { color: var(--text-pixel); }
 }
 
 @keyframes shake {
   0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(3px, 0); }
-  50% { transform: translate(-3px, 2px); }
-  75% { transform: translate(0, -2px); }
+  25%      { transform: translate(3px, 0); }
+  50%      { transform: translate(-3px, 2px); }
+  75%      { transform: translate(0, -2px); }
 }
 
-@media (max-width: 920px) {
-  #game-container {
-    padding: 6px;
-  }
+@keyframes lightFlicker {
+  0%   { opacity: 0.7; }
+  50%  { opacity: 0.55; }
+  100% { opacity: 0.7; }
+}
 
-  #menu-view {
-    padding: 18px;
-  }
+@keyframes dustDrift {
+  from { transform: translateY(0)   rotate(0deg);   }
+  to   { transform: translateY(-8%) rotate(0.5deg); }
+}
+
+@keyframes warningSweep {
+  0%   { transform: translateX(-90%); }
+  40%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+
+/* ============================================================
+   SECTION 19: RESPONSIVE — TABLET (max-width: 920px)
+   Compact desktop / small laptop / tablet landscape
+   ============================================================ */
+
+@media (max-width: 920px) {
+  #game-container { padding: 6px; }
+  #menu-view      { padding: 18px; }
 
   .game-title {
     font-size: 3.1rem;
     text-shadow: 3px 3px 0 #15181d, 6px 6px 0 var(--accent-red);
   }
 
-  .game-subtitle {
-    font-size: 0.78rem;
-    letter-spacing: 2px;
-  }
-
-  .menu-decor {
-    padding: 14px;
-  }
-
-  .story-box {
-    min-height: 100%;
-  }
+  .game-subtitle  { font-size: 0.78rem; letter-spacing: 2px; }
+  .menu-decor     { padding: 14px; }
+  .story-box      { min-height: 100%; }
 
   .status-panel {
     grid-template-columns: repeat(3, 1fr);
-    top: 6px;
-    left: 6px;
-    right: 6px;
+    top: 6px; left: 6px; right: 6px;
     gap: 3px;
     font-size: 0.48rem;
   }
 
+  .status-item { min-height: 20px; padding: 0 4px; }
+  .progress-shell { height: 8px; }
+  .objective-text { font-size: 0.52rem; }
+
   .mission-panel {
     grid-template-columns: 1fr;
-    top: 32px;
-    left: 6px;
+    top: 32px; left: 6px;
     width: calc(100% - 12px);
     padding: 4px;
     gap: 5px;
   }
 
-  .status-item {
-    min-height: 20px;
-    padding: 0 4px;
-  }
-
-  .progress-shell {
-    height: 8px;
-  }
-
-  .objective-text {
-    font-size: 0.52rem;
-  }
-
-  .resource-panel {
-    top: 60px;
-    left: 6px;
-    width: 34px;
-    gap: 3px;
-  }
-
-  .resource-item {
-    min-height: 28px;
-    padding: 3px;
-  }
-
-  .resource-item img {
-    width: 18px;
-    height: 18px;
-  }
-
-  .resource-item > span:not(.resource-count) {
-    font-size: 0.52rem;
-  }
+  .resource-panel { top: 60px; left: 6px; width: 34px; gap: 3px; }
+  .resource-item  { min-height: 28px; padding: 3px; }
+  .resource-item img { width: 18px; height: 18px; }
+  .resource-item > span:not(.resource-count) { font-size: 0.52rem; }
 
   .dialogue-overlay {
     width: 45%;
@@ -1350,47 +1401,14 @@ body.prolog-active #settings-btn {
     border-left-width: 3px;
   }
 
-  .dialogue-overlay::before {
-    display: none;
-  }
-
-  .dialogue-body {
-    gap: 6px;
-  }
-
-  .avatar-container {
-    width: 34px;
-    height: 34px;
-  }
-
-  .command-deck {
-    width: 38%;
-    left: auto;
-    right: 6px;
-    bottom: 7px;
-    gap: 4px;
-  }
-
-  .environment-readout {
-    display: none;
-  }
-
-  #journal-btn,
-  .journal-panel {
-    display: none;
-  }
+  .dialogue-overlay::before { display: none; }
+  .dialogue-body { gap: 6px; }
+  .avatar-container { width: 34px; height: 34px; }
 
   .dialogue-text,
-  .choice-btn {
-    font-size: 0.55rem;
-    line-height: 1.2;
-  }
+  .choice-btn   { font-size: 0.55rem; line-height: 1.2; }
 
-  .speaker-name {
-    font-size: 0.52rem;
-    letter-spacing: 1px;
-    padding-bottom: 1px;
-  }
+  .speaker-name { font-size: 0.52rem; letter-spacing: 1px; padding-bottom: 1px; }
 
   .choice-btn {
     min-height: 25px;
@@ -1399,19 +1417,18 @@ body.prolog-active #settings-btn {
     gap: 5px;
   }
 
-  .choice-index {
-    width: 16px;
-    height: 16px;
-    font-size: 0.52rem;
-  }
+  .choice-index { width: 16px; height: 16px; font-size: 0.52rem; }
+  .choice-impact { grid-column: 2; font-size: 0.48rem; }
 
-  .choice-impact {
-    grid-column: 2;
-    font-size: 0.48rem;
-  }
+  .command-deck { width: 38%; right: 6px; bottom: 7px; gap: 4px; }
 
+  /* Hide non-essential panels at this breakpoint */
+  .environment-readout { display: none; }
+  #journal-btn, .journal-panel { display: none; }
+
+  /* Character bubbles — revert to standard bottom bar at this size */
   .story-box.speaker-ayah .dialogue-overlay,
-  .story-box.speaker-ibu .dialogue-overlay,
+  .story-box.speaker-ibu  .dialogue-overlay,
   .story-box.speaker-anak .dialogue-overlay {
     position: relative;
     inset: auto;
@@ -1423,55 +1440,43 @@ body.prolog-active #settings-btn {
     transform: none;
   }
 
-  .story-box.speaker-ayah .dialogue-overlay {
-    left: auto;
-    top: auto;
-  }
-
-  .story-box.speaker-ibu .dialogue-overlay {
-    left: auto;
-    top: auto;
-  }
-
-  .story-box.speaker-anak .dialogue-overlay {
-    left: auto;
-    top: auto;
-    width: 45%;
-  }
+  .story-box.speaker-ayah .dialogue-overlay,
+  .story-box.speaker-ibu  .dialogue-overlay,
+  .story-box.speaker-anak .dialogue-overlay { left: auto; top: auto; }
 
   .story-box.speaker-ayah .speaker-name,
-  .story-box.speaker-ibu .speaker-name,
-  .story-box.speaker-anak .speaker-name {
-    font-size: 0.48rem;
-    margin-bottom: 2px;
-  }
+  .story-box.speaker-ibu  .speaker-name,
+  .story-box.speaker-anak .speaker-name { font-size: 0.48rem; margin-bottom: 2px; }
 
   .story-box.speaker-ayah .dialogue-text,
-  .story-box.speaker-ibu .dialogue-text,
-  .story-box.speaker-anak .dialogue-text {
-    font-size: 0.52rem;
-  }
+  .story-box.speaker-ibu  .dialogue-text,
+  .story-box.speaker-anak .dialogue-text { font-size: 0.52rem; }
 
   .story-box.speaker-ayah .avatar-container,
-  .story-box.speaker-ibu .avatar-container,
-  .story-box.speaker-anak .avatar-container {
-    display: flex !important;
-  }
+  .story-box.speaker-ibu  .avatar-container,
+  .story-box.speaker-anak .avatar-container { display: flex !important; }
 }
 
-/* ── PORTRAIT MOBILE REFLOW ── */
-@media (max-width: 600px), (max-height: 480px) {
+
+/* ============================================================
+   SECTION 20: RESPONSIVE — MOBILE PORTRAIT (max-width: 768px)
+   Primary mobile breakpoint covering phones & small tablets
+   in portrait orientation. Lifts the 16:9 aspect-ratio lock.
+   ============================================================ */
+
+@media (max-width: 768px) {
   body {
     align-items: flex-start;
     overflow-y: auto;
     height: auto;
-    min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport for mobile browsers */
   }
 
+  /* Release fixed 16:9 ratio — let the container flow naturally */
   #game-container {
     width: 100vw;
     height: auto;
-    min-height: 100vh;
+    min-height: 100dvh;
     aspect-ratio: unset;
     border-radius: 0;
     border: none;
@@ -1480,10 +1485,7 @@ body.prolog-active #settings-btn {
     overflow-y: auto;
   }
 
-  /* Sembunyikan overlay CRT di portrait (terlalu berat) */
-  .crt-overlay, .crt-flicker { display: none; }
-
-  /* Status panel horizontal kompak di atas */
+  /* ── Status bar: 2×3 compact grid ── */
   .status-panel {
     position: relative;
     top: 0; left: 0; right: 0;
@@ -1491,58 +1493,60 @@ body.prolog-active #settings-btn {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: auto auto;
     gap: 4px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     margin-bottom: 4px;
   }
 
   .status-item {
-    min-height: 28px;
-    padding: 2px 4px;
+    min-height: 30px;
+    padding: 3px 6px;
     font-size: 0.65rem;
+    justify-content: flex-start;
   }
 
-  /* Mission panel di bawah status, full-width */
+  /* ── Mission / progress bar: full-width, in-flow ── */
   .mission-panel {
     position: relative;
     top: 0; left: 0;
     width: 100%;
-    margin-bottom: 6px;
+    grid-template-columns: minmax(80px, 28%) 1fr;
+    margin-bottom: 4px;
+    padding: 5px 7px;
+    gap: 7px;
   }
 
-  /* Sembunyikan resource panel & environment readout */
-  .environment-readout,
-  #journal-btn,
-  .journal-panel { display: none; }
+  .progress-shell   { height: 10px; }
+  .objective-text   { font-size: 0.68rem; white-space: normal; }
 
+  /* ── Inventory: horizontal bar, all items visible and tappable ── */
   .resource-panel {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
     position: relative;
     top: 0; left: 0;
     width: 100%;
-    margin-bottom: 6px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
     gap: 6px;
+    margin-bottom: 6px;
     z-index: 8;
   }
 
   .resource-item {
     flex: 1;
-    min-height: 44px;
+    min-height: 52px;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 6px;
-    padding: 6px;
+    padding: 6px 8px;
     background: rgba(9, 11, 14, 0.88);
+    border-radius: 2px;
   }
 
-  .resource-item img {
-    width: 24px;
-    height: 24px;
-  }
+  .resource-item img { width: 26px; height: 26px; }
 
+  /* Show item label inline (was hidden via absolute tooltip on desktop) */
   .resource-item > span:not(.resource-count) {
     display: inline;
     position: static;
@@ -1550,51 +1554,157 @@ body.prolog-active #settings-btn {
     padding: 0;
     background: none;
     border: none;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--text-pixel);
+    width: auto;
   }
 
   .resource-count {
     position: static;
     transform: none;
     margin-left: auto;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
   }
 
-  /* Story box mengisi ruang tersisa */
+  /* ── Story box: flexible height fills available space ── */
   .story-box {
     flex: 1;
-    min-height: 40vh;
+    min-height: 35vh;
     margin-bottom: 6px;
+    padding: clamp(10px, 3vw, 16px);
   }
 
-  /* Dialogue overlay full-width */
+  /* ── Dialogue box: full width ── */
   .dialogue-overlay {
-    width: calc(100% - 16px);
-    margin: 0 8px 8px;
-    min-height: 80px;
+    width: calc(100% - 12px);
+    min-height: 90px;
+    margin: 0 6px 8px;
+    padding: 10px 12px;
+    border-left-width: 4px;
   }
 
-  /* Command deck tidak absolute — ikut flow */
+  .dialogue-overlay::before { display: none; }
+
+  .dialogue-body  { gap: 8px; }
+  .avatar-container { width: 44px; height: 44px; }
+
+  .dialogue-text  { font-size: 0.88rem; line-height: 1.4; min-height: 48px; }
+  .speaker-name   { font-size: 0.78rem; letter-spacing: 1px; }
+
+  /* ── Character bubbles collapse to standard bar ── */
+  .story-box.speaker-ayah .dialogue-overlay,
+  .story-box.speaker-ibu  .dialogue-overlay,
+  .story-box.speaker-anak .dialogue-overlay {
+    position: relative;
+    inset: auto;
+    width: calc(100% - 12px);
+    min-height: 90px;
+    margin: 0 6px 8px;
+    padding: 10px 12px;
+    border: 2px solid var(--line-bright);
+    border-left: 4px solid var(--accent-red-border);
+    transform: none;
+  }
+
+  .story-box.speaker-ayah .dialogue-overlay:hover,
+  .story-box.speaker-ibu  .dialogue-overlay:hover,
+  .story-box.speaker-anak .dialogue-overlay:hover { transform: none; }
+
+  .story-box.speaker-ayah .dialogue-overlay::before,
+  .story-box.speaker-ibu  .dialogue-overlay::before,
+  .story-box.speaker-anak .dialogue-overlay::before { display: none; }
+
+  .story-box.speaker-ayah .dialogue-body,
+  .story-box.speaker-ibu  .dialogue-body,
+  .story-box.speaker-anak .dialogue-body { display: flex; }
+
+  .story-box.speaker-ayah .avatar-container,
+  .story-box.speaker-ibu  .avatar-container,
+  .story-box.speaker-anak .avatar-container { display: flex !important; }
+
+  .story-box.speaker-ayah .speaker-name,
+  .story-box.speaker-ibu  .speaker-name,
+  .story-box.speaker-anak .speaker-name { font-size: 0.78rem; }
+
+  .story-box.speaker-ayah .dialogue-text,
+  .story-box.speaker-ibu  .dialogue-text,
+  .story-box.speaker-anak .dialogue-text { font-size: 0.88rem; min-height: 48px; }
+
+  /* ── Command deck: in-flow, full-width ── */
   .command-deck {
     position: relative;
     right: 0; bottom: 0;
     width: 100%;
-    padding: 0 8px 8px;
+    padding: 0 4px 8px;
   }
 
   .choice-btn {
-    min-height: 44px;
+    min-height: 48px; /* 48px is the minimum comfortable touch target */
     font-size: 0.82rem;
+    grid-template-columns: 28px 1fr;
+    padding: 8px 10px;
+  }
+
+  .choice-index { width: 22px; height: 22px; font-size: 0.7rem; }
+
+  /* ── Ending screen ── */
+  #ending-view  { padding: 16px; gap: 12px; }
+  .ending-type  { font-size: 2rem; }
+  .ending-alert-title { font-size: 0.82rem; }
+
+  .ending-content-box {
+    max-width: 100%;
+    padding: 12px;
+  }
+
+  .ending-description { font-size: 0.9rem; }
+  .ending-stats { padding: 10px; }
+
+  /* ── Modal full-width on mobile ── */
+  .modal-content {
+    max-width: 100%;
+    width: calc(100% - 32px);
+    padding: 1.5rem;
+  }
+
+  /* ── Disable CRT on mobile — performance & readability ── */
+  .crt-overlay,
+  .crt-flicker { display: none; }
+
+  /* ── Hide environment readout & journal (screen real estate) ── */
+  .environment-readout,
+  #journal-btn,
+  .journal-panel { display: none; }
+
+  /* ── Settings button position ── */
+  #settings-btn {
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+    font-size: 1.5rem !important;
   }
 }
 
-/* ── SETTINGS MODAL & UTILS ── */
-.modal.hidden {
-  display: none !important;
+
+/* ============================================================
+   SECTION 21: RESPONSIVE — VERY SMALL PORTRAIT (max-width: 480px)
+   Extra-small phones — tighten spacing further
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .status-panel   { font-size: 0.6rem; gap: 3px; }
+  .status-item    { min-height: 26px; padding: 2px 4px; }
+  .resource-item  { min-height: 44px; padding: 4px 6px; gap: 4px; }
+  .resource-item img { width: 22px; height: 22px; }
+  .dialogue-text  { font-size: 0.8rem; }
+  .choice-btn     { min-height: 44px; font-size: 0.78rem; }
+  .game-title     { font-size: 2.6rem; }
+  .game-subtitle  { font-size: 0.72rem; letter-spacing: 2px; }
 }
 
+
+/* ============================================================
+   SECTION 22: GLOBAL UTILITIES
+   ============================================================ */
+
 body.disable-crt .crt-overlay,
-body.disable-crt .crt-flicker {
-  display: none !important;
-}
+body.disable-crt .crt-flicker { display: none !important; }
