@@ -341,17 +341,45 @@ export class GameView {
    * Applies background and alert CSS classes to the story box.
    * @param {object} scene
    */
-  renderSceneArt(scene) {
+  renderSceneArt(scene, flags = {}, sceneId = '') {
     const bgClassMap = { prolog: 'bg-prolog', hari1: 'bg-hari1', normal: 'bg-hari1', rusak: 'bg-rusak' };
 
-    this.dom.storyBox.classList.remove('bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert',
-      'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator');
+    const ENV_CLASSES = ['env-dusty', 'env-smoky', 'env-damaged', 'env-dim'];
+    this.dom.storyBox.classList.remove(
+      'bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert',
+      'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator',
+      ...ENV_CLASSES
+    );
 
     this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', scene.background === 'prolog');
     document.body.classList.toggle('prolog-active', scene.background === 'prolog');
 
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-hari1');
     if (scene.alert) this.dom.storyBox.classList.add('scene-alert');
+
+    // ── Environmental visual filters based on active flags ──────────────────
+    // Only apply during non-prolog gameplay scenes
+    const isGameplay = scene.background !== 'prolog';
+    if (isGameplay) {
+      // Dusty/sepia tint — unfiltered air contaminates the environment
+      if (flags.air_uninspected && !flags.air_remedied) {
+        this.dom.storyBox.classList.add('env-dusty');
+      }
+      // Smoky haze — lingering gas from a bad smoke decision
+      if (flags.smoke_poisoned) {
+        this.dom.storyBox.classList.add('env-smoky');
+      }
+      // Structural crack tint — debris, dust, and low-light damage
+      if (flags.structural_damage) {
+        this.dom.storyBox.classList.add('env-damaged');
+      }
+      // Dim flicker — power not saved means unstable emergency lighting
+      // Only meaningful from hour 44+ (economy mode threshold)
+      const hour = parseInt(scene.hour) || 0;
+      if (hour >= 44 && !flags.power_saved) {
+        this.dom.storyBox.classList.add('env-dim');
+      }
+    }
   }
 
   /**
@@ -446,6 +474,11 @@ export class GameView {
       if (choice.requireFlags?.length) {
         const meetsAll = choice.requireFlags.every((f) => flags[f] === true);
         if (!meetsAll) return;
+      }
+
+      if (choice.forbiddenFlags?.length) {
+        const hasForbidden = choice.forbiddenFlags.some((f) => flags[f] === true);
+        if (hasForbidden) return;
       }
 
       const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;

@@ -1,5 +1,41 @@
 {
   "scenes": {
+    "prolog_packing": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Sebelum menyegel pintu bunker, Anda memiliki ransel darurat dengan 5 slot penyimpanan. Pilih barang yang ingin Anda bawa:",
+      "background": "prolog",
+      "hour": "0 Jam",
+      "objective": "Kemasi ransel darurat Anda (5 slot).",
+      "choices": [
+        {
+          "id": "c_prolog_pack_food",
+          "text": "Masukkan 1 Makanan Kaleng (+1 Makanan)",
+          "nextSceneId": "prolog_packing"
+        },
+        {
+          "id": "c_prolog_pack_drink",
+          "text": "Masukkan 1 Botol Air Bersih (+1 Minuman)",
+          "nextSceneId": "prolog_packing"
+        },
+        {
+          "id": "c_prolog_pack_kit",
+          "text": "Masukkan 1 Kotak P3K Darurat (+1 P3K, Maksimal 2)",
+          "nextSceneId": "prolog_packing",
+          "forbiddenFlags": [
+            "kit_maxed"
+          ]
+        },
+        {
+          "id": "c_prolog_pack_battery",
+          "text": "Masukkan Baterai Radio Ekstra (Membuka jadwal siaran diperpanjang)",
+          "nextSceneId": "prolog_packing",
+          "forbiddenFlags": [
+            "battery_packed"
+          ]
+        }
+      ]
+    },
     "prolog_intro": {
       "speaker": "Narator",
       "avatar": null,
@@ -543,6 +579,19 @@
           "nextSceneId": "day2_radio_save",
           "knowledgeEffect": 1,
           "log": "Radio dihubungkan ke generator utama dengan tegangan tinggi."
+        },
+        {
+          "id": "c_day2_radio_battery",
+          "text": "Gunakan Baterai Radio Ekstra untuk memantau frekuensi penuh tanpa batas.",
+          "nextSceneId": "day2_radio_save",
+          "knowledgeEffect": 2,
+          "log": "Baterai ekstra digunakan; koordinat terselamatkan tanpa penghematan ketat.",
+          "requireFlags": [
+            "extra_battery"
+          ],
+          "setFlags": [
+            "radio_saved"
+          ]
         }
       ]
     },
@@ -1129,7 +1178,13 @@
     "day4_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BNPB] ...peringatan darurat... kelompok perusuh terdeteksi di sektor B... amankan fasilitas... [STATIK]\\n\\nTiba-tiba, siaran radio terpecah. Satgas mengumumkan helikopter penyelamat terhambat badai abu vulkanik pekat dan gas sulfur dioksida permukaan. Evakuasi ditunda 24 jam! Gempa susulan dahsyat mengguncang struktur dasar bunker.",
+      "text": "[RADIO BNPB] ...peringatan darurat... kelompok perusuh terdeteksi di sektor B... amankan fasilitas... [STATIK]\n\nTiba-tiba, siaran radio terpecah. Satgas mengumumkan helikopter penyelamat terhambat badai abu vulkanik pekat dan gas sulfur dioksida permukaan. Evakuasi ditunda 24 jam! Gempa susulan dahsyat mengguncang struktur dasar bunker.",
+      "conditionalText": [
+        {
+          "requiredFlag": "near_miss",
+          "text": " Tubuh seluruh keluarga gemetar hebat, menanggung beban kelalaian prosedur sebelumnya. Ransum makanan dan minuman telah benar-benar habis akibat kebocoran atau kerusakan daya sebelumnya."
+        }
+      ],
       "background": "rusak",
       "hour": "72 Jam",
       "objective": "Bertahan ekstra 24 jam dalam kondisi darurat.",

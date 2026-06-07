@@ -1883,3 +1883,51 @@ body.disable-crt .crt-flicker { display: none !important; }
 .shake-effect {
   animation: shake 0.45s steps(2, end) 2;
 }
+
+/* ============================================================
+   SECTION: ENVIRONMENTAL FLAG FILTERS
+   Applied by renderSceneArt() based on active model flags.
+   All filters use transition for smooth blending between scenes.
+   ============================================================ */
+
+/* env-dusty — air_uninspected && !air_remedied
+   Sepia + slight hue-rotate to suggest dusty, contaminated air */
+.story-box.env-dusty {
+  filter: sepia(0.42) hue-rotate(-12deg) brightness(0.88);
+  transition: filter 0.6s ease;
+}
+.story-box.env-dusty .dust {
+  opacity: 0.72 !important;
+}
+
+/* env-smoky — smoke_poisoned
+   Desaturate + blue-gray wash to simulate residual gas haze */
+.story-box.env-smoky {
+  filter: saturate(0.45) brightness(0.82) hue-rotate(160deg) contrast(0.9);
+  transition: filter 0.6s ease;
+}
+
+/* env-damaged — structural_damage
+   Warm amber desaturation + slight darkening to simulate debris & cracks */
+.story-box.env-damaged {
+  filter: sepia(0.28) brightness(0.84) contrast(1.08);
+  transition: filter 0.6s ease;
+}
+
+/* env-dim — power not saved after hour 44
+   Low brightness with a slow irregular flicker animation */
+.story-box.env-dim {
+  animation: envFlicker 3.4s infinite steps(1, end);
+  transition: filter 0.6s ease;
+}
+
+@keyframes envFlicker {
+  0%   { filter: brightness(0.72) saturate(0.7); }
+  15%  { filter: brightness(0.64) saturate(0.6); }
+  16%  { filter: brightness(0.78) saturate(0.7); }
+  44%  { filter: brightness(0.70) saturate(0.65); }
+  45%  { filter: brightness(0.58) saturate(0.55); }
+  46%  { filter: brightness(0.74) saturate(0.68); }
+  80%  { filter: brightness(0.68) saturate(0.62); }
+  100% { filter: brightness(0.72) saturate(0.7); }
+}

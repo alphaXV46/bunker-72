@@ -24,6 +24,8 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day3_door_open':        'door_opened',
   'c_day2_scavenge_trigger': 'scavenged',
   'c_day3_pinch_inspect_vent': 'vent_secured',
+  'c_prolog_pack_battery': 'extra_battery',
+  'c_day2_radio_battery': 'radio_saved',
 });
 
 export class GameModel {
@@ -36,6 +38,13 @@ export class GameModel {
     this.history       = [];
     this.flags         = {};
     this.inventory     = { ...SURVIVAL.DEFAULTS.inventory };
+  }
+
+  getMaxStat(statName) {
+    if (this.flags?.near_miss && statName !== 'knowledge') {
+      return 85;
+    }
+    return 100;
   }
 
   /**
@@ -54,9 +63,9 @@ export class GameModel {
   init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
     this.currentSceneId = sceneId || 'day1_start';
     this.knowledge      = (typeof knowledge === 'number' && !isNaN(knowledge)) ? clamp(knowledge, 0, SURVIVAL.KNOWLEDGE_MAX) : SURVIVAL.DEFAULTS.knowledge;
-    this.hunger         = (typeof hunger    === 'number' && !isNaN(hunger))    ? clamp(hunger, 0, 100)    : SURVIVAL.DEFAULTS.hunger;
-    this.thirst         = (typeof thirst    === 'number' && !isNaN(thirst))    ? clamp(thirst, 0, 100)    : SURVIVAL.DEFAULTS.thirst;
-    this.health         = (typeof health    === 'number' && !isNaN(health))    ? clamp(health, 0, 100)    : SURVIVAL.DEFAULTS.health;
+    this.hunger         = (typeof hunger    === 'number' && !isNaN(hunger))    ? clamp(hunger, 0, this.getMaxStat('hunger'))    : SURVIVAL.DEFAULTS.hunger;
+    this.thirst         = (typeof thirst    === 'number' && !isNaN(thirst))    ? clamp(thirst, 0, this.getMaxStat('thirst'))    : SURVIVAL.DEFAULTS.thirst;
+    this.health         = (typeof health    === 'number' && !isNaN(health))    ? clamp(health, 0, this.getMaxStat('health'))    : SURVIVAL.DEFAULTS.health;
     this.history        = Array.isArray(history) ? history : [];
     this.inventory      = inventory ? { ...inventory } : { ...SURVIVAL.DEFAULTS.inventory };
 
@@ -84,6 +93,14 @@ export class GameModel {
     if (flags.air_remedied) {
       delete flags.air_uninspected;
     }
+    if (history.some(e => e.choiceId === 'c_prolog_pack_battery')) {
+      flags.extra_battery = true;
+      flags.battery_packed = true;
+    }
+    const kitChoicesCount = history.filter(e => e.choiceId === 'c_prolog_pack_kit').length;
+    if (kitChoicesCount >= 2) {
+      flags.kit_maxed = true;
+    }
     return flags;
   }
 
@@ -108,15 +125,15 @@ export class GameModel {
     const hungerDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * HUNGER_DECAY_PER_INTERVAL;
     const thirstDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * THIRST_DECAY_PER_INTERVAL;
 
-    this.hunger = clamp(this.hunger - hungerDecay, 0, 100);
-    this.thirst = clamp(this.thirst - thirstDecay, 0, 100);
+    this.hunger = clamp(this.hunger - hungerDecay, 0, this.getMaxStat('hunger'));
+    this.thirst = clamp(this.thirst - thirstDecay, 0, this.getMaxStat('thirst'));
 
     let healthPenalty = 0;
     if (this.hunger <= 0) healthPenalty += (elapsedHours / DECAY_INTERVAL_HOURS) * HEALTH_PENALTY_HUNGER;
     if (this.thirst <= 0) healthPenalty += (elapsedHours / DECAY_INTERVAL_HOURS) * HEALTH_PENALTY_THIRST;
 
     if (healthPenalty > 0) {
-      this.health = clamp(this.health - healthPenalty, 0, 100);
+      this.health = clamp(this.health - healthPenalty, 0, this.getMaxStat('health'));
     }
   }
 
@@ -147,7 +164,7 @@ export class GameModel {
     const effect = ITEM_EFFECTS[key];
     if (!effect) return null;
 
-    this[effect.stat] = clamp(this[effect.stat] + effect.delta, 0, 100);
+    this[effect.stat] = clamp(this[effect.stat] + effect.delta, 0, this.getMaxStat(effect.stat));
     return { label: effect.label, effectText: effect.effectText };
   }
 
@@ -181,21 +198,24 @@ export class GameModel {
 
     const conditionsMet = (hasKnowledge ? 1 : 0) + (hasRadioSave ? 1 : 0) + (hasWaterFilter ? 1 : 0);
 
-    // Day 4 Secret Gate Evaluation
-    if (conditionsMet === 3) {
-      return 'day4_intro'; // Gate success
-    }
-
-    // Near Miss Gate Evaluation (exactly 2 conditions met)
-    if (conditionsMet === 2) {
-      if (!hasRadioSave) {
-        this.flags.near_miss_radio = true;
-      } else if (!hasWaterFilter) {
-        this.flags.near_miss_water = true;
-      } else if (!hasKnowledge) {
-        this.flags.near_miss_knowledge = true;
+    // Day 4 Secret Gate / Near Miss Evaluation
+    if (conditionsMet >= 2) {
+      if (conditionsMet === 2) {
+        this.flags.near_miss = true;
+        if (!hasRadioSave) {
+          this.flags.near_miss_radio = true;
+        } else if (!hasWaterFilter) {
+          this.flags.near_miss_water = true;
+        } else if (!hasKnowledge) {
+          this.flags.near_miss_knowledge = true;
+        }
+        this.health = clamp(this.health - 15, 0, this.getMaxStat('health'));
+        this.hunger = clamp(this.hunger - 15, 0, this.getMaxStat('hunger'));
+        this.thirst = clamp(this.thirst - 15, 0, this.getMaxStat('thirst'));
+        this.inventory.food = 0;
+        this.inventory.drink = 0;
       }
-      return 'ending_near_miss';
+      return 'day4_intro';
     }
 
     // Communication Blackout Gate (conditionsMet <= 1):

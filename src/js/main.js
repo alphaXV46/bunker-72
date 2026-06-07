@@ -160,7 +160,7 @@ function initGame() {
     localStorage.removeItem(SAVE_KEY);
     showScreen('game');
     const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
-    storyEngine.start('prolog_intro', knowledge, [], null, null, hunger, thirst, health);
+    storyEngine.start('prolog_packing', knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health);
   });
 
   dom.continueBtn.addEventListener('click', () => {

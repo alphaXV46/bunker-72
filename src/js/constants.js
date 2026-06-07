@@ -122,7 +122,12 @@ export const CHOICE_QUALITY_MAP = Object.freeze({
   'c_day4_triage_food': 'Optimal',
   'c_day4_triage_drink': 'Optimal',
   'c_day4_triage_kit': 'Optimal',
-  'c_day4_triage_save': 'Risky'
+  'c_day4_triage_save': 'Risky',
+  'c_prolog_pack_food': 'Optimal',
+  'c_prolog_pack_drink': 'Optimal',
+  'c_prolog_pack_kit': 'Optimal',
+  'c_prolog_pack_battery': 'Optimal',
+  'c_day2_radio_battery': 'Optimal'
 });
 
 // ─── POWER STATUS TIME THRESHOLDS ──────────────────────────────────────────

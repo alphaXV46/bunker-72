@@ -74,6 +74,14 @@ export class StoryEngine {
     // Check health-zero fatal condition first, regardless of incoming scene.
     if (this._checkFatalCondition(sceneId)) return;
 
+    if (sceneId === 'prolog_packing') {
+      const packedCount = this.model.inventory.food + this.model.inventory.drink + this.model.inventory.kit + (this.model.flags.extra_battery ? 1 : 0);
+      if (packedCount >= 5) {
+        this.renderScene('prolog_intro');
+        return;
+      }
+    }
+
     if (sceneId === 'day2_seal_leak') {
       const hasIgnored = this.model.history.some(entry => entry.choiceId === 'c_day2_air_remedy_ignore');
       if (this.model.flags.air_uninspected === true && !this.model.flags.air_remedied && !hasIgnored) {
@@ -186,7 +194,7 @@ export class StoryEngine {
 
     // Pass pre-computed boolean — View does not need the model reference.
     this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
-    this.view.renderSceneArt(scene);
+    this.view.renderSceneArt(scene, this.model.flags, sceneId);
     this.view.renderSpeaker(scene);
     this.view.renderSystemAlert(alertTag);
 
@@ -229,6 +237,23 @@ export class StoryEngine {
       return;
     }
 
+    if (choice.id === 'c_prolog_pack_food') {
+      this.model.inventory.food++;
+    }
+    if (choice.id === 'c_prolog_pack_drink') {
+      this.model.inventory.drink++;
+    }
+    if (choice.id === 'c_prolog_pack_kit') {
+      this.model.inventory.kit++;
+      if (this.model.inventory.kit >= 2) {
+        this.model.flags.kit_maxed = true;
+      }
+    }
+    if (choice.id === 'c_prolog_pack_battery') {
+      this.model.flags.extra_battery = true;
+      this.model.flags.battery_packed = true;
+    }
+
     const prevHealth = this.model.health;
 
     if (choice.id === 'c_day2_air_remedy_inspect') {
@@ -262,7 +287,7 @@ export class StoryEngine {
     if (choice.id === 'c_day4_triage_food') {
       if (this.model.inventory.food > 0) {
         this.model.inventory.food--;
-        this.model.hunger = Math.min(100, this.model.hunger + 30);
+        this.model.hunger = Math.min(this.model.getMaxStat('hunger'), this.model.hunger + 30);
         choice.log = "Mengalokasikan ransum makanan terakhir untuk memulihkan Anak.";
       } else {
         this.model.health = Math.max(0, this.model.health - 25);
@@ -272,7 +297,7 @@ export class StoryEngine {
     if (choice.id === 'c_day4_triage_drink') {
       if (this.model.inventory.drink > 0) {
         this.model.inventory.drink--;
-        this.model.thirst = Math.min(100, this.model.thirst + 30);
+        this.model.thirst = Math.min(this.model.getMaxStat('thirst'), this.model.thirst + 30);
         choice.log = "Mengalokasikan persediaan air terakhir untuk memulihkan Ibu.";
       } else {
         this.model.health = Math.max(0, this.model.health - 25);
@@ -282,7 +307,7 @@ export class StoryEngine {
     if (choice.id === 'c_day4_triage_kit') {
       if (this.model.inventory.kit > 0) {
         this.model.inventory.kit--;
-        this.model.health = Math.min(100, this.model.health + 40);
+        this.model.health = Math.min(this.model.getMaxStat('health'), this.model.health + 40);
         choice.log = "Menggunakan P3K terakhir untuk merawat trauma fisik Ayah.";
       } else {
         this.model.health = Math.max(0, this.model.health - 25);
@@ -435,6 +460,17 @@ export class StoryEngine {
    */
   processNarrativeText(sceneId, rawText, speaker) {
     let processedText = rawText;
+
+    if (sceneId === 'prolog_packing') {
+      const packedCount = this.model.inventory.food + this.model.inventory.drink + this.model.inventory.kit + (this.model.flags.extra_battery ? 1 : 0);
+      const itemsList = [];
+      if (this.model.inventory.food > 0) itemsList.push(`${this.model.inventory.food} Makanan`);
+      if (this.model.inventory.drink > 0) itemsList.push(`${this.model.inventory.drink} Minuman`);
+      if (this.model.inventory.kit > 0) itemsList.push(`${this.model.inventory.kit} P3K`);
+      if (this.model.flags.extra_battery) itemsList.push(`1 Baterai Ekstra`);
+      const itemsStr = itemsList.length > 0 ? itemsList.join(', ') : 'Belum ada';
+      processedText = `[RANSEL: ${packedCount}/5 Slot Terisi] — Isi Ransel: ${itemsStr}.\n\n` + processedText;
+    }
 
     const scene = this.storyData.scenes[sceneId];
     if (scene) {
