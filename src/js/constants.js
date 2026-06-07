@@ -118,7 +118,11 @@ export const CHOICE_QUALITY_MAP = Object.freeze({
   'c_day4_oxygen_tank': 'Optimal',
   'c_day4_looters_shock': 'Optimal',
   'c_day4_looters_intercom': 'Acceptable',
-  'c_day4_looters_barter': 'Risky'
+  'c_day4_looters_barter': 'Risky',
+  'c_day4_triage_food': 'Optimal',
+  'c_day4_triage_drink': 'Optimal',
+  'c_day4_triage_kit': 'Optimal',
+  'c_day4_triage_save': 'Risky'
 });
 
 // ─── POWER STATUS TIME THRESHOLDS ──────────────────────────────────────────
@@ -175,3 +179,40 @@ export function getTimePhase(hour) {
   if (modHour === 18) return 'MALAM';
   return '';
 }
+
+export function getKnowledgeLabel(k) {
+  if (k <= 3) return "Belum Siap";
+  if (k <= 7) return "Waspada Dasar";
+  if (k <= 11) return "Terlatih";
+  return "Protokol Elite";
+}
+
+export const FACTS_MAP = Object.freeze({
+  'c_day1_lock_open': 'Menunda penutupan pintu bunker memungkinkan partikel PM2.5 dan gas mematikan masuk. Pintu harus langsung ditutup.',
+  'c_day1_air_noinspect': 'Sistem filtrasi udara tanpa pengecekan katup dapat bocor. Inspeksi visual wajib dilakukan sebelum pengaktifan.',
+  'c_day1_water_waste': 'Air adalah sumber daya paling berharga. Konsumsi berlebihan di jam pertama mempercepat dehidrasi kronis pada hari berikutnya.',
+  'c_day1_sanitation_door': 'Menyimpan limbah tanpa wadah tertutup dekat akses utama memicu penyakit menular dalam ruang tertutup.',
+  'c_day1_sanitation_corner': 'Penumpukan limbah sembarangan meningkatkan bakteri patogen udara.',
+  'c_day1_rest_bad': 'Mengabaikan kebersihan area tidur akan menurunkan kekebalan tubuh drastis akibat paparan kotoran langsung.',
+  'c_day2_panic_exit': 'Membuka pintu segel saat panik adalah penyebab kematian utama di bunker karena membiarkan paparan mematikan masuk seketika.',
+  'c_day2_leak_cloth': 'Kain basah hanya menyaring partikel besar, tidak efektif menahan gas beracun. Selalu gunakan sealant khusus.',
+  'c_day2_leak_fan': 'Meniup asap tidak menghilangkan racun, hanya memindahkannya. Retakan harus segera ditutup.',
+  'c_day2_smoke_water': 'Membuang air untuk membilas asap hanya memboroskan ransum kritis. Gunakan P3K atau masker bersih.',
+  'c_day2_smoke_chemical': 'Menyemprotkan disinfektan konsentrasi tinggi untuk asap justru meracuni udara ruangan lebih cepat.',
+  'c_day2_radio_always_on': 'Radio menyala terus menerus adalah pemborosan energi fatal. Dalam bencana, atur jadwal menyimak siaran darurat.',
+  'c_day2_power_alllight': 'Mempertahankan penerangan terang terus menerus menguras baterai utama. Biasakan hidup dengan lampu darurat minimalis.',
+  'c_day2_power_modify': 'Memodifikasi paksa sirkuit listrik bisa merusak generator, menyebabkan mati total atau kebakaran internal.',
+  'c_day2_drain_alllight': 'Tidak mematikan daya saat darurat berujung pada hilangnya seluruh fungsi elektronik vital.',
+  'c_day2_drain_modify': 'Bypass listrik darurat sangat dilarang dalam SOP keselamatan bunker manapun.',
+  'c_day3_water_boil': 'Merebus air hanya membunuh bakteri, tapi memusatkan racun kimia seperti logam berat. Air keruh logam wajib difilter.',
+  'c_day3_water_settle': 'Mengendapkan air tanpa filter kimiawi tidak menetralisir polutan mikroskopis atau racun industri.',
+  'c_day3_signal_knock': 'Membuat suara bising dengan memukul pipa bisa mengundang penjarah atau hewan liar, kompromi pertahanan bunker.',
+  'c_day3_signal_fire': 'Menyalakan api sekecil apapun di dalam bunker tertutup mengonsumsi oksigen berharga dan menghasilkan karbon monoksida mematikan.',
+  'c_day3_filter_signal_knock': 'Sinyal suara sangat berisiko membongkar lokasi persembunyian Anda.',
+  'c_day3_filter_signal_fire': 'Api dalam ruang tertutup adalah racun pembunuh diam-diam.',
+  'c_day3_door_open': 'Membuka pintu sebelum memverifikasi identitas dan kode sandi resmi bisa menyebabkan bunker diinvasi.',
+  'c_day4_oxygen_vent': 'Menyalakan ventilasi paksa tanpa filter menyedot gas beracun dari luar, mempercepat keracunan.',
+  'c_day4_looters_barter': 'Negosiasi dengan penjarah saat pertahanan sudah bocor memberi celah mereka untuk menyerang langsung.',
+  'c_day4_triage_save': 'Menyimpan seluruh persediaan saat kondisi kritis menyebabkan penurunan stamina ekstrem seluruh keluarga.'
+});
+

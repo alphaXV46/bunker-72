@@ -12,7 +12,7 @@
 import { GameModel  } from './gameModel.js';
 import { GameView   } from './gameView.js';
 import { RetroAudio } from './retroAudio.js';
-import { ENDING_IDS, SURVIVAL, parseHour } from './constants.js';
+import { ENDING_IDS, SURVIVAL, parseHour, FACTS_MAP, CHOICE_QUALITY_MAP } from './constants.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
@@ -73,6 +73,14 @@ export class StoryEngine {
   renderScene(sceneId) {
     // Check health-zero fatal condition first, regardless of incoming scene.
     if (this._checkFatalCondition(sceneId)) return;
+
+    if (sceneId === 'day2_seal_leak') {
+      const hasIgnored = this.model.history.some(entry => entry.choiceId === 'c_day2_air_remedy_ignore');
+      if (this.model.flags.air_uninspected === true && !this.model.flags.air_remedied && !hasIgnored) {
+        this.renderScene('day2_remedy_air');
+        return;
+      }
+    }
 
     // Resolve logic-trigger pseudo-scenes before doing anything else.
     if (sceneId === 'trigger_ending_eval') {
@@ -211,12 +219,22 @@ export class StoryEngine {
    * @param {object} choice - Choice object from story.json.
    */
   handleChoiceSelect(choice) {
+    if (this._inventoryReactionTimeout) {
+      clearTimeout(this._inventoryReactionTimeout);
+      this._inventoryReactionTimeout = null;
+    }
+
     if (this.view.isTyping) {
       this.view.skipTyping();
       return;
     }
 
     const prevHealth = this.model.health;
+
+    if (choice.id === 'c_day2_air_remedy_inspect') {
+      delete this.model.flags.air_uninspected;
+      this.model.flags.air_remedied = true;
+    }
 
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
@@ -240,18 +258,61 @@ export class StoryEngine {
       this.model.flags.looters_breached = true;
     }
 
+    // Day 4 triage choices consequences
+    if (choice.id === 'c_day4_triage_food') {
+      if (this.model.inventory.food > 0) {
+        this.model.inventory.food--;
+        this.model.hunger = Math.min(100, this.model.hunger + 30);
+        choice.log = "Mengalokasikan ransum makanan terakhir untuk memulihkan Anak.";
+      } else {
+        this.model.health = Math.max(0, this.model.health - 25);
+        choice.log = "Gagal memberikan makanan kepada Anak karena inventaris kosong (stres fisik parah).";
+      }
+    }
+    if (choice.id === 'c_day4_triage_drink') {
+      if (this.model.inventory.drink > 0) {
+        this.model.inventory.drink--;
+        this.model.thirst = Math.min(100, this.model.thirst + 30);
+        choice.log = "Mengalokasikan persediaan air terakhir untuk memulihkan Ibu.";
+      } else {
+        this.model.health = Math.max(0, this.model.health - 25);
+        choice.log = "Gagal memberikan air kepada Ibu karena inventaris kosong (dehidrasi ekstrem).";
+      }
+    }
+    if (choice.id === 'c_day4_triage_kit') {
+      if (this.model.inventory.kit > 0) {
+        this.model.inventory.kit--;
+        this.model.health = Math.min(100, this.model.health + 40);
+        choice.log = "Menggunakan P3K terakhir untuk merawat trauma fisik Ayah.";
+      } else {
+        this.model.health = Math.max(0, this.model.health - 25);
+        choice.log = "Gagal menggunakan P3K karena habis (kondisi fisik Ayah terus memburuk).";
+      }
+    }
+    if (choice.id === 'c_day4_triage_save') {
+      this.model.hunger = Math.max(0, this.model.hunger - 15);
+      this.model.thirst = Math.max(0, this.model.thirst - 15);
+      this.model.health = Math.max(0, this.model.health - 15);
+      choice.log = "Menyimpan seluruh sisa persediaan; seluruh keluarga mengalami penurunan stamina serentak.";
+    }
+
     // Panic-exit incurs a direct health penalty.
     if (choice.id === 'c_day2_panic_exit') {
       this.model.health = Math.max(0, this.model.health - SURVIVAL.PANIC_HEALTH_PENALTY);
     }
 
     // Record decision in history.
-    this.model.history.push({
+    const quality = CHOICE_QUALITY_MAP[choice.id];
+    const historyEntry = {
       hour:     this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
       text:     choice.log || choice.text,
       choiceId: choice.id  ?? null,
       effect,
-    });
+    };
+    if (quality === 'Risky') {
+      historyEntry.fact = FACTS_MAP[choice.id];
+    }
+    this.model.history.push(historyEntry);
 
     // Activate any flags declared on this choice.
     if (choice.setFlags?.length) {
@@ -314,6 +375,26 @@ export class StoryEngine {
 
     if (!ENDING_IDS.includes(this.model.currentSceneId) && this.onSave) {
       this.onSave(this.model.toSaveData());
+    }
+
+    const reactions = {
+      food:  { speaker: "Anak", avatar: "anak", text: "Nyam! Makanannya enak sekali. Terima kasih, Ayah!" },
+      drink: { speaker: "Ibu",  avatar: "ibu",  text: "Tenggorokan saya rasanya jauh lebih segar sekarang. Terima kasih." },
+      kit:   { speaker: "Ayah", avatar: "ayah", text: "Stamina saya mulai pulih. Obat-obatan ini sangat krusial." }
+    };
+    const react = reactions[key];
+    if (react) {
+      if (this._inventoryReactionTimeout) {
+        clearTimeout(this._inventoryReactionTimeout);
+        this._inventoryReactionTimeout = null;
+      }
+      this.view.renderSpeaker(react);
+      this.view.typeText(react.text, () => {
+        const currentScene = this.storyData.scenes[this.model.currentSceneId];
+        this._inventoryReactionTimeout = setTimeout(() => {
+          this.restoreSceneDialogue(currentScene);
+        }, 3000);
+      });
     }
   }
 
@@ -392,5 +473,36 @@ export class StoryEngine {
     }
 
     return processedText;
+  }
+
+  handleDialogueClick() {
+    if (this._inventoryReactionTimeout) {
+      clearTimeout(this._inventoryReactionTimeout);
+      this._inventoryReactionTimeout = null;
+      const currentScene = this.storyData.scenes[this.model.currentSceneId];
+      if (currentScene) {
+        this.restoreSceneDialogue(currentScene);
+      }
+    }
+  }
+
+  restoreSceneDialogue(scene) {
+    this.view.renderSpeaker(scene);
+    let dialogueText = scene.text || '';
+    const alertMatch = dialogueText.match(/^\[([^\]]+)\]/);
+    if (alertMatch) {
+      dialogueText = dialogueText.slice(alertMatch[0].length).trim();
+    }
+    const modifiedText = this.processNarrativeText(this.model.currentSceneId, dialogueText, scene.speaker);
+    this.view.dom.dialogueText.textContent = modifiedText;
+    this.view.isTyping = false;
+    if (this.view.typingRafId) {
+      cancelAnimationFrame(this.view.typingRafId);
+      this.view.typingRafId = null;
+    }
+    this.view.renderChoices(
+      scene.choices, this.model.currentSceneId, this.model.flags,
+      (choice) => this.handleChoiceSelect(choice)
+    );
   }
 }

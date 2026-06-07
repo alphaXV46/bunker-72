@@ -15,6 +15,7 @@ import { clamp, ENDING_IDS, SURVIVAL } from './constants.js';
 // Text-content matching has been fully removed (GDD v2.2 migration complete).
 const FLAG_CHOICE_MAP = Object.freeze({
   'c_day1_air_noinspect':    'air_uninspected',
+  'c_day2_air_remedy_inspect': 'air_remedied',
   'c_day2_panic_exit':       'structural_damage',
   'c_day2_radio_schedule':   'radio_saved',
   'c_day2_power_save':       'power_saved',
@@ -80,6 +81,9 @@ export class GameModel {
         flags[FLAG_CHOICE_MAP[entry.choiceId]] = true;
       }
     });
+    if (flags.air_remedied) {
+      delete flags.air_uninspected;
+    }
     return flags;
   }
 
