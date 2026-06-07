@@ -261,6 +261,31 @@ export class StoryEngine {
       this.model.flags.air_remedied = true;
     }
 
+    if (choice.id === 'c_day2_scavenge_bypass') {
+      if (this.model.knowledge >= 8) {
+        this.model.inventory.food += 1;
+        this.model.inventory.drink += 1;
+        this.model.flags.scavenged = true;
+        choice.nextSceneId = 'day2_scavenge_success';
+        choice.log = "Melakukan pencarian perbekalan di kompartemen luar dengan mem-bypass kunci solenoid secara sukses.";
+      } else {
+        this.model.health = Math.max(0, this.model.health - 20);
+        this.model.flags.generator_damaged = true;
+        this.model.flags.scavenged = true;
+        choice.nextSceneId = 'day2_scavenge_bypass_fail';
+        choice.log = "Gagal mem-bypass kunci solenoid, memicu sengatan listrik korsleting regulator generator (-20 HP).";
+      }
+    }
+
+    if (choice.id === 'c_day2_scavenge_slow') {
+      this.model.inventory.food += 1;
+      this.model.inventory.drink += 1;
+      this.model.flags.scavenged = true;
+      this.model.updateSurvivalStats(6);
+      choice.nextSceneId = 'day2_scavenge_slow_success';
+      choice.log = "Pencarian perbekalan manual dilakukan secara lambat (memakan waktu 6 jam ekstra).";
+    }
+
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
     this.model.knowledge = Math.max(0, Math.min(SURVIVAL.KNOWLEDGE_MAX, this.model.knowledge + effect));
@@ -336,6 +361,7 @@ export class StoryEngine {
     };
     if (quality === 'Risky') {
       historyEntry.fact = FACTS_MAP[choice.id];
+      this.view.notifyJournal();
     }
     this.model.history.push(historyEntry);
 
@@ -375,6 +401,10 @@ export class StoryEngine {
       return;
     }
 
+    const hungerVal = this.model.hunger;
+    const thirstVal = this.model.thirst;
+    const healthVal = this.model.health;
+
     const result = this.model.useInventoryItem(key);
     if (!result) return; // Item not available
 
@@ -403,9 +433,27 @@ export class StoryEngine {
     }
 
     const reactions = {
-      food:  { speaker: "Anak", avatar: "anak", text: "Nyam! Makanannya enak sekali. Terima kasih, Ayah!" },
-      drink: { speaker: "Ibu",  avatar: "ibu",  text: "Tenggorokan saya rasanya jauh lebih segar sekarang. Terima kasih." },
-      kit:   { speaker: "Ayah", avatar: "ayah", text: "Stamina saya mulai pulih. Obat-obatan ini sangat krusial." }
+      food:  {
+        speaker: "Anak",
+        avatar: "anak",
+        text: hungerVal <= 30
+          ? "Terima kasih, Ayah... perutku sangat perih tadi. Akhirnya kita bisa makan..."
+          : "Nyam! Makanannya enak sekali. Terima kasih, Ayah!"
+      },
+      drink: {
+        speaker: "Ibu",
+        avatar: "ibu",
+        text: thirstVal <= 30
+          ? "Terima kasih, Ayah... tenggorokan saya sangat kering seperti terbakar. Ini menyelamatkan saya."
+          : "Tenggorokan saya rasanya jauh lebih segar sekarang. Terima kasih."
+      },
+      kit:   {
+        speaker: "Ayah",
+        avatar: "ayah",
+        text: healthVal <= 40
+          ? "Nyeri dadaku mulai mereda... obat ini bekerja cepat. Terima kasih."
+          : "Stamina saya mulai pulih. Obat-obatan ini sangat krusial."
+      }
     };
     const react = reactions[key];
     if (react) {

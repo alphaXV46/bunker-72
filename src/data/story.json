@@ -755,11 +755,25 @@
       "objective": "Cari sisa makanan dan minuman darurat.",
       "choices": [
         {
-          "id": "c_day2_scavenge_trigger",
-          "text": "Periksa kompartemen penyimpanan luar bunker.",
-          "nextSceneId": "trigger_scavenge_eval",
+          "id": "c_day2_scavenge_bypass",
+          "text": "Bypass kunci solenoid kompartemen penyimpanan luar.",
+          "nextSceneId": "day2_scavenge_success",
           "knowledgeEffect": 0,
-          "log": "Melakukan pencarian perbekalan di kompartemen luar."
+          "log": "Melakukan pencarian perbekalan di kompartemen luar dengan bypass solenoid."
+        },
+        {
+          "id": "c_day2_scavenge_slow",
+          "text": "Bongkar panel pengunci secara manual (memakan waktu 6 jam).",
+          "nextSceneId": "day2_scavenge_slow_success",
+          "knowledgeEffect": 0,
+          "log": "Bongkar panel kompartemen secara manual secara lambat."
+        },
+        {
+          "id": "c_day2_scavenge_ignore",
+          "text": "Abaikan kompartemen luar dan langsung bersiap untuk esok hari.",
+          "nextSceneId": "day3_start",
+          "knowledgeEffect": 0,
+          "log": "Mengabaikan kompartemen penyimpanan luar."
         }
       ]
     },
@@ -794,6 +808,40 @@
           "nextSceneId": "day3_start",
           "knowledgeEffect": 0,
           "log": "Pencarian perbekalan luar gagal."
+        }
+      ]
+    },
+    "day2_scavenge_bypass_fail": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Jari Anda mencoba menghubungkan sirkuit solenoida secara paksa, tetapi percikan listrik biru meletup keras menyengat tangan Anda. Dada Anda sesak menahan nyeri sengatan listrik bertegangan tinggi, dan lampu darurat berkedip tidak stabil—sistem generator mengalami korsleting regulator tambahan. Kompartemen tetap terkunci rapat.",
+      "background": "normal",
+      "hour": "54 Jam",
+      "objective": "Lanjutkan ke Hari Ketiga.",
+      "choices": [
+        {
+          "id": "c_day2_scavenge_bypass_fail_next",
+          "text": "Lanjutkan ke Hari Ketiga dengan tubuh cedera.",
+          "nextSceneId": "day3_start",
+          "knowledgeEffect": 0,
+          "log": "Melanjutkan perjalanan dengan luka pasca kegagalan bypass."
+        }
+      ]
+    },
+    "day2_scavenge_slow_success": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Anda membongkar sekrup panel penutup satu per satu secara manual dengan obeng karat. Proses ini memakan waktu dan menguras energi Anda di tengah dinginnya malam, namun akhirnya tuas mekanis dapat ditarik aman. Di balik kompartemen, Anda menemukan 1 makanan kaleng dan 1 air mineral. Namun, waktu ekstra yang dihabiskan membuat rasa haus dan lapar keluarga semakin memuncak.",
+      "background": "normal",
+      "hour": "54 Jam",
+      "objective": "Lanjutkan ke Hari Ketiga.",
+      "choices": [
+        {
+          "id": "c_day2_scavenge_slow_success_next",
+          "text": "Lanjutkan ke Hari Ketiga.",
+          "nextSceneId": "day3_start",
+          "knowledgeEffect": 0,
+          "log": "Pencarian perbekalan manual lambat diselesaikan."
         }
       ]
     },
@@ -1182,7 +1230,7 @@
       "conditionalText": [
         {
           "requiredFlag": "near_miss",
-          "text": " Tubuh seluruh keluarga gemetar hebat, menanggung beban kelalaian prosedur sebelumnya. Ransum makanan dan minuman telah benar-benar habis akibat kebocoran atau kerusakan daya sebelumnya."
+          "text": " Tubuh seluruh keluarga gemetar hebat, menanggung beban kelalaian prosedur sebelumnya. Puing-puing semen yang runtuh semalam menimpa lemari penyimpanan kita, menghancurkan sisa botol air dan menimbun ransum makanan terakhir di bawah berton-ton beton. Kita terpaksa memulai hari ekstra ini dengan tangan hampa."
         }
       ],
       "background": "rusak",

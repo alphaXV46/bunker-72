@@ -95,6 +95,9 @@ export const CHOICE_QUALITY_MAP = Object.freeze({
   'c_day2_power_save_drain': 'Optimal',
   'c_day2_drain_alllight': 'Risky',
   'c_day2_drain_modify': 'Risky',
+  'c_day2_scavenge_bypass': 'Risky',
+  'c_day2_scavenge_slow': 'Optimal',
+  'c_day2_scavenge_ignore': 'Acceptable',
 
   // Day 3
   'c_day3_water_boil': 'Risky',
@@ -209,6 +212,7 @@ export const FACTS_MAP = Object.freeze({
   'c_day2_power_modify': 'Memodifikasi paksa sirkuit listrik bisa merusak generator, menyebabkan mati total atau kebakaran internal.',
   'c_day2_drain_alllight': 'Tidak mematikan daya saat darurat berujung pada hilangnya seluruh fungsi elektronik vital.',
   'c_day2_drain_modify': 'Bypass listrik darurat sangat dilarang dalam SOP keselamatan bunker manapun.',
+  'c_day2_scavenge_bypass': 'Mem-bypass kunci solenoid generator tanpa alat pelindung diri dapat memicu sengatan listrik tegangan tinggi dan kerusakan regulator daya.',
   'c_day3_water_boil': 'Merebus air hanya membunuh bakteri, tapi memusatkan racun kimia seperti logam berat. Air keruh logam wajib difilter.',
   'c_day3_water_settle': 'Mengendapkan air tanpa filter kimiawi tidak menetralisir polutan mikroskopis atau racun industri.',
   'c_day3_signal_knock': 'Membuat suara bising dengan memukul pipa bisa mengundang penjarah atau hewan liar, kompromi pertahanan bunker.',

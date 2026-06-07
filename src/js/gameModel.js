@@ -23,6 +23,8 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day3_water_filter':     'water_filtered',
   'c_day3_door_open':        'door_opened',
   'c_day2_scavenge_trigger': 'scavenged',
+  'c_day2_scavenge_bypass': 'scavenged',
+  'c_day2_scavenge_slow': 'scavenged',
   'c_day3_pinch_inspect_vent': 'vent_secured',
   'c_prolog_pack_battery': 'extra_battery',
   'c_day2_radio_battery': 'radio_saved',
@@ -101,6 +103,9 @@ export class GameModel {
     if (kitChoicesCount >= 2) {
       flags.kit_maxed = true;
     }
+    if (history.some(e => e.choiceId === 'c_day2_scavenge_bypass' && e.text && e.text.includes("Gagal"))) {
+      flags.generator_damaged = true;
+    }
     return flags;
   }
 
@@ -122,8 +127,19 @@ export class GameModel {
     if (typeof elapsedHours !== 'number' || isNaN(elapsedHours) || elapsedHours <= 0) return;
 
     const { DECAY_INTERVAL_HOURS, HUNGER_DECAY_PER_INTERVAL, THIRST_DECAY_PER_INTERVAL, HEALTH_PENALTY_HUNGER, HEALTH_PENALTY_THIRST } = SURVIVAL;
-    const hungerDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * HUNGER_DECAY_PER_INTERVAL;
-    const thirstDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * THIRST_DECAY_PER_INTERVAL;
+    
+    let hungerDecayRate = HUNGER_DECAY_PER_INTERVAL;
+    if (this.flags.air_uninspected) {
+      hungerDecayRate += 3;
+    }
+    
+    let thirstDecayRate = THIRST_DECAY_PER_INTERVAL;
+    if (this.flags.structural_damage) {
+      thirstDecayRate += 3;
+    }
+
+    const hungerDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * hungerDecayRate;
+    const thirstDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * thirstDecayRate;
 
     this.hunger = clamp(this.hunger - hungerDecay, 0, this.getMaxStat('hunger'));
     this.thirst = clamp(this.thirst - thirstDecay, 0, this.getMaxStat('thirst'));
@@ -131,6 +147,10 @@ export class GameModel {
     let healthPenalty = 0;
     if (this.hunger <= 0) healthPenalty += (elapsedHours / DECAY_INTERVAL_HOURS) * HEALTH_PENALTY_HUNGER;
     if (this.thirst <= 0) healthPenalty += (elapsedHours / DECAY_INTERVAL_HOURS) * HEALTH_PENALTY_THIRST;
+
+    if (this.flags.smoke_poisoned) {
+      healthPenalty += (elapsedHours / DECAY_INTERVAL_HOURS) * 5;
+    }
 
     if (healthPenalty > 0) {
       this.health = clamp(this.health - healthPenalty, 0, this.getMaxStat('health'));

@@ -117,6 +117,7 @@ export class GameView {
       journalPanel.setAttribute('aria-hidden', 'false');
       journalBtn.style.opacity       = '0';
       journalBtn.style.pointerEvents = 'none';
+      journalBtn.classList.remove('flash-alert');
     };
     const close = () => {
       journalPanel.classList.remove('journal-open');
@@ -558,6 +559,14 @@ export class GameView {
       journalPanel.setAttribute('aria-hidden', 'false');
       journalBtn.style.opacity       = '0';
       journalBtn.style.pointerEvents = 'none';
+      journalBtn.classList.remove('flash-alert');
+    }
+  }
+
+  notifyJournal() {
+    const journalBtn = document.getElementById('journal-btn');
+    if (journalBtn) {
+      journalBtn.classList.add('flash-alert');
     }
   }
 
