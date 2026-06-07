@@ -16,6 +16,7 @@ export const ENDING_IDS = Object.freeze([
   'ending_fatal',
   'ending_secret_best',
   'ending_secret_bad',
+  'ending_stranded_bad',
 ]);
 
 // ─── SURVIVAL SYSTEM CONFIGURATION ─────────────────────────────────────────

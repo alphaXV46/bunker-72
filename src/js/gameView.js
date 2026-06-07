@@ -625,6 +625,13 @@ export class GameView {
         grade:      'PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)',
         gradeColor: 'var(--accent-red-border)',
       },
+      ending_stranded_bad: {
+        title:      'ENDING BURUK: TERDAMPAR TANPA HARAPAN',
+        titleClass: 'ending-bad',
+        bgClass:    'ending-bg-fatal',
+        grade:      'PERINGKAT KESIAPSIAGAAN: GAGAL (Keluarga Terdampar & Gugur)',
+        gradeColor: 'var(--accent-red-border)',
+      },
     };
 
     const cfg = ENDING_CONFIG[endingId];
