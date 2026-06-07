@@ -1221,8 +1221,31 @@ body.prolog-active #settings-btn { display: none !important; }
   gap: 1rem;
 }
 
+/* Settings gear button — fixed position over all screens */
+.settings-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: var(--cursor-pointer);
+  line-height: 1;
+  padding: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.settings-icon:hover {
+  opacity: 0.75;
+  transform: rotate(30deg);
+}
+
 /* Utility: hide modal */
 .modal.hidden { display: none !important; }
+
+/* Credits box centred variant */
+.ending-content-box--center { text-align: center; }
 
 
 /* ============================================================
