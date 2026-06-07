@@ -80,9 +80,10 @@ export class StoryEngine {
     this.view.updateInventoryUI(this.model.currentSceneId, this.model.inventory);
 
     const isEnding = ENDING_IDS.includes(sceneId);
+    const isRadioScene = ['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad'].includes(sceneId);
 
-    if (!isEnding && scene.focusItems && scene.focusItems.includes('radio')) {
-      this.audio.playRadioSound(true);
+    if (!isEnding && isRadioScene) {
+      this.audio.playRadioSound(false);
     } else {
       this.audio.stopRadioSound();
     }

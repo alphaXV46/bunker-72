@@ -8,6 +8,7 @@ export class RetroAudio {
     this.bgmSource = null;
     this.bgmState = 'playing'; // default to playing so it starts automatically on init
     this.radioSource = null;
+    this.radioTimeout = null;
   }
 
   init() {
@@ -129,17 +130,26 @@ export class RetroAudio {
 
       const source = this.ctx.createBufferSource();
       source.buffer = buffer;
-      source.loop = loop;
+      source.loop = false; // force non-looping to prevent user dizziness
       source.connect(this.masterGain);
       source.start(0);
 
       this.radioSource = source;
+
+      // Limit playback duration to 5 seconds max
+      this.radioTimeout = setTimeout(() => {
+        this.stopRadioSound();
+      }, 5000);
     } catch (e) {
       console.error('Failed to play radio sound:', e);
     }
   }
 
   stopRadioSound() {
+    if (this.radioTimeout) {
+      clearTimeout(this.radioTimeout);
+      this.radioTimeout = null;
+    }
     if (this.radioSource) {
       try {
         this.radioSource.stop();
