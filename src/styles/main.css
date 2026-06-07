@@ -292,6 +292,45 @@ input[type="range"] {
   white-space: nowrap;
   backdrop-filter: blur(3px);
   box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+/* Warning Status styling */
+.status-item.status-warning {
+  border-color: var(--warning-yellow-border);
+  background-color: rgba(255, 209, 102, 0.12);
+}
+.environment-readout div.status-warning {
+  border-left-color: var(--warning-yellow-border);
+  background-color: rgba(255, 209, 102, 0.12);
+}
+
+/* Low Status styling */
+.status-item.status-low {
+  border-color: var(--accent-red-border);
+  background-color: rgba(255, 93, 93, 0.15);
+  animation: statusPulse 1.5s infinite ease-in-out;
+}
+.environment-readout div.status-low {
+  border-left-color: var(--accent-red-border);
+  background-color: rgba(255, 93, 93, 0.15);
+  animation: statusPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.status-item span,
+.environment-readout div span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .highlight-val {

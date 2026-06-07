@@ -36,7 +36,7 @@
         },
         {
           "id": "c_day1_lock_open",
-          "text": "Biarkan pintu sedikit terbuka untuk memantau tetangga.",
+          "text": "Tunda penutupan pintu selama 30 detik untuk menyeimbangkan tekanan udara masuk.",
           "nextSceneId": "day1_lockdoor",
           "knowledgeEffect": -2,
           "log": "Pintu dibiarkan sedikit terbuka sebelum akhirnya dikunci."
@@ -53,15 +53,15 @@
     "day1_lockdoor": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis, pintu sudah terkunci rapat. Namun indikator filtrasi masih berkedip merah. Jika katup bypass tidak disegel rapat, udara permukaan yang terkontaminasi abu akan terhirup oleh kita.",
+      "text": "Berdasarkan indikator panel, mekanisme segel mekanis telah terkunci penuh. Namun lampu indikator filtrasi masih berkedip merah. Jika katup bypass tidak diisolasi secara fisik, partikulat abu vulkanik luar akan merembes langsung ke ruang sirkulasi utama kita.",
       "background": "normal",
-      "hour": "4 Jam",
+      "hour": "6 Jam",
       "objective": "Amankan kualitas udara sebelum keluarga beristirahat.",
       "focusItems": ["kit"],
       "choices": [
         {
           "id": "c_day1_air_noinspect",
-          "text": "Segera nyalakan penyaring udara tanpa memeriksa segel katup.",
+          "text": "Jalankan penyaring udara pada mode kecepatan penuh untuk pembersihan cepat.",
           "nextSceneId": "day1_air_unsafe",
           "knowledgeEffect": -1,
           "log": "Penyaring dinyalakan tanpa inspeksi katup.",
@@ -86,9 +86,9 @@
     "day1_air_safe": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Syukurlah, demi keselamatan kita segel karetnya sempat dikencangkan sebelum lepas. Udara di ruang utama mulai terasa lebih bersih sekarang.",
+      "text": "Syukurlah, prosedur pemeriksaan kita berhasil mendeteksi segel karet katup yang hampir lepas. Kita berhasil mengencangkannya tepat waktu, sehingga sirkulasi udara bersih di ruang utama kembali normal.",
       "background": "normal",
-      "hour": "8 Jam",
+      "hour": "12 Jam",
       "objective": "Lakukan inventaris awal.",
       "choices": [
         {
@@ -105,7 +105,7 @@
       "avatar": "anak",
       "text": "Ayah... aku takut. Ada bau belerang menyengat di sini. Mataku perih sekali dan dadaku sesak untuk bernapas. Menyalakan penyaring tanpa memeriksa katup karbon menyedot abu PM2.5 beracun langsung dari luar.",
       "background": "normal",
-      "hour": "8 Jam",
+      "hour": "12 Jam",
       "objective": "Pulihkan kualitas udara secepatnya.",
       "alert": true,
       "choices": [
@@ -121,9 +121,9 @@
     "day1_air_fix": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis katup bypass-nya memang longgar. Untung kita segera mematikan mesin sebelum paparan zat beracun memburuk. Ke depannya, kita harus mematuhi SOP pemeriksaan.",
+      "text": "Analisis katup bypass menunjukkan adanya kebocoran akibat tekanan balik. Keputusan mematikan mesin penyaring dengan cepat mencegah kontaminasi gas beracun. Mulai sekarang, kita harus mematuhi SOP pengecekan berkala.",
       "background": "normal",
-      "hour": "10 Jam",
+      "hour": "12 Jam",
       "objective": "Lakukan inventaris awal.",
       "choices": [
         {
@@ -140,13 +140,13 @@
       "avatar": null,
       "text": "Rak logistik berisi air galon, makanan kaleng, kompor portabel, radio VHF, tablet pemurni, masker, dan kotak P3K. Tidak banyak, tapi cukup jika semuanya dihitung.",
       "background": "normal",
-      "hour": "14 Jam",
+      "hour": "18 Jam",
       "objective": "Tentukan rencana konsumsi air.",
       "focusItems": ["food", "drink"],
       "choices": [
         {
           "id": "c_day1_water_waste",
-          "text": "Minum sepuasnya agar tubuh tetap bugar dan terhidrasi penuh.",
+          "text": "Tingkatkan konsumsi air di awal untuk menetralisir potensi racun di tenggorokan.",
           "nextSceneId": "day1_water_waste",
           "knowledgeEffect": -1,
           "log": "Air dipakai terlalu longgar."
@@ -160,7 +160,7 @@
         },
         {
           "id": "c_day1_water_noschedule",
-          "text": "Minum air seadanya saja tanpa membuat jadwal ketat.",
+          "text": "Konsumsi air hanya saat haus tanpa penjadwalan ketat.",
           "nextSceneId": "day1_water_rational",
           "knowledgeEffect": 0,
           "log": "Air dikonsumsi tanpa jadwal ransum ketat."
@@ -170,7 +170,7 @@
     "day1_water_rational": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis, kita harus memberi label pada botol ransum harian dan menyegel satu galon penuh sebagai cadangan mutlak.",
+      "text": "Berdasarkan perhitungan laju dehidrasi, kita wajib menempelkan label takaran harian pada botol air ransum dan mengunci satu galon penuh sebagai cadangan darurat mutlak.",
       "background": "normal",
       "hour": "18 Jam",
       "objective": "Jaga kebersihan ruang bunker.",
@@ -178,21 +178,21 @@
       "choices": [
         {
           "id": "c_day1_sanitation_good",
-          "text": "Pisahkan area tidur, area makan, dan area limbah dengan kantong tertutup.",
+          "text": "Pisahkan area tidur, area makan, dan area limbah dengan wadah fisik bersegel.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
           "log": "Zona bersih dan limbah dipisahkan."
         },
         {
           "id": "c_day1_sanitation_door",
-          "text": "Biarkan semua barang dekat pintu agar mudah diambil jika harus keluar cepat.",
+          "text": "Semprotkan disinfektan kimia konsentrasi tinggi secara berkala pada tumpukan limbah terbuka.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu."
         },
         {
           "id": "c_day1_sanitation_corner",
-          "text": "Tumpuk seluruh limbah di sudut terbuka untuk menghemat kantong.",
+          "text": "Tempatkan limbah dekat katup pembuangan udara agar bau tersedot keluar alami.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -2,
           "log": "Limbah ditumpuk terbuka di sudut."
@@ -202,7 +202,7 @@
     "day1_water_waste": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Demi keselamatan bersama, kita harus membatasi diri. Konsumsi air kita melonjak tajam, padahal 72 jam pertama adalah masa kritis tanpa kepastian evakuasi.",
+      "text": "Protokol darurat mengharuskan kita mengontrol konsumsi secara ketat. Peningkatan asupan air saat ini sangat berisiko, mengingat 72 jam pertama adalah masa paling kritis sebelum adanya konfirmasi evakuasi resmi.",
       "background": "normal",
       "hour": "18 Jam",
       "objective": "Jaga kebersihan ruang bunker.",
@@ -210,21 +210,21 @@
       "choices": [
         {
           "id": "c_day1_waterwaste_sanitation_good",
-          "text": "Pisahkan area tidur, area makan, dan area limbah dengan kantong tertutup.",
+          "text": "Pisahkan area tidur, area makan, dan area limbah dengan wadah fisik bersegel.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
           "log": "Zona bersih dan limbah dipisahkan."
         },
         {
           "id": "c_day1_waterwaste_sanitation_door",
-          "text": "Biarkan semua barang dekat pintu agar mudah diambil jika harus keluar cepat.",
+          "text": "Semprotkan disinfektan kimia konsentrasi tinggi secara berkala pada tumpukan limbah terbuka.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu."
         },
         {
           "id": "c_day1_waterwaste_sanitation_corner",
-          "text": "Tumpuk seluruh limbah di sudut terbuka untuk menghemat kantong.",
+          "text": "Tempatkan limbah dekat katup pembuangan udara agar bau tersedot keluar alami.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -2,
           "log": "Limbah ditumpuk terbuka di sudut."
@@ -234,7 +234,7 @@
     "day1_sanitation_good": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Ini baru benar. Demi keselamatan kita, area tidur terisolasi dari kelembapan, logistik aman dari kontaminasi, and kantong limbah terikat rapat.",
+      "text": "Ini susunan yang aman untuk mencegah penyakit. Isolasi kelembapan di area tidur sudah tepat, bahan pangan terlindungi dari jamur, and kantong pembuangan limbah tertutup rapat.",
       "background": "normal",
       "hour": "24 Jam",
       "objective": "Pulihkan tenaga untuk hari kedua.",
@@ -289,12 +289,12 @@
       "avatar": "anak",
       "text": "Ibu! Aku takut sekali! Bunkernya bergetar hebat! Apakah langit-langit beton di atas kita akan runtuh?",
       "background": "normal",
-      "hour": "32 Jam",
+      "hour": "30 Jam",
       "objective": "Redam panik dan cari sumber kebocoran.",
       "choices": [
         {
           "id": "c_day2_panic_exit",
-          "text": "Panik dan berlari ke pintu keluar untuk membukanya.",
+          "text": "Evakuasi ke koridor luar karena khawatir langit-langit utama runtuh.",
           "nextSceneId": "day2_panic_exit",
           "knowledgeEffect": -3,
           "log": "Hampir membuka pintu keluar dalam kondisi panik.",
@@ -319,7 +319,7 @@
     "day2_panic_exit": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Jangan buka pintu keluar, Ayah! Demi keselamatan kita, tahan dulu! Paparan eksternal gas sulfur di luar masih mematikan!",
+      "text": "Tahan pintunya, Ayah! Protokol isolasi melarang pembukaan pintu segel saat ini! Paparan gas sulfur konsentrasi tinggi di koridor luar sangat mematikan bagi paru-paru!",
       "background": "rusak",
       "hour": "36 Jam",
       "objective": "Cari kebocoran yang membuat udara berubah.",
@@ -337,7 +337,7 @@
     "day2_calm_check": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Tenang, Nak. Tarik napas perlahan-lahan. Ayah, demi keselamatan kita lihat retakan rambut di atas ventilator. Asap abu vulkanik mulai merembes masuk!",
+      "text": "Tenang, Nak. Bernapaslah perlahan-lahan. Ayah, perhatikan akumulasi asap di atas kap ventilator. Protokol filtrasi darurat mendeteksi retakan mikro beton!",
       "background": "normal",
       "hour": "36 Jam",
       "objective": "Tutup retakan ventilasi dengan aman.",
@@ -354,14 +354,14 @@
     "day2_find_leak": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis retakan mikro pada dinding struktural telah meluas. Asap beracun akan masuk lebih cepat jika getaran gempa susulan terjadi lagi.",
+      "text": "Retakan mikro pada dinding struktural beton telah meluas akibat getaran seismik. Laju kebocoran asap beracun akan berlipat ganda jika getaran susulan kembali menghantam bunker.",
       "background": "normal",
-      "hour": "38 Jam",
+      "hour": "36 Jam",
       "objective": "Pilih metode perbaikan kebocoran.",
       "choices": [
         {
           "id": "c_day2_leak_cloth",
-          "text": "Sumbat retakan dengan kain basah tanpa masker pelindung.",
+          "text": "Tutup retakan cepat dengan lakban dan kain basah tanpa alat bantu napas.",
           "nextSceneId": "day2_leak_poor_fix",
           "knowledgeEffect": -1,
           "log": "Retakan disumbat tanpa pelindung napas."
@@ -375,7 +375,7 @@
         },
         {
           "id": "c_day2_leak_fan",
-          "text": "Abaikan retakan kecil dan gunakan kipas angin kecil untuk meniup asap.",
+          "text": "Gunakan kipas ekstraksi internal untuk mengarahkan aliran asap ke sudut lain.",
           "nextSceneId": "day2_leak_poor_fix",
           "knowledgeEffect": -2,
           "log": "Retakan diabaikan, asap hanya ditiup kipas."
@@ -387,13 +387,13 @@
       "avatar": null,
       "text": "Retakan tertutup, tetapi Ayah menghirup asap terlalu banyak. Batuknya membuat seluruh keluarga sadar bahwa perbaikan darurat pun butuh prosedur.",
       "background": "normal",
-      "hour": "40 Jam",
+      "hour": "42 Jam",
       "objective": "Rawat paparan asap dan lanjutkan komunikasi.",
       "focusItems": ["kit", "radio"],
       "choices": [
         {
           "id": "c_day2_smoke_water",
-          "text": "Minum air banyak untuk meredakan batuk dan langsung pakai radio.",
+          "text": "Bilas tenggorokan dengan air dalam jumlah besar untuk meredakan iritasi.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": -1,
           "log": "Paparan asap ditangani seadanya."
@@ -407,7 +407,7 @@
         },
         {
           "id": "c_day2_smoke_chemical",
-          "text": "Gunakan cairan pembersih kimia keras untuk menghilangkan bau asap.",
+          "text": "Semprotkan penetral bau berbasis aerosol untuk membersihkan udara ruangan.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": -2,
           "log": "Cairan kimia keras disemprotkan untuk bau asap."
@@ -417,9 +417,9 @@
     "day2_seal_leak": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Asapnya sudah berhenti merembes. Demi keselamatan kita, penggunaan sealant silikon tadi adalah keputusan tepat, meski struktur beton tetap melemah.",
+      "text": "Kebocoran asap sudah teratasi. Pengaplikasian sealant darurat tadi adalah langkah mitigasi yang tepat untuk meminimalkan paparan zat aktif, meskipun integritas beton dinding tetap melemah.",
       "background": "normal",
-      "hour": "40 Jam",
+      "hour": "42 Jam",
       "objective": "Gunakan radio tanpa menghabiskan baterai.",
       "focusItems": ["radio", "kit"],
       "choices": [
@@ -435,7 +435,7 @@
     "day2_radio_setup": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis, gelombang radio VHF terhalang kolom abu vulkanik tebal. Saya hanya menangkap fragmen siaran darurat BNPB. Sisa sel baterai kita sangat minim.",
+      "text": "Kerapatan kolom debu abu vulkanik tebal memicu atenuasi sinyal VHF yang parah. Penerima radio hanya bisa menangkap fragmen darurat BNPB, sedangkan kapasitas sel daya baterai cadangan kita sangat terbatas.",
       "conditionalText": [
         {
           "requiredFlag": "ng_plus",
@@ -443,13 +443,13 @@
         }
       ],
       "background": "normal",
-      "hour": "44 Jam",
+      "hour": "48 Jam",
       "objective": "Kelola radio dan baterai.",
       "focusItems": ["radio"],
       "choices": [
         {
           "id": "c_day2_radio_always_on",
-          "text": "Biarkan radio menyala terus-menerus untuk mencari sinyal bantuan.",
+          "text": "Biarkan radio memindai seluruh frekuensi secara otomatis tanpa henti.",
           "nextSceneId": "day2_radio_drain",
           "knowledgeEffect": -2,
           "log": "Radio dinyalakan terus-menerus."
@@ -474,7 +474,7 @@
     "day2_radio_save": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Demi keselamatan kita, ingat baik-baik sandi transmisi evakuasi ini: GARUDA-72. Tim penolong hanya akan membuka segel jika kita menyebutkan kode ini.",
+      "text": "Guna menghindari penyusupan dan menjamin keamanan fisik, catat sandi evakuasi resmi ini: GARUDA-72. Tim penolong hanya akan membuka segel luar jika sandi ini diverifikasi lewat interkom.",
       "conditionalText": [
         {
           "requiredFlag": "ng_plus",
@@ -491,19 +491,19 @@
           "text": "Matikan lampu utama dan sisakan lampu darurat koridor.",
           "nextSceneId": "day2_power_good",
           "knowledgeEffect": 1,
-          "log": "Daya bunker dialihkan ke mode hemat.",
+          "log": "Daya bunker dialihkan to mode hemat.",
           "setFlags": ["power_saved"]
         },
         {
           "id": "c_day2_power_alllight",
-          "text": "Biarkan semua lampu menyala agar Anak tidak takut.",
+          "text": "Pertahankan lampu utama pada intensitas rendah untuk menjaga visibilitas visual.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -1,
           "log": "Daya dipakai berlebihan untuk kenyamanan."
         },
         {
           "id": "c_day2_power_modify",
-          "text": "Modifikasi generator untuk memaksa daya lampu tetap terang maksimal.",
+          "text": "Bypass sirkuit regulator daya untuk mencegah redupnya lampu utama.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -2,
           "log": "Generator dimodifikasi paksa untuk lampu terang."
@@ -531,19 +531,19 @@
           "text": "Matikan lampu utama dan sisakan lampu darurat koridor.",
           "nextSceneId": "day2_power_good",
           "knowledgeEffect": 1,
-          "log": "Daya bunker dialihkan ke mode hemat.",
+          "log": "Daya bunker dialihkan to mode hemat.",
           "setFlags": ["power_saved"]
         },
         {
           "id": "c_day2_drain_alllight",
-          "text": "Biarkan semua lampu menyala agar Anak tidak takut.",
+          "text": "Pertahankan lampu utama pada intensitas rendah untuk menjaga visibilitas visual.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -1,
           "log": "Daya dipakai berlebihan untuk kenyamanan."
         },
         {
           "id": "c_day2_drain_modify",
-          "text": "Modifikasi generator untuk memaksa daya lampu tetap terang maksimal.",
+          "text": "Bypass sirkuit regulator daya untuk mencegah redupnya lampu utama.",
           "nextSceneId": "day2_power_bad",
           "knowledgeEffect": -2,
           "log": "Generator dimodifikasi paksa untuk lampu terang."
@@ -555,7 +555,7 @@
       "avatar": null,
       "text": "Lampu utama padam, tetapi lampu darurat cukup untuk bergerak aman. Baterai tersisa untuk radio, panel pintu, and sirkulasi dasar.",
       "background": "normal",
-      "hour": "52 Jam",
+      "hour": "54 Jam",
       "objective": "Masuki hari ketiga dengan cadangan daya.",
       "choices": [
         {
@@ -572,7 +572,7 @@
       "avatar": null,
       "text": "Bunker terang beberapa jam, lalu generator tersendat. Saat lampu utama mati mendadak, kepanikan kembali naik.",
       "background": "normal",
-      "hour": "52 Jam",
+      "hour": "54 Jam",
       "objective": "Masuki hari ketiga dalam kondisi daya rendah.",
       "alert": true,
       "choices": [
@@ -588,9 +588,9 @@
     "day2_scavenge_check": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis, laju konsumsi kita tidak seimbang dengan sisa logistik di rak utama. Kita harus membuka kompartemen darurat luar sebelum dehidrasi merusak fungsi organ.",
+      "text": "Data logistik menunjukkan ketidakseimbangan kritis antara volume asupan harian dengan sisa stok di rak utama. Kita harus mengakses kompartemen darurat luar sebelum dehidrasi menurunkan fungsi ginjal keluarga.",
       "background": "normal",
-      "hour": "53 Jam",
+      "hour": "54 Jam",
       "objective": "Cari sisa makanan dan minuman darurat.",
       "choices": [
         {
@@ -670,13 +670,13 @@
         }
       ],
       "background": "rusak",
-      "hour": "58 Jam",
+      "hour": "60 Jam",
       "objective": "Pilih metode pemurnian air yang tepat.",
       "focusItems": ["drink", "kit"],
       "choices": [
         {
           "id": "c_day3_water_boil",
-          "text": "Rebus air keruh berbau logam dengan kompor gas.",
+          "text": "Rebus air tangki hingga mendidih menggunakan kompor portabel.",
           "nextSceneId": "day3_pressure_pinch",
           "knowledgeEffect": -1,
           "log": "Air logam direbus tanpa filter."
@@ -691,7 +691,7 @@
         },
         {
           "id": "c_day3_water_settle",
-          "text": "Biarkan air mengendap 12 jam di wadah terbuka tanpa disaring.",
+          "text": "Endapkan air dalam wadah terbuka lalu saring menggunakan kain katun berlapis.",
           "nextSceneId": "day3_pressure_pinch",
           "knowledgeEffect": -2,
           "log": "Air diendapkan terbuka tanpa filter."
@@ -728,7 +728,7 @@
       "avatar": "ibu",
       "text": "Sesaat setelah meminum air, lambung Anak dan Ayah terasa melilit hebat disusul muntah-muntah. Merebus air logam tidak membuang racun kimia terlarut. Perebusan hanya membunuh bakteri patogen tetapi justru memusatkan senyawa logam berat beracun. Kita harus segera menggunakan P3K dari panel inventaris untuk menetralisir keracunan.",
       "background": "rusak",
-      "hour": "62 Jam",
+      "hour": "66 Jam",
       "objective": "Gunakan P3K dari panel inventaris secepatnya!",
       "focusItems": ["kit"],
       "choices": [
@@ -744,15 +744,15 @@
     "day3_water_boil": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis, merebus air hanya membunuh bakteri patogen, namun tidak akan mengendapkan senyawa logam berat beracun dari pipa bunker yang rusak.",
+      "text": "Suhu didih air hanya mematikan mikroba patogen, tetapi tidak mengendapkan ion logam berat terlarut di dalam pasokan pipa bunker yang pecah.",
       "background": "rusak",
-      "hour": "62 Jam",
+      "hour": "66 Jam",
       "objective": "Putuskan cara memberi sinyal ke tim evakuasi.",
       "focusItems": ["drink", "radio"],
       "choices": [
         {
           "id": "c_day3_signal_knock",
-          "text": "Pukul pintu bunker berkali-kali agar siapa pun di luar mendengar.",
+          "text": "Gunakan pipa besi untuk memukul dinding resonansi bunker secara berkala.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -1,
           "log": "Sinyal dibuat dengan suara berisiko."
@@ -766,7 +766,7 @@
         },
         {
           "id": "c_day3_signal_fire",
-          "text": "Bakar sisa kemasan karton di bawah ventilasi untuk memicu asap keluar.",
+          "text": "Bakar sedikit bahan bakar padat di bawah ventilasi pembuangan untuk membuat sinyal asap.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -2,
           "log": "Kertas dibakar untuk sinyal asap."
@@ -778,13 +778,13 @@
       "avatar": "anak",
       "text": "Aku senang, airnya jernih lagi setelah disaring. Rasanya hambar tapi menyegarkan. Ibu menyimpan tablet terakhir untuk jam evakuasi.",
       "background": "rusak",
-      "hour": "62 Jam",
+      "hour": "66 Jam",
       "objective": "Putuskan cara memberi sinyal ke tim evakuasi.",
       "focusItems": ["drink", "kit", "radio"],
       "choices": [
         {
           "id": "c_day3_filter_signal_knock",
-          "text": "Pukul pintu bunker berkali-kali agar siapa pun di luar mendengar.",
+          "text": "Gunakan pipa besi untuk memukul dinding resonansi bunker secara berkala.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -1,
           "log": "Sinyal dibuat dengan suara berisiko."
@@ -798,7 +798,7 @@
         },
         {
           "id": "c_day3_filter_signal_fire",
-          "text": "Bakar sisa kemasan karton di bawah ventilasi untuk memicu asap keluar.",
+          "text": "Bakar sedikit bahan bakar padat di bawah ventilasi pembuangan untuk membuat sinyal asap.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -2,
           "log": "Kertas dibakar untuk sinyal asap."
@@ -810,7 +810,7 @@
       "avatar": null,
       "text": "Suara pukulan memantul di koridor luar. Beberapa menit kemudian, langkah asing berhenti di balik pintu bunker.",
       "background": "rusak",
-      "hour": "66 Jam",
+      "hour": "72 Jam",
       "objective": "Hadapi kontak dari luar.",
       "alert": true,
       "choices": [
@@ -828,7 +828,7 @@
       "avatar": "ibu",
       "text": "Kain reflektif terpasang di lubang intip. Jika tim resmi datang, mereka bisa melihat tanda dari luar tanpa kita membuka pintu.",
       "background": "rusak",
-      "hour": "66 Jam",
+      "hour": "72 Jam",
       "objective": "Tunggu kontak sampai protokol evakuasi aktif.",
       "choices": [
         {
@@ -845,12 +845,12 @@
       "avatar": null,
       "text": "Halo! Ada orang di dalam? Kami sukarelawan logistik lingkungan. Kami membawa makanan hangat. Buka pintunya sekarang sebelum terlambat!",
       "background": "rusak",
-      "hour": "70 Jam",
+      "hour": "72 Jam",
       "objective": "Verifikasi identitas sebelum membuka pintu.",
       "choices": [
         {
           "id": "c_day3_door_open",
-          "text": "Buka pintu langsung untuk menolong suara wanita di luar.",
+          "text": "Buka kunci pengaman pintu luar untuk memfasilitasi masuknya korban.",
           "nextSceneId": "day3_knock_open",
           "knowledgeEffect": -3,
           "log": "Pintu dibuka untuk pihak tak verifikasi.",
@@ -875,9 +875,9 @@
     "day3_knock_verify": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Secara teknis, mereka tidak memiliki kelengkapan APD hazmat dan gagal menyebutkan kode sandi GARUDA-72. Mereka mundur saat saya mengokang tuas segel pintu. Tidak lama kemudian, sirene evakuasi asli mulai terdengar.",
+      "text": "Verifikasi kamera menunjukkan mereka tidak menggunakan hazmat APD standar and gagal menyebutkan kode sandi GARUDA-72. Mereka langsung mundur saat tuas pengunci pintu saya kokang secara manual.",
       "background": "rusak",
-      "hour": "71 Jam",
+      "hour": "72 Jam",
       "objective": "Tunggu hingga jam ke-72.",
       "choices": [
         {
@@ -894,7 +894,7 @@
       "avatar": null,
       "text": "Pintu terbuka dan udara luar masuk cepat. Orang-orang bersenjata merampas logistik dan merusak panel kendali sebelum kabur. Membuka pintu pertahanan tanpa verifikasi visual melanggar seluruh protokol keamanan pasif pasca-bencana.",
       "background": "rusak",
-      "hour": "71 Jam",
+      "hour": "72 Jam",
       "objective": "Bertahan sampai evakuasi meski protokol gagal.",
       "alert": true,
       "choices": [
@@ -910,7 +910,7 @@
     "ending_eval": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-72 tiba. Sirene ambulans, kendaraan berat, dan suara radio resmi memenuhi koridor luar. Tim evakuasi Satgas Penanggulangan Bencana mulai membuka akses bunker.",
+      "text": "Jam ke-72 tiba. Sirene ambulans, kendaraan berat, and suara radio resmi memenuhi koridor luar. Tim evakuasi Satgas Penanggulangan Bencana mulai membuka akses bunker.",
       "background": "rusak",
       "hour": "72 Jam",
       "objective": "Lihat hasil akhir penyelamatan.",
@@ -960,7 +960,7 @@
         },
         {
           "id": "c_day4_oxygen_vent",
-          "text": "Buka ventilasi darurat luar untuk menarik udara segar dari permukaan.",
+          "text": "Aktifkan kipas intake ventilasi darurat untuk menarik udara luar.",
           "nextSceneId": "day4_looters",
           "knowledgeEffect": -3,
           "log": "Ventilasi luar dibuka paksa, menghirup udara beracun.",
@@ -978,9 +978,9 @@
     "day4_looters": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Ayah! Demi keselamatan kita, bersiaplah! Ada suara langkah kaki berat dan derit alat las mencoba membongkar engsel baja luar!",
+      "text": "Ayah! Amankan barikade pertahanan pintu sekarang! Sensor getar mendeteksi upaya pembongkaran engsel luar menggunakan alat pemotong logam!",
       "background": "rusak",
-      "hour": "88 Jam",
+      "hour": "84 Jam",
       "objective": "Amankan pintu bunker dari penjarah.",
       "focusItems": ["radio"],
       "choices": [
@@ -1000,7 +1000,7 @@
         },
         {
           "id": "c_day4_looters_barter",
-          "text": "Buka sedikit pintu untuk bernegosiasi barter sisa makanan.",
+          "text": "Buka celah pintu interkom luar untuk menegosiasikan barter logistik.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": -3,
           "log": "Membuka pintu sedikit untuk barter makanan dengan penjarah.",
@@ -1071,6 +1071,14 @@
       "text": "Gugur di Garis Akhir. Bencana melanda di saat-saat terakhir. Keluarga Anda gagal mengatasi kelangkaan oksigen atau membiarkan pintu luar ditembus oleh penjarah bersenjata di tengah kepungan abu panas. Ketika tim penyelamat tiba, Bunker 72 hanya menyisakan kegelapan dan keheningan.",
       "background": "rusak",
       "hour": "96 Jam",
+      "choices": []
+    },
+    "ending_stranded_bad": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Terdampar Tanpa Harapan. Evakuasi ditunda karena badai abu, tetapi keluarga Anda tidak memiliki persiapan memadai. Tanpa radio untuk memperbarui koordinat penyelamatan, pasokan air yang teracuni logam berat, dan tingkat kesiapsiagaan yang rendah, bunker runtuh secara fungsional sebelum bantuan dapat menjangkau Anda. Ketika badai mereda di hari keempat, tidak ada sinyal kehidupan dari Bunker 72.",
+      "background": "rusak",
+      "hour": "72 Jam",
       "choices": []
     }
   }

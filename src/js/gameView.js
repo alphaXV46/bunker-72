@@ -9,7 +9,7 @@
  * Dependencies: constants.js only (for POWER_THRESHOLDS and parseHour/clamp).
  */
 
-import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP } from './constants.js';
+import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP, getTimePhase } from './constants.js';
 
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
@@ -190,7 +190,7 @@ export class GameView {
     const day     = clamp(Math.floor(hour / 24) + 1, 1, 4);
     const progress = clamp((hour / maxHour) * 100, 0, 100);
 
-    this.dom.statusTime.textContent      = scene.hour;
+    this.dom.statusTime.textContent      = `${scene.hour} (${getTimePhase(hour)})`;
     this.dom.statusDay.textContent       = day;
     this.dom.statusKnowledge.textContent = knowledge;
 
@@ -200,7 +200,11 @@ export class GameView {
 
     this.dom.statusProgressBar.style.width   = `${progress}%`;
     this.dom.statusObjective.textContent     = scene.objective || 'Ambil keputusan paling aman untuk keluarga.';
-    this.dom.statusAir.textContent           = knowledge <= 4 ? 'KRITIS' : knowledge <= 8 ? 'WASPADA' : 'STABIL';
+
+    const airStatus = knowledge <= 4 ? 'KRITIS' : knowledge <= 8 ? 'WASPADA' : 'STABIL';
+    this.dom.statusAir.textContent           = airStatus;
+
+    this.updateStatusVisuals(hunger, thirst, health, airStatus);
 
     // Structure status
     let structureText = 'AMAN';
@@ -222,6 +226,45 @@ export class GameView {
       powerText = 'HEMAT';
     }
     this.dom.statusPower.textContent = powerText;
+  }
+
+  /**
+   * Updates status visual classes (low, warning) for HUD items.
+   *
+   * @param {number} hunger
+   * @param {number} thirst
+   * @param {number} health
+   * @param {string} airStatus
+   */
+  updateStatusVisuals(hunger, thirst, health, airStatus) {
+    const hungerEl = document.getElementById('hud-hunger');
+    const thirstEl = document.getElementById('hud-thirst');
+    const healthEl = document.getElementById('hud-health');
+    const airEl    = document.getElementById('hud-air');
+
+    // Hunger
+    if (hungerEl) {
+      hungerEl.classList.toggle('status-low', hunger <= 20);
+      hungerEl.classList.toggle('status-warning', hunger > 20 && hunger <= 40);
+    }
+
+    // Thirst
+    if (thirstEl) {
+      thirstEl.classList.toggle('status-low', thirst <= 20);
+      thirstEl.classList.toggle('status-warning', thirst > 20 && thirst <= 40);
+    }
+
+    // Health
+    if (healthEl) {
+      healthEl.classList.toggle('status-low', health <= 30);
+      healthEl.classList.toggle('status-warning', health > 30 && health <= 60);
+    }
+
+    // Air
+    if (airEl) {
+      airEl.classList.toggle('status-low', airStatus === 'KRITIS');
+      airEl.classList.toggle('status-warning', airStatus === 'WASPADA');
+    }
   }
 
   /**

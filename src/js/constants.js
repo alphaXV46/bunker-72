@@ -29,10 +29,10 @@ export const SURVIVAL = Object.freeze({
   DECAY_INTERVAL_HOURS: 6,
 
   /** Hunger points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  HUNGER_DECAY_PER_INTERVAL: 18,
+  HUNGER_DECAY_PER_INTERVAL: 14,
 
   /** Thirst points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  THIRST_DECAY_PER_INTERVAL: 18,
+  THIRST_DECAY_PER_INTERVAL: 14,
 
   /** Health points lost per DECAY_INTERVAL_HOURS when hunger reaches zero. */
   HEALTH_PENALTY_HUNGER: 10,
@@ -158,4 +158,18 @@ export function clamp(value, min, max) {
 export function parseHour(hourText) {
   const match = String(hourText ?? '0').match(/\d+/);
   return match ? Number(match[0]) : 0;
+}
+
+/**
+ * Maps an hour to its corresponding daily phase block (Morning, Afternoon, Evening, Night).
+ * @param {number} hour
+ * @returns {string}
+ */
+export function getTimePhase(hour) {
+  const modHour = hour % 24;
+  if (modHour === 0) return 'PAGI';
+  if (modHour === 6) return 'SIANG';
+  if (modHour === 12) return 'SORE';
+  if (modHour === 18) return 'MALAM';
+  return '';
 }

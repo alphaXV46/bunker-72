@@ -52,10 +52,10 @@ export class GameModel {
    */
   init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
     this.currentSceneId = sceneId || 'day1_start';
-    this.knowledge      = typeof knowledge === 'number' ? knowledge : SURVIVAL.DEFAULTS.knowledge;
-    this.hunger         = typeof hunger    === 'number' ? hunger    : SURVIVAL.DEFAULTS.hunger;
-    this.thirst         = typeof thirst    === 'number' ? thirst    : SURVIVAL.DEFAULTS.thirst;
-    this.health         = typeof health    === 'number' ? health    : SURVIVAL.DEFAULTS.health;
+    this.knowledge      = (typeof knowledge === 'number' && !isNaN(knowledge)) ? clamp(knowledge, 0, SURVIVAL.KNOWLEDGE_MAX) : SURVIVAL.DEFAULTS.knowledge;
+    this.hunger         = (typeof hunger    === 'number' && !isNaN(hunger))    ? clamp(hunger, 0, 100)    : SURVIVAL.DEFAULTS.hunger;
+    this.thirst         = (typeof thirst    === 'number' && !isNaN(thirst))    ? clamp(thirst, 0, 100)    : SURVIVAL.DEFAULTS.thirst;
+    this.health         = (typeof health    === 'number' && !isNaN(health))    ? clamp(health, 0, 100)    : SURVIVAL.DEFAULTS.health;
     this.history        = Array.isArray(history) ? history : [];
     this.inventory      = inventory ? { ...inventory } : { ...SURVIVAL.DEFAULTS.inventory };
 
@@ -98,7 +98,7 @@ export class GameModel {
    * @param {number} elapsedHours
    */
   updateSurvivalStats(elapsedHours) {
-    if (elapsedHours <= 0) return;
+    if (typeof elapsedHours !== 'number' || isNaN(elapsedHours) || elapsedHours <= 0) return;
 
     const { DECAY_INTERVAL_HOURS, HUNGER_DECAY_PER_INTERVAL, THIRST_DECAY_PER_INTERVAL, HEALTH_PENALTY_HUNGER, HEALTH_PENALTY_THIRST } = SURVIVAL;
     const hungerDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * HUNGER_DECAY_PER_INTERVAL;
@@ -178,9 +178,7 @@ export class GameModel {
       return 'day4_intro';
     }
 
-    if (this.knowledge >= 1 && this.knowledge <= 4)             return 'ending_bad';
-    if (this.knowledge >= 5 && this.knowledge <= 7)             return 'ending_normal';
-    return 'ending_best';
+    return 'ending_stranded_bad';
   }
 
   /**

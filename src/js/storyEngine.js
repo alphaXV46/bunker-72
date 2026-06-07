@@ -169,7 +169,7 @@ export class StoryEngine {
         if (sceneId === 'ending_secret_bad') {
           endingText = this.model.getSecretBadEndingText();
         }
-        this.onEnd(sceneId, this.model.knowledge, endingText, this.model.getEndingSummary());
+        this.onEnd(sceneId, this.model.knowledge, endingText, this.model.getEndingSummary(), this.model.flags);
       }
       return;
     }
