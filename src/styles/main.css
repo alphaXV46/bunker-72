@@ -481,12 +481,13 @@ body.prolog-active #settings-btn {
 
 #game-view.prolog-mode .command-deck {
   width: auto;
-  right: clamp(48px, 5vw, 92px);
-  bottom: clamp(50px, 6vh, 82px);
+  left: clamp(28px, 3.2vw, 54px);
+  right: auto;
+  bottom: clamp(54px, 6.5vh, 88px);
 }
 
 #game-view.prolog-mode .choices-panel {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .prolog-continue {
