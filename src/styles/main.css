@@ -1731,3 +1731,91 @@ body.prolog-active #settings-btn { display: none !important; }
 
 body.disable-crt .crt-overlay,
 body.disable-crt .crt-flicker { display: none !important; }
+
+/* ============================================================
+   SECTION 23: DEBRIEF SCREEN & BADGES (MVC ANALYTICS)
+   ============================================================ */
+
+.debrief-box {
+  background: rgba(17, 20, 24, 0.85);
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(10px, 1.2vw, 18px);
+  margin: 15px auto;
+  max-width: 650px;
+  width: 90%;
+  max-height: 180px;
+  overflow-y: auto;
+  text-align: left;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.debrief-box h3 {
+  margin: 0 0 8px 0;
+  color: var(--cyan);
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.debrief-box ul {
+  padding-left: 18px;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-pixel);
+}
+
+.debrief-box li {
+  margin-bottom: 8px;
+}
+
+.debrief-box li:last-child {
+  margin-bottom: 0;
+}
+
+/* Post-Game Quality Badges */
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 1px 6px;
+  margin-left: 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badge-opt {
+  background-color: rgba(31, 111, 74, 0.3);
+  color: var(--accent-green-border);
+  border: 1px solid var(--accent-green-border);
+}
+
+.badge-acc {
+  background-color: rgba(179, 125, 32, 0.3);
+  color: var(--warning-yellow-border);
+  border: 1px solid var(--warning-yellow-border);
+}
+
+.badge-risk {
+  background-color: rgba(143, 29, 35, 0.3);
+  color: var(--accent-red-border);
+  border: 1px solid var(--accent-red-border);
+}
+
+/* Scrollbar styling for debrief-box */
+.debrief-box::-webkit-scrollbar {
+  width: 6px;
+}
+.debrief-box::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+.debrief-box::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+.debrief-box::-webkit-scrollbar-thumb:hover {
+  background: var(--line-bright);
+}

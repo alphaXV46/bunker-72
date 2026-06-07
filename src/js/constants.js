@@ -52,8 +52,71 @@ export const SURVIVAL = Object.freeze({
     hunger: 100,
     thirst: 100,
     health: 100,
-    inventory: Object.freeze({ food: 3, drink: 3, kit: 1 }),
+    inventory: Object.freeze({ food: 2, drink: 2, kit: 1 }),
   }),
+});
+
+/** Evaluation matrix for post-game analytics mapping choices to quality levels. */
+export const CHOICE_QUALITY_MAP = Object.freeze({
+  // Day 1
+  'c_day1_lock_auto': 'Acceptable',
+  'c_day1_lock_open': 'Risky',
+  'c_day1_lock_manual': 'Optimal',
+  'c_day1_air_noinspect': 'Risky',
+  'c_day1_air_newseal': 'Optimal',
+  'c_day1_air_wetmask': 'Acceptable',
+  'c_day1_water_waste': 'Risky',
+  'c_day1_water_rational': 'Optimal',
+  'c_day1_water_noschedule': 'Acceptable',
+  'c_day1_sanitation_good': 'Optimal',
+  'c_day1_sanitation_door': 'Risky',
+  'c_day1_sanitation_corner': 'Risky',
+  'c_day1_rest_good': 'Optimal',
+  'c_day1_rest_bad': 'Risky',
+
+  // Day 2
+  'c_day2_panic_exit': 'Risky',
+  'c_day2_shelter_bed': 'Acceptable',
+  'c_day2_hydraulic': 'Optimal',
+  'c_day2_leak_cloth': 'Risky',
+  'c_day2_leak_sealant': 'Optimal',
+  'c_day2_leak_fan': 'Risky',
+  'c_day2_smoke_water': 'Risky',
+  'c_day2_smoke_firstaid': 'Optimal',
+  'c_day2_smoke_chemical': 'Risky',
+  'c_day2_radio_always_on': 'Risky',
+  'c_day2_radio_schedule': 'Optimal',
+  'c_day2_radio_generator': 'Acceptable',
+  'c_day2_power_save': 'Optimal',
+  'c_day2_power_alllight': 'Risky',
+  'c_day2_power_modify': 'Risky',
+  'c_day2_power_save_drain': 'Optimal',
+  'c_day2_drain_alllight': 'Risky',
+  'c_day2_drain_modify': 'Risky',
+
+  // Day 3
+  'c_day3_water_boil': 'Risky',
+  'c_day3_water_filter': 'Optimal',
+  'c_day3_water_settle': 'Risky',
+  'c_day3_signal_knock': 'Risky',
+  'c_day3_signal_cloth': 'Optimal',
+  'c_day3_signal_fire': 'Risky',
+  'c_day3_filter_signal_knock': 'Risky',
+  'c_day3_filter_signal_cloth': 'Optimal',
+  'c_day3_filter_signal_fire': 'Risky',
+  'c_day3_door_open': 'Risky',
+  'c_day3_door_verify': 'Optimal',
+  'c_day3_door_ignore': 'Acceptable',
+  'c_day3_pinch_focus_water': 'Acceptable',
+  'c_day3_pinch_inspect_vent': 'Optimal',
+
+  // Day 4
+  'c_day4_oxygen_rest': 'Acceptable',
+  'c_day4_oxygen_vent': 'Risky',
+  'c_day4_oxygen_tank': 'Optimal',
+  'c_day4_looters_shock': 'Optimal',
+  'c_day4_looters_intercom': 'Acceptable',
+  'c_day4_looters_barter': 'Risky'
 });
 
 // ─── POWER STATUS TIME THRESHOLDS ──────────────────────────────────────────

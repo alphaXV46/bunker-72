@@ -88,6 +88,23 @@ export class StoryEngine {
       this.renderScene(success ? 'day2_scavenge_success' : 'day2_scavenge_fail');
       return;
     }
+    if (sceneId === 'day3_pinch_water_resolved') {
+      const isFiltered = this.model.flags.water_filtered === true;
+      const target = (isFiltered && !this.model.flags.water_ruined) ? 'day3_water_filter' : 'day3_water_poisoned';
+      this.model.flags.structural_damage = true;
+      this.model.health = Math.max(0, this.model.health - 15);
+      this.renderScene(target);
+      return;
+    }
+    if (sceneId === 'day3_pinch_vent_inspected') {
+      this.model.flags.water_ruined = true;
+      this.model.flags.water_filtered = false;
+      if (this.model.inventory.drink > 0) {
+        this.model.inventory.drink -= 1;
+      }
+      this.renderScene('day3_water_poisoned');
+      return;
+    }
 
     const scene = this.storyData.scenes[sceneId];
     if (!scene) {
@@ -140,6 +157,13 @@ export class StoryEngine {
     // ── Ending path ──
     if (isEnding) {
       this.view.renderSystemAlert(null);
+      // Persist game completed state to unlock NG+
+      localStorage.setItem('bunker72_game_completed', 'true');
+      // Force render of entire protocol log with analytics quality tags
+      this.view.renderProtocolLog(this.model.history, true);
+      // Auto-open journal panel so player immediately views analytics
+      this.view.openJournal();
+
       if (this.onEnd) {
         let endingText = scene.text;
         if (sceneId === 'ending_secret_bad') {
@@ -317,8 +341,7 @@ export class StoryEngine {
   }
 
   /**
-   * Prepend descriptive sensory introductions, inject speaker overrides,
-   * and physical distress markers if hunger, thirst, or health are low.
+   * Resolve dynamic state-conditional text blocks defined in story.json.
    * @param {string} sceneId
    * @param {string} rawText
    * @param {string} speaker
@@ -327,59 +350,19 @@ export class StoryEngine {
   processNarrativeText(sceneId, rawText, speaker) {
     let processedText = rawText;
 
-    // 1. Sensory introductions at the start of days
-    if (sceneId === 'day1_start') {
-      processedText = "Udara dingin bunker berbau besi berkarat dan beton basah. " + processedText;
-    } else if (sceneId === 'day2_start') {
-      processedText = "Suara gemuruh samar dan getaran dinding bunker membuat debu-debu halus berjatuhan. " + processedText;
-    } else if (sceneId === 'day3_start') {
-      processedText = "Keheningan mencekam menyelimuti bunker, hanya dipecah oleh dengung generator yang mulai tidak stabil. " + processedText;
-    } else if (sceneId === 'day4_intro') {
-      processedText = "Sirkulasi udara terasa berat dan pengap, pertanda batas waktu bunker semakin dekat. " + processedText;
+    const scene = this.storyData.scenes[sceneId];
+    if (scene && Array.isArray(scene.conditionalText)) {
+      scene.conditionalText.forEach((cond) => {
+        if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === true) {
+          if (cond.position === 'prepend') {
+            processedText = cond.text + processedText;
+          } else {
+            processedText = processedText + cond.text;
+          }
+        }
+      });
     }
 
-    // 2. Character dialogue prefixes overrides
-    if (speaker === 'Ayah') {
-      processedText = "Secara teknis, " + processedText;
-    } else if (speaker === 'Ibu') {
-      processedText = "Demi keselamatan kita, " + processedText;
-    } else if (speaker === 'Anak') {
-      processedText = "Aku takut, " + processedText;
-    }
-
-    // 3. Physical distress markers if hunger, thirst, or health are low
-    const hunger = this.model.hunger;
-    const thirst = this.model.thirst;
-    const health = this.model.health;
-
-    if (hunger >= 40 && thirst >= 40 && health >= 40) {
-      return processedText;
-    }
-
-    if (speaker === "Narator" || !speaker) {
-      let physicalState = "";
-      if (hunger < 40 && thirst < 40 && health < 40) {
-        physicalState = " [Keluarga tampak sangat kritis, sekarat karena lapar, dehidrasi, dan cedera parah] ";
-      } else if (hunger < 40 && thirst < 40) {
-        physicalState = " [Keluarga tampak sangat pucat, lemas karena lapar dan dahaga ekstrem] ";
-      } else if (hunger < 40 && health < 40) {
-        physicalState = " [Keluarga bergerak lambat, menahan lapar dan sakit akibat cedera] ";
-      } else if (thirst < 40 && health < 40) {
-        physicalState = " [Keluarga tersengal-sengal, dehidrasi parah dan cedera] ";
-      } else if (hunger < 40) {
-        physicalState = " [Keluarga bergerak lambat, menahan lapar yang membakar] ";
-      } else if (thirst < 40) {
-        physicalState = " [Bibir keluarga pecah-pecah karena dehidrasi parah] ";
-      } else if (health < 40) {
-        physicalState = " [Kondisi fisik keluarga sangat lemah dan kesakitan] ";
-      }
-      return physicalState + processedText;
-    } else {
-      const strains = [];
-      if (thirst < 40) strains.push("*Uhuk!* *Uhuk!*.. (tenggorokan kering tercekat).. ");
-      if (hunger < 40) strains.push("*(lemas menahan lapar)*.. ");
-      if (health < 40) strains.push("*(merintih kesakitan)*.. ");
-      return strains.join("") + processedText;
-    }
+    return processedText;
   }
 }

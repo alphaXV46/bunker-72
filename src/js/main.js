@@ -147,10 +147,10 @@ function initGame() {
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     },
 
-    // ✅ endingSummary is now a 4th argument — no circular call from view to controller.
-    onEnd: (endingId, finalKnowledge, endingText, endingSummary) => {
+    // ✅ endingSummary is now a 4th argument, flags is 5th — no circular call from view to controller.
+    onEnd: (endingId, finalKnowledge, endingText, endingSummary, flags) => {
       localStorage.removeItem(SAVE_KEY); // clear save on completion
-      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary);
+      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags);
       showScreen('ending');
     },
   });

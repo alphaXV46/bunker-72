@@ -9,7 +9,7 @@
  * Dependencies: constants.js only (for POWER_THRESHOLDS and parseHour/clamp).
  */
 
-import { clamp, parseHour, POWER_THRESHOLDS } from './constants.js';
+import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP } from './constants.js';
 
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
@@ -388,10 +388,13 @@ export class GameView {
   }
 
   /**
-   * Renders the last 5 protocol log entries into the journal panel.
+   * Renders the protocol log entries into the journal panel.
+   * If isPostGame is true, renders all history with analytical badges.
+   *
    * @param {Array} history
+   * @param {boolean} isPostGame
    */
-  renderProtocolLog(history) {
+  renderProtocolLog(history, isPostGame = false) {
     if (!this.dom.protocolLogList) return;
 
     if (!history?.length) {
@@ -399,13 +402,46 @@ export class GameView {
       return;
     }
 
-    this.dom.protocolLogList.innerHTML = history
-      .slice(-5)
-      .map(({ hour, text, effect }) => {
-        const spanClass = effect > 0 ? 'log-good' : effect < 0 ? 'log-risk' : '';
-        return `<p><span>[${hour}]</span><span class="${spanClass}">${text}</span></p>`;
+    const items = isPostGame ? history : history.slice(-5);
+
+    this.dom.protocolLogList.innerHTML = items
+      .map(({ hour, text, effect, choiceId }) => {
+        let badge = '';
+        let itemClass = '';
+
+        if (isPostGame && choiceId && CHOICE_QUALITY_MAP[choiceId]) {
+          const qual = CHOICE_QUALITY_MAP[choiceId];
+          if (qual === 'Optimal') {
+            badge = ' <span class="badge badge-opt">✓ Optimal</span>';
+            itemClass = 'log-good';
+          } else if (qual === 'Acceptable') {
+            badge = ' <span class="badge badge-acc">~ Acceptable</span>';
+            itemClass = 'log-neutral';
+          } else if (qual === 'Risky') {
+            badge = ' <span class="badge badge-risk">✗ Risky</span>';
+            itemClass = 'log-risk';
+          }
+        } else {
+          itemClass = effect > 0 ? 'log-good' : effect < 0 ? 'log-risk' : '';
+        }
+
+        return `<p class="${itemClass}"><span>[${hour}]</span> <span>${text}</span>${badge}</p>`;
       })
       .join('');
+  }
+
+  /**
+   * Opens the journal panel directly (used for post-game log analytics).
+   */
+  openJournal() {
+    const journalPanel = document.getElementById('journal-panel');
+    const journalBtn      = document.getElementById('journal-btn');
+    if (journalPanel && journalBtn) {
+      journalPanel.classList.add('journal-open');
+      journalPanel.setAttribute('aria-hidden', 'false');
+      journalBtn.style.opacity       = '0';
+      journalBtn.style.pointerEvents = 'none';
+    }
   }
 
   // ─── TYPEWRITER ───────────────────────────────────────────────────────────
@@ -486,18 +522,19 @@ export class GameView {
   // ─── ENDING SCREEN ────────────────────────────────────────────────────────
 
   /**
-   * Renders the ending screen with all outcome data.
+   * Renders the ending screen with all outcome data and dynamic debrief analytics.
    * All data is passed as explicit parameters — no controller callback required.
    *
    * @param {string} endingId
    * @param {number} finalKnowledge
    * @param {string} endingText
    * @param {string} endingSummary    - Pre-computed by GameModel.getEndingSummary().
+   * @param {object} flags            - Player state flags reconstructed from history.
    */
-  renderEnding(endingId, finalKnowledge, endingText, endingSummary) {
+  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}) {
     this.dom.endingKnowledge.textContent = finalKnowledge;
     this.dom.endingDesc.textContent      = endingText;
-    this.dom.endingSummary.textContent   = endingSummary; // ✅ passed in, no circular call
+    this.dom.endingSummary.textContent   = endingSummary;
 
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
@@ -555,5 +592,46 @@ export class GameView {
     this.dom.endingView.classList.add(cfg.bgClass);
     this.dom.endingGradeText.textContent     = cfg.grade;
     this.dom.endingGradeText.style.color     = cfg.gradeColor;
+
+    // Dynamic debrief list generation based on flag history
+    const debriefList = document.getElementById('debrief-list');
+    const debriefBox = document.getElementById('debrief-box');
+    if (debriefList && debriefBox) {
+      debriefList.innerHTML = '';
+      const bullets = [];
+
+      if (flags.air_uninspected === true) {
+        bullets.push("<strong>Mitigasi Katup Udara:</strong> Inspeksi segel karet katup ventilasi secara fisik sangat krusial pasca-bencana. Menyalakan filtrasi tanpa pengecekan katup bypass menyedot abu PM2.5 beracun langsung dari luar.");
+      } else {
+        bullets.push("<strong>Optimal - Filtrasi Udara:</strong> Penggantian segel katup secara proaktif berhasil mengisolasi gas permukaan dari ruang utama bunker.");
+      }
+
+      if (flags.water_filtered === true && flags.water_ruined !== true) {
+        bullets.push("<strong>Optimal - Pemurnian Air:</strong> Penggunaan filter karbon aktif dan tablet klorin terbukti efektif mengendapkan kontaminan logam berat dari tangki air pipa yang tercemar.");
+      } else {
+        bullets.push("<strong>Mitigasi Kimiawi Air:</strong> Merebus air berbau logam tidak menghilangkan senyawa kimia berat terlarut; penguapan justru memusatkan konsentrasi racunnya. Selalu saring dengan karbon aktif.");
+      }
+
+      if (flags.radio_saved === true) {
+        bullets.push("<strong>Optimal - Manajemen Baterai:</strong> Penjadwalan transmisi radio (10 menit per 6 jam) sukses menghemat daya sel baterai kritis untuk menangkap sinyal evakuasi.");
+      } else {
+        bullets.push("<strong>Manajemen Daya Radio:</strong> Batasi operasional penerima VHF dengan jadwal transmisi ketat agar baterai tidak habis sebelum pesan koordinat Satgas BNPB diterima.");
+      }
+
+      if (flags.door_opened === true) {
+        bullets.push("<strong>Keamanan Sosial Darurat:</strong> Menjaga pintu keluar tetap tertutup rapat dari pihak tak dikenal mencegah penyusupan dan penjarahan logistik kritis keluarga.");
+      } else {
+        bullets.push("<strong>Optimal - Protokol Keamanan:</strong> Menolak membuka pintu untuk suara tak dikenal and memverifikasi sandi evakuasi resmi BNPB (GARUDA-72) menjamin pertahanan fisik keluarga.");
+      }
+
+      if (flags.structural_damage === true) {
+        bullets.push("<strong>Integritas Struktur:</strong> Saat gempa melanda, memicu hidrolik penopang atau berlindung di bawah ranjang baja melindungi tubuh. Panik berlari ke pintu keluar melemahkan struktur pintu.");
+      } else {
+        bullets.push("<strong>Optimal - Respon Gempa:</strong> Aktivasi hidrolik penopang struktural berhasil meredam getaran seismik and mencegah retakan fatal di dinding ventilasi.");
+      }
+
+      debriefList.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
+      debriefBox.classList.remove('hidden');
+    }
   }
 }

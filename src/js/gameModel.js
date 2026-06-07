@@ -14,6 +14,7 @@ import { clamp, ENDING_IDS, SURVIVAL } from './constants.js';
 // Maps stable Choice IDs → the boolean flags they activate.
 // Text-content matching has been fully removed (GDD v2.2 migration complete).
 const FLAG_CHOICE_MAP = Object.freeze({
+  'c_day1_air_noinspect':    'air_uninspected',
   'c_day2_panic_exit':       'structural_damage',
   'c_day2_radio_schedule':   'radio_saved',
   'c_day2_power_save':       'power_saved',
@@ -21,6 +22,7 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day3_water_filter':     'water_filtered',
   'c_day3_door_open':        'door_opened',
   'c_day2_scavenge_trigger': 'scavenged',
+  'c_day3_pinch_inspect_vent': 'vent_secured',
 });
 
 export class GameModel {
@@ -59,6 +61,9 @@ export class GameModel {
 
     // Use provided flags directly, or reconstruct them from history via Choice IDs.
     this.flags = flags ?? this._reconstructFlagsFromHistory(this.history);
+
+    // Dynamic New Game+ progression check.
+    this.flags.ng_plus = localStorage.getItem('bunker72_game_completed') === 'true';
   }
 
   /**
@@ -84,7 +89,7 @@ export class GameModel {
    * @returns {boolean}
    */
   isInventoryDisabledScene(sceneId) {
-    const DISABLED_SCENES = ['ending_eval', 'day4_eval', 'trigger_ending_eval', 'trigger_secret_ending_eval'];
+    const DISABLED_SCENES = ['ending_eval', 'day4_eval', 'trigger_ending_eval', 'trigger_secret_ending_eval', 'day3_pinch_water_resolved', 'day3_pinch_vent_inspected'];
     return DISABLED_SCENES.includes(sceneId) || ENDING_IDS.includes(sceneId);
   }
 
@@ -122,10 +127,17 @@ export class GameModel {
 
     this.inventory[key] -= 1;
 
+    let kitDelta = 40;
+    let kitText = '+40 Kesehatan';
+    if (key === 'kit' && this.health >= 70) {
+      kitDelta = 20;
+      kitText = '+20 Kesehatan (Penalti Pemulihan)';
+    }
+
     const ITEM_EFFECTS = {
       food:  { stat: 'hunger', delta: 30, label: 'Makanan', effectText: '+30 Lapar'    },
       drink: { stat: 'thirst', delta: 30, label: 'Air',     effectText: '+30 Dahaga'   },
-      kit:   { stat: 'health', delta: 40, label: 'P3K',     effectText: '+40 Kesehatan' },
+      kit:   { stat: 'health', delta: kitDelta, label: 'P3K',     effectText: kitText },
     };
 
     const effect = ITEM_EFFECTS[key];
