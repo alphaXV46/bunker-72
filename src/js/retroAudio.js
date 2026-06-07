@@ -4,23 +4,51 @@ export class RetroAudio {
     this.staticNoiseBuffer = null;
     this.masterGain = null;
     this._lastVolume = 0.6;
+    this.buffers = {};
+    this.bgmSource = null;
+    this.bgmState = 'playing'; // default to playing so it starts automatically on init
+    this.radioSource = null;
   }
 
   init() {
     if (this.ctx) {
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().then(() => {
+          if (this.bgmState === 'playing' && !this.bgmSource) {
+            this.playBGM();
+          }
+        });
+      }
       return;
     }
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.value = this._lastVolume;
     this.masterGain.connect(this.ctx.destination);
+
+    if (this.bgmState === 'playing') {
+      this.playBGM();
+    }
+  }
+
+  async getAudioBuffer(url) {
+    if (this.buffers[url]) {
+      return this.buffers[url];
+    }
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    this.init();
+    const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+    this.buffers[url] = audioBuffer;
+    return audioBuffer;
   }
 
   setVolume(value) {
+    const vol = Math.max(0, Math.min(1, value));
+    if (vol > 0) this._lastVolume = vol;
     if (!this.ctx || !this.masterGain) return;
     this.masterGain.gain.setTargetAtTime(
-      Math.max(0, Math.min(1, value)),
+      vol,
       this.ctx.currentTime,
       0.05
     );
@@ -33,6 +61,92 @@ export class RetroAudio {
       this.ctx.currentTime,
       0.05
     );
+  }
+
+  async playBGM() {
+    this.init();
+    if (!this.ctx) return;
+
+    if (this.bgmSource) {
+      return;
+    }
+
+    this.bgmState = 'playing';
+
+    try {
+      const url = new URL('../audio/bgm/background_music.ogg', import.meta.url).href;
+      const buffer = await this.getAudioBuffer(url);
+
+      if (this.bgmState !== 'playing') return;
+      if (this.bgmSource) return;
+
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(this.masterGain);
+      source.start(0);
+      this.bgmSource = source;
+    } catch (e) {
+      console.error('Failed to play BGM:', e);
+    }
+  }
+
+  stopBGM() {
+    this.bgmState = 'stopped';
+    if (this.bgmSource) {
+      try {
+        this.bgmSource.stop();
+      } catch (e) {}
+      this.bgmSource.disconnect();
+      this.bgmSource = null;
+    }
+  }
+
+  async playBadChoice() {
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const url = new URL('../audio/sfx/bad_choice.aac', import.meta.url).href;
+      const buffer = await this.getAudioBuffer(url);
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.masterGain);
+      source.start(0);
+    } catch (e) {
+      console.error('Failed to play bad choice SFX:', e);
+    }
+  }
+
+  async playRadioSound(loop = false) {
+    this.init();
+    if (!this.ctx) return;
+
+    this.stopRadioSound();
+
+    try {
+      const url = new URL('../audio/sfx/radio_sound.aac', import.meta.url).href;
+      const buffer = await this.getAudioBuffer(url);
+
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = loop;
+      source.connect(this.masterGain);
+      source.start(0);
+
+      this.radioSource = source;
+    } catch (e) {
+      console.error('Failed to play radio sound:', e);
+    }
+  }
+
+  stopRadioSound() {
+    if (this.radioSource) {
+      try {
+        this.radioSource.stop();
+      } catch (e) {}
+      this.radioSource.disconnect();
+      this.radioSource = null;
+    }
   }
 
   playClick() {

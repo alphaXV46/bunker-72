@@ -80,6 +80,13 @@ export class StoryEngine {
     this.view.updateInventoryUI(this.model.currentSceneId, this.model.inventory);
 
     const isEnding = ENDING_IDS.includes(sceneId);
+
+    if (!isEnding && scene.focusItems && scene.focusItems.includes('radio')) {
+      this.audio.playRadioSound(true);
+    } else {
+      this.audio.stopRadioSound();
+    }
+
     if (!isEnding && this.onSave) {
       this.onSave(
         this.model.currentSceneId,
@@ -159,7 +166,17 @@ export class StoryEngine {
     }
 
     this.view.renderProtocolLog(this.model.history);
-    this.audio.playClick();
+
+    const isBadChoice = (choice.knowledgeEffect < 0) || 
+                        (choice.id === 'c_day2_panic_exit') || 
+                        (choice.nextSceneId && choice.nextSceneId.includes('bad'));
+
+    if (isBadChoice) {
+      this.audio.playBadChoice();
+    } else {
+      this.audio.playClick();
+    }
+
     this.renderScene(choice.nextSceneId);
   }
 
@@ -168,10 +185,10 @@ export class StoryEngine {
       const scene = this.storyData.scenes[this.model.currentSceneId];
       const hour = scene ? parseHour(scene.hour) : 0;
       if (hour >= 48 && this.model.knowledge <= 6) {
-        this.audio.playRadioStatic();
+        this.audio.playRadioSound(false);
         return;
       }
-      this.audio.playRadioStatic();
+      this.audio.playRadioSound(false);
       return;
     }
 
