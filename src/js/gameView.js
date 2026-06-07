@@ -592,7 +592,7 @@ export class GameView {
    * @param {string} endingSummary    - Pre-computed by GameModel.getEndingSummary().
    * @param {object} flags            - Player state flags reconstructed from history.
    */
-  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}) {
+  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = []) {
     this.dom.endingKnowledge.textContent = finalKnowledge;
     this.dom.endingDesc.textContent      = endingText;
     this.dom.endingSummary.textContent   = endingSummary;
@@ -708,5 +708,83 @@ export class GameView {
       debriefList.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
       debriefBox.classList.remove('hidden');
     }
+
+    this.renderEducationalDebrief(history);
+  }
+
+  /**
+   * Parses the 3 lowest-quality choices from the history and displays real-world safety facts.
+   * @param {Array} history
+   */
+  renderEducationalDebrief(history) {
+    const container = document.getElementById('educational-debrief-container');
+    if (!container) return;
+
+    if (!history || !history.length) {
+      container.innerHTML = '';
+      return;
+    }
+
+    const factsMap = {
+      'c_day1_lock_open': 'Menunda penutupan pintu bunker memungkinkan partikel PM2.5 dan gas mematikan masuk. Pintu harus langsung ditutup.',
+      'c_day1_air_noinspect': 'Sistem filtrasi udara tanpa pengecekan katup dapat bocor. Inspeksi visual wajib dilakukan sebelum pengaktifan.',
+      'c_day1_water_waste': 'Air adalah sumber daya paling berharga. Konsumsi berlebihan di jam pertama mempercepat dehidrasi kronis pada hari berikutnya.',
+      'c_day1_sanitation_door': 'Menyimpan limbah tanpa wadah tertutup dekat akses utama memicu penyakit menular dalam ruang tertutup.',
+      'c_day1_sanitation_corner': 'Penumpukan limbah sembarangan meningkatkan bakteri patogen udara.',
+      'c_day1_rest_bad': 'Mengabaikan kebersihan area tidur akan menurunkan kekebalan tubuh drastis akibat paparan kotoran langsung.',
+      'c_day2_panic_exit': 'Membuka pintu segel saat panik adalah penyebab kematian utama di bunker karena membiarkan paparan mematikan masuk seketika.',
+      'c_day2_leak_cloth': 'Kain basah hanya menyaring partikel besar, tidak efektif menahan gas beracun. Selalu gunakan sealant khusus.',
+      'c_day2_leak_fan': 'Meniup asap tidak menghilangkan racun, hanya memindahkannya. Retakan harus segera ditutup.',
+      'c_day2_smoke_water': 'Membuang air untuk membilas asap hanya memboroskan ransum kritis. Gunakan P3K atau masker bersih.',
+      'c_day2_smoke_chemical': 'Menyemprotkan disinfektan konsentrasi tinggi untuk asap justru meracuni udara ruangan lebih cepat.',
+      'c_day2_radio_always_on': 'Radio menyala terus menerus adalah pemborosan energi fatal. Dalam bencana, atur jadwal menyimak siaran darurat.',
+      'c_day2_power_alllight': 'Mempertahankan penerangan terang terus menerus menguras baterai utama. Biasakan hidup dengan lampu darurat minimalis.',
+      'c_day2_power_modify': 'Memodifikasi paksa sirkuit listrik bisa merusak generator, menyebabkan mati total atau kebakaran internal.',
+      'c_day2_drain_alllight': 'Tidak mematikan daya saat darurat berujung pada hilangnya seluruh fungsi elektronik vital.',
+      'c_day2_drain_modify': 'Bypass listrik darurat sangat dilarang dalam SOP keselamatan bunker manapun.',
+      'c_day3_water_boil': 'Merebus air hanya membunuh bakteri, tapi memusatkan racun kimia seperti logam berat. Air keruh logam wajib difilter.',
+      'c_day3_water_settle': 'Mengendapkan air tanpa filter kimiawi tidak menetralisir polutan mikroskopis atau racun industri.',
+      'c_day3_signal_knock': 'Membuat suara bising dengan memukul pipa bisa mengundang penjarah atau hewan liar, kompromi pertahanan bunker.',
+      'c_day3_signal_fire': 'Menyalakan api sekecil apapun di dalam bunker tertutup mengonsumsi oksigen berharga dan menghasilkan karbon monoksida mematikan.',
+      'c_day3_filter_signal_knock': 'Sinyal suara sangat berisiko membongkar lokasi persembunyian Anda.',
+      'c_day3_filter_signal_fire': 'Api dalam ruang tertutup adalah racun pembunuh diam-diam.',
+      'c_day3_door_open': 'Membuka pintu sebelum memverifikasi identitas dan kode sandi resmi bisa menyebabkan bunker diinvasi.',
+      'c_day4_oxygen_vent': 'Menyalakan ventilasi paksa tanpa filter menyedot gas beracun dari luar, mempercepat keracunan.',
+      'c_day4_looters_barter': 'Negosiasi dengan penjarah saat pertahanan sudah bocor memberi celah mereka untuk menyerang langsung.'
+    };
+
+    // Filter to only choices that have a known quality and fact
+    const ratedChoices = history
+      .filter(item => item.choiceId && CHOICE_QUALITY_MAP[item.choiceId])
+      .map(item => ({
+        id: item.choiceId,
+        quality: CHOICE_QUALITY_MAP[item.choiceId],
+        text: item.text,
+        fact: factsMap[item.choiceId]
+      }))
+      .filter(item => item.fact); // only keep if we have a fact
+
+    // Sort: Risky (1) < Acceptable (2) < Optimal (3)
+    const getQualityScore = (q) => q === 'Risky' ? 1 : q === 'Acceptable' ? 2 : 3;
+    ratedChoices.sort((a, b) => getQualityScore(a.quality) - getQualityScore(b.quality));
+
+    const topThree = ratedChoices.slice(0, 3);
+
+    if (topThree.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    let html = '<div class="educational-debrief-box" style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--cyan); background: rgba(91, 192, 190, 0.1); border-radius: 4px;">';
+    html += '<h3 style="color: var(--cyan); margin-bottom: 0.5rem; font-family: \'VT323\', monospace;">💡 FAKTA KESELAMATAN (EDUKASI)</h3>';
+    html += '<ul style="padding-left: 1.5rem; font-family: \'Share Tech Mono\', monospace; color: var(--text-pixel);">';
+
+    topThree.forEach(item => {
+      let icon = item.quality === 'Risky' ? '⚠️' : 'ℹ️';
+      html += `<li style="margin-bottom: 0.5rem;"><strong>${icon} Evaluasi Keputusan:</strong> ${item.fact}</li>`;
+    });
+
+    html += '</ul></div>';
+    container.innerHTML = html;
   }
 }
