@@ -144,7 +144,17 @@ export class GameView {
   }
 
   renderSceneArt(scene, currentSceneId) {
-    this.dom.storyBox.classList.remove('bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert');
+    this.dom.storyBox.classList.remove(
+      'bg-prolog',
+      'bg-hari1',
+      'bg-normal',
+      'bg-rusak',
+      'scene-alert',
+      'speaker-ayah',
+      'speaker-ibu',
+      'speaker-anak',
+      'speaker-narrator'
+    );
     this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', scene.background === 'prolog');
     document.body.classList.toggle('prolog-active', scene.background === 'prolog');
 
@@ -162,6 +172,9 @@ export class GameView {
     this.dom.speakerName.textContent = scene.speaker;
     const avatarKey = scene.avatar || 'narrator';
     const avatarUrl = AVATARS[avatarKey];
+    const speakerClass = ['ayah', 'ibu', 'anak'].includes(avatarKey) ? `speaker-${avatarKey}` : 'speaker-narrator';
+    this.dom.storyBox.classList.remove('speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator');
+    this.dom.storyBox.classList.add(speakerClass);
 
     if (avatarUrl) {
       this.dom.speakerAvatar.src = avatarUrl;
