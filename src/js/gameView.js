@@ -295,6 +295,47 @@ export class GameView {
   }
 
   /**
+   * Renders or updates the system alert banner inside '#game-container'.
+   * @param {string|null} alertTag - The tag/message to display, or null to hide it.
+   */
+  renderSystemAlert(alertTag) {
+    const container = document.getElementById('game-container');
+    if (!container) return;
+
+    let alertEl = container.querySelector('.system-alert-banner');
+
+    if (alertTag) {
+      if (!alertEl) {
+        alertEl = document.createElement('div');
+        alertEl.className = 'system-alert-banner';
+        alertEl.style.position = 'absolute';
+        alertEl.style.top = '72px';
+        alertEl.style.left = '50%';
+        alertEl.style.transform = 'translateX(-50%)';
+        alertEl.style.backgroundColor = 'rgba(8, 9, 11, 0.95)';
+        alertEl.style.border = '2px solid var(--accent-red-border)';
+        alertEl.style.color = 'var(--accent-red-border)';
+        alertEl.style.padding = '8px 16px';
+        alertEl.style.fontFamily = "'Share Tech Mono', 'Courier New', monospace";
+        alertEl.style.fontSize = '0.95rem';
+        alertEl.style.fontWeight = 'bold';
+        alertEl.style.zIndex = '999';
+        alertEl.style.textAlign = 'center';
+        alertEl.style.boxShadow = '0 0 15px rgba(255, 93, 93, 0.4)';
+        alertEl.style.letterSpacing = '1px';
+        alertEl.style.pointerEvents = 'none';
+        container.appendChild(alertEl);
+      }
+      alertEl.textContent = `⚠️ PERINGATAN SISTEM: ${alertTag} ⚠️`;
+      alertEl.style.display = 'block';
+    } else {
+      if (alertEl) {
+        alertEl.style.display = 'none';
+      }
+    }
+  }
+
+  /**
    * Renders interactive choice buttons.
    * Receives all data as parameters — no internal story data or model access.
    *

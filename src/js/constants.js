@@ -29,7 +29,10 @@ export const SURVIVAL = Object.freeze({
   DECAY_INTERVAL_HOURS: 6,
 
   /** Hunger points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  HUNGER_DECAY_PER_INTERVAL: 25,
+  HUNGER_DECAY_PER_INTERVAL: 18,
+
+  /** Thirst points lost per DECAY_INTERVAL_HOURS of elapsed time. */
+  THIRST_DECAY_PER_INTERVAL: 18,
 
   /** Health points lost per DECAY_INTERVAL_HOURS when hunger reaches zero. */
   HEALTH_PENALTY_HUNGER: 10,
@@ -49,7 +52,7 @@ export const SURVIVAL = Object.freeze({
     hunger: 100,
     thirst: 100,
     health: 100,
-    inventory: Object.freeze({ food: 2, drink: 2, kit: 1 }),
+    inventory: Object.freeze({ food: 3, drink: 3, kit: 1 }),
   }),
 });
 

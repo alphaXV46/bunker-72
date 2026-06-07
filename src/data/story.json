@@ -534,7 +534,7 @@
     "day2_power_good": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Lampu utama padam, tetapi lampu darurat cukup untuk bergerak aman. Baterai tersisa untuk radio, panel pintu, dan sirkulasi dasar.",
+      "text": "Lampu utama padam, tetapi lampu darurat cukup untuk bergerak aman. Baterai tersisa untuk radio, panel pintu, and sirkulasi dasar.",
       "background": "normal",
       "hour": "52 Jam",
       "objective": "Masuki hari ketiga dengan cadangan daya.",
@@ -542,7 +542,7 @@
         {
           "id": "c_day2_powergood_next",
           "text": "Lanjutkan ke Hari Ketiga.",
-          "nextSceneId": "day3_start",
+          "nextSceneId": "day2_scavenge_check",
           "knowledgeEffect": 0,
           "log": "Malam kedua dilalui dengan daya terkendali."
         }
@@ -560,9 +560,60 @@
         {
           "id": "c_day2_powerbad_next",
           "text": "Lanjutkan ke Hari Ketiga.",
-          "nextSceneId": "day3_start",
+          "nextSceneId": "day2_scavenge_check",
           "knowledgeEffect": -1,
           "log": "Generator memasuki kondisi rendah."
+        }
+      ]
+    },
+    "day2_scavenge_check": {
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Persediaan makanan dan minuman kita semakin menipis. Menurutku, kita perlu memeriksa kompartemen penyimpanan luar di koridor darurat bunker sebelum situasi memburuk.",
+      "background": "normal",
+      "hour": "53 Jam",
+      "objective": "Cari sisa makanan dan minuman darurat.",
+      "choices": [
+        {
+          "id": "c_day2_scavenge_trigger",
+          "text": "Periksa kompartemen penyimpanan luar bunker.",
+          "nextSceneId": "trigger_scavenge_eval",
+          "knowledgeEffect": 0,
+          "log": "Melakukan pencarian perbekalan di kompartemen luar."
+        }
+      ]
+    },
+    "day2_scavenge_success": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "[PERBEKALAN TAMBAHAN] Berkat pengetahuan teknis keluarga tentang struktur bunker, Anda berhasil menemukan kompartemen tersembunyi yang menyimpan makanan dan minuman ekstra tanpa membahayakan sistem segel udara.",
+      "background": "normal",
+      "hour": "54 Jam",
+      "objective": "Lanjutkan ke Hari Ketiga.",
+      "choices": [
+        {
+          "id": "c_day2_scavenge_success_next",
+          "text": "Lanjutkan ke Hari Ketiga.",
+          "nextSceneId": "day3_start",
+          "knowledgeEffect": 0,
+          "log": "Pencarian perbekalan luar berhasil dilakukan."
+        }
+      ]
+    },
+    "day2_scavenge_fail": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "[AKSES DITOLAK] Anda mencoba meraba kompartemen penyimpanan luar bunker, tetapi pengetahuan Anda tidak cukup untuk membuka panel yang terkunci tanpa merusak sistem segel udara. Anda terpaksa kembali dengan tangan kosong.",
+      "background": "normal",
+      "hour": "54 Jam",
+      "objective": "Lanjutkan ke Hari Ketiga.",
+      "choices": [
+        {
+          "id": "c_day2_scavenge_fail_next",
+          "text": "Lanjutkan ke Hari Ketiga.",
+          "nextSceneId": "day3_start",
+          "knowledgeEffect": 0,
+          "log": "Pencarian perbekalan luar gagal karena kurangnya pengetahuan taktis."
         }
       ]
     },

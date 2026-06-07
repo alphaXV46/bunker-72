@@ -83,11 +83,25 @@ export class StoryEngine {
       this.renderScene(this.model.evaluateSecretEnding());
       return;
     }
+    if (sceneId === 'trigger_scavenge_eval') {
+      const success = this.model.evaluateScavenge();
+      this.renderScene(success ? 'day2_scavenge_success' : 'day2_scavenge_fail');
+      return;
+    }
 
     const scene = this.storyData.scenes[sceneId];
     if (!scene) {
       console.error(`[StoryEngine] Scene "${sceneId}" not found in story data.`);
       return;
+    }
+
+    // Parse bracketed system alert prefix at the very start of scene.text
+    let alertTag = null;
+    let dialogueText = scene.text || '';
+    const alertMatch = dialogueText.match(/^\[([^\]]+)\]/);
+    if (alertMatch) {
+      alertTag = alertMatch[1];
+      dialogueText = dialogueText.slice(alertMatch[0].length).trim();
     }
 
     // Apply time-based survival stat decay for non-ending scenes.
@@ -125,6 +139,7 @@ export class StoryEngine {
 
     // ── Ending path ──
     if (isEnding) {
+      this.view.renderSystemAlert(null);
       if (this.onEnd) {
         let endingText = scene.text;
         if (sceneId === 'ending_secret_bad') {
@@ -145,6 +160,7 @@ export class StoryEngine {
     this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
     this.view.renderSceneArt(scene);
     this.view.renderSpeaker(scene);
+    this.view.renderSystemAlert(alertTag);
 
     // Build choices payload for use by typeText and skipTyping.
     const choicesPayload = {
@@ -154,8 +170,8 @@ export class StoryEngine {
       onChoiceClick: (choice) => this.handleChoiceSelect(choice),
     };
 
-    // Intercept text streams with physical distress markers if stats are low
-    const modifiedText = this.injectDistressMarkers(scene.text, scene.speaker, this.model.hunger, this.model.thirst);
+    // Process text narrative modifications
+    const modifiedText = this.processNarrativeText(sceneId, dialogueText, scene.speaker);
 
     this.view.dom.choicesPanel.innerHTML = '';
     // Pass choicesPayload so skipTyping can render choices without model access.
@@ -301,27 +317,69 @@ export class StoryEngine {
   }
 
   /**
-   * Intercepts and modifies the dialogue text to inject physical distress markers if stats are low.
-   * @param {string} text
+   * Prepend descriptive sensory introductions, inject speaker overrides,
+   * and physical distress markers if hunger, thirst, or health are low.
+   * @param {string} sceneId
+   * @param {string} rawText
    * @param {string} speaker
-   * @param {number} hunger
-   * @param {number} thirst
    * @returns {string}
    */
-  injectDistressMarkers(text, speaker, hunger, thirst) {
-    if (hunger >= 40 && thirst >= 40) return text;
+  processNarrativeText(sceneId, rawText, speaker) {
+    let processedText = rawText;
+
+    // 1. Sensory introductions at the start of days
+    if (sceneId === 'day1_start') {
+      processedText = "Udara dingin bunker berbau besi berkarat dan beton basah. " + processedText;
+    } else if (sceneId === 'day2_start') {
+      processedText = "Suara gemuruh samar dan getaran dinding bunker membuat debu-debu halus berjatuhan. " + processedText;
+    } else if (sceneId === 'day3_start') {
+      processedText = "Keheningan mencekam menyelimuti bunker, hanya dipecah oleh dengung generator yang mulai tidak stabil. " + processedText;
+    } else if (sceneId === 'day4_intro') {
+      processedText = "Sirkulasi udara terasa berat dan pengap, pertanda batas waktu bunker semakin dekat. " + processedText;
+    }
+
+    // 2. Character dialogue prefixes overrides
+    if (speaker === 'Ayah') {
+      processedText = "Secara teknis, " + processedText;
+    } else if (speaker === 'Ibu') {
+      processedText = "Demi keselamatan kita, " + processedText;
+    } else if (speaker === 'Anak') {
+      processedText = "Aku takut, " + processedText;
+    }
+
+    // 3. Physical distress markers if hunger, thirst, or health are low
+    const hunger = this.model.hunger;
+    const thirst = this.model.thirst;
+    const health = this.model.health;
+
+    if (hunger >= 40 && thirst >= 40 && health >= 40) {
+      return processedText;
+    }
+
     if (speaker === "Narator" || !speaker) {
-      const physicalState = hunger < 40 && thirst < 40
-        ? " [Keluarga tampak sangat pucat, lemas karena lapar dan dahaga ekstrem] "
-        : hunger < 40
-        ? " [Keluarga bergerak lambat, menahan lapar yang membakar] "
-        : " [Bibir keluarga pecah-pecah karena dehidrasi parah] ";
-      return physicalState + text;
+      let physicalState = "";
+      if (hunger < 40 && thirst < 40 && health < 40) {
+        physicalState = " [Keluarga tampak sangat kritis, sekarat karena lapar, dehidrasi, dan cedera parah] ";
+      } else if (hunger < 40 && thirst < 40) {
+        physicalState = " [Keluarga tampak sangat pucat, lemas karena lapar dan dahaga ekstrem] ";
+      } else if (hunger < 40 && health < 40) {
+        physicalState = " [Keluarga bergerak lambat, menahan lapar dan sakit akibat cedera] ";
+      } else if (thirst < 40 && health < 40) {
+        physicalState = " [Keluarga tersengal-sengal, dehidrasi parah dan cedera] ";
+      } else if (hunger < 40) {
+        physicalState = " [Keluarga bergerak lambat, menahan lapar yang membakar] ";
+      } else if (thirst < 40) {
+        physicalState = " [Bibir keluarga pecah-pecah karena dehidrasi parah] ";
+      } else if (health < 40) {
+        physicalState = " [Kondisi fisik keluarga sangat lemah dan kesakitan] ";
+      }
+      return physicalState + processedText;
     } else {
       const strains = [];
       if (thirst < 40) strains.push("*Uhuk!* *Uhuk!*.. (tenggorokan kering tercekat).. ");
       if (hunger < 40) strains.push("*(lemas menahan lapar)*.. ");
-      return strains.join("") + text;
+      if (health < 40) strains.push("*(merintih kesakitan)*.. ");
+      return strains.join("") + processedText;
     }
   }
 }

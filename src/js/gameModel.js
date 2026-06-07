@@ -20,6 +20,7 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day2_power_save_drain': 'power_saved',
   'c_day3_water_filter':     'water_filtered',
   'c_day3_door_open':        'door_opened',
+  'c_day2_scavenge_trigger': 'scavenged',
 });
 
 export class GameModel {
@@ -94,11 +95,12 @@ export class GameModel {
   updateSurvivalStats(elapsedHours) {
     if (elapsedHours <= 0) return;
 
-    const { DECAY_INTERVAL_HOURS, HUNGER_DECAY_PER_INTERVAL, HEALTH_PENALTY_HUNGER, HEALTH_PENALTY_THIRST } = SURVIVAL;
-    const decay = (elapsedHours / DECAY_INTERVAL_HOURS) * HUNGER_DECAY_PER_INTERVAL;
+    const { DECAY_INTERVAL_HOURS, HUNGER_DECAY_PER_INTERVAL, THIRST_DECAY_PER_INTERVAL, HEALTH_PENALTY_HUNGER, HEALTH_PENALTY_THIRST } = SURVIVAL;
+    const hungerDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * HUNGER_DECAY_PER_INTERVAL;
+    const thirstDecay = (elapsedHours / DECAY_INTERVAL_HOURS) * THIRST_DECAY_PER_INTERVAL;
 
-    this.hunger = clamp(this.hunger - decay, 0, 100);
-    this.thirst = clamp(this.thirst - decay, 0, 100);
+    this.hunger = clamp(this.hunger - hungerDecay, 0, 100);
+    this.thirst = clamp(this.thirst - thirstDecay, 0, 100);
 
     let healthPenalty = 0;
     if (this.hunger <= 0) healthPenalty += (elapsedHours / DECAY_INTERVAL_HOURS) * HEALTH_PENALTY_HUNGER;
@@ -131,6 +133,21 @@ export class GameModel {
 
     this[effect.stat] = clamp(this[effect.stat] + effect.delta, 0, 100);
     return { label: effect.label, effectText: effect.effectText };
+  }
+
+  /**
+   * Awards +1 food and +1 drink if knowledge >= 8 and scavenged flag is not set.
+   * Sets scavenged flag to true if successful.
+   * @returns {boolean} True if scavenge succeeded, false otherwise.
+   */
+  evaluateScavenge() {
+    if (this.knowledge >= 8 && !this.flags.scavenged) {
+      this.inventory.food += 1;
+      this.inventory.drink += 1;
+      this.flags.scavenged = true;
+      return true;
+    }
+    return false;
   }
 
   /**
