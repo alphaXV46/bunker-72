@@ -268,6 +268,26 @@ export class GameView {
   }
 
   /**
+   * Applies a visual pulse effect to the knowledge score element.
+   * @param {number} effect 
+   */
+  pulseKnowledge(effect) {
+    if (effect === 0 || !this.dom.statusKnowledge) return;
+    const pulseClass = effect > 0 ? 'pulse-score-good' : 'pulse-score-risk';
+    
+    this.dom.statusKnowledge.classList.remove('pulse-score-good', 'pulse-score-risk');
+    // Force DOM reflow to restart animation
+    void this.dom.statusKnowledge.offsetWidth;
+    this.dom.statusKnowledge.classList.add(pulseClass);
+    
+    setTimeout(() => {
+      if (this.dom.statusKnowledge) {
+        this.dom.statusKnowledge.classList.remove(pulseClass);
+      }
+    }, 1000);
+  }
+
+  /**
    * Updates inventory UI slots.
    * Receives `isDisabledScene` as a pre-computed boolean — no model access.
    *
@@ -412,9 +432,7 @@ export class GameView {
       const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
 
       // Wire up visual impact class based on knowledge effect
-      let impactClass = 'choice-neutral';
-      if (effect > 0) impactClass = 'choice-good';
-      if (effect < 0) impactClass = 'choice-risk';
+      const impactClass = 'choice-neutral';
 
       const btn       = document.createElement('button');
       btn.className   = `choice-btn ${impactClass}`;
@@ -624,6 +642,13 @@ export class GameView {
         bgClass:    'ending-bg-fatal',
         grade:      'PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)',
         gradeColor: 'var(--accent-red-border)',
+      },
+      ending_near_miss: {
+        title:      'ENDING NYARIS: SATU KESALAHAN FATAL',
+        titleClass: 'ending-normal',
+        bgClass:    'ending-bg-normal',
+        grade:      'PERINGKAT KESIAPSIAGAAN: CUKUP (Dievakuasi Dengan Cedera Parah)',
+        gradeColor: 'var(--warning-yellow-border)',
       },
       ending_stranded_bad: {
         title:      'ENDING BURUK: TERDAMPAR TANPA HARAPAN',

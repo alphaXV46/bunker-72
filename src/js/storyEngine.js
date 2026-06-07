@@ -219,6 +219,7 @@ export class StoryEngine {
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
     this.model.knowledge = Math.max(0, Math.min(SURVIVAL.KNOWLEDGE_MAX, this.model.knowledge + effect));
+    this.view.pulseKnowledge(effect);
 
     // Severe Choice Consequences mapping
     if (choice.id === 'c_day3_water_boil' || choice.id === 'c_day3_water_settle') {

@@ -103,7 +103,7 @@
     "day1_air_unsafe": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah... aku takut. Ada bau belerang menyengat di sini. Mataku perih sekali dan dadaku sesak untuk bernapas. Menyalakan penyaring tanpa memeriksa katup karbon menyedot abu PM2.5 beracun langsung dari luar.",
+      "text": "Ayah, kenapa lampu filternya merah? Mataku perih sekali dan baunya seperti kembang api yang terbakar. Apakah mesin besarnya rusak karena kita tidak membersihkan saringannya?",
       "background": "normal",
       "hour": "12 Jam",
       "objective": "Pulihkan kualitas udara secepatnya.",
@@ -287,7 +287,7 @@
     "day2_damage_check": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ibu! Aku takut sekali! Bunkernya bergetar hebat! Apakah langit-langit beton di atas kita akan runtuh?",
+      "text": "Wah, dindingnya bergetar! Tapi lihat, Ayah, pilar-pilar besi ini bergerak menahan atap! Bunker ini kuat sekali ya? Tapi aku masih takut kalau suara gemuruhnya makin keras...",
       "background": "normal",
       "hour": "30 Jam",
       "objective": "Redam panik dan cari sumber kebocoran.",
@@ -513,7 +513,7 @@
     "day2_radio_drain": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah, aku takut... Lampu indikator hijau di radio tiba-tiba mati. Suara kresek-kreseknya hilang total.",
+      "text": "Yah... kenapa kotak bicaranya tiba-tiba mati? Lampu hijaunya sudah tidak berkedip lagi. Apakah baterainya habis karena kita biarkan menyala terus? Aku tidak bisa mendengar suara helikopter lagi...",
       "conditionalText": [
         {
           "requiredFlag": "ng_plus",
@@ -662,7 +662,7 @@
     "day3_water_issue": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah... aku takut... Tenggorokanku sangat kering dan haus, tapi air di gelas penampung ini hitam keruh dan baunya seperti besi berkarat.",
+      "text": "Ibu, kenapa air dari keran ini warnanya hitam keruh dan baunya seperti koin besi? Apakah mesin airnya sedih? Aku haus sekali, tapi aku tidak berani meminumnya...",
       "conditionalText": [
         {
           "requiredFlag": "air_uninspected",
@@ -776,7 +776,7 @@
     "day3_water_filter": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Aku senang, airnya jernih lagi setelah disaring. Rasanya hambar tapi menyegarkan. Ibu menyimpan tablet terakhir untuk jam evakuasi.",
+      "text": "Wah, ajaib! Air yang tadi hitam sekarang jadi bening lagi! Pil kecil dari Ibu seperti sihir. Airnya segar sekali, terima kasih Ibu!",
       "background": "rusak",
       "hour": "66 Jam",
       "objective": "Putuskan cara memberi sinyal ke tim evakuasi.",
@@ -945,7 +945,7 @@
     "day4_oxygen": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah... Ibu... aku sangat takut, paru-paruku perih sekali saat bernapas. Udara di dalam ruangan rasanya sangat tipis dan berbau asam.",
+      "text": "Ayah... aku mengantuk sekali... Kenapa baling-baling kipas besarnya berhenti berputar? Udara di sini rasanya tipis dan dadaku sesak saat bernapas. Apakah mesinnya butuh tidur juga?",
       "background": "rusak",
       "hour": "78 Jam",
       "objective": "Atasi kelangkaan oksigen darurat.",
@@ -1028,7 +1028,7 @@
     "ending_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Penyelamatan Darurat Kritis. Keluarga Anda berhasil dievakuasi di jam ke-72, namun berada dalam kondisi kritis. Udara bunker terkontaminasi ringan akibat kegagalan protokol dan mereka membutuhkan perawatan medis intensif segera untuk bertahan hidup.",
+      "text": "Tim evakuasi membongkar paksa pintu baja yang setengah meleleh. 'Cepat, tabung oksigen! Detak jantung mereka melemah!' jerit petugas medis saat menemukan kami terkapar di lantai yang dingin dan lembab. Bau asam dari gas vulkanik mendominasi setiap tarikan napas kami yang dangkal. Ayah memegang tanganku dengan tenaga yang nyaris hilang, 'Maafkan Ayah... Ayah gagal menjaga kalian...' bisiknya lemah sebelum kesadarannya memudar. Kegagalan memperbaiki sistem filtrasi tepat waktu dan kontaminasi air telah merusak organ dalam kami. Kami dibawa keluar dengan tandu darurat, menatap langit kelabu melalui masker oksigen medis, menyadari bahwa hidup kami kini bergantung sepenuhnya pada mesin penopang kehidupan di rumah sakit.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1036,7 +1036,7 @@
     "ending_normal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Bertahan Hidup dengan Luka. Keluarga Anda berhasil dievakuasi pada jam ke-72. Namun, mereka lelah, dehidrasi ringan, dan shock akibat beberapa penanganan darurat yang terlambat. Mereka selamat, tetapi butuh waktu lama untuk pulih.",
+      "text": "Cahaya senter tim evakuasi menembus asap tipis yang memenuhi koridor. 'Bawa tandu ke sini!' teriak salah satu petugas. Ibu terbatuk hebat, menyandarkan kepalanya di bahu Ayah yang kelelahan. Udara terasa panas dan berbau belerang menyengat, mengingatkan pada retakan dinding yang sempat meracuni kami. 'Bertahanlah, Bu... kita akan segera mendapat udara bersih,' bisik Ayah dengan suara parau. Luka-luka dan dehidrasi ringan yang kami alami adalah harga dari beberapa keputusan panik dan penanganan darurat yang terlambat. Meski akhirnya diselamatkan, perih di tenggorokan kami menjadi pengingat abadi bahwa di bawah tanah, satu kesalahan kecil pun harus dibayar dengan rasa sakit yang panjang.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1044,7 +1044,7 @@
     "ending_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Selamat. Karena keputusan yang tenang dan disiplin, kualitas udara tetap stabil, air aman, daya cukup, dan pintu tidak pernah dibuka untuk pihak tak verifikasi. Keluarga keluar dari Bunker 72 dalam kondisi sehat saat tim resmi tiba.",
+      "text": "Suara engsel baja berderit saat cahaya matahari yang menyilaukan menusuk masuk ke dalam bunker, membawa udara segar sisa badai. 'Kalian aman sekarang,' terdengar suara tim evakuasi di balik helm hazmat mereka. Ayah memeluk kami erat, air matanya membasahi pipiku yang kotor oleh debu. 'Kita berhasil, Yah, Ibu... mesinnya melindungi kita,' gumamku. Dinginnya dinding beton kini terasa melegakan, bukan lagi kurungan. Kedisiplinan menjaga sirkulasi udara, menghemat baterai radio, dan kewaspadaan tidak membuka pintu sembarangan telah membayar lunas pengorbanan kami. Paru-paru kami bersih, dan kami melangkah keluar menuju kendaraan penyelamat dengan dada tegap, meninggalkan bunker yang telah menjadi benteng kokoh penyelamat nyawa.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []
@@ -1052,7 +1052,7 @@
     "ending_fatal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Makam Bunker 72. Keluarga Anda gugur di dalam bunker sebelum tim penyelamat berhasil membuka pintu. Bunker terkontaminasi parah oleh abu vulkanik asam dan sulfur akibat kebocoran atau kerusakan sistem penopang hidup.",
+      "text": "Keheningan abadi menyelimuti ruang bawah tanah itu. Tidak ada lagi suara kipas atau desingan mesin, hanya tetesan air hitam yang jatuh menimpa genangan debu vulkanik tebal. Udara begitu pekat oleh belerang dan gas beracun yang menumpuk dari retakan beton yang gagal ditangani. Ketika tim penyelamat akhirnya membongkar pintu baja beberapa minggu kemudian, mereka hanya menemukan jasad keluarga kami yang saling berpelukan erat di sudut gelap bunker. 'Terlambat, komandan. Tidak ada yang selamat,' lapor seorang petugas dengan suara bergetar. Kepanikan yang menghancurkan struktur dan kegagalan mengisolasi racun telah mengubah tempat perlindungan ini menjadi makam baja yang dingin, membekukan penyesalan terakhir kami.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1060,7 +1060,7 @@
     "ending_secret_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Penyelamatan Sempurna! Keluarga Anda berhasil dievakuasi setelah bertahan selama 96 jam penuh perjuangan. Karena keputusan taktis Anda, bunker aman dari penjarah, udara terjaga, dan seluruh anggota keluarga selamat tanpa cedera maupun trauma berarti.",
+      "text": "Setelah 96 jam yang terasa seperti keabadian, suara baling-baling helikopter menggetarkan dinding beton kami. Pintu terbuka, menyilaukan mata kami dengan sinar matahari pagi. 'Luar biasa, sistem kehidupan kalian masih berfungsi 100%,' puji komandan tim penyelamat. Ayah tersenyum lebar sambil mengusap kepalaku, 'Kita berhasil melewati badai terburuk, Nak.' Bau logam berkarat tergantikan oleh semilir angin segar. Keputusan taktis membagi ransum dengan cermat, melindungi pintu dari penjarah dengan aliran kejut, dan menyaring air dengan sempurna telah menjaga kami tak tersentuh bahaya luar. Kami melangkah keluar tanpa luka sedikit pun, meninggalkan bunker 72 tidak sebagai tempat berlindung sementara, melainkan sebagai monumen ketahanan hidup sebuah keluarga.",
       "background": "normal",
       "hour": "96 Jam",
       "choices": []
@@ -1068,7 +1068,7 @@
     "ending_secret_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Gugur di Garis Akhir. Bencana melanda di saat-saat terakhir. Keluarga Anda gagal mengatasi kelangkaan oksigen atau membiarkan pintu luar ditembus oleh penjarah bersenjata di tengah kepungan abu panas. Ketika tim penyelamat tiba, Bunker 72 hanya menyisakan kegelapan dan keheningan.",
+      "text": "Gemuruh helikopter di permukaan tidak sempat kami dengar. Pintu interkom yang terbuka akibat negosiasi yang gagal telah memberi celah bagi penjarah untuk merusak panel listrik utama. Dalam kegelapan pekat, napas Ibu tersengal-sengal mencari sisa oksigen yang menipis tajam. 'Ayah... dadaku sakit sekali...' rintihku pelan. Ayah memeluk kami dengan putus asa di tengah dinginnya lantai baja, menyadari pertahanan terakhir telah tertembus. Keputusan keliru mempercayai orang asing di hari terakhir telah menghancurkan segalanya. Saat tim evakuasi akhirnya mengusir para penjarah dan membuka segel, Bunker 72 telah hening selamanya, menjadi saksi bisu tragisnya nyawa yang hilang hanya satu inci dari garis akhir penyelamatan.",
       "background": "rusak",
       "hour": "96 Jam",
       "choices": []
@@ -1076,7 +1076,29 @@
     "ending_stranded_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Terdampar Tanpa Harapan. Evakuasi ditunda karena badai abu, tetapi keluarga Anda tidak memiliki persiapan memadai. Tanpa radio untuk memperbarui koordinat penyelamatan, pasokan air yang teracuni logam berat, dan tingkat kesiapsiagaan yang rendah, bunker runtuh secara fungsional sebelum bantuan dapat menjangkau Anda. Ketika badai mereda di hari keempat, tidak ada sinyal kehidupan dari Bunker 72.",
+      "text": "Panggilan dari radio darurat tak pernah datang. Baterai telah mati sejak hari kedua, meninggalkan kami dalam kesunyian yang mencekam. Ibu terus merintih kesakitan memegangi perutnya setelah meminum air tercemar logam berat. 'Ayah, apakah tidak ada yang datang menjemput kita?' tanyaku lirih di tengah keremangan lampu darurat yang meredup lambat laun. 'Ayah tidak tahu, Nak...' jawabnya diiringi isak tangis yang tertahan. Tanpa mengetahui koordinat penyelamatan akibat matinya komunikasi, kami terperangkap. Udara perlahan menjadi racun. Kesalahan manajemen daya radio dan kepanikan dalam pemurnian air telah memotong akses kami ke dunia luar. Kami terdampar tanpa harapan, hingga kegelapan sepenuhnya menelan Bunker 72.",
+      "background": "rusak",
+      "hour": "72 Jam",
+      "choices": []
+    },
+    "ending_near_miss": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Cahaya senter tim evakuasi membias menembus sisa debu di koridor. 'Kami menemukan mereka, tapi kondisinya memprihatinkan!' teriak petugas medis. Ayah mencoba berdiri, namun kakinya gemetar hebat, menatap lantai baja yang dingin dengan penuh penyesalan. 'Kita hampir saja selamat dengan sempurna...' bisiknya pedih. Bau obat-obatan medis mengalahkan aroma apek ruangan saat kami ditandu menuju permukaan. Tragedi ini membuktikan bahwa di ruang bawah tanah ini, satu kesalahan tunggal mampu merenggut nyawa.",
+      "conditionalText": [
+        {
+          "requiredFlag": "near_miss_radio",
+          "text": " Kegagalan menghemat baterai radio membuat tim penyelamat tidak bisa memverifikasi koordinat pasti kita, membiarkan kita menghirup sisa gas beracun selama berjam-jam penundaan evakuasi."
+        },
+        {
+          "requiredFlag": "near_miss_water",
+          "text": " Keputusan ceroboh merebus air pipa bukannya memfilternya justru memusatkan konsentrasi logam berat yang kini merusak fungsi ginjal keluarga kita secara permanen."
+        },
+        {
+          "requiredFlag": "near_miss_knowledge",
+          "text": " Kurangnya pengetahuan prosedur mitigasi bencana darurat membuat kita mengambil berbagai keputusan gegabah yang melemahkan sistem pertahanan dasar bunker secara keseluruhan."
+        }
+      ],
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []

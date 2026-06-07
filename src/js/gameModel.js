@@ -171,15 +171,27 @@ export class GameModel {
     const doorOpened = this.flags.door_opened === true;
     if (this.knowledge === 0 || doorOpened || this.health <= 0) return 'ending_fatal';
 
+    const hasKnowledge   = this.knowledge >= 8;
     const hasRadioSave   = this.flags.radio_saved    === true;
     const hasWaterFilter = this.flags.water_filtered === true;
 
+    const conditionsMet = (hasKnowledge ? 1 : 0) + (hasRadioSave ? 1 : 0) + (hasWaterFilter ? 1 : 0);
+
     // Day 4 Secret Gate Evaluation
-    if (hasRadioSave && hasWaterFilter) {
-      if (this.knowledge >= 8) {
-        return 'day4_intro'; // Gate success
+    if (conditionsMet === 3) {
+      return 'day4_intro'; // Gate success
+    }
+
+    // Near Miss Gate Evaluation (exactly 2 conditions met)
+    if (conditionsMet === 2) {
+      if (!hasRadioSave) {
+        this.flags.near_miss_radio = true;
+      } else if (!hasWaterFilter) {
+        this.flags.near_miss_water = true;
+      } else if (!hasKnowledge) {
+        this.flags.near_miss_knowledge = true;
       }
-      return 'ending_stranded_bad'; // Distinct branch for failing the secret gate
+      return 'ending_near_miss';
     }
 
     // Standard Ending Matrix based on knowledge score

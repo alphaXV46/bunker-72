@@ -17,6 +17,7 @@ export const ENDING_IDS = Object.freeze([
   'ending_secret_best',
   'ending_secret_bad',
   'ending_stranded_bad',
+  'ending_near_miss',
 ]);
 
 // ─── SURVIVAL SYSTEM CONFIGURATION ─────────────────────────────────────────
@@ -30,10 +31,10 @@ export const SURVIVAL = Object.freeze({
   DECAY_INTERVAL_HOURS: 6,
 
   /** Hunger points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  HUNGER_DECAY_PER_INTERVAL: 14,
+  HUNGER_DECAY_PER_INTERVAL: 18,
 
   /** Thirst points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  THIRST_DECAY_PER_INTERVAL: 14,
+  THIRST_DECAY_PER_INTERVAL: 20,
 
   /** Health points lost per DECAY_INTERVAL_HOURS when hunger reaches zero. */
   HEALTH_PENALTY_HUNGER: 10,
