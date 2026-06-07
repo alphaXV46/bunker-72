@@ -699,7 +699,7 @@ body.prolog-active #settings-btn {
 .story-box.speaker-anak .dialogue-overlay {
   position: absolute;
   z-index: 10;
-  width: min(28%, 420px);
+  width: min(26%, 400px);
   min-height: auto;
   margin: 0;
   padding: clamp(10px, 1vw, 15px) clamp(12px, 1.1vw, 18px);
@@ -710,22 +710,30 @@ body.prolog-active #settings-btn {
   box-shadow: 7px 7px 0 rgba(0, 0, 0, 0.42), 0 0 22px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(3px);
   transform: translate(-50%, -100%);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.story-box.speaker-ayah .dialogue-overlay:hover,
+.story-box.speaker-ibu .dialogue-overlay:hover,
+.story-box.speaker-anak .dialogue-overlay:hover {
+  border-color: var(--warning-yellow-border);
+  transform: translate(-50%, calc(-100% - 3px));
 }
 
 .story-box.speaker-ayah .dialogue-overlay {
-  left: 48%;
-  top: 61%;
+  left: 34%;
+  top: 52%;
 }
 
 .story-box.speaker-ibu .dialogue-overlay {
-  left: 62%;
-  top: 55%;
+  left: 68%;
+  top: 50%;
 }
 
 .story-box.speaker-anak .dialogue-overlay {
-  left: 56%;
-  top: 73%;
-  width: min(24%, 340px);
+  left: 54%;
+  top: 50%;
+  width: min(25%, 360px);
 }
 
 .story-box.speaker-ayah .dialogue-overlay::before,
@@ -742,6 +750,18 @@ body.prolog-active #settings-btn {
   border-bottom: 2px solid rgba(231, 237, 240, 0.74);
   transform: rotate(45deg);
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.26);
+}
+
+.story-box.speaker-ayah .dialogue-overlay::before {
+  left: 54%;
+}
+
+.story-box.speaker-ibu .dialogue-overlay::before {
+  left: 42%;
+}
+
+.story-box.speaker-anak .dialogue-overlay::before {
+  left: 50%;
 }
 
 .story-box.speaker-ayah .dialogue-body,
@@ -1305,24 +1325,24 @@ body.prolog-active #settings-btn {
   .story-box.speaker-ayah .dialogue-overlay,
   .story-box.speaker-ibu .dialogue-overlay,
   .story-box.speaker-anak .dialogue-overlay {
-    width: 38%;
+    width: 32%;
     padding: 5px 6px;
   }
 
   .story-box.speaker-ayah .dialogue-overlay {
-    left: 45%;
-    top: 63%;
+    left: 34%;
+    top: 53%;
   }
 
   .story-box.speaker-ibu .dialogue-overlay {
-    left: 60%;
-    top: 58%;
+    left: 68%;
+    top: 51%;
   }
 
   .story-box.speaker-anak .dialogue-overlay {
     left: 54%;
-    top: 77%;
-    width: 34%;
+    top: 51%;
+    width: 30%;
   }
 
   .story-box.speaker-ayah .speaker-name,
