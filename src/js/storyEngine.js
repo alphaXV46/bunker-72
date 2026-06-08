@@ -17,6 +17,7 @@ import { ENDING_IDS, SURVIVAL, parseHour, FACTS_MAP, CHOICE_QUALITY_MAP } from '
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
 const RADIO_SCENES = new Set(['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad', 'day3_start', 'day3_water_issue']);
+const PROLOG_PACK_FLAGS = ['food_packed', 'drink_packed', 'kit_packed', 'battery_packed', 'snack_packed', 'toy_packed'];
 
 export class StoryEngine {
   /**
@@ -75,7 +76,7 @@ export class StoryEngine {
     if (this._checkFatalCondition(sceneId)) return;
 
     if (sceneId === 'prolog_packing') {
-      const packedCount = this.model.inventory.food + this.model.inventory.drink + this.model.inventory.kit + (this.model.flags.extra_battery ? 1 : 0);
+      const packedCount = this._getPackedCount();
       if (packedCount >= 5) {
         this.renderScene('prolog_intro');
         return;
@@ -253,19 +254,26 @@ export class StoryEngine {
 
     if (choice.id === 'c_prolog_pack_food') {
       this.model.inventory.food++;
+      this.model.flags.food_packed = true;
     }
     if (choice.id === 'c_prolog_pack_drink') {
       this.model.inventory.drink++;
+      this.model.flags.drink_packed = true;
     }
     if (choice.id === 'c_prolog_pack_kit') {
       this.model.inventory.kit++;
-      if (this.model.inventory.kit >= 2) {
-        this.model.flags.kit_maxed = true;
-      }
+      this.model.flags.kit_packed = true;
     }
     if (choice.id === 'c_prolog_pack_battery') {
       this.model.flags.extra_battery = true;
       this.model.flags.battery_packed = true;
+    }
+    if (choice.id === 'c_prolog_pack_snack') {
+      this.model.inventory.food++;
+      this.model.flags.snack_packed = true;
+    }
+    if (choice.id === 'c_prolog_pack_toy') {
+      this.model.flags.toy_packed = true;
     }
 
     const prevHealth = this.model.health;
@@ -513,6 +521,10 @@ export class StoryEngine {
     return sceneId === 'ending_secret_bad' || sceneId === 'ending_fatal';
   }
 
+  _getPackedCount() {
+    return PROLOG_PACK_FLAGS.filter((flag) => this.model.flags[flag] === true).length;
+  }
+
   /**
    * Resolve dynamic state-conditional text blocks defined in story.json.
    * @param {string} sceneId
@@ -524,12 +536,14 @@ export class StoryEngine {
     let processedText = rawText;
 
     if (sceneId === 'prolog_packing') {
-      const packedCount = this.model.inventory.food + this.model.inventory.drink + this.model.inventory.kit + (this.model.flags.extra_battery ? 1 : 0);
+      const packedCount = this._getPackedCount();
       const itemsList = [];
-      if (this.model.inventory.food > 0) itemsList.push(`${this.model.inventory.food} Makanan`);
-      if (this.model.inventory.drink > 0) itemsList.push(`${this.model.inventory.drink} Minuman`);
-      if (this.model.inventory.kit > 0) itemsList.push(`${this.model.inventory.kit} P3K`);
-      if (this.model.flags.extra_battery) itemsList.push(`1 Baterai Ekstra`);
+      if (this.model.flags.food_packed) itemsList.push('Makanan');
+      if (this.model.flags.drink_packed) itemsList.push('Air');
+      if (this.model.flags.kit_packed) itemsList.push('P3K');
+      if (this.model.flags.battery_packed) itemsList.push('Radio');
+      if (this.model.flags.snack_packed) itemsList.push('Snack');
+      if (this.model.flags.toy_packed) itemsList.push('Mainan');
       const itemsStr = itemsList.length > 0 ? itemsList.join(', ') : 'Belum ada';
       processedText = `Ransel ${packedCount}/5 slot.` + "\n" + `Isi: ${itemsStr}.` + "\n\n" + processedText;
     }

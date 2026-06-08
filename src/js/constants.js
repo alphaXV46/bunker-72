@@ -130,6 +130,8 @@ export const CHOICE_QUALITY_MAP = Object.freeze({
   'c_prolog_pack_drink': 'Optimal',
   'c_prolog_pack_kit': 'Optimal',
   'c_prolog_pack_battery': 'Optimal',
+  'c_prolog_pack_snack': 'Acceptable',
+  'c_prolog_pack_toy': 'Acceptable',
   'c_day2_radio_battery': 'Optimal'
 });
 

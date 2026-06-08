@@ -19,6 +19,15 @@ const AVATARS = {
   narrator: new URL('../assets/avatar_narrator.png', import.meta.url).href,
 };
 
+const PACKING_ITEMS = {
+  food:  { image: new URL('../assets/food_icon.png',  import.meta.url).href, label: 'Makanan Kaleng' },
+  drink: { image: new URL('../assets/drink_icon.png', import.meta.url).href, label: 'Air Bersih' },
+  kit:   { image: new URL('../assets/kit_icon.png',   import.meta.url).href, label: 'Kotak P3K' },
+  radio: { image: new URL('../assets/radio_icon.png', import.meta.url).href, label: 'Radio Portable' },
+  snack: { image: new URL('../assets/snacks.png',     import.meta.url).href, label: 'Snack' },
+  toy:   { image: new URL('../assets/car_toy.png',    import.meta.url).href, label: 'Mainan Anak' },
+};
+
 export class GameView {
   /**
    * @param {object} dom - Object map of pre-selected DOM element references.
@@ -350,6 +359,7 @@ export class GameView {
       prolog2: 'bg-prolog-2',
       prolog3: 'bg-prolog-3',
       prolog4: 'bg-prolog-4',
+      titlecard: 'bg-titlecard',
       hari1: 'bg-day1',
       normal: 'bg-day1',
       rusak: 'bg-rusak',
@@ -362,18 +372,21 @@ export class GameView {
 
     this.dom.storyBox.classList.remove(
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
-      'bg-hari1', 'bg-day1', 'bg-normal', 'bg-rusak', 'scene-alert',
+      'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-normal', 'bg-rusak', 'scene-alert',
       'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator',
       ...ENV_CLASSES
     );
 
     const isProlog = String(scene.background || '').startsWith('prolog');
     const isPacking = sceneId === 'prolog_packing';
+    const isTitleCard = scene.background === 'titlecard';
     const gameView = this.dom.storyBox.closest('#game-view');
     gameView?.classList.toggle('prolog-mode', isProlog);
     gameView?.classList.toggle('packing-mode', isPacking);
+    gameView?.classList.toggle('title-card-mode', isTitleCard);
     document.body.classList.toggle('prolog-active', isProlog);
     document.body.classList.toggle('packing-active', isPacking);
+    document.body.classList.toggle('title-card-active', isTitleCard);
 
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
     this.dom.storyBox.classList.add(`scene-id-${sceneId}`);
@@ -381,7 +394,7 @@ export class GameView {
 
     // ── Environmental visual filters based on active flags ──────────────────
     // Only apply during non-prolog gameplay scenes
-    const isGameplay = !isProlog && !isPacking;
+    const isGameplay = !isProlog && !isPacking && !isTitleCard;
     if (isGameplay) {
       // Dusty/sepia tint — unfiltered air contaminates the environment
       if (flags.air_uninspected && !flags.air_remedied) {
@@ -478,7 +491,23 @@ export class GameView {
    */
   renderChoices(choices, currentSceneId, flags, onChoiceClick) {
     this.dom.choicesPanel.innerHTML = '';
+    this.dom.choicesPanel.classList.remove('packing-grid');
     if (!choices?.length) return;
+
+    if (currentSceneId === 'prolog_packing') {
+      this.renderPackingChoices(choices, flags, onChoiceClick);
+      return;
+    }
+
+    if (currentSceneId === 'prolog_title') {
+      const btn = document.createElement('button');
+      btn.className = 'title-continue';
+      btn.type = 'button';
+      btn.textContent = choices[0].text;
+      btn.addEventListener('click', () => onChoiceClick(choices[0]));
+      this.dom.choicesPanel.appendChild(btn);
+      return;
+    }
 
     let renderedIndex = 1;
     choices.forEach((choice) => {
@@ -863,5 +892,29 @@ export class GameView {
     `;
 
     container.innerHTML = html;
+  }
+
+  renderPackingChoices(choices, flags, onChoiceClick) {
+    this.dom.choicesPanel.classList.add('packing-grid');
+
+    choices.forEach((choice) => {
+      if (choice.forbiddenFlags?.some((f) => flags[f] === true)) return;
+
+      const item = PACKING_ITEMS[choice.item] || PACKING_ITEMS.food;
+      const btn = document.createElement('button');
+      btn.className = `packing-item packing-item-${choice.item}`;
+      btn.type = 'button';
+      btn.innerHTML = `
+        <span class="packing-item-glow"></span>
+        <img src="${item.image}" alt="${item.label}">
+        <span>${item.label}</span>
+      `;
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('packing-picked')) return;
+        btn.classList.add('packing-picked');
+        window.setTimeout(() => onChoiceClick(choice), 420);
+      });
+      this.dom.choicesPanel.appendChild(btn);
+    });
   }
 }

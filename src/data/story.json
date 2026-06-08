@@ -1,37 +1,98 @@
 {
   "scenes": {
+    "prolog_home": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Ayah baru pulang. Ibu sedang menyiapkan makan malam. Anak masih di lantai ruang keluarga, mendorong mobil-mobilan merahnya tanpa tahu langit di luar mulai berubah.",
+      "background": "prolog1",
+      "hour": "0 Jam",
+      "objective": "Saksikan awal keadaan darurat.",
+      "autoNextSceneId": "prolog_alert",
+      "autoAdvanceDelay": 1200,
+      "choices": []
+    },
+    "prolog_alert": {
+      "speaker": "TV Darurat",
+      "avatar": null,
+      "text": "BREAKING NEWS. Seluruh warga diminta segera menuju tempat perlindungan. Ulangi: seluruh warga diminta segera menuju tempat perlindungan terdekat.",
+      "background": "prolog2",
+      "hour": "0 Jam",
+      "objective": "Respons siaran darurat.",
+      "autoNextSceneId": "prolog_question",
+      "autoAdvanceDelay": 1200,
+      "choices": []
+    },
+    "prolog_question": {
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Cepat! Kita hanya punya sedikit waktu!\n\nIbu: Apa yang harus kita bawa?",
+      "background": "prolog2",
+      "hour": "0 Jam",
+      "objective": "Pilih barang penting untuk ransel bunker.",
+      "autoNextSceneId": "prolog_packing",
+      "autoAdvanceDelay": 1200,
+      "choices": []
+    },
     "prolog_packing": {
       "speaker": "Ransel Darurat",
       "avatar": null,
-      "text": "Siaran darurat baru saja masuk. Anda punya 5 slot ransel untuk persediaan pertama sebelum keluarga meninggalkan rumah.",
+      "text": "Pilih 5 barang untuk dibawa ke bunker. Klik barang di atas meja, lalu barang akan masuk ke tas.",
       "background": "packing",
       "hour": "0 Jam",
       "objective": "Kemasi ransel darurat Anda (5 slot).",
       "choices": [
         {
           "id": "c_prolog_pack_food",
-          "text": "Masukkan 1 Makanan Kaleng (+1 Makanan)",
-          "nextSceneId": "prolog_packing"
+          "text": "Makanan Kaleng",
+          "item": "food",
+          "nextSceneId": "prolog_packing",
+          "forbiddenFlags": [
+            "food_packed"
+          ]
         },
         {
           "id": "c_prolog_pack_drink",
-          "text": "Masukkan 1 Botol Air Bersih (+1 Minuman)",
-          "nextSceneId": "prolog_packing"
+          "text": "Air Bersih",
+          "item": "drink",
+          "nextSceneId": "prolog_packing",
+          "forbiddenFlags": [
+            "drink_packed"
+          ]
         },
         {
           "id": "c_prolog_pack_kit",
-          "text": "Masukkan 1 Kotak P3K Darurat (+1 P3K, Maksimal 2)",
+          "text": "Kotak P3K",
+          "item": "kit",
           "nextSceneId": "prolog_packing",
           "forbiddenFlags": [
-            "kit_maxed"
+            "kit_packed"
           ]
         },
         {
           "id": "c_prolog_pack_battery",
-          "text": "Masukkan Baterai Radio Ekstra (Membuka jadwal siaran diperpanjang)",
+          "text": "Radio Portable",
+          "item": "radio",
           "nextSceneId": "prolog_packing",
           "forbiddenFlags": [
             "battery_packed"
+          ]
+        },
+        {
+          "id": "c_prolog_pack_snack",
+          "text": "Snack",
+          "item": "snack",
+          "nextSceneId": "prolog_packing",
+          "forbiddenFlags": [
+            "snack_packed"
+          ]
+        },
+        {
+          "id": "c_prolog_pack_toy",
+          "text": "Mainan Anak",
+          "item": "toy",
+          "nextSceneId": "prolog_packing",
+          "forbiddenFlags": [
+            "toy_packed"
           ]
         }
       ]
@@ -82,9 +143,26 @@
       "background": "prolog4",
       "hour": "0 Jam",
       "objective": "Tinggalkan permukaan dan mulai hidup di dalam bunker.",
-      "autoNextSceneId": "day1_lockdoor",
+      "autoNextSceneId": "prolog_title",
       "autoAdvanceDelay": 1600,
       "choices": []
+    },
+    "prolog_title": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "BUNKER 72\n72 JAM PERTAMA",
+      "background": "titlecard",
+      "hour": "0 Jam",
+      "objective": "Mulai hari pertama di dalam bunker.",
+      "choices": [
+        {
+          "id": "c_prolog_enter_day1",
+          "text": "Lanjutkan",
+          "nextSceneId": "day1_lockdoor",
+          "knowledgeEffect": 0,
+          "log": "Keluarga memasuki Bunker 72."
+        }
+      ]
     },
     "day1_lockdoor": {
       "speaker": "Ayah",

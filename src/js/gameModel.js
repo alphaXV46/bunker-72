@@ -26,7 +26,12 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day2_scavenge_bypass': 'scavenged',
   'c_day2_scavenge_slow': 'scavenged',
   'c_day3_pinch_inspect_vent': 'vent_secured',
+  'c_prolog_pack_food': 'food_packed',
+  'c_prolog_pack_drink': 'drink_packed',
+  'c_prolog_pack_kit': 'kit_packed',
   'c_prolog_pack_battery': 'extra_battery',
+  'c_prolog_pack_snack': 'snack_packed',
+  'c_prolog_pack_toy': 'toy_packed',
   'c_day2_radio_battery': 'radio_saved',
 });
 
@@ -98,10 +103,6 @@ export class GameModel {
     if (history.some(e => e.choiceId === 'c_prolog_pack_battery')) {
       flags.extra_battery = true;
       flags.battery_packed = true;
-    }
-    const kitChoicesCount = history.filter(e => e.choiceId === 'c_prolog_pack_kit').length;
-    if (kitChoicesCount >= 2) {
-      flags.kit_maxed = true;
     }
     if (history.some(e => e.choiceId === 'c_day2_scavenge_bypass' && e.text && e.text.includes("Gagal"))) {
       flags.generator_damaged = true;
