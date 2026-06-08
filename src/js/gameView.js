@@ -897,6 +897,17 @@ export class GameView {
   renderPackingChoices(choices, flags, onChoiceClick) {
     this.dom.choicesPanel.classList.add('packing-grid');
 
+    const packedCount = ['food_packed', 'drink_packed', 'kit_packed', 'battery_packed', 'snack_packed', 'toy_packed']
+      .filter((flag) => flags[flag] === true).length;
+
+    const hint = document.createElement('div');
+    hint.className = 'packing-hint';
+    hint.innerHTML = `
+      <strong>Pilih 5 barang untuk dibawa ke bunker</strong>
+      <span>${packedCount}/5 masuk tas</span>
+    `;
+    this.dom.choicesPanel.appendChild(hint);
+
     choices.forEach((choice) => {
       if (choice.forbiddenFlags?.some((f) => flags[f] === true)) return;
 
