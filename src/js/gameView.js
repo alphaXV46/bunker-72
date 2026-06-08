@@ -352,6 +352,9 @@ export class GameView {
    * @param {object} scene
    */
   renderSceneArt(scene, flags = {}, sceneId = '') {
+    const hour = parseHour(scene.hour);
+    const gameplayDayBg = hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
+    const damagedBg = hour >= 48 ? 'bg-day3' : 'bg-rusak';
     const bgClassMap = {
       packing: 'bg-prolog-1',
       prolog: 'bg-prolog-1',
@@ -361,8 +364,8 @@ export class GameView {
       prolog4: 'bg-prolog-4',
       titlecard: 'bg-titlecard',
       hari1: 'bg-day1',
-      normal: 'bg-day1',
-      rusak: 'bg-rusak',
+      normal: gameplayDayBg,
+      rusak: damagedBg,
     };
 
     const ENV_CLASSES = ['env-dusty', 'env-smoky', 'env-damaged', 'env-dim'];
@@ -372,7 +375,7 @@ export class GameView {
 
     this.dom.storyBox.classList.remove(
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
-      'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-normal', 'bg-rusak', 'scene-alert',
+      'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-day2', 'bg-day3', 'bg-normal', 'bg-rusak', 'scene-alert',
       'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator',
       ...ENV_CLASSES
     );
@@ -453,22 +456,6 @@ export class GameView {
       if (!alertEl) {
         alertEl = document.createElement('div');
         alertEl.className = 'system-alert-banner';
-        alertEl.style.position = 'absolute';
-        alertEl.style.top = '72px';
-        alertEl.style.left = '50%';
-        alertEl.style.transform = 'translateX(-50%)';
-        alertEl.style.backgroundColor = 'rgba(8, 9, 11, 0.95)';
-        alertEl.style.border = '2px solid var(--accent-red-border)';
-        alertEl.style.color = 'var(--accent-red-border)';
-        alertEl.style.padding = '8px 16px';
-        alertEl.style.fontFamily = "'Share Tech Mono', 'Courier New', monospace";
-        alertEl.style.fontSize = '0.95rem';
-        alertEl.style.fontWeight = 'bold';
-        alertEl.style.zIndex = '999';
-        alertEl.style.textAlign = 'center';
-        alertEl.style.boxShadow = '0 0 15px rgba(255, 93, 93, 0.4)';
-        alertEl.style.letterSpacing = '1px';
-        alertEl.style.pointerEvents = 'none';
         container.appendChild(alertEl);
       }
       alertEl.textContent = `⚠️ PERINGATAN SISTEM: ${alertTag} ⚠️`;

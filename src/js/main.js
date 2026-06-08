@@ -105,6 +105,10 @@ function showScreen(screenKey) {
   SCREENS.forEach((key) => dom[key]?.classList.remove('active'));
   const target = dom[`${screenKey}View`];
   if (target) target.classList.add('active');
+
+  if (screenKey !== 'game') {
+    storyEngine?.audio.stopAll();
+  }
 }
 
 // ─── INITIALISATION ──────────────────────────────────────────────────────────
@@ -159,6 +163,7 @@ function initGame() {
   dom.newGameBtn.addEventListener('click', () => {
     localStorage.removeItem(SAVE_KEY);
     showScreen('game');
+    storyEngine.audio.playBGM();
     const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
     storyEngine.start('prolog_home', knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health);
   });
@@ -167,6 +172,7 @@ function initGame() {
     const save = checkSaveData();
     if (!save) return;
     showScreen('game');
+    storyEngine.audio.playBGM();
     storyEngine.start(
       save.sceneId,
       save.knowledge,
@@ -208,6 +214,12 @@ function initGame() {
   };
   document.addEventListener('click',   initAudioOnFirstInteraction);
   document.addEventListener('keydown', initAudioOnFirstInteraction);
+
+  window.addEventListener('pagehide', () => storyEngine?.audio.stopAll());
+  window.addEventListener('beforeunload', () => storyEngine?.audio.stopAll());
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) storyEngine?.audio.stopAll();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', initGame);

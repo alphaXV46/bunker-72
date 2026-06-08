@@ -103,6 +103,14 @@ export class RetroAudio {
     }
   }
 
+  stopAll() {
+    this.stopRadioSound();
+    this.stopBGM();
+    if (this.ctx && this.ctx.state !== 'closed') {
+      this.ctx.suspend().catch(() => {});
+    }
+  }
+
   async playBadChoice() {
     this.init();
     if (!this.ctx) return;
