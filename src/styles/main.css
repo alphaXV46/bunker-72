@@ -172,7 +172,7 @@ input[type="range"] {
   padding: 36px;
   background:
     linear-gradient(rgba(8,9,11,0.18), rgba(8,9,11,0.5)),
-    url('../assets/bg_menu_baru.png') center / cover no-repeat;
+    url('../assets/bg_menu.png') center / cover no-repeat;
 }
 
 .menu-title-container {
@@ -562,13 +562,18 @@ input[type="range"] {
 }
 
 /* Scene background classes */
-.story-box.bg-prolog { background-image: url('../assets/bg_prolog.png'); }
+.story-box.bg-prolog,
+.story-box.bg-prolog-1 { background-image: url('../assets/bg_prolog1.png'); }
+.story-box.bg-prolog-2 { background-image: url('../assets/bg_prolog2.png'); }
+.story-box.bg-prolog-3 { background-image: url('../assets/bg_prolog3.png'); }
+.story-box.bg-prolog-4 { background-image: url('../assets/bg_prolog4.png'); }
 .story-box.bg-hari1,
-.story-box.bg-normal  { background-image: url('../assets/bg_hari1.png'); }
+.story-box.bg-day1,
+.story-box.bg-normal  { background-image: url('../assets/bg_day1.png'); }
 .story-box.bg-rusak   {
   background-image:
     linear-gradient(rgba(20,8,8,0.22), rgba(0,0,0,0.12)),
-    url('../assets/bg_hari1.png');
+    url('../assets/bg_day2.png');
 }
 
 /* Scene vignette gradient */
@@ -889,20 +894,36 @@ body.prolog-active #settings-btn { display: none !important; }
 
 #game-view.prolog-mode .scene-vignette {
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.74) 0%, rgba(0,0,0,0.36) 31%, rgba(0,0,0,0.08) 58%, rgba(0,0,0,0.26) 100%),
-    linear-gradient(180deg, rgba(0,0,0,0.18) 0%, transparent 36%, rgba(0,0,0,0.72) 100%);
+    linear-gradient(90deg, rgba(0,0,0,0.84) 0%, rgba(0,0,0,0.48) 34%, rgba(0,0,0,0.16) 60%, rgba(0,0,0,0.38) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.06) 34%, rgba(0,0,0,0.82) 100%),
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.02) 0 34%, rgba(0,0,0,0.78) 100%);
+}
+
+#game-view.prolog-mode .scene-vignette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(0,0,0,0.28), transparent 35%),
+    rgba(0,0,0,0.1);
+  pointer-events: none;
 }
 
 #game-view.prolog-mode .dialogue-overlay {
-  width: min(36%, 520px);
+  width: min(42%, 620px);
   min-height: auto;
-  margin: 0 0 clamp(96px, 11vh, 138px) clamp(28px, 3.2vw, 54px);
-  padding: 0;
-  border-left: 0;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
+  margin: 0 0 clamp(88px, 10vh, 128px) clamp(28px, 3.2vw, 54px);
+  padding: clamp(14px, 1.4vw, 22px);
+  border: 2px solid rgba(114,128,138,0.55);
+  border-left: 6px solid var(--warning-yellow-border);
+  background:
+    linear-gradient(180deg, rgba(15,18,22,0.76), rgba(7,9,12,0.9)),
+    linear-gradient(90deg, rgba(91,192,190,0.08), transparent 48%);
+  box-shadow:
+    10px 10px 0 rgba(0,0,0,0.42),
+    0 0 36px rgba(0,0,0,0.72),
+    inset 0 0 0 1px rgba(231,237,240,0.05);
+  backdrop-filter: blur(4px);
 }
 
 #game-view.prolog-mode .dialogue-overlay::before {
@@ -920,13 +941,32 @@ body.prolog-active #settings-btn { display: none !important; }
   text-shadow: 0 2px 0 rgba(0,0,0,0.7), 0 0 16px rgba(0,0,0,0.8);
 }
 
-#game-view.prolog-mode .speaker-name,
-#game-view.prolog-mode .avatar-container { display: none !important; }
+#game-view.prolog-mode .speaker-name {
+  display: inline-flex;
+  color: var(--cyan);
+  border-bottom: 1px solid rgba(91,192,190,0.45);
+  margin-bottom: 4px;
+}
 
-#game-view.prolog-mode .dialogue-body { display: block; }
+#game-view.prolog-mode .avatar-container {
+  width: clamp(54px, 5vw, 78px);
+  height: clamp(54px, 5vw, 78px);
+  border-color: rgba(91,192,190,0.62);
+  box-shadow: inset 0 -10px 0 rgba(0,0,0,0.25), 0 0 16px rgba(91,192,190,0.14);
+}
+
+#game-view.prolog-mode .story-box.speaker-narrator .avatar-container {
+  display: none !important;
+}
+
+#game-view.prolog-mode .dialogue-body { display: flex; }
+
+#game-view.prolog-mode .story-box.speaker-narrator .dialogue-body {
+  display: block;
+}
 
 #game-view.prolog-mode .dialogue-text {
-  font-size: clamp(0.98rem, 1.22vw, 1.32rem);
+  font-size: clamp(0.94rem, 1.14vw, 1.24rem);
   line-height: 1.52;
   color: #f3ead2;
   text-shadow: 0 3px 0 rgba(0,0,0,0.68), 0 0 18px rgba(0,0,0,0.85);
@@ -989,7 +1029,9 @@ body.prolog-active #settings-btn { display: none !important; }
 
 .choice-btn {
   min-height: clamp(44px, 5.4vh, 60px);
-  background: linear-gradient(90deg, rgba(23,27,33,0.95), rgba(16,18,22,0.88));
+  background:
+    linear-gradient(90deg, rgba(91,192,190,0.06), transparent 38%),
+    linear-gradient(180deg, rgba(23,27,33,0.96), rgba(10,12,15,0.9));
   color: var(--text-pixel);
   border: 2px solid var(--line);
   padding: clamp(8px, 1vw, 12px);
@@ -1004,11 +1046,13 @@ body.prolog-active #settings-btn { display: none !important; }
   gap: 10px;
   align-items: center;
   backdrop-filter: blur(3px);
-  box-shadow: 0 5px 0 rgba(0,0,0,0.28);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.28), inset 0 0 0 1px rgba(231,237,240,0.03);
 }
 
 .choice-btn:hover:not(:disabled) {
-  background-color: #20262d;
+  background:
+    linear-gradient(90deg, rgba(255,209,102,0.12), transparent 44%),
+    linear-gradient(180deg, rgba(27,32,38,0.98), rgba(12,14,17,0.94));
   border-color: var(--warning-yellow-border);
   transform: translateX(4px);
 }
@@ -1027,6 +1071,7 @@ body.prolog-active #settings-btn { display: none !important; }
   place-items: center;
   border: 2px solid var(--line);
   color: var(--cyan);
+  background: rgba(8,9,11,0.72);
 }
 
 .choice-copy  { min-width: 0; }
@@ -1331,7 +1376,7 @@ body.prolog-active #settings-btn { display: none !important; }
 #ending-view.ending-bg-normal {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.72)),
-    url('../assets/bg_normal_end.png') center / cover no-repeat;
+    url('../assets/bg_bad_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-best {

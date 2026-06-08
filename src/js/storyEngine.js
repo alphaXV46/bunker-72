@@ -210,6 +210,20 @@ export class StoryEngine {
     const modifiedText = this.processNarrativeText(sceneId, dialogueText, scene.speaker);
 
     this.view.dom.choicesPanel.innerHTML = '';
+
+    if (scene.autoNextSceneId) {
+      const delay = typeof scene.autoAdvanceDelay === 'number' ? scene.autoAdvanceDelay : 1100;
+      const autoAdvance = () => {
+        window.setTimeout(() => this.renderScene(scene.autoNextSceneId), delay);
+      };
+      this.view.typeText(modifiedText, autoAdvance, {
+        ...choicesPayload,
+        choices: [],
+        autoAdvance,
+      });
+      return;
+    }
+
     // Pass choicesPayload so skipTyping can render choices without model access.
     this.view.typeText(modifiedText, () => {
       this.view.renderChoices(

@@ -39,39 +39,52 @@
     "prolog_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pukul 18.07, langit Cilegon berubah merah membara. Sirene darurat kota meraung-raung bersahutan di tengah kepulan abu vulkanik. Anda, Ibu, dan Anak berhasil mencapai Bunker 72 tepat sesaat sebelum gemuruh gelombang kejut letusan kedua Krakatau menghempas permukaan. Panel pintu berkedip merah: sistem harus disegel dalam hitungan menit.",
-      "background": "prolog",
+      "text": "Pukul 18.07, langit Cilegon berubah merah membara. Sirene darurat kota meraung-raung bersahutan di tengah kepulan abu vulkanik. Dari balik kaca yang retak, Anda melihat jalan utama perlahan menghilang di bawah hujan pasir panas.",
+      "background": "prolog1",
       "hour": "0 Jam",
-      "objective": "Segel bunker dan mulai protokol 72 jam.",
+      "objective": "Capai Bunker 72 sebelum gelombang kejut susulan tiba.",
       "focusItems": [
         "food",
         "drink",
         "kit",
         "radio"
       ],
-      "choices": [
-        {
-          "id": "c_day1_lock_auto",
-          "text": "Kunci pintu otomatis & aktifkan sistem filtrasi.",
-          "nextSceneId": "day1_lockdoor",
-          "knowledgeEffect": 1,
-          "log": "Pintu dikunci otomatis."
-        },
-        {
-          "id": "c_day1_lock_open",
-          "text": "Tunda penutupan pintu selama 30 detik untuk menyeimbangkan tekanan udara masuk.",
-          "nextSceneId": "day1_lockdoor",
-          "knowledgeEffect": -2,
-          "log": "Pintu dibiarkan sedikit terbuka sebelum akhirnya dikunci."
-        },
-        {
-          "id": "c_day1_lock_manual",
-          "text": "Kunci manual dengan palang darurat baja.",
-          "nextSceneId": "day1_lockdoor",
-          "knowledgeEffect": 2,
-          "log": "Pintu dikunci manual dengan palang baja."
-        }
-      ]
+      "autoNextSceneId": "prolog_road",
+      "autoAdvanceDelay": 1300,
+      "choices": []
+    },
+    "prolog_road": {
+      "speaker": "Ibu",
+      "avatar": "ibu",
+      "text": "Jangan lihat ke belakang, Nak. Pegang tangan Ibu. Ayah sudah dekat dengan pintu bunker. Kita masuk dulu, baru bernapas pelan-pelan. Di luar sana tidak ada udara yang aman lagi.",
+      "background": "prolog2",
+      "hour": "0 Jam",
+      "objective": "Bawa keluarga melewati akses terakhir.",
+      "autoNextSceneId": "prolog_threshold",
+      "autoAdvanceDelay": 1200,
+      "choices": []
+    },
+    "prolog_threshold": {
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Panel akses merespons. Ransel darurat masuk, semua anggota keluarga terdeteksi. Begitu pintu ini menutup, kita bertahan dengan prosedur, bukan panik. Bunker 72, mulai protokol penyegelan.",
+      "background": "prolog3",
+      "hour": "0 Jam",
+      "objective": "Masuk dan aktifkan segel utama.",
+      "autoNextSceneId": "prolog_surface",
+      "autoAdvanceDelay": 1200,
+      "choices": []
+    },
+    "prolog_surface": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Di luar, gelombang abu menelan halaman bunker. Lampu jalan padam satu per satu, dan permukaan berubah menjadi lautan debu hitam. Di balik pintu baja yang baru tersegel, keluarga Anda kini hanya punya 72 jam pertama untuk tetap hidup.",
+      "background": "prolog4",
+      "hour": "0 Jam",
+      "objective": "Tinggalkan permukaan dan mulai hidup di dalam bunker.",
+      "autoNextSceneId": "day1_lockdoor",
+      "autoAdvanceDelay": 1600,
+      "choices": []
     },
     "day1_lockdoor": {
       "speaker": "Ayah",

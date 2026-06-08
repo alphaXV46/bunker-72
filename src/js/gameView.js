@@ -343,24 +343,35 @@ export class GameView {
    * @param {object} scene
    */
   renderSceneArt(scene, flags = {}, sceneId = '') {
-    const bgClassMap = { prolog: 'bg-prolog', hari1: 'bg-hari1', normal: 'bg-hari1', rusak: 'bg-rusak' };
+    const bgClassMap = {
+      prolog: 'bg-prolog-1',
+      prolog1: 'bg-prolog-1',
+      prolog2: 'bg-prolog-2',
+      prolog3: 'bg-prolog-3',
+      prolog4: 'bg-prolog-4',
+      hari1: 'bg-day1',
+      normal: 'bg-day1',
+      rusak: 'bg-rusak',
+    };
 
     const ENV_CLASSES = ['env-dusty', 'env-smoky', 'env-damaged', 'env-dim'];
     this.dom.storyBox.classList.remove(
-      'bg-prolog', 'bg-hari1', 'bg-normal', 'bg-rusak', 'scene-alert',
+      'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
+      'bg-hari1', 'bg-day1', 'bg-normal', 'bg-rusak', 'scene-alert',
       'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator',
       ...ENV_CLASSES
     );
 
-    this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', scene.background === 'prolog');
-    document.body.classList.toggle('prolog-active', scene.background === 'prolog');
+    const isProlog = String(scene.background || '').startsWith('prolog');
+    this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', isProlog);
+    document.body.classList.toggle('prolog-active', isProlog);
 
-    this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-hari1');
+    this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
     if (scene.alert) this.dom.storyBox.classList.add('scene-alert');
 
     // ── Environmental visual filters based on active flags ──────────────────
     // Only apply during non-prolog gameplay scenes
-    const isGameplay = scene.background !== 'prolog';
+    const isGameplay = !isProlog;
     if (isGameplay) {
       // Dusty/sepia tint — unfiltered air contaminates the environment
       if (flags.air_uninspected && !flags.air_remedied) {
@@ -458,16 +469,6 @@ export class GameView {
   renderChoices(choices, currentSceneId, flags, onChoiceClick) {
     this.dom.choicesPanel.innerHTML = '';
     if (!choices?.length) return;
-
-    // Prolog gets a special full-width continue button
-    if (currentSceneId === 'prolog_intro') {
-      const btn       = document.createElement('button');
-      btn.className   = 'prolog-continue';
-      btn.textContent = 'Klik untuk masuk ke bunker';
-      btn.addEventListener('click', () => onChoiceClick(choices[0]));
-      this.dom.choicesPanel.appendChild(btn);
-      return;
-    }
 
     let renderedIndex = 1;
     choices.forEach((choice) => {
@@ -639,6 +640,12 @@ export class GameView {
 
     // Re-render choices from the payload stored when typeText() was called.
     const p = this._pendingChoicesPayload;
+    if (p?.autoAdvance) {
+      p.autoAdvance();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
     if (p) {
       this.renderChoices(p.choices, p.currentSceneId, p.flags, p.onChoiceClick);
     }
