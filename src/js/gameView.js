@@ -916,14 +916,13 @@ export class GameView {
       btn.className = `packing-item packing-item-${choice.item}`;
       btn.type = 'button';
       btn.innerHTML = `
-        <span class="packing-item-glow"></span>
         <img src="${item.image}" alt="${item.label}">
         <span>${item.label}</span>
       `;
       btn.addEventListener('click', () => {
         if (btn.classList.contains('packing-picked')) return;
         btn.classList.add('packing-picked');
-        window.setTimeout(() => onChoiceClick(choice), 420);
+        onChoiceClick(choice);
       });
       this.dom.choicesPanel.appendChild(btn);
     });
