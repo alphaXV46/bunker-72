@@ -885,7 +885,64 @@ input[type="range"] {
 #game-view.prolog-mode .journal-panel,
 #game-view.prolog-mode #settings-btn { display: none !important; }
 
-body.prolog-active #settings-btn { display: none !important; }
+#game-view.packing-mode .status-panel,
+#game-view.packing-mode .mission-panel,
+#game-view.packing-mode .resource-panel,
+#game-view.packing-mode .environment-readout,
+#game-view.packing-mode #journal-btn,
+#game-view.packing-mode .journal-panel,
+#game-view.packing-mode #settings-btn { display: none !important; }
+
+body.prolog-active #settings-btn,
+body.packing-active #settings-btn { display: none !important; }
+
+#game-view.packing-mode .story-box {
+  padding: clamp(28px, 3vw, 46px);
+  justify-content: flex-end;
+}
+
+#game-view.packing-mode .scene-vignette {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.04) 52%, rgba(0,0,0,0.34) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.16) 58%, rgba(0,0,0,0.42) 100%);
+}
+
+#game-view.packing-mode .dialogue-overlay {
+  position: absolute;
+  left: clamp(34px, 3.6vw, 58px);
+  bottom: clamp(34px, 4.2vh, 58px);
+  width: min(36%, 560px);
+  min-height: auto;
+  margin: 0;
+  padding: clamp(14px, 1.3vw, 20px);
+  background: linear-gradient(180deg, rgba(10,12,15,0.72), rgba(8,9,11,0.84));
+  border: 2px solid rgba(114,128,138,0.62);
+  border-left: 6px solid var(--warning-yellow-border);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.34), 0 0 28px rgba(0,0,0,0.42);
+}
+
+#game-view.packing-mode .dialogue-overlay::before { display: none; }
+#game-view.packing-mode .speaker-name,
+#game-view.packing-mode .avatar-container { display: none !important; }
+#game-view.packing-mode .dialogue-body { display: block; }
+#game-view.packing-mode .dialogue-text {
+  font-size: clamp(0.86rem, 1vw, 1.08rem);
+  line-height: 1.42;
+  color: #f7eed8;
+}
+
+#game-view.packing-mode .command-deck {
+  width: min(42%, 640px);
+  right: clamp(34px, 4vw, 68px);
+  bottom: clamp(34px, 4.2vh, 58px);
+}
+
+#game-view.packing-mode .choice-btn {
+  min-height: clamp(42px, 5vh, 56px);
+  background:
+    linear-gradient(90deg, rgba(91,192,190,0.08), transparent 45%),
+    rgba(9,11,14,0.78);
+}
 
 #game-view.prolog-mode .story-box {
   padding: clamp(28px, 3vw, 48px);
@@ -894,9 +951,9 @@ body.prolog-active #settings-btn { display: none !important; }
 
 #game-view.prolog-mode .scene-vignette {
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.84) 0%, rgba(0,0,0,0.48) 34%, rgba(0,0,0,0.16) 60%, rgba(0,0,0,0.38) 100%),
-    linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.06) 34%, rgba(0,0,0,0.82) 100%),
-    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.02) 0 34%, rgba(0,0,0,0.78) 100%);
+    linear-gradient(90deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.14) 42%, rgba(0,0,0,0.24) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.08) 0%, transparent 42%, rgba(0,0,0,0.46) 100%),
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0) 0 44%, rgba(0,0,0,0.44) 100%);
 }
 
 #game-view.prolog-mode .scene-vignette::after {
@@ -904,72 +961,58 @@ body.prolog-active #settings-btn { display: none !important; }
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(0deg, rgba(0,0,0,0.28), transparent 35%),
-    rgba(0,0,0,0.1);
+    linear-gradient(0deg, rgba(0,0,0,0.16), transparent 42%);
   pointer-events: none;
 }
 
 #game-view.prolog-mode .dialogue-overlay {
-  width: min(42%, 620px);
+  width: min(38%, 590px);
   min-height: auto;
-  margin: 0 0 clamp(88px, 10vh, 128px) clamp(28px, 3.2vw, 54px);
-  padding: clamp(14px, 1.4vw, 22px);
-  border: 2px solid rgba(114,128,138,0.55);
-  border-left: 6px solid var(--warning-yellow-border);
-  background:
-    linear-gradient(180deg, rgba(15,18,22,0.76), rgba(7,9,12,0.9)),
-    linear-gradient(90deg, rgba(91,192,190,0.08), transparent 48%);
-  box-shadow:
-    10px 10px 0 rgba(0,0,0,0.42),
-    0 0 36px rgba(0,0,0,0.72),
-    inset 0 0 0 1px rgba(231,237,240,0.05);
-  backdrop-filter: blur(4px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  position: absolute;
+  left: clamp(52px, 5vw, 86px);
+  bottom: clamp(66px, 8vh, 104px);
 }
 
 #game-view.prolog-mode .dialogue-overlay::before {
-  content: 'PROLOG';
-  position: static;
-  display: block;
-  width: auto;
-  height: auto;
-  margin-bottom: 14px;
-  background: transparent;
-  box-shadow: none;
-  color: var(--warning-yellow-border);
-  font-size: clamp(0.72rem, 0.9vw, 0.95rem);
-  letter-spacing: 5px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.7), 0 0 16px rgba(0,0,0,0.8);
+  display: none;
 }
 
-#game-view.prolog-mode .speaker-name {
-  display: inline-flex;
-  color: var(--cyan);
-  border-bottom: 1px solid rgba(91,192,190,0.45);
-  margin-bottom: 4px;
-}
+#game-view.prolog-mode .speaker-name,
+#game-view.prolog-mode .avatar-container { display: none !important; }
 
-#game-view.prolog-mode .avatar-container {
-  width: clamp(54px, 5vw, 78px);
-  height: clamp(54px, 5vw, 78px);
-  border-color: rgba(91,192,190,0.62);
-  box-shadow: inset 0 -10px 0 rgba(0,0,0,0.25), 0 0 16px rgba(91,192,190,0.14);
-}
-
-#game-view.prolog-mode .story-box.speaker-narrator .avatar-container {
-  display: none !important;
-}
-
-#game-view.prolog-mode .dialogue-body { display: flex; }
-
-#game-view.prolog-mode .story-box.speaker-narrator .dialogue-body {
-  display: block;
-}
+#game-view.prolog-mode .dialogue-body { display: block; }
 
 #game-view.prolog-mode .dialogue-text {
-  font-size: clamp(0.94rem, 1.14vw, 1.24rem);
-  line-height: 1.52;
-  color: #f3ead2;
-  text-shadow: 0 3px 0 rgba(0,0,0,0.68), 0 0 18px rgba(0,0,0,0.85);
+  font-family: 'VT323', monospace;
+  font-size: clamp(1.35rem, 1.75vw, 2rem);
+  line-height: 1.12;
+  color: #fff2cc;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.72), 0 0 18px rgba(0,0,0,0.82);
+}
+
+#game-view.prolog-mode .scene-id-prolog_road .dialogue-overlay {
+  left: auto;
+  right: clamp(52px, 5vw, 86px);
+  bottom: clamp(62px, 8vh, 96px);
+  text-align: right;
+}
+
+#game-view.prolog-mode .scene-id-prolog_threshold .dialogue-overlay {
+  left: clamp(60px, 6vw, 110px);
+  top: clamp(72px, 10vh, 118px);
+  bottom: auto;
+}
+
+#game-view.prolog-mode .scene-id-prolog_surface .dialogue-overlay {
+  left: clamp(58px, 5.5vw, 96px);
+  bottom: clamp(74px, 9vh, 118px);
+  width: min(43%, 660px);
 }
 
 #game-view.prolog-mode .command-deck {
@@ -1359,39 +1402,46 @@ body.prolog-active #settings-btn { display: none !important; }
 
 #ending-view {
   align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 28px;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: clamp(18px, 2.3vw, 34px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-bright) rgba(0,0,0,0.2);
   background:
-    linear-gradient(rgba(8,9,11,0.2), rgba(8,9,11,0.72)),
+    linear-gradient(rgba(8,9,11,0.18), rgba(8,9,11,0.56)),
     url('../assets/bg_fatal_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-bad {
   background:
-    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.76)),
+    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.58)),
     url('../assets/bg_bad_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-normal {
   background:
-    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.72)),
+    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.55)),
     url('../assets/bg_bad_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-best {
   background:
-    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.65)),
+    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.48)),
     url('../assets/bg_good_end.png') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-fatal {
   background:
-    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.78)),
+    linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.62)),
     url('../assets/bg_fatal_end.png') center / cover no-repeat;
 }
 
-.ending-header     { text-align: center; }
+.ending-header {
+  width: min(920px, 100%);
+  text-align: center;
+  padding-top: 4px;
+}
 
 .ending-alert-title {
   font-size: 1rem;
@@ -1402,8 +1452,10 @@ body.prolog-active #settings-btn { display: none !important; }
 
 .ending-type {
   font-family: 'VT323', monospace;
-  font-size: 3.4rem;
-  margin: 8px 0 0;
+  font-size: clamp(2rem, 3.5vw, 3.35rem);
+  line-height: 0.92;
+  margin: 6px 0 0;
+  text-shadow: 0 4px 0 rgba(0,0,0,0.7), 0 0 18px rgba(0,0,0,0.8);
 }
 
 .ending-bad    { color: var(--accent-red-border)     !important; }
@@ -1412,31 +1464,104 @@ body.prolog-active #settings-btn { display: none !important; }
 
 .ending-content-box {
   width: 100%;
-  max-width: 740px;
-  background-color: rgba(12, 14, 18, 0.92);
+  max-width: 920px;
+  background:
+    linear-gradient(180deg, rgba(15,18,22,0.86), rgba(8,9,11,0.9)),
+    linear-gradient(90deg, rgba(91,192,190,0.06), transparent 42%);
   border: 2px solid var(--line-bright);
-  padding: 18px;
+  border-left: 6px solid var(--cyan);
+  padding: clamp(14px, 1.4vw, 20px);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.34);
+  backdrop-filter: blur(4px);
 }
 
 .ending-description {
-  font-size: 1.02rem;
-  line-height: 1.55;
+  max-height: clamp(96px, 15vh, 130px);
+  overflow-y: auto;
+  padding-right: 8px;
+  font-size: clamp(0.88rem, 1vw, 1.04rem);
+  line-height: 1.48;
   margin: 0;
-  text-align: justify;
+  text-align: left;
 }
 
 .ending-stats {
-  width: min(740px, 100%);
+  width: min(920px, 100%);
   text-align: center;
-  font-size: 1rem;
-  background: rgba(12, 14, 18, 0.82);
+  font-size: clamp(0.82rem, 0.95vw, 1rem);
+  background: rgba(12, 14, 18, 0.84);
   border: 2px solid var(--line);
-  padding: 12px;
+  padding: clamp(10px, 1vw, 14px);
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.28);
 }
 
 .ending-stats p   { margin: 5px 0; }
 .ending-grade     { font-weight: bold; letter-spacing: 1px; }
 .ending-summary   { color: var(--text-muted); font-size: 0.88rem; }
+
+#ending-view .choices-panel {
+  width: min(360px, 100%);
+  flex-shrink: 0;
+}
+
+#ending-view #educational-debrief-container {
+  width: min(920px, 100%);
+  padding-bottom: 14px;
+}
+
+.educational-debrief-box {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: clamp(10px, 1vw, 14px);
+  border: 2px solid var(--cyan);
+  background: rgba(9, 20, 22, 0.78);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+}
+
+.educational-debrief-box h3 {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  color: var(--cyan);
+  font-family: 'VT323', monospace;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  letter-spacing: 1px;
+}
+
+.educational-debrief-box section {
+  min-height: 106px;
+  max-height: 146px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid rgba(114,128,138,0.54);
+  background: rgba(8,9,11,0.44);
+}
+
+.educational-debrief-box h4 {
+  margin: 0 0 6px;
+  font-size: 0.92rem;
+  letter-spacing: 1px;
+}
+
+.educational-debrief-box ul {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--text-pixel);
+  font-size: 0.74rem;
+  line-height: 1.32;
+}
+
+.educational-debrief-box li { margin-bottom: 6px; }
+.empty-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+.debrief-good { color: var(--accent-green-border); }
+.debrief-risk { color: var(--accent-red-border); }
+.debrief-guide { color: var(--warning-yellow-border); }
 
 
 /* ============================================================
@@ -1878,6 +2003,10 @@ body.disable-crt .crt-flicker { display: none !important; }
 
 .debrief-box li:last-child {
   margin-bottom: 0;
+}
+
+#ending-view .debrief-box {
+  display: none;
 }
 
 /* Post-Game Quality Badges */

@@ -531,7 +531,7 @@ export class StoryEngine {
       if (this.model.inventory.kit > 0) itemsList.push(`${this.model.inventory.kit} P3K`);
       if (this.model.flags.extra_battery) itemsList.push(`1 Baterai Ekstra`);
       const itemsStr = itemsList.length > 0 ? itemsList.join(', ') : 'Belum ada';
-      processedText = `[RANSEL: ${packedCount}/5 Slot Terisi] — Isi Ransel: ${itemsStr}.\n\n` + processedText;
+      processedText = `Ransel ${packedCount}/5 slot.` + "\n" + `Isi: ${itemsStr}.` + "\n\n" + processedText;
     }
 
     const scene = this.storyData.scenes[sceneId];

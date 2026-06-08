@@ -1,10 +1,10 @@
 {
   "scenes": {
     "prolog_packing": {
-      "speaker": "Narator",
+      "speaker": "Ransel Darurat",
       "avatar": null,
-      "text": "Sebelum menyegel pintu bunker, Anda memiliki ransel darurat dengan 5 slot penyimpanan. Pilih barang yang ingin Anda bawa:",
-      "background": "prolog",
+      "text": "Siaran darurat baru saja masuk. Anda punya 5 slot ransel untuk persediaan pertama sebelum keluarga meninggalkan rumah.",
+      "background": "packing",
       "hour": "0 Jam",
       "objective": "Kemasi ransel darurat Anda (5 slot).",
       "choices": [
@@ -39,10 +39,10 @@
     "prolog_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pukul 18.07, langit Cilegon berubah merah membara. Sirene darurat kota meraung-raung bersahutan di tengah kepulan abu vulkanik. Dari balik kaca yang retak, Anda melihat jalan utama perlahan menghilang di bawah hujan pasir panas.",
-      "background": "prolog1",
+      "text": "Pukul 18.07. Layar televisi memotong semua siaran: status darurat berlaku. Dari jendela rumah, langit Cilegon berubah merah tua, dan suara sirene mulai menembus dinding.",
+      "background": "prolog2",
       "hour": "0 Jam",
-      "objective": "Capai Bunker 72 sebelum gelombang kejut susulan tiba.",
+      "objective": "Tinggalkan rumah sebelum jalur evakuasi tertutup.",
       "focusItems": [
         "food",
         "drink",
@@ -56,8 +56,8 @@
     "prolog_road": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Jangan lihat ke belakang, Nak. Pegang tangan Ibu. Ayah sudah dekat dengan pintu bunker. Kita masuk dulu, baru bernapas pelan-pelan. Di luar sana tidak ada udara yang aman lagi.",
-      "background": "prolog2",
+      "text": "Jangan lihat ke belakang, Nak. Pegang tangan Ibu. Pintu bunker sudah di depan kita. Kita masuk dulu, baru bernapas pelan-pelan. Di luar sini udaranya mulai terasa panas.",
+      "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Bawa keluarga melewati akses terakhir.",
       "autoNextSceneId": "prolog_threshold",

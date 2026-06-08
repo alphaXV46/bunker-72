@@ -344,6 +344,7 @@ export class GameView {
    */
   renderSceneArt(scene, flags = {}, sceneId = '') {
     const bgClassMap = {
+      packing: 'bg-prolog-1',
       prolog: 'bg-prolog-1',
       prolog1: 'bg-prolog-1',
       prolog2: 'bg-prolog-2',
@@ -355,6 +356,10 @@ export class GameView {
     };
 
     const ENV_CLASSES = ['env-dusty', 'env-smoky', 'env-damaged', 'env-dim'];
+    Array.from(this.dom.storyBox.classList)
+      .filter((className) => className.startsWith('scene-id-'))
+      .forEach((className) => this.dom.storyBox.classList.remove(className));
+
     this.dom.storyBox.classList.remove(
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
       'bg-hari1', 'bg-day1', 'bg-normal', 'bg-rusak', 'scene-alert',
@@ -363,15 +368,20 @@ export class GameView {
     );
 
     const isProlog = String(scene.background || '').startsWith('prolog');
-    this.dom.storyBox.closest('#game-view')?.classList.toggle('prolog-mode', isProlog);
+    const isPacking = sceneId === 'prolog_packing';
+    const gameView = this.dom.storyBox.closest('#game-view');
+    gameView?.classList.toggle('prolog-mode', isProlog);
+    gameView?.classList.toggle('packing-mode', isPacking);
     document.body.classList.toggle('prolog-active', isProlog);
+    document.body.classList.toggle('packing-active', isPacking);
 
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
+    this.dom.storyBox.classList.add(`scene-id-${sceneId}`);
     if (scene.alert) this.dom.storyBox.classList.add('scene-alert');
 
     // ── Environmental visual filters based on active flags ──────────────────
     // Only apply during non-prolog gameplay scenes
-    const isGameplay = !isProlog;
+    const isGameplay = !isProlog && !isPacking;
     if (isGameplay) {
       // Dusty/sepia tint — unfiltered air contaminates the environment
       if (flags.air_uninspected && !flags.air_remedied) {
@@ -804,14 +814,14 @@ export class GameView {
     const optimalChoices = [];
     const riskyChoices = [];
 
-    history.forEach(item => {
+    history.forEach((item) => {
       if (item.choiceId && CHOICE_QUALITY_MAP[item.choiceId]) {
         const quality = CHOICE_QUALITY_MAP[item.choiceId];
         const choiceData = {
           id: item.choiceId,
           text: item.text,
           hour: item.hour,
-          fact: FACTS_MAP[item.choiceId] || ''
+          fact: FACTS_MAP[item.choiceId] || '',
         };
         if (quality === 'Optimal') {
           optimalChoices.push(choiceData);
@@ -821,36 +831,34 @@ export class GameView {
       }
     });
 
-    let html = `
-      <div class="educational-debrief-box" style="margin-top: 1.5rem; padding: 1.25rem; border: 2px solid var(--cyan); background: rgba(91, 192, 190, 0.1); border-radius: 4px; font-family: 'Share Tech Mono', monospace;">
-        <h3 style="color: var(--cyan); margin-top: 0; margin-bottom: 1rem; font-family: 'VT323', monospace; font-size: 1.5rem; letter-spacing: 1px;">💡 EVALUASI DETAIL KEPUTUSAN & MITIGASI</h3>
-        
-        <div style="margin-bottom: 1rem;">
-          <h4 style="color: var(--accent-green-border); margin: 0 0 0.5rem 0; font-size: 1.1rem;">✓ KEPUTUSAN TEPAT (OPTIMAL)</h4>
-          \${optimalChoices.length > 0 ? \`
-            <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-pixel);">
-              \${optimalChoices.map(c => \`<li style="margin-bottom: 0.25rem;">[\${c.hour}] \${c.text}</li>\`).join('')}
-            </ul>
-          \` : '<p style="margin: 0; padding-left: 1.25rem; color: #888; font-style: italic;">Tidak ada keputusan optimal yang tercatat.</p>'}
-        </div>
+    const renderList = (items, emptyText, includeFact = false) => {
+      if (!items.length) return `<p class="empty-note">${emptyText}</p>`;
+      return `
+        <ul>
+          ${items.map((c) => {
+            const body = includeFact ? c.fact : c.text;
+            return `<li><strong>[${c.hour}]</strong> ${body}</li>`;
+          }).join('')}
+        </ul>
+      `;
+    };
 
-        <div style="margin-bottom: 1rem;">
-          <h4 style="color: var(--accent-red-border); margin: 0 0 0.5rem 0; font-size: 1.1rem;">✗ KEPUTUSAN BERISIKO (RISKY)</h4>
-          \${riskyChoices.length > 0 ? \`
-            <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-pixel);">
-              \${riskyChoices.map(c => \`<li style="margin-bottom: 0.25rem;">[\${c.hour}] \${c.text}</li>\`).join('')}
-            </ul>
-          \` : '<p style="margin: 0; padding-left: 1.25rem; color: #888; font-style: italic;">Tidak ada keputusan berisiko yang tercatat.</p>'}
-        </div>
-
-        <div>
-          <h4 style="color: var(--warning-yellow-border); margin: 0 0 0.5rem 0; font-size: 1.1rem;">⚠ PANDUAN PERBAIKAN MITIGASI</h4>
-          \${riskyChoices.filter(c => c.fact).length > 0 ? \`
-            <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-pixel);">
-              \${riskyChoices.filter(c => c.fact).map(c => \`<li style="margin-bottom: 0.5rem;"><strong>[\${c.hour}]</strong> \${c.fact}</li>\`).join('')}
-            </ul>
-          \` : '<p style="margin: 0; padding-left: 1.25rem; color: #888; font-style: italic;">Tidak ada panduan mitigasi khusus yang diperlukan.</p>'}
-        </div>
+    const riskyFacts = riskyChoices.filter((c) => c.fact);
+    const html = `
+      <div class="educational-debrief-box">
+        <h3>EVALUASI DETAIL KEPUTUSAN & MITIGASI</h3>
+        <section>
+          <h4 class="debrief-good">KEPUTUSAN TEPAT</h4>
+          ${renderList(optimalChoices, 'Tidak ada keputusan optimal yang tercatat.')}
+        </section>
+        <section>
+          <h4 class="debrief-risk">KEPUTUSAN BERISIKO</h4>
+          ${renderList(riskyChoices, 'Tidak ada keputusan berisiko yang tercatat.')}
+        </section>
+        <section>
+          <h4 class="debrief-guide">PANDUAN PERBAIKAN MITIGASI</h4>
+          ${renderList(riskyFacts, 'Tidak ada panduan mitigasi khusus yang diperlukan.', true)}
+        </section>
       </div>
     `;
 
