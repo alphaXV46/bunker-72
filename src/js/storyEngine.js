@@ -36,6 +36,7 @@ export class StoryEngine {
     this.model = new GameModel();
     this.view  = new GameView(this.dom);
     this.audio = new RetroAudio();
+    this.pendingClickNextSceneId = null;
 
     this._journalSetup = false;
     this._volumeSetup  = false;
@@ -213,6 +214,7 @@ export class StoryEngine {
     this.view.captureNarrative(scene, modifiedText, sceneId, canReviewThisScene);
 
     this.view.dom.choicesPanel.innerHTML = '';
+    this.pendingClickNextSceneId = null;
 
     if (sceneId === 'prolog_packing') {
       this.view.dom.dialogueText.textContent = '';
@@ -222,12 +224,20 @@ export class StoryEngine {
     }
 
     if (scene.autoNextSceneId) {
-      const delay = sceneId === 'prolog_packing' ? 0 : (typeof scene.autoAdvanceDelay === 'number' ? scene.autoAdvanceDelay : 1100);
+      const isClickToContinueProlog = sceneId.startsWith('prolog_') && sceneId !== 'prolog_title';
+      if (isClickToContinueProlog) {
+        this.view.typeText(modifiedText, () => {
+          this.pendingClickNextSceneId = scene.autoNextSceneId;
+        }, {
+          ...choicesPayload,
+          choices: [],
+          clickNextSceneId: scene.autoNextSceneId,
+        });
+        return;
+      }
+
+      const delay = typeof scene.autoAdvanceDelay === 'number' ? scene.autoAdvanceDelay : 1100;
       const autoAdvance = () => {
-        if (delay <= 0) {
-          this.renderScene(scene.autoNextSceneId);
-          return;
-        }
         window.setTimeout(() => this.renderScene(scene.autoNextSceneId), delay);
       };
       this.view.typeText(modifiedText, autoAdvance, {
@@ -601,6 +611,13 @@ export class StoryEngine {
   }
 
   handleDialogueClick() {
+    if (this.pendingClickNextSceneId) {
+      const nextSceneId = this.pendingClickNextSceneId;
+      this.pendingClickNextSceneId = null;
+      this.renderScene(nextSceneId);
+      return;
+    }
+
     if (this._inventoryReactionTimeout) {
       clearTimeout(this._inventoryReactionTimeout);
       this._inventoryReactionTimeout = null;

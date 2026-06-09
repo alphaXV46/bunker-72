@@ -189,11 +189,11 @@ input[type="range"] {
 
 .game-title {
   font-family: 'VT323', monospace;
-  font-size: 5.4rem;
+  font-size: clamp(5.4rem, 8vw, 7.2rem);
   line-height: 0.9;
   margin: 8px 0 0;
   color: #f3f8f6;
-  text-shadow: 4px 4px 0 #15181d, 8px 8px 0 var(--accent-red);
+  text-shadow: 4px 4px 0 #15181d, 0 0 22px rgba(255,209,102,0.22), 8px 8px 0 var(--accent-red);
   letter-spacing: 0;
 }
 
@@ -255,7 +255,26 @@ input[type="range"] {
 
 .menu-buttons-container {
   width: 100%;
-  max-width: 340px;
+  max-width: 420px;
+}
+
+#menu-view .choice-btn {
+  min-height: 62px;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+  font-size: clamp(1rem, 1.25vw, 1.25rem);
+  letter-spacing: 2px;
+  border-color: rgba(114, 128, 138, 0.92);
+  background:
+    linear-gradient(90deg, rgba(255,209,102,0.12), transparent 52%),
+    linear-gradient(180deg, rgba(18,22,27,0.96), rgba(7,9,12,0.94));
+}
+
+#menu-view .choice-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  border-color: var(--warning-yellow-border);
+  color: #fff2cc;
 }
 
 
@@ -685,18 +704,18 @@ input[type="range"] {
    ============================================================ */
 
 .dialogue-overlay {
-  width: min(78%, 1180px);
-  min-height: clamp(260px, 31vh, 340px);
+  width: min(48%, 720px);
+  min-height: clamp(130px, 17vh, 190px);
   background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
   border: 2px solid var(--line-bright);
   border-left: 6px solid var(--accent-red-border);
-  padding: clamp(14px, 1.3vw, 20px) clamp(16px, 1.5vw, 24px) clamp(126px, 14vh, 154px);
+  padding: clamp(12px, 1.2vw, 18px);
   display: flex;
   flex-direction: column;
   gap: 8px;
   box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
   position: relative;
-  margin: 0 0 clamp(26px, 3.5vh, 48px) clamp(92px, 7%, 128px);
+  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
   backdrop-filter: blur(4px);
 }
 
@@ -753,9 +772,9 @@ input[type="range"] {
   font-size: clamp(0.92rem, 1.12vw, 1.25rem);
   line-height: 1.45;
   min-height: 62px;
-  max-height: clamp(96px, 12vh, 136px);
-  overflow-y: auto;
-  padding-right: 28px;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
   text-shadow: 0 2px 0 rgba(0,0,0,0.5);
 }
 
@@ -854,10 +873,10 @@ input[type="range"] {
   position: relative;
   inset: auto;
   z-index: 1;
-  width: min(78%, 1180px);
-  min-height: clamp(260px, 31vh, 340px);
-  margin: 0 0 clamp(26px, 3.5vh, 48px) clamp(92px, 7%, 128px);
-  padding: clamp(14px, 1.3vw, 20px) clamp(16px, 1.5vw, 24px) clamp(126px, 14vh, 154px);
+  width: min(48%, 720px);
+  min-height: clamp(130px, 17vh, 190px);
+  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
+  padding: clamp(12px, 1.2vw, 18px);
   border: 2px solid var(--line-bright);
   border-left: 6px solid var(--accent-red-border);
   background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
@@ -913,9 +932,9 @@ input[type="range"] {
 .story-box.speaker-ibu  .dialogue-text,
 .story-box.speaker-anak .dialogue-text {
   min-height: 62px;
-  max-height: clamp(96px, 12vh, 136px);
-  overflow-y: auto;
-  padding-right: 28px;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
   font-size: clamp(0.92rem, 1.12vw, 1.25rem);
   line-height: 1.45;
 }
@@ -1297,14 +1316,14 @@ body.title-card-active #settings-btn { display: none !important; }
 
 .command-deck {
   position: absolute;
-  left: clamp(92px, 7%, 128px);
-  right: auto;
-  bottom: clamp(50px, 6vh, 78px);
-  z-index: 11;
-  width: min(78%, 1180px);
+  left: auto;
+  right: clamp(14px, 1.5vw, 24px);
+  bottom: clamp(18px, 2vh, 26px);
+  z-index: 9;
+  width: min(40%, 560px);
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0;
+  gap: 8px;
 }
 
 .choices-panel {
@@ -1314,8 +1333,8 @@ body.title-card-active #settings-btn { display: none !important; }
 }
 
 #game-view .command-deck .choices-panel {
-  gap: 7px;
-  padding: 0 clamp(18px, 1.6vw, 26px) clamp(14px, 1.4vw, 20px) clamp(150px, 12vw, 180px);
+  gap: 8px;
+  padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -1323,16 +1342,16 @@ body.title-card-active #settings-btn { display: none !important; }
 }
 
 .choice-btn {
-  min-height: clamp(42px, 5vh, 56px);
+  min-height: clamp(44px, 5.4vh, 60px);
   background:
     linear-gradient(90deg, rgba(91,192,190,0.06), transparent 38%),
     linear-gradient(180deg, rgba(23,27,33,0.96), rgba(10,12,15,0.9));
   color: var(--text-pixel);
   border: 2px solid var(--line);
-  padding: clamp(7px, 0.85vw, 10px);
+  padding: clamp(8px, 1vw, 12px);
   cursor: pointer;
   text-align: left;
-  font-size: clamp(0.76rem, 0.86vw, 0.95rem);
+  font-size: clamp(0.78rem, 0.95vw, 1rem);
   font-family: inherit;
   transition: transform 0.1s ease, background-color 0.1s ease, border-color 0.1s ease;
   outline: none;
@@ -1341,7 +1360,7 @@ body.title-card-active #settings-btn { display: none !important; }
   gap: 10px;
   align-items: center;
   backdrop-filter: blur(3px);
-  box-shadow: inset 0 0 0 1px rgba(231,237,240,0.03);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.28), inset 0 0 0 1px rgba(231,237,240,0.03);
 }
 
 .choice-btn:hover:not(:disabled) {
@@ -1933,6 +1952,11 @@ body.title-card-active #settings-btn { display: none !important; }
   .dialogue-text,
   .choice-btn   { font-size: 0.55rem; line-height: 1.2; }
 
+  .dialogue-text {
+    max-height: none;
+    overflow: visible;
+  }
+
   .speaker-name { font-size: 0.52rem; letter-spacing: 1px; padding-bottom: 1px; }
 
   .choice-btn {
@@ -2113,7 +2137,7 @@ body.title-card-active #settings-btn { display: none !important; }
   .dialogue-body  { gap: 8px; }
   .avatar-container { width: 44px; height: 44px; }
 
-  .dialogue-text  { font-size: 0.88rem; line-height: 1.4; min-height: 48px; }
+  .dialogue-text  { font-size: 0.88rem; line-height: 1.4; min-height: 48px; max-height: none; overflow: visible; }
   .speaker-name   { font-size: 0.78rem; letter-spacing: 1px; }
 
   /* ── Character bubbles collapse to standard bar ── */

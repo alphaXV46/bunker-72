@@ -64,13 +64,24 @@ export class GameView {
 
   _setupDialogueClickListener() {
     const dialogueOverlay = this.dom.storyBox.querySelector('.dialogue-overlay');
-    if (!dialogueOverlay) return;
-    dialogueOverlay.addEventListener('click', () => {
+    const advance = () => {
       if (this.isTyping) {
         this.skipTyping();
       } else {
         this.controller.handleDialogueClick();
       }
+    };
+
+    if (dialogueOverlay) {
+      dialogueOverlay.addEventListener('click', (event) => {
+        event.stopPropagation();
+        advance();
+      });
+    }
+
+    this.dom.storyBox.addEventListener('click', (event) => {
+      if (event.target.closest('button')) return;
+      advance();
     });
   }
 
@@ -681,6 +692,12 @@ export class GameView {
     const p = this._pendingChoicesPayload;
     if (p?.autoAdvance) {
       p.autoAdvance();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
+    if (p?.clickNextSceneId && this.controller) {
+      this.controller.pendingClickNextSceneId = p.clickNextSceneId;
       this._pendingChoicesPayload = null;
       return;
     }
