@@ -198,7 +198,7 @@ export function getKnowledgeLabel(k) {
 }
 
 export const FACTS_MAP = Object.freeze({
-  'c_day1_lock_open': 'Menunda penutupan pintu bunker memungkinkan partikel PM2.5 dan gas mematikan masuk. Pintu harus langsung ditutup.',
+  'c_day1_lock_open': 'Menunda penutupan pintu bunker memungkinkan abu Krakatau dan gas belerang masuk. Pintu harus langsung ditutup.',
   'c_day1_air_noinspect': 'Sistem filtrasi udara tanpa pengecekan katup dapat bocor. Inspeksi visual wajib dilakukan sebelum pengaktifan.',
   'c_day1_water_waste': 'Air adalah sumber daya paling berharga. Konsumsi berlebihan di jam pertama mempercepat dehidrasi kronis pada hari berikutnya.',
   'c_day1_sanitation_door': 'Menyimpan limbah tanpa wadah tertutup dekat akses utama memicu penyakit menular dalam ruang tertutup.',
@@ -215,8 +215,8 @@ export const FACTS_MAP = Object.freeze({
   'c_day2_drain_alllight': 'Tidak mematikan daya saat darurat berujung pada hilangnya seluruh fungsi elektronik vital.',
   'c_day2_drain_modify': 'Bypass listrik darurat sangat dilarang dalam SOP keselamatan bunker manapun.',
   'c_day2_scavenge_bypass': 'Mem-bypass kunci solenoid generator tanpa alat pelindung diri dapat memicu sengatan listrik tegangan tinggi dan kerusakan regulator daya.',
-  'c_day3_water_boil': 'Merebus air hanya membunuh bakteri, tapi memusatkan racun kimia seperti logam berat. Air keruh logam wajib difilter.',
-  'c_day3_water_settle': 'Mengendapkan air tanpa filter kimiawi tidak menetralisir polutan mikroskopis atau racun industri.',
+  'c_day3_water_boil': 'Merebus air hanya membunuh bakteri, tapi memusatkan mineral vulkanik dan endapan abu. Air keruh wajib difilter karbon aktif.',
+  'c_day3_water_settle': 'Mengendapkan air tanpa filter karbon aktif tidak menetralisir partikel halus dan kontaminan vulkanik terlarut.',
   'c_day3_signal_knock': 'Membuat suara bising dengan memukul pipa bisa mengundang penjarah atau hewan liar, kompromi pertahanan bunker.',
   'c_day3_signal_fire': 'Menyalakan api sekecil apapun di dalam bunker tertutup mengonsumsi oksigen berharga dan menghasilkan karbon monoksida mematikan.',
   'c_day3_filter_signal_knock': 'Sinyal suara sangat berisiko membongkar lokasi persembunyian Anda.',

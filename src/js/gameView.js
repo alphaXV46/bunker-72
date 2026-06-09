@@ -808,15 +808,15 @@ export class GameView {
       const bullets = [];
 
       if (flags.air_uninspected === true) {
-        bullets.push("<strong>Mitigasi Katup Udara:</strong> Inspeksi segel karet katup ventilasi secara fisik sangat krusial pasca-bencana. Menyalakan filtrasi tanpa pengecekan katup bypass menyedot abu PM2.5 beracun langsung dari luar.");
+        bullets.push("<strong>Mitigasi Katup Udara:</strong> Inspeksi segel karet katup ventilasi secara fisik sangat krusial pasca-bencana. Menyalakan filtrasi tanpa pengecekan katup bypass menyedot abu Krakatau dan gas belerang langsung dari luar.");
       } else {
         bullets.push("<strong>Optimal - Filtrasi Udara:</strong> Penggantian segel katup secara proaktif berhasil mengisolasi gas permukaan dari ruang utama bunker.");
       }
 
       if (flags.water_filtered === true && flags.water_ruined !== true) {
-        bullets.push("<strong>Optimal - Pemurnian Air:</strong> Penggunaan filter karbon aktif dan tablet klorin terbukti efektif mengendapkan kontaminan logam berat dari tangki air pipa yang tercemar.");
+        bullets.push("<strong>Optimal - Pemurnian Air:</strong> Penggunaan filter karbon aktif dan tablet klorin terbukti efektif mengurangi kontaminan abu, belerang, dan mineral halus dari tangki air pipa yang tercemar.");
       } else {
-        bullets.push("<strong>Mitigasi Kimiawi Air:</strong> Merebus air berbau logam tidak menghilangkan senyawa kimia berat terlarut; penguapan justru memusatkan konsentrasi racunnya. Selalu saring dengan karbon aktif.");
+        bullets.push("<strong>Mitigasi Air Vulkanik:</strong> Merebus air keruh tidak menghilangkan mineral vulkanik terlarut; penguapan justru memusatkan kontaminannya. Selalu saring dengan karbon aktif.");
       }
 
       if (flags.radio_saved === true) {

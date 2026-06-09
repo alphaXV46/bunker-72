@@ -3,7 +3,7 @@
     "prolog_home": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Ayah baru pulang. Ibu sedang menyiapkan makan malam. Anak masih di lantai ruang keluarga, mendorong mobil-mobilan merahnya tanpa tahu langit di luar mulai berubah.",
+      "text": "Ayah baru pulang ke rumah kecil kami di Rakata Selatan, sebuah pesisir fiktif Indonesia yang hidup di bawah bayangan Krakatau. Ibu sedang menyiapkan makan malam. Anak masih di lantai ruang keluarga, mendorong mobil-mobilan merahnya tanpa tahu langit di luar mulai berubah.",
       "background": "prolog1",
       "hour": "0 Jam",
       "objective": "Saksikan awal keadaan darurat.",
@@ -14,7 +14,7 @@
     "prolog_alert": {
       "speaker": "TV Darurat",
       "avatar": null,
-      "text": "BREAKING NEWS. Seluruh warga diminta segera menuju tempat perlindungan. Ulangi: seluruh warga diminta segera menuju tempat perlindungan terdekat.",
+      "text": "BREAKING NEWS. Aktivitas eksplosif Krakatau meningkat drastis. Seluruh warga sektor pesisir Rakata Selatan diminta segera menuju bunker pertahanan sipil terdekat.",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Respons siaran darurat.",
@@ -25,7 +25,7 @@
     "prolog_question": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Cepat! Kita hanya punya sedikit waktu!\n\nIbu: Apa yang harus kita bawa?",
+      "text": "Cepat! Jalur ke Bunker 72 tidak akan lama terbuka.\n\nIbu: Apa yang harus kita bawa?",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Pilih barang penting untuk ransel bunker.",
@@ -36,7 +36,7 @@
     "prolog_packing": {
       "speaker": "Ransel Darurat",
       "avatar": null,
-      "text": "Pilih 5 barang untuk dibawa ke bunker. Klik barang di atas meja, lalu barang akan masuk ke tas.",
+      "text": "Pilih 5 barang paling penting untuk bertahan di Bunker 72. Klik barang di atas meja, lalu barang akan masuk ke tas.",
       "background": "packing",
       "hour": "0 Jam",
       "objective": "Kemasi ransel darurat Anda (5 slot).",
@@ -100,7 +100,7 @@
     "prolog_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pukul 18.07. Layar televisi memotong semua siaran: status darurat berlaku. Dari jendela rumah, langit Cilegon berubah merah tua, dan suara sirene mulai menembus dinding.",
+      "text": "Pukul 18.07. Layar televisi memotong semua siaran: status darurat berlaku. Dari jendela rumah, puncak Krakatau memuntahkan cahaya merah di balik laut, dan sirene Rakata Selatan mulai menembus dinding.",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Tinggalkan rumah sebelum jalur evakuasi tertutup.",
@@ -117,7 +117,7 @@
     "prolog_road": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Jangan lihat ke belakang, Nak. Pegang tangan Ibu. Pintu bunker sudah di depan kita. Kita masuk dulu, baru bernapas pelan-pelan. Di luar sini udaranya mulai terasa panas.",
+      "text": "Jangan lihat ke belakang, Nak. Pegang tangan Ibu. Pintu bunker sudah di depan kita. Kita masuk dulu, baru bernapas pelan-pelan. Abu panas dari laut mulai turun di halaman.",
       "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Bawa keluarga melewati akses terakhir.",
@@ -128,7 +128,7 @@
     "prolog_threshold": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Panel akses merespons. Ransel darurat masuk, semua anggota keluarga terdeteksi. Begitu pintu ini menutup, kita bertahan dengan prosedur, bukan panik. Bunker 72, mulai protokol penyegelan.",
+      "text": "Panel akses merespons. Ransel darurat masuk, semua anggota keluarga terdeteksi. Bunker pertahanan sipil Rakata menerima kita. Begitu pintu ini menutup, kita bertahan dengan prosedur, bukan panik.",
       "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Masuk dan aktifkan segel utama.",
@@ -139,7 +139,7 @@
     "prolog_surface": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Di luar, gelombang abu menelan halaman bunker. Lampu jalan padam satu per satu, dan permukaan berubah menjadi lautan debu hitam. Di balik pintu baja yang baru tersegel, keluarga Anda kini hanya punya 72 jam pertama untuk tetap hidup.",
+      "text": "Di luar, Krakatau meledak di kejauhan. Gelombang abu menelan halaman bunker, lampu jalan padam satu per satu, dan Rakata Selatan berubah menjadi lautan debu hitam. Di balik pintu baja yang baru tersegel, keluarga Anda kini hanya punya 72 jam pertama untuk tetap hidup.",
       "background": "prolog4",
       "hour": "0 Jam",
       "objective": "Tinggalkan permukaan dan mulai hidup di dalam bunker.",
@@ -167,7 +167,7 @@
     "day1_lockdoor": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Panel terkunci — indikator biru, status aman. Tapi lampu filtrasi masih merah berkedip. Segel katup perlu dicek fisik sebelum kita nyalakan mesinnya. Abu PM2.5 di luar bisa masuk dalam hitungan detik kalau ada celah.",
+      "text": "Panel terkunci - indikator biru, status aman. Tapi lampu filtrasi masih merah berkedip. Segel katup perlu dicek fisik sebelum kita nyalakan mesinnya. Abu Krakatau dan gas belerang di luar bisa masuk dalam hitungan detik kalau ada celah.",
       "background": "normal",
       "hour": "6 Jam",
       "objective": "Amankan kualitas udara sebelum keluarga beristirahat.",
@@ -327,7 +327,7 @@
         },
         {
           "id": "c_day1_sanitation_door",
-          "text": "Semprotkan disinfektan kimia konsentrasi tinggi secara berkala pada tumpukan limbah terbuka.",
+          "text": "Semprotkan disinfektan pekat secara berkala pada tumpukan limbah terbuka.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu."
@@ -363,7 +363,7 @@
         },
         {
           "id": "c_day1_waterwaste_sanitation_door",
-          "text": "Semprotkan disinfektan kimia konsentrasi tinggi secara berkala pada tumpukan limbah terbuka.",
+          "text": "Semprotkan disinfektan pekat secara berkala pada tumpukan limbah terbuka.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu."
@@ -414,7 +414,7 @@
     "day2_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BNPB] ...status siaga satu... radius zona merah diperluas... bertahan di tempat perlindungan... [STATIK]\\n\\nHari kedua dimulai dengan getaran hebat dari permukaan. Debu halus jatuh dari celah lampu, dan dinding utara mengeluarkan bunyi berderit panjang.",
+      "text": "[RADIO BNPB] ...status siaga satu... radius zona merah Rakata Selatan diperluas... bertahan di tempat perlindungan... [STATIK]\\n\\nHari kedua dimulai dengan getaran hebat dari permukaan. Debu halus jatuh dari celah lampu, dan dinding utara mengeluarkan bunyi berderit panjang.",
       "conditionalText": [
         { "requiredFlag": "air_uninspected", "text": " Udara pagi ini terasa sedikit apek dan tercium bau asam tipis yang membuat dada terasa berat." }
       ],
@@ -564,7 +564,7 @@
           "text": "Semprotkan penetral bau berbasis aerosol untuk membersihkan udara ruangan.",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": -2,
-          "log": "Cairan kimia keras disemprotkan untuk bau asap."
+          "log": "Disinfektan pekat disemprotkan untuk bau asap."
         }
       ]
     },
@@ -633,7 +633,7 @@
     "day2_radio_setup": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Abu vulkanik di atmosfer menyebabkan attenuasi sinyal frekuensi VHF. Kita hanya bisa lock ke siaran BNPB di 162.55 MHz. Masalahnya: kapasitas baterai tersisa tidak lebih dari 18 jam operasional penuh. Kita perlu kalkulasi jadwal penggunaan yang ketat.",
+      "text": "Abu vulkanik Krakatau di atmosfer menyebabkan attenuasi sinyal frekuensi VHF. Kita hanya bisa lock ke siaran BNPB di 162.55 MHz. Masalahnya: kapasitas baterai tersisa tidak lebih dari 18 jam operasional penuh. Kita perlu kalkulasi jadwal penggunaan yang ketat.",
       "conditionalText": [
         {
           "requiredFlag": "ng_plus",
@@ -1018,7 +1018,7 @@
           "text": "Rebus air tangki hingga mendidih menggunakan kompor portabel.",
           "nextSceneId": "day3_pressure_pinch",
           "knowledgeEffect": -1,
-          "log": "Air logam direbus tanpa filter."
+          "log": "Air vulkanik direbus tanpa filter."
         },
         {
           "id": "c_day3_water_filter",
@@ -1082,7 +1082,7 @@
     "day3_water_poisoned": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Sesaat setelah meminum air, lambung Anak dan Ayah terasa melilit hebat disusul muntah-muntah. Merebus air logam tidak membuang racun kimia terlarut. Perebusan hanya membunuh bakteri patogen tetapi justru memusatkan senyawa logam berat beracun. Kita harus segera menggunakan P3K dari panel inventaris untuk menetralisir keracunan.",
+      "text": "Sesaat setelah meminum air, lambung Anak dan Ayah terasa melilit hebat disusul muntah-muntah. Merebus air keruh tidak membuang kontaminan mineral vulkanik yang larut dari pipa retak. Perebusan hanya membunuh bakteri patogen, tetapi justru memusatkan jejak belerang, silika halus, dan endapan abu. Kita harus segera menggunakan P3K dari panel inventaris untuk menangani gejala keracunan.",
       "conditionalText": [
         { "requiredFlag": "structural_damage", "text": " Retakan dinding yang membentang membuat gempa susulan terasa lebih mengerikan di sudut ini." }
       ],
@@ -1105,7 +1105,7 @@
     "day3_water_boil": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Ini yang perlu kita pahami: perebusan membunuh patogen biologis, tapi penguapan justru memusatkan ion logam berat — timbal, mangan — yang terlarut dari pipa yang retak. Kita baru saja memberikan racun kimia dengan konsentrasi lebih tinggi dari sebelumnya. Itu kesalahan prosedur yang harus kita ingat.",
+      "text": "Ini yang perlu kita pahami: perebusan membunuh patogen biologis, tapi penguapan justru memusatkan mineral vulkanik, belerang, dan partikel halus yang masuk dari pipa retak. Air seperti itu harus disaring karbon aktif dulu. Itu kesalahan prosedur yang harus kita ingat.",
       "conditionalText": [
         { "requiredFlag": "structural_damage", "text": " Langit-langit di atas kompor portabel tampak melengkung turun akibat pilar penopang yang melemah kemarin." }
       ],
@@ -1300,7 +1300,7 @@
     "ending_eval": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-72 tiba. Sirene ambulans, kendaraan berat, and suara radio resmi memenuhi koridor luar. Tim evakuasi Satgas Penanggulangan Bencana mulai membuka akses bunker.",
+      "text": "Jam ke-72 tiba. Sirene ambulans, kendaraan berat, dan suara radio resmi memenuhi koridor luar. Tim evakuasi BNPB Rakata mulai membuka akses bunker pertahanan sipil.",
       "background": "rusak",
       "hour": "72 Jam",
       "objective": "Lihat hasil akhir penyelamatan.",
@@ -1522,7 +1522,7 @@
     "ending_secret_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Setelah 96 jam yang terasa seperti keabadian, suara baling-baling helikopter menggetarkan dinding beton kami. Pintu terbuka, menyilaukan mata kami dengan sinar matahari pagi. 'Luar biasa, sistem kehidupan kalian masih berfungsi 100%,' puji komandan tim penyelamat. Ayah tersenyum lebar sambil mengusap kepalaku, 'Kita berhasil melewati badai terburuk, Nak.' Bau logam berkarat tergantikan oleh semilir angin segar. Keputusan taktis membagi ransum dengan cermat, melindungi pintu dari penjarah dengan aliran kejut, dan menyaring air dengan sempurna telah menjaga kami tak tersentuh bahaya luar. Kami melangkah keluar tanpa luka sedikit pun, meninggalkan bunker 72 tidak sebagai tempat berlindung sementara, melainkan sebagai monumen ketahanan hidup sebuah keluarga.",
+      "text": "Setelah 96 jam yang terasa seperti keabadian, suara baling-baling helikopter menggetarkan dinding beton kami. Pintu terbuka, menyilaukan mata kami dengan sinar matahari pagi di atas Rakata Selatan yang tertutup abu. 'Luar biasa, sistem kehidupan kalian masih berfungsi 100%,' puji komandan tim penyelamat. Ayah tersenyum lebar sambil mengusap kepalaku, 'Kita berhasil melewati badai terburuk, Nak.' Bau logam berkarat tergantikan oleh semilir angin laut yang mulai bersih. Keputusan taktis membagi ransum dengan cermat, melindungi pintu dari penjarah, dan menyaring air dengan sempurna telah menjaga kami tak tersentuh bahaya luar. Kami melangkah keluar tanpa luka sedikit pun, meninggalkan Bunker 72 bukan hanya sebagai tempat berlindung sementara, melainkan monumen ketahanan hidup sebuah keluarga.",
       "background": "normal",
       "hour": "96 Jam",
       "choices": []
@@ -1538,7 +1538,7 @@
     "ending_stranded_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Panggilan dari radio darurat tak pernah datang. Baterai telah mati sejak hari kedua, meninggalkan kami dalam kesunyian yang mencekam. Ibu terus merintih kesakitan memegangi perutnya setelah meminum air tercemar logam berat. 'Ayah, apakah tidak ada yang datang menjemput kita?' tanyaku lirih di tengah keremangan lampu darurat yang meredup lambat laun. 'Ayah tidak tahu, Nak...' jawabnya diiringi isak tangis yang tertahan. Tanpa mengetahui koordinat penyelamatan akibat matinya komunikasi, kami terperangkap. Udara perlahan menjadi racun. Kesalahan manajemen daya radio dan kepanikan dalam pemurnian air telah memotong akses kami ke dunia luar. Kami terdampar tanpa harapan, hingga kegelapan sepenuhnya menelan Bunker 72.",
+      "text": "Panggilan dari radio darurat tak pernah datang. Baterai telah mati sejak hari kedua, meninggalkan kami dalam kesunyian yang mencekam. Ibu terus merintih kesakitan memegangi perutnya setelah meminum air yang tercemar abu dan mineral vulkanik. 'Ayah, apakah tidak ada yang datang menjemput kita?' tanyaku lirih di tengah keremangan lampu darurat yang meredup lambat laun. 'Ayah tidak tahu, Nak...' jawabnya diiringi isak tangis yang tertahan. Tanpa mengetahui koordinat penyelamatan akibat matinya komunikasi, kami terperangkap. Udara perlahan menjadi racun. Kesalahan manajemen daya radio dan kepanikan dalam pemurnian air telah memotong akses kami ke dunia luar. Kami terdampar tanpa harapan, hingga kegelapan sepenuhnya menelan Bunker 72.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1554,7 +1554,7 @@
         },
         {
           "requiredFlag": "near_miss_water",
-          "text": " Keputusan ceroboh merebus air pipa bukannya memfilternya justru memusatkan konsentrasi logam berat yang kini merusak fungsi ginjal keluarga kita secara permanen."
+          "text": " Keputusan ceroboh merebus air pipa bukannya memfilternya justru memusatkan kontaminan mineral vulkanik yang kini merusak tubuh keluarga kita secara permanen."
         },
         {
           "requiredFlag": "near_miss_knowledge",
