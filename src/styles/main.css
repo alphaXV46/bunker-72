@@ -442,7 +442,7 @@ input[type="range"] {
 .resource-panel {
   position: absolute;
   top: clamp(102px, 12.5vh, 134px);
-  left: clamp(12px, 1.2vw, 20px);
+  left: clamp(42px, 3.8vw, 64px);
   z-index: 8;
   display: grid;
   grid-template-columns: 1fr;
@@ -1232,6 +1232,7 @@ body.title-card-active #settings-btn { display: none !important; }
 #game-view.title-card-mode .command-deck {
   left: 50%;
   right: auto;
+  top: auto;
   bottom: clamp(48px, 7vh, 86px);
   width: auto;
   transform: translateX(-50%);
@@ -1280,6 +1281,7 @@ body.title-card-active #settings-btn { display: none !important; }
   width: auto;
   left: clamp(28px, 3.2vw, 54px);
   right: auto;
+  top: auto;
   bottom: clamp(54px, 6.5vh, 88px);
 }
 
@@ -1317,10 +1319,11 @@ body.title-card-active #settings-btn { display: none !important; }
 .command-deck {
   position: absolute;
   left: auto;
-  right: clamp(14px, 1.5vw, 24px);
-  bottom: clamp(18px, 2vh, 26px);
+  right: clamp(42px, 3.8vw, 64px);
+  top: clamp(500px, 61.6vh, 628px);
+  bottom: auto;
   z-index: 9;
-  width: min(40%, 560px);
+  width: min(38%, 620px);
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
@@ -1415,8 +1418,8 @@ body.title-card-active #settings-btn { display: none !important; }
 /* Toggle button */
 #journal-btn {
   position: absolute;
-  left: clamp(42px, 3.8vw, 64px);
-  bottom: clamp(8px, 1vh, 14px);
+  left: clamp(138px, 11.5vw, 190px);
+  bottom: clamp(24px, 3.2vh, 34px);
   z-index: 10;
   display: flex;
   align-items: center;
@@ -1444,10 +1447,10 @@ body.title-card-active #settings-btn { display: none !important; }
 /* Slide-in panel */
 .journal-panel {
   position: absolute;
-  left: clamp(90px, 7.5vw, 120px);
-  bottom: clamp(56px, 7vh, 72px);
+  left: clamp(138px, 11.5vw, 190px);
+  bottom: clamp(62px, 7vh, 82px);
   z-index: 11;
-  width: min(34%, 380px);
+  width: min(48%, 720px);
   max-height: 210px;
   background: rgba(9, 11, 14, 0.94);
   border: 2px solid var(--line-bright);
@@ -1969,7 +1972,13 @@ body.title-card-active #settings-btn { display: none !important; }
   .choice-index { width: 16px; height: 16px; font-size: 0.52rem; }
   .choice-impact { grid-column: 2; font-size: 0.48rem; }
 
-  .command-deck { width: 38%; right: 6px; bottom: 7px; gap: 4px; }
+  .command-deck {
+    width: 38%;
+    right: 6px;
+    top: 61.6vh;
+    bottom: auto;
+    gap: 4px;
+  }
 
   /* Hide non-essential panels at this breakpoint */
   .environment-readout { display: none; }
@@ -2182,7 +2191,9 @@ body.title-card-active #settings-btn { display: none !important; }
   /* ── Command deck: in-flow, full-width ── */
   .command-deck {
     position: relative;
-    right: 0; bottom: 0;
+    top: auto;
+    right: 0;
+    bottom: 0;
     width: 100%;
     padding: 0 4px 8px;
   }
