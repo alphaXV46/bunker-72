@@ -685,18 +685,18 @@ input[type="range"] {
    ============================================================ */
 
 .dialogue-overlay {
-  width: min(68%, 980px);
-  min-height: clamp(104px, 15vh, 154px);
+  width: min(78%, 1180px);
+  min-height: clamp(260px, 31vh, 340px);
   background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
   border: 2px solid var(--line-bright);
   border-left: 6px solid var(--accent-red-border);
-  padding: clamp(12px, 1.2vw, 18px);
+  padding: clamp(14px, 1.3vw, 20px) clamp(16px, 1.5vw, 24px) clamp(126px, 14vh, 154px);
   display: flex;
   flex-direction: column;
   gap: 8px;
   box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
   position: relative;
-  margin: 0 0 clamp(128px, 15vh, 168px) clamp(92px, 7%, 128px);
+  margin: 0 0 clamp(26px, 3.5vh, 48px) clamp(92px, 7%, 128px);
   backdrop-filter: blur(4px);
 }
 
@@ -753,6 +753,9 @@ input[type="range"] {
   font-size: clamp(0.92rem, 1.12vw, 1.25rem);
   line-height: 1.45;
   min-height: 62px;
+  max-height: clamp(96px, 12vh, 136px);
+  overflow-y: auto;
+  padding-right: 28px;
   text-shadow: 0 2px 0 rgba(0,0,0,0.5);
 }
 
@@ -851,10 +854,10 @@ input[type="range"] {
   position: relative;
   inset: auto;
   z-index: 1;
-  width: min(68%, 980px);
-  min-height: clamp(104px, 15vh, 154px);
-  margin: 0 0 clamp(128px, 15vh, 168px) clamp(92px, 7%, 128px);
-  padding: clamp(12px, 1.2vw, 18px);
+  width: min(78%, 1180px);
+  min-height: clamp(260px, 31vh, 340px);
+  margin: 0 0 clamp(26px, 3.5vh, 48px) clamp(92px, 7%, 128px);
+  padding: clamp(14px, 1.3vw, 20px) clamp(16px, 1.5vw, 24px) clamp(126px, 14vh, 154px);
   border: 2px solid var(--line-bright);
   border-left: 6px solid var(--accent-red-border);
   background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
@@ -910,6 +913,9 @@ input[type="range"] {
 .story-box.speaker-ibu  .dialogue-text,
 .story-box.speaker-anak .dialogue-text {
   min-height: 62px;
+  max-height: clamp(96px, 12vh, 136px);
+  overflow-y: auto;
+  padding-right: 28px;
   font-size: clamp(0.92rem, 1.12vw, 1.25rem);
   line-height: 1.45;
 }
@@ -954,16 +960,20 @@ body.title-card-active #settings-btn { display: none !important; }
 
 .narrative-back-btn {
   position: absolute;
-  top: 10px;
-  right: 12px;
+  top: 12px;
+  right: 16px;
   appearance: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
   border: 1px solid rgba(91,192,190,0.55);
   background: rgba(8,9,11,0.72);
   color: var(--cyan);
   font-family: inherit;
-  font-size: clamp(0.62rem, 0.72vw, 0.78rem);
-  letter-spacing: 1px;
-  padding: 4px 8px;
+  font-size: clamp(1rem, 1.1vw, 1.25rem);
+  line-height: 1;
+  padding: 0;
   transition: border-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
 }
 
@@ -1289,9 +1299,9 @@ body.title-card-active #settings-btn { display: none !important; }
   position: absolute;
   left: clamp(92px, 7%, 128px);
   right: auto;
-  bottom: clamp(22px, 3vh, 42px);
-  z-index: 9;
-  width: min(68%, 980px);
+  bottom: clamp(50px, 6vh, 78px);
+  z-index: 11;
+  width: min(78%, 1180px);
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
@@ -1300,27 +1310,29 @@ body.title-card-active #settings-btn { display: none !important; }
 .choices-panel {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: clamp(10px, 1vw, 14px);
-  border: 2px solid var(--line-bright);
-  border-top: 0;
-  border-left: 6px solid var(--accent-red-border);
-  background: linear-gradient(180deg, rgba(7,9,12,0.92), rgba(5,7,9,0.96));
-  box-shadow: 10px 10px 0 rgba(0,0,0,0.42);
-  backdrop-filter: blur(4px);
+  gap: 8px;
+}
+
+#game-view .command-deck .choices-panel {
+  gap: 7px;
+  padding: 0 clamp(18px, 1.6vw, 26px) clamp(14px, 1.4vw, 20px) clamp(150px, 12vw, 180px);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .choice-btn {
-  min-height: clamp(44px, 5.4vh, 60px);
+  min-height: clamp(42px, 5vh, 56px);
   background:
     linear-gradient(90deg, rgba(91,192,190,0.06), transparent 38%),
     linear-gradient(180deg, rgba(23,27,33,0.96), rgba(10,12,15,0.9));
   color: var(--text-pixel);
   border: 2px solid var(--line);
-  padding: clamp(8px, 1vw, 12px);
+  padding: clamp(7px, 0.85vw, 10px);
   cursor: pointer;
   text-align: left;
-  font-size: clamp(0.78rem, 0.95vw, 1rem);
+  font-size: clamp(0.76rem, 0.86vw, 0.95rem);
   font-family: inherit;
   transition: transform 0.1s ease, background-color 0.1s ease, border-color 0.1s ease;
   outline: none;
@@ -1329,7 +1341,7 @@ body.title-card-active #settings-btn { display: none !important; }
   gap: 10px;
   align-items: center;
   backdrop-filter: blur(3px);
-  box-shadow: 0 5px 0 rgba(0,0,0,0.28), inset 0 0 0 1px rgba(231,237,240,0.03);
+  box-shadow: inset 0 0 0 1px rgba(231,237,240,0.03);
 }
 
 .choice-btn:hover:not(:disabled) {
@@ -1384,8 +1396,8 @@ body.title-card-active #settings-btn { display: none !important; }
 /* Toggle button */
 #journal-btn {
   position: absolute;
-  left: clamp(90px, 7.5vw, 120px);
-  bottom: clamp(18px, 2vh, 26px);
+  left: clamp(42px, 3.8vw, 64px);
+  bottom: clamp(8px, 1vh, 14px);
   z-index: 10;
   display: flex;
   align-items: center;

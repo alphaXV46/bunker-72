@@ -44,6 +44,7 @@ export class GameView {
     this.currentNarrative = null;
     this.currentChoicesPayload = null;
     this.isReviewingNarrative = false;
+    this.canReviewNarrative = false;
     this.backButton = null;
   }
 
@@ -486,6 +487,7 @@ export class GameView {
     this.dom.choicesPanel.classList.remove('packing-grid');
     this.currentChoicesPayload = { choices, currentSceneId, flags, onChoiceClick };
     this.isReviewingNarrative = false;
+    this.canReviewNarrative = choices?.length > 0 && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title';
     this.updateBackButton();
     if (!choices?.length) return;
 
@@ -926,9 +928,9 @@ export class GameView {
     });
   }
 
-  captureNarrative(scene, text, sceneId) {
+  captureNarrative(scene, text, sceneId, reviewable = false) {
     if (!text) return;
-    if (this.currentNarrative?.sceneId !== sceneId && this.currentNarrative?.text) {
+    if (this.currentNarrative?.sceneId !== sceneId && this.currentNarrative?.text && this.currentNarrative.reviewable) {
       this.narrativeHistory.push(this.currentNarrative);
       if (this.narrativeHistory.length > 12) this.narrativeHistory.shift();
     }
@@ -938,6 +940,7 @@ export class GameView {
       speaker: scene.speaker,
       avatar: scene.avatar,
       text,
+      reviewable,
     };
   }
 
@@ -961,8 +964,9 @@ export class GameView {
 
   updateBackButton() {
     const button = this._ensureBackButton();
-    button.disabled = this.narrativeHistory.length === 0 || this.isTyping;
-    button.textContent = this.isReviewingNarrative ? 'LANJUT' : 'KEMBALI';
+    button.disabled = !this.canReviewNarrative || this.narrativeHistory.length === 0 || this.isTyping;
+    button.textContent = this.isReviewingNarrative ? '>' : '<';
+    button.title = this.isReviewingNarrative ? 'Kembali ke pilihan' : 'Baca narasi sebelumnya';
     button.classList.toggle('is-hidden', button.disabled);
   }
 

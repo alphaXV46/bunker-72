@@ -209,7 +209,8 @@ export class StoryEngine {
 
     // Process text narrative modifications
     const modifiedText = this.processNarrativeText(sceneId, dialogueText, scene.speaker);
-    this.view.captureNarrative(scene, modifiedText, sceneId);
+    const canReviewThisScene = scene.choices?.length > 0 && !sceneId.startsWith('prolog_') && sceneId !== 'prolog_title';
+    this.view.captureNarrative(scene, modifiedText, sceneId, canReviewThisScene);
 
     this.view.dom.choicesPanel.innerHTML = '';
 
