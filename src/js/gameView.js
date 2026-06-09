@@ -40,6 +40,11 @@ export class GameView {
     this.typingRafId    = null;
     this.activeText     = '';
     this._pendingChoicesPayload = null; // stored so skipTyping can re-render
+    this.narrativeHistory = [];
+    this.currentNarrative = null;
+    this.currentChoicesPayload = null;
+    this.isReviewingNarrative = false;
+    this.backButton = null;
   }
 
   /**
@@ -479,6 +484,9 @@ export class GameView {
   renderChoices(choices, currentSceneId, flags, onChoiceClick) {
     this.dom.choicesPanel.innerHTML = '';
     this.dom.choicesPanel.classList.remove('packing-grid');
+    this.currentChoicesPayload = { choices, currentSceneId, flags, onChoiceClick };
+    this.isReviewingNarrative = false;
+    this.updateBackButton();
     if (!choices?.length) return;
 
     if (currentSceneId === 'prolog_packing') {
@@ -615,10 +623,11 @@ export class GameView {
     this.isTyping             = true;
     this._pendingChoicesPayload = choicesPayload;
     this.dom.dialogueText.textContent = '';
+    this.updateBackButton();
 
     let currentIndex   = 0;
     let lastTimestamp  = null;
-    const CHAR_INTERVAL = 32; // ms per character
+    const CHAR_INTERVAL = 12; // ms per character
 
     const frame = (timestamp) => {
       if (!this.isTyping) return;
@@ -645,6 +654,7 @@ export class GameView {
       } else {
         this.isTyping    = false;
         this.typingRafId = null;
+        this.updateBackButton();
         if (callback) callback();
       }
     };
@@ -663,6 +673,7 @@ export class GameView {
 
     this.dom.dialogueText.textContent = this.activeText;
     this.isTyping                     = false;
+    this.updateBackButton();
 
     // Re-render choices from the payload stored when typeText() was called.
     const p = this._pendingChoicesPayload;
@@ -913,5 +924,74 @@ export class GameView {
       });
       this.dom.choicesPanel.appendChild(btn);
     });
+  }
+
+  captureNarrative(scene, text, sceneId) {
+    if (!text) return;
+    if (this.currentNarrative?.sceneId !== sceneId && this.currentNarrative?.text) {
+      this.narrativeHistory.push(this.currentNarrative);
+      if (this.narrativeHistory.length > 12) this.narrativeHistory.shift();
+    }
+
+    this.currentNarrative = {
+      sceneId,
+      speaker: scene.speaker,
+      avatar: scene.avatar,
+      text,
+    };
+  }
+
+  _ensureBackButton() {
+    if (this.backButton) return this.backButton;
+    const button = document.createElement('button');
+    button.className = 'narrative-back-btn';
+    button.type = 'button';
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (this.isReviewingNarrative) {
+        this.restoreCurrentNarrative();
+      } else {
+        this.showPreviousNarrative();
+      }
+    });
+    this.dom.storyBox.querySelector('.dialogue-overlay')?.appendChild(button);
+    this.backButton = button;
+    return button;
+  }
+
+  updateBackButton() {
+    const button = this._ensureBackButton();
+    button.disabled = this.narrativeHistory.length === 0 || this.isTyping;
+    button.textContent = this.isReviewingNarrative ? 'LANJUT' : 'KEMBALI';
+    button.classList.toggle('is-hidden', button.disabled);
+  }
+
+  showPreviousNarrative() {
+    if (!this.narrativeHistory.length) return;
+    if (this.typingRafId) { cancelAnimationFrame(this.typingRafId); this.typingRafId = null; }
+    if (this.typingTimeoutId) { clearTimeout(this.typingTimeoutId); this.typingTimeoutId = null; }
+
+    const previous = this.narrativeHistory[this.narrativeHistory.length - 1];
+    this.isReviewingNarrative = true;
+    this.renderSpeaker(previous);
+    this.dom.dialogueText.textContent = previous.text;
+    this.dom.choicesPanel.innerHTML = '';
+    this.dom.choicesPanel.classList.remove('packing-grid');
+    this.isTyping = false;
+    this._pendingChoicesPayload = null;
+    this.updateBackButton();
+  }
+
+  restoreCurrentNarrative() {
+    if (!this.currentNarrative) return;
+    this.isReviewingNarrative = false;
+    this.renderSpeaker(this.currentNarrative);
+    this.dom.dialogueText.textContent = this.currentNarrative.text;
+
+    const p = this.currentChoicesPayload;
+    if (p) {
+      this.renderChoices(p.choices, p.currentSceneId, p.flags, p.onChoiceClick);
+    }
+    this.updateBackButton();
   }
 }

@@ -9,6 +9,7 @@ export class RetroAudio {
     this.bgmState = 'playing'; // default to playing so it starts automatically on init
     this.radioSource = null;
     this.radioTimeout = null;
+    this.activeSources = new Set();
   }
 
   init() {
@@ -106,6 +107,11 @@ export class RetroAudio {
   stopAll() {
     this.stopRadioSound();
     this.stopBGM();
+    this.activeSources.forEach((source) => {
+      try { source.stop(); } catch (e) {}
+      try { source.disconnect(); } catch (e) {}
+    });
+    this.activeSources.clear();
     if (this.ctx && this.ctx.state !== 'closed') {
       this.ctx.suspend().catch(() => {});
     }
@@ -150,6 +156,32 @@ export class RetroAudio {
       }, 5000);
     } catch (e) {
       console.error('Failed to play radio sound:', e);
+    }
+  }
+
+  async playEarthquake() {
+    this.init();
+    if (!this.ctx) return;
+
+    try {
+      const url = new URL('../audio/sfx/gempa.mp3', import.meta.url).href;
+      const buffer = await this.getAudioBuffer(url);
+      const source = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+
+      source.buffer = buffer;
+      gain.gain.setValueAtTime(0.42, this.ctx.currentTime);
+      source.connect(gain);
+      gain.connect(this.masterGain);
+      this.activeSources.add(source);
+      source.onended = () => {
+        this.activeSources.delete(source);
+        try { source.disconnect(); } catch (e) {}
+      };
+      source.start(0);
+    } catch (e) {
+      console.error('Failed to play earthquake SFX:', e);
+      this.playRumble();
     }
   }
 

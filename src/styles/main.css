@@ -685,8 +685,8 @@ input[type="range"] {
    ============================================================ */
 
 .dialogue-overlay {
-  width: min(44%, 680px);
-  min-height: clamp(112px, 16vh, 166px);
+  width: min(68%, 980px);
+  min-height: clamp(104px, 15vh, 154px);
   background: linear-gradient(180deg, rgba(19,24,30,0.9), rgba(7,9,12,0.94));
   border: 2px solid var(--line-bright);
   border-left: 6px solid var(--accent-red-border);
@@ -696,7 +696,7 @@ input[type="range"] {
   gap: 8px;
   box-shadow: 10px 10px 0 rgba(0,0,0,0.48), 0 0 32px rgba(0,0,0,0.5);
   position: relative;
-  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
+  margin: 0 0 clamp(128px, 15vh, 168px) clamp(92px, 7%, 128px);
   backdrop-filter: blur(4px);
 }
 
@@ -851,9 +851,9 @@ input[type="range"] {
   position: relative;
   inset: auto;
   z-index: 1;
-  width: min(44%, 680px);
-  min-height: clamp(112px, 16vh, 166px);
-  margin: 0 0 clamp(18px, 2vh, 26px) clamp(92px, 7%, 128px);
+  width: min(68%, 980px);
+  min-height: clamp(104px, 15vh, 154px);
+  margin: 0 0 clamp(128px, 15vh, 168px) clamp(92px, 7%, 128px);
   padding: clamp(12px, 1.2vw, 18px);
   border: 2px solid var(--line-bright);
   border-left: 6px solid var(--accent-red-border);
@@ -950,6 +950,31 @@ body.title-card-active #settings-btn { display: none !important; }
 #game-view.packing-mode .story-box {
   padding: clamp(28px, 3vw, 46px);
   justify-content: center;
+}
+
+.narrative-back-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  appearance: none;
+  border: 1px solid rgba(91,192,190,0.55);
+  background: rgba(8,9,11,0.72);
+  color: var(--cyan);
+  font-family: inherit;
+  font-size: clamp(0.62rem, 0.72vw, 0.78rem);
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  transition: border-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
+}
+
+.narrative-back-btn:hover:not(:disabled) {
+  border-color: var(--warning-yellow-border);
+  color: #fff2cc;
+  transform: translateY(-1px);
+}
+
+.narrative-back-btn.is-hidden {
+  display: none;
 }
 
 #game-view.packing-mode .scene-vignette {
@@ -1262,19 +1287,27 @@ body.title-card-active #settings-btn { display: none !important; }
 
 .command-deck {
   position: absolute;
-  right: clamp(14px, 1.5vw, 24px);
-  bottom: clamp(18px, 2vh, 26px);
+  left: clamp(92px, 7%, 128px);
+  right: auto;
+  bottom: clamp(22px, 3vh, 42px);
   z-index: 9;
-  width: min(40%, 560px);
+  width: min(68%, 980px);
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 0;
 }
 
 .choices-panel {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  padding: clamp(10px, 1vw, 14px);
+  border: 2px solid var(--line-bright);
+  border-top: 0;
+  border-left: 6px solid var(--accent-red-border);
+  background: linear-gradient(180deg, rgba(7,9,12,0.92), rgba(5,7,9,0.96));
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.42);
+  backdrop-filter: blur(4px);
 }
 
 .choice-btn {

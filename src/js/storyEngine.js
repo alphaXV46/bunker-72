@@ -154,8 +154,8 @@ export class StoryEngine {
     } else {
       this.audio.stopRadioSound();
     }
-    if (['day2_start', 'day2_damage_check', 'day4_intro'].includes(sceneId)) {
-      this.audio.playRumble();
+    if (scene.background === 'prolog4' || ['day2_start', 'day2_damage_check', 'day3_pinch_start', 'day4_intro'].includes(sceneId)) {
+      this.audio.playEarthquake();
     }
     if (this.model.knowledge <= 4 || isEnding && this._isCollapseEnding(sceneId) || scene.alert === true) {
       this.audio.playAlarm();
@@ -209,12 +209,24 @@ export class StoryEngine {
 
     // Process text narrative modifications
     const modifiedText = this.processNarrativeText(sceneId, dialogueText, scene.speaker);
+    this.view.captureNarrative(scene, modifiedText, sceneId);
 
     this.view.dom.choicesPanel.innerHTML = '';
 
+    if (sceneId === 'prolog_packing') {
+      this.view.dom.dialogueText.textContent = '';
+      this.view.isTyping = false;
+      this.view.renderChoices(scene.choices, sceneId, this.model.flags, (choice) => this.handleChoiceSelect(choice));
+      return;
+    }
+
     if (scene.autoNextSceneId) {
-      const delay = typeof scene.autoAdvanceDelay === 'number' ? scene.autoAdvanceDelay : 1100;
+      const delay = sceneId === 'prolog_packing' ? 0 : (typeof scene.autoAdvanceDelay === 'number' ? scene.autoAdvanceDelay : 1100);
       const autoAdvance = () => {
+        if (delay <= 0) {
+          this.renderScene(scene.autoNextSceneId);
+          return;
+        }
         window.setTimeout(() => this.renderScene(scene.autoNextSceneId), delay);
       };
       this.view.typeText(modifiedText, autoAdvance, {
