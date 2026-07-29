@@ -199,6 +199,16 @@ export class RetroAudio {
     }
   }
 
+  _autoDisconnectNode(sourceNode, ...nodesToDisconnect) {
+    if (!sourceNode) return;
+    sourceNode.onended = () => {
+      try { sourceNode.disconnect(); } catch (e) {}
+      nodesToDisconnect.forEach((n) => {
+        try { n?.disconnect(); } catch (e) {}
+      });
+    };
+  }
+
   playClick() {
     this.init();
     if (!this.ctx) return;
@@ -217,6 +227,7 @@ export class RetroAudio {
     osc.connect(gain);
     gain.connect(this.masterGain);
     
+    this._autoDisconnectNode(osc, gain);
     osc.start();
     osc.stop(now + 0.04);
   }
@@ -243,6 +254,7 @@ export class RetroAudio {
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    this._autoDisconnectNode(osc, gain);
     osc.start();
     osc.stop(now + 1.2);
   }
@@ -275,6 +287,7 @@ export class RetroAudio {
     noiseNode.connect(gain);
     gain.connect(this.masterGain);
 
+    this._autoDisconnectNode(noiseNode, gain);
     noiseNode.start();
     noiseNode.stop(now + 1.0);
   }
@@ -305,6 +318,7 @@ export class RetroAudio {
     filter.connect(gain);
     gain.connect(this.masterGain);
 
+    this._autoDisconnectNode(osc, filter, gain);
     osc.start();
     osc.stop(now + 2.0);
   }
@@ -327,6 +341,8 @@ export class RetroAudio {
     osc1.connect(gain);
     osc2.connect(gain);
     gain.connect(this.masterGain);
+
+    this._autoDisconnectNode(osc1, osc2, gain);
     osc1.start();
     osc2.start();
     osc1.stop(now + 0.6);

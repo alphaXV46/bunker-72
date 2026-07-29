@@ -55,6 +55,73 @@ export class GameModel {
   }
 
   /**
+   * Safely mutates knowledge within valid bounds.
+   * @param {number} delta
+   */
+  modifyKnowledge(delta) {
+    if (typeof delta !== 'number' || isNaN(delta)) return;
+    this.knowledge = clamp(this.knowledge + delta, 0, SURVIVAL.KNOWLEDGE_MAX);
+  }
+
+  /**
+   * Safely mutates health within valid bounds [0, maxStat].
+   * @param {number} delta
+   */
+  modifyHealth(delta) {
+    if (typeof delta !== 'number' || isNaN(delta)) return;
+    this.health = clamp(this.health + delta, 0, this.getMaxStat('health'));
+  }
+
+  /**
+   * Safely mutates hunger within valid bounds [0, maxStat].
+   * @param {number} delta
+   */
+  modifyHunger(delta) {
+    if (typeof delta !== 'number' || isNaN(delta)) return;
+    this.hunger = clamp(this.hunger + delta, 0, this.getMaxStat('hunger'));
+  }
+
+  /**
+   * Safely mutates thirst within valid bounds [0, maxStat].
+   * @param {number} delta
+   */
+  modifyThirst(delta) {
+    if (typeof delta !== 'number' || isNaN(delta)) return;
+    this.thirst = clamp(this.thirst + delta, 0, this.getMaxStat('thirst'));
+  }
+
+  /**
+   * Adds or removes inventory item quantity safely.
+   * @param {'food'|'drink'|'kit'} key
+   * @param {number} delta
+   */
+  addInventoryItem(key, delta = 1) {
+    if (typeof this.inventory[key] !== 'number') {
+      this.inventory[key] = 0;
+    }
+    this.inventory[key] = Math.max(0, this.inventory[key] + delta);
+  }
+
+  /**
+   * Sets a boolean or arbitrary state flag.
+   * @param {string} flagKey
+   * @param {any} value
+   */
+  setFlag(flagKey, value = true) {
+    if (!flagKey) return;
+    this.flags[flagKey] = value;
+  }
+
+  /**
+   * Deletes a state flag.
+   * @param {string} flagKey
+   */
+  deleteFlag(flagKey) {
+    if (!flagKey) return;
+    delete this.flags[flagKey];
+  }
+
+  /**
    * Initializes or re-initializes model state.
    * Used for both new games and loading a save.
    *

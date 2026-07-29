@@ -97,10 +97,17 @@ export class GameView {
 
   _setupInventoryListeners() {
     this.dom.resourceItems.forEach((item) => {
-      item.addEventListener('click', () => {
+      const activate = () => {
         const key = item.dataset.resource;
-        // Controller decides whether the click is valid for the current scene.
         this.controller.handleInventoryClick(key);
+      };
+
+      item.addEventListener('click', activate);
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activate();
+        }
       });
     });
   }
@@ -632,10 +639,19 @@ export class GameView {
     if (this.typingRafId)     cancelAnimationFrame(this.typingRafId);
     if (this.typingTimeoutId) clearTimeout(this.typingTimeoutId);
 
-    this.activeText           = text;
-    this.isTyping             = true;
+    this.activeText             = text;
+    this.isTyping               = true;
     this._pendingChoicesPayload = choicesPayload;
-    this.dom.dialogueText.textContent = '';
+    
+    // Create/reuse TextNode to avoid repeated DOM layout thrashing & string allocations
+    let textNode = this.dom.dialogueText.firstChild;
+    if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+      textNode = document.createTextNode('');
+      this.dom.dialogueText.replaceChildren(textNode);
+    } else {
+      textNode.nodeValue = '';
+    }
+
     this.updateBackButton();
 
     let currentIndex   = 0;
@@ -651,14 +667,16 @@ export class GameView {
 
       if (charsToAdd > 0) {
         lastTimestamp = timestamp - (elapsed % CHAR_INTERVAL);
-        for (let i = 0; i < charsToAdd && currentIndex < text.length; i++) {
-          const char = text[currentIndex];
-          this.dom.dialogueText.textContent += char;
-          // Emit a click sound on every other non-whitespace character
-          if (char.trim() && currentIndex % 2 === 0) {
-            this.controller.audio.playClick();
+        const prevIndex = currentIndex;
+        currentIndex = Math.min(text.length, currentIndex + charsToAdd);
+
+        textNode.nodeValue = text.slice(0, currentIndex);
+
+        for (let i = prevIndex; i < currentIndex; i++) {
+          const char = text[i];
+          if (char && char.trim() && i % 2 === 0) {
+            this.controller?.audio?.playClick();
           }
-          currentIndex++;
         }
       }
 
@@ -684,7 +702,12 @@ export class GameView {
     if (this.typingRafId)     { cancelAnimationFrame(this.typingRafId); this.typingRafId = null; }
     if (this.typingTimeoutId) { clearTimeout(this.typingTimeoutId);      this.typingTimeoutId = null; }
 
-    this.dom.dialogueText.textContent = this.activeText;
+    let textNode = this.dom.dialogueText.firstChild;
+    if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+      this.dom.dialogueText.textContent = this.activeText;
+    } else {
+      textNode.nodeValue = this.activeText;
+    }
     this.isTyping                     = false;
     this.updateBackButton();
 

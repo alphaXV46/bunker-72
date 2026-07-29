@@ -276,124 +276,124 @@ export class StoryEngine {
     }
 
     if (choice.id === 'c_prolog_pack_food') {
-      this.model.inventory.food++;
-      this.model.flags.food_packed = true;
+      this.model.addInventoryItem('food', 1);
+      this.model.setFlag('food_packed');
     }
     if (choice.id === 'c_prolog_pack_drink') {
-      this.model.inventory.drink++;
-      this.model.flags.drink_packed = true;
+      this.model.addInventoryItem('drink', 1);
+      this.model.setFlag('drink_packed');
     }
     if (choice.id === 'c_prolog_pack_kit') {
-      this.model.inventory.kit++;
-      this.model.flags.kit_packed = true;
+      this.model.addInventoryItem('kit', 1);
+      this.model.setFlag('kit_packed');
     }
     if (choice.id === 'c_prolog_pack_battery') {
-      this.model.flags.extra_battery = true;
-      this.model.flags.battery_packed = true;
+      this.model.setFlag('extra_battery');
+      this.model.setFlag('battery_packed');
     }
     if (choice.id === 'c_prolog_pack_snack') {
-      this.model.inventory.food++;
-      this.model.flags.snack_packed = true;
+      this.model.addInventoryItem('food', 1);
+      this.model.setFlag('snack_packed');
     }
     if (choice.id === 'c_prolog_pack_toy') {
-      this.model.flags.toy_packed = true;
+      this.model.setFlag('toy_packed');
     }
 
     const prevHealth = this.model.health;
 
     if (choice.id === 'c_day2_air_remedy_inspect') {
-      delete this.model.flags.air_uninspected;
-      this.model.flags.air_remedied = true;
+      this.model.deleteFlag('air_uninspected');
+      this.model.setFlag('air_remedied');
     }
 
     if (choice.id === 'c_day2_scavenge_bypass') {
       if (this.model.knowledge >= 8) {
-        this.model.inventory.food += 1;
-        this.model.inventory.drink += 1;
-        this.model.flags.scavenged = true;
+        this.model.addInventoryItem('food', 1);
+        this.model.addInventoryItem('drink', 1);
+        this.model.setFlag('scavenged');
         choice.nextSceneId = 'day2_scavenge_success';
         choice.log = "Melakukan pencarian perbekalan di kompartemen luar dengan mem-bypass kunci solenoid secara sukses.";
       } else {
-        this.model.health = Math.max(0, this.model.health - 20);
-        this.model.flags.generator_damaged = true;
-        this.model.flags.scavenged = true;
+        this.model.modifyHealth(-20);
+        this.model.setFlag('generator_damaged');
+        this.model.setFlag('scavenged');
         choice.nextSceneId = 'day2_scavenge_bypass_fail';
         choice.log = "Gagal mem-bypass kunci solenoid, memicu sengatan listrik korsleting regulator generator (-20 HP).";
       }
     }
 
     if (choice.id === 'c_day2_scavenge_slow') {
-      this.model.inventory.food += 1;
-      this.model.inventory.drink += 1;
-      this.model.flags.scavenged = true;
+      this.model.addInventoryItem('food', 1);
+      this.model.addInventoryItem('drink', 1);
+      this.model.setFlag('scavenged');
       this.model.updateSurvivalStats(6);
       choice.nextSceneId = 'day2_scavenge_slow_success';
       choice.log = "Pencarian perbekalan manual dilakukan secara lambat (memakan waktu 6 jam ekstra).";
     }
 
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
-    const effect         = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
-    this.model.knowledge = Math.max(0, Math.min(SURVIVAL.KNOWLEDGE_MAX, this.model.knowledge + effect));
+    const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
+    this.model.modifyKnowledge(effect);
     this.view.pulseKnowledge(effect);
 
     // Severe Choice Consequences mapping
     if (choice.id === 'c_day3_water_boil' || choice.id === 'c_day3_water_settle') {
-      this.model.health = Math.max(0, this.model.health - 30);
-      this.model.flags.water_poisoned = true;
+      this.model.modifyHealth(-30);
+      this.model.setFlag('water_poisoned');
     }
     if (choice.id === 'c_day2_leak_cloth' || choice.id === 'c_day2_leak_fan') {
-      this.model.health = Math.max(0, this.model.health - 20);
-      this.model.flags.smoke_poisoned = true;
+      this.model.modifyHealth(-20);
+      this.model.setFlag('smoke_poisoned');
     }
     if (choice.id === 'c_day4_oxygen_vent') {
-      this.model.health = Math.max(0, this.model.health - 30);
-      this.model.flags.oxygen_depleted = true;
+      this.model.modifyHealth(-30);
+      this.model.setFlag('oxygen_depleted');
     }
     if (choice.id === 'c_day4_looters_barter') {
-      this.model.flags.looters_breached = true;
+      this.model.setFlag('looters_breached');
     }
 
     // Day 4 triage choices consequences
     if (choice.id === 'c_day4_triage_food') {
       if (this.model.inventory.food > 0) {
-        this.model.inventory.food--;
-        this.model.hunger = Math.min(this.model.getMaxStat('hunger'), this.model.hunger + 30);
+        this.model.addInventoryItem('food', -1);
+        this.model.modifyHunger(30);
         choice.log = "Mengalokasikan ransum makanan terakhir untuk memulihkan Anak.";
       } else {
-        this.model.health = Math.max(0, this.model.health - 25);
+        this.model.modifyHealth(-25);
         choice.log = "Gagal memberikan makanan kepada Anak karena inventaris kosong (stres fisik parah).";
       }
     }
     if (choice.id === 'c_day4_triage_drink') {
       if (this.model.inventory.drink > 0) {
-        this.model.inventory.drink--;
-        this.model.thirst = Math.min(this.model.getMaxStat('thirst'), this.model.thirst + 30);
+        this.model.addInventoryItem('drink', -1);
+        this.model.modifyThirst(30);
         choice.log = "Mengalokasikan persediaan air terakhir untuk memulihkan Ibu.";
       } else {
-        this.model.health = Math.max(0, this.model.health - 25);
+        this.model.modifyHealth(-25);
         choice.log = "Gagal memberikan air kepada Ibu karena inventaris kosong (dehidrasi ekstrem).";
       }
     }
     if (choice.id === 'c_day4_triage_kit') {
       if (this.model.inventory.kit > 0) {
-        this.model.inventory.kit--;
-        this.model.health = Math.min(this.model.getMaxStat('health'), this.model.health + 40);
+        this.model.addInventoryItem('kit', -1);
+        this.model.modifyHealth(40);
         choice.log = "Menggunakan P3K terakhir untuk merawat trauma fisik Ayah.";
       } else {
-        this.model.health = Math.max(0, this.model.health - 25);
+        this.model.modifyHealth(-25);
         choice.log = "Gagal menggunakan P3K karena habis (kondisi fisik Ayah terus memburuk).";
       }
     }
     if (choice.id === 'c_day4_triage_save') {
-      this.model.hunger = Math.max(0, this.model.hunger - 15);
-      this.model.thirst = Math.max(0, this.model.thirst - 15);
-      this.model.health = Math.max(0, this.model.health - 15);
+      this.model.modifyHunger(-15);
+      this.model.modifyThirst(-15);
+      this.model.modifyHealth(-15);
       choice.log = "Menyimpan seluruh sisa persediaan; seluruh keluarga mengalami penurunan stamina serentak.";
     }
 
     // Panic-exit incurs a direct health penalty.
     if (choice.id === 'c_day2_panic_exit') {
-      this.model.health = Math.max(0, this.model.health - SURVIVAL.PANIC_HEALTH_PENALTY);
+      this.model.modifyHealth(-SURVIVAL.PANIC_HEALTH_PENALTY);
     }
 
     // Record decision in history.
@@ -412,7 +412,7 @@ export class StoryEngine {
 
     // Activate any flags declared on this choice.
     if (choice.setFlags?.length) {
-      choice.setFlags.forEach((f) => { this.model.flags[f] = true; });
+      choice.setFlags.forEach((f) => { this.model.setFlag(f); });
     }
 
     this.view.renderProtocolLog(this.model.history);
