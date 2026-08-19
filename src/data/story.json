@@ -1158,10 +1158,10 @@
         },
         {
           "id": "c_day3_signal_fire",
-          "text": "Bakar serpihan kain di corong ventilasi agar asapnya terlihat dari udara.",
+          "text": "Nyalakan suar darurat fosfor (flare) di dekat corong pembuangan agar terlihat dari udara.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -2,
-          "log": "Kertas dibakar untuk sinyal asap."
+          "log": "Suar fosfor dinyalakan di corong ventilasi, asap meracuni ruang dalam."
         }
       ]
     },
@@ -1200,10 +1200,10 @@
         },
         {
           "id": "c_day3_filter_signal_fire",
-          "text": "Bakar serpihan kain di corong ventilasi agar asapnya terlihat dari udara.",
+          "text": "Nyalakan suar darurat fosfor (flare) di dekat corong pembuangan agar terlihat dari udara.",
           "nextSceneId": "day3_signal_bad",
           "knowledgeEffect": -2,
-          "log": "Kertas dibakar untuk sinyal asap."
+          "log": "Suar fosfor dinyalakan di corong ventilasi, asap meracuni ruang dalam."
         }
       ]
     },
@@ -1310,7 +1310,7 @@
         {
           "id": "c_day3_verify_wait",
           "text": "Tetap waspada dan tunggu konfirmasi resmi tim penyelamat.",
-          "nextSceneId": "ending_eval",
+          "nextSceneId": "day3_final_vigil",
           "knowledgeEffect": 0,
           "log": "Bunker tetap terkunci sampai tim resmi tiba."
         }
@@ -1334,7 +1334,7 @@
         {
           "id": "c_day3_open_survive",
           "text": "Kunci kembali pintu darurat dan bertahan di tengah kekacauan hingga jam ke-72.",
-          "nextSceneId": "ending_eval",
+          "nextSceneId": "day3_final_vigil",
           "knowledgeEffect": 0,
           "log": "Keluarga bertahan setelah pintu dilanggar."
         }
@@ -1549,7 +1549,7 @@
     "ending_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja yang melengkung terbongkar keluar, dan bersamaan dengan itu, cahaya matahari pagi pesisir Rakata Selatan menembus masuk—menyilaukan mata setelah tiga hari terkurung dalam gulita. Udara laut yang segar dan dingin menyapu bau belerang yang membusuk di sudut ruangan. 'Kalian aman sekarang,' bisik petugas berseragam hazmat saat mengangkat tubuh Anak yang terlelap ke atas tandu. Mobil-mobilan merahnya masih berada di dalam genggaman jemari kecilnya. Ayah memeluk Ibu erat-erat di bawah hangatnya selimut termal, air matanya membasahi pipi yang kotor oleh jelaga debu. Kedisiplinan menjaga sirkulasi udara, menghemat baterai radio, dan keteguhan melindungi pintu telah membayar lunas setiap rasa takut. Mereka melangkah keluar menuju kendaraan evakuasi, meninggalkan Bunker 72 sebagai saksi abadi ketangguhan sebuah keluarga.",
+      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja yang melengkung terbongkar keluar, dan bersamaan dengan itu, cahaya matahari pagi pesisir Selat Sunda menyembur masuk bagai pedang perak—menyilaukan mata setelah tiga hari terkurung dalam gulita. Udara laut yang segar dan bersih menyapu bau belerang yang membusuk di sudut ruangan. Petugas berseragam hazmat melompat turun dan mengangkat tubuh Anak yang terlelap tenang ke atas tandu. Mobil-mobilan merahnya masih berada di dalam dekapan jemari kecilnya. Ayah terbatuk parau saat oksigen murni dari masker tim medis menyentuh paru-parunya. Dengan tubuh yang gemetar hebat, ia membuka mata dan melihat tangan Ibu yang lemah terulur dari selimut termal di atas tandu sebelah, jemarinya bergerak perlahan mencari genggamannya. Kedisiplinan menjaga sirkulasi udara, menghemat baterai radio, dan keteguhan melindungi pintu telah membayar lunas setiap rasa takut. Mereka melangkah keluar menuju kendaraan evakuasi, meninggalkan Bunker 72 sebagai saksi abadi ketangguhan sebuah keluarga.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []
@@ -1607,6 +1607,29 @@
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
+    },
+    "day3_final_vigil": {
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Jam ke-71 lewat tiga puluh menit. Mesin filtrasi terbatuk lalu mati dalam desis singkat. Sisa masker oksigen medis mini hanya tinggal satu di atas meja. Kupasangkan tali karetnya ke wajah kecil Anak kami. Dia sempat menatapku bingung di balik kabut plastik, 'Ayah... maskernya dingin. Kenapa Ibu nggak pakai juga?'\n\nIbu menepis lembut tanganku saat kucoba menyodorkan sisa tabung kepadanya. 'Pasang ke dia, Mas... biarkan Adek lihat matahari lagi.' Kurangkul Ibu erat-erat di sudut lantai semen, menutupi kepala kami berdua dengan jaket kerja di tengah gulita, menunggu dentuman alat pemotong tim evakuasi.",
+      "conditionalText": [
+        {
+          "requiredFlag": "structural_damage",
+          "text": " Retakan di dinding terus mendesis pelan, mengingatkan kami betapa rapuhnya batas antara hidup dan mati di bawah tanah."
+        }
+      ],
+      "background": "rusak",
+      "hour": "71 Jam",
+      "objective": "Hadapi saat-saat penentuan sebelum pintu bunker dibuka.",
+      "choices": [
+        {
+          "id": "c_day3_final_vigil_embrace",
+          "text": "Dekap keluarga erat-erat dalam kegelapan dan sambut tim penyelamat.",
+          "nextSceneId": "ending_eval",
+          "knowledgeEffect": 0,
+          "log": "Keluarga saling mendekap dalam kepasrahan dan cinta di jam ke-71."
+        }
+      ]
     }
   }
 }

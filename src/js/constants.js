@@ -114,6 +114,7 @@ export const CHOICE_QUALITY_MAP = Object.freeze({
   'c_day3_door_ignore': 'Acceptable',
   'c_day3_pinch_focus_water': 'Acceptable',
   'c_day3_pinch_inspect_vent': 'Optimal',
+  'c_day3_final_vigil_embrace': 'Optimal',
 
   // Day 4
   'c_day4_oxygen_rest': 'Acceptable',
