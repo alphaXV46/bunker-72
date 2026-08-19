@@ -58,6 +58,7 @@ export class GameView {
     this._setupKeyboardShortcuts();
     this._setupInventoryListeners();
     this._setupSettingsModal();
+    this._setupCardAndDrawerListeners();
   }
 
   // ─── LISTENER SETUP (private) ─────────────────────────────────────────────
@@ -134,6 +135,47 @@ export class GameView {
       document.body.classList.toggle('disable-crt', disabled);
       localStorage.setItem('bunker72_crt_disabled', String(disabled));
     });
+  }
+
+  _setupCardAndDrawerListeners() {
+    const card = document.getElementById('floating-interactive-card');
+    const toggleBtn = document.getElementById('card-nav-toggle-btn');
+    const toggleLabel = document.getElementById('toggle-btn-label');
+
+    const drawerBtn = document.getElementById('drawer-toggle-btn');
+    const drawer = document.getElementById('side-tactical-drawer');
+    const drawerCloseBtn = document.getElementById('drawer-close-btn');
+
+    if (toggleBtn && card && toggleLabel) {
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (card.classList.contains('show-choices')) {
+          card.classList.remove('show-choices');
+          card.classList.add('show-dialogue');
+          toggleLabel.textContent = 'PILIHAN AKSI';
+        } else {
+          card.classList.remove('show-dialogue');
+          card.classList.add('show-choices');
+          toggleLabel.textContent = 'BACA CERITA';
+        }
+      });
+    }
+
+    if (drawerBtn && drawer) {
+      drawerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        drawer.classList.toggle('drawer-open');
+        drawer.setAttribute('aria-hidden', drawer.classList.contains('drawer-open') ? 'false' : 'true');
+      });
+    }
+
+    if (drawerCloseBtn && drawer) {
+      drawerCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        drawer.classList.remove('drawer-open');
+        drawer.setAttribute('aria-hidden', 'true');
+      });
+    }
   }
 
   // ─── ONE-TIME SETUPS (called by StoryEngine.start) ───────────────────────
@@ -507,6 +549,15 @@ export class GameView {
     this.isReviewingNarrative = false;
     this.canReviewNarrative = choices?.length > 0 && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title';
     this.updateBackButton();
+
+    const card = document.getElementById('floating-interactive-card');
+    const toggleLabel = document.getElementById('toggle-btn-label');
+    if (card && toggleLabel && choices?.length && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title') {
+      card.classList.remove('show-dialogue');
+      card.classList.add('show-choices');
+      toggleLabel.textContent = 'BACA CERITA';
+    }
+
     if (!choices?.length) return;
 
     if (currentSceneId === 'prolog_packing') {
@@ -642,6 +693,14 @@ export class GameView {
     this.activeText             = text;
     this.isTyping               = true;
     this._pendingChoicesPayload = choicesPayload;
+
+    const card = document.getElementById('floating-interactive-card');
+    const toggleLabel = document.getElementById('toggle-btn-label');
+    if (card && toggleLabel) {
+      card.classList.remove('show-choices');
+      card.classList.add('show-dialogue');
+      toggleLabel.textContent = 'PILIHAN AKSI';
+    }
     
     // Create/reuse TextNode to avoid repeated DOM layout thrashing & string allocations
     let textNode = this.dom.dialogueText.firstChild;
@@ -1003,11 +1062,11 @@ export class GameView {
   }
 
   updateBackButton() {
-    const button = this._ensureBackButton();
-    button.disabled = !this.canReviewNarrative || this.narrativeHistory.length === 0 || this.isTyping;
-    button.textContent = this.isReviewingNarrative ? '>' : '<';
-    button.title = this.isReviewingNarrative ? 'Kembali ke pilihan' : 'Baca narasi sebelumnya';
-    button.classList.toggle('is-hidden', button.disabled);
+    if (this.backButton) {
+      this.backButton.disabled = true;
+      this.backButton.classList.add('is-hidden');
+      this.backButton.style.display = 'none';
+    }
   }
 
   showPreviousNarrative() {

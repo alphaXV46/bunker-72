@@ -254,6 +254,13 @@ export class StoryEngine {
         scene.choices, sceneId, this.model.flags,
         (choice) => this.handleChoiceSelect(choice)
       );
+
+      // Auto-trigger Radio Mini-Game if scene specifies it or is day2_radio_setup
+      if (scene.autoTriggerRadio === true || sceneId === 'day2_radio_setup') {
+        setTimeout(() => {
+          this.radioMiniGame?.open();
+        }, 400);
+      }
     }, choicesPayload);
   }
 
@@ -423,10 +430,15 @@ export class StoryEngine {
       this.audio.playDamageAlert();
     }
 
-    // Play appropriate SFX.
     const isBadChoice = effect < 0 || choice.id === 'c_day2_panic_exit'
       || (choice.nextSceneId?.includes('bad') ?? false);
     isBadChoice ? this.audio.playBadChoice() : this.audio.playClick();
+
+    if (choice.triggerRadioMiniGame === true || choice.id === 'c_day2_seal_radio') {
+      setTimeout(() => {
+        this.radioMiniGame?.open();
+      }, 300);
+    }
 
     this.renderScene(choice.nextSceneId);
   }
@@ -441,8 +453,10 @@ export class StoryEngine {
     if (this.model.isInventoryDisabledScene(this.model.currentSceneId)) return;
 
     if (key === 'radio') {
-      // Radio always plays its sound when clicked — no duplicate branch needed.
       this.audio.playRadioSound();
+      if (this.radioMiniGame) {
+        this.radioMiniGame.open();
+      }
       return;
     }
 

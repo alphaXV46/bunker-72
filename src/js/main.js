@@ -13,14 +13,20 @@
 import storyData from '../data/story.json';
 import { StoryEngine } from './storyEngine.js';
 import { SAVE_KEY, SURVIVAL } from './constants.js';
+import { preloadAssets } from './assetLoader.js';
+import { RadioMiniGame } from './radioMiniGame.js';
 
 // ─── DOM REFERENCES ──────────────────────────────────────────────────────────
 const dom = {
   // Screens
-  menuView:    document.getElementById('menu-view'),
-  gameView:    document.getElementById('game-view'),
-  endingView:  document.getElementById('ending-view'),
-  creditsView: document.getElementById('credits-view'),
+  loadingScreen:     document.getElementById('loading-screen'),
+  loadingBarFill:    document.getElementById('loading-bar-fill'),
+  loadingPercent:    document.getElementById('loading-percent'),
+  loadingStatusText: document.getElementById('loading-status-text'),
+  menuView:          document.getElementById('menu-view'),
+  gameView:          document.getElementById('game-view'),
+  endingView:        document.getElementById('ending-view'),
+  creditsView:       document.getElementById('credits-view'),
 
   // Menu buttons
   newGameBtn:  document.getElementById('new-game-btn'),
@@ -115,7 +121,25 @@ function showScreen(screenKey) {
 
 let storyEngine = null;
 
-function initGame() {
+async function initGame() {
+  // Preload fonts and images with progress updates
+  await preloadAssets((percent, loaded, total) => {
+    if (dom.loadingBarFill) dom.loadingBarFill.style.width = `${percent}%`;
+    if (dom.loadingPercent) dom.loadingPercent.textContent = `${percent}%`;
+    if (dom.loadingStatusText) {
+      dom.loadingStatusText.textContent = `MEMUAT ASET (${loaded}/${total})...`;
+    }
+  });
+
+  // Hide loading screen and reveal main menu
+  if (dom.loadingScreen) {
+    dom.loadingScreen.classList.add('fade-out');
+    setTimeout(() => {
+      dom.loadingScreen.classList.remove('active');
+    }, 450);
+  }
+  showScreen('menu');
+
   storyEngine = new StoryEngine({
     storyData,
     dom: {
@@ -158,6 +182,41 @@ function initGame() {
       showScreen('ending');
     },
   });
+
+  // Wire Radio Frequency Tuning Mini-Game
+  const radioModalEl = document.getElementById('radio-minigame-modal');
+  if (radioModalEl) {
+    storyEngine.radioMiniGame = new RadioMiniGame({
+      modalEl: radioModalEl,
+      audio: storyEngine.audio,
+      onSuccess: (broadcastText) => {
+        storyEngine.model.knowledge = Math.min(15, storyEngine.model.knowledge + 1);
+        storyEngine.view.pulseKnowledge(1);
+        const scene = storyEngine.storyData.scenes[storyEngine.model.currentSceneId];
+        if (scene) {
+          storyEngine.view.renderHud(
+            scene, storyEngine.model.knowledge, storyEngine.model.currentSceneId,
+            storyEngine.model.flags, storyEngine.model.hunger, storyEngine.model.thirst, storyEngine.model.health
+          );
+        }
+        storyEngine.model.history.push({
+          hour: scene?.hour ?? '--',
+          text: `[MINI-GAME] Radio VHF Terkunci: ${broadcastText}`,
+          choiceId: null,
+          effect: 1,
+        });
+        storyEngine.view.renderProtocolLog(storyEngine.model.history);
+      },
+    });
+  }
+
+  const quickRadioBtn = document.getElementById('quick-radio-btn');
+  if (quickRadioBtn) {
+    quickRadioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      storyEngine?.radioMiniGame?.open();
+    });
+  }
 
   // ── Menu buttons ──
   dom.newGameBtn.addEventListener('click', () => {

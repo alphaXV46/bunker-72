@@ -28,6 +28,12 @@ out/
 .DS_Store
 Thumbs.db
 
+# Local archives & scratch
+scratch/
+lib_pdf/
+*.rar
+*.zip
+
 # Local env files
 .env
 .env.local

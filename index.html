@@ -13,7 +13,25 @@
 </head>
 <body>
   <main id="game-container">
-    <section id="menu-view" class="view-screen active">
+    <!-- Loading Screen (Covers UI until fonts & assets are fully ready) -->
+    <section id="loading-screen" class="view-screen loading-screen active">
+      <div class="loading-container">
+        <div class="menu-kicker">SATGAS SIMULASI DARURAT / INVENTARIS SISTEM</div>
+        <h1 class="loading-title">MEMUAT PROTOKOL 72</h1>
+        <div class="loading-decor">
+          <div class="flashing-warning">INISIALISASI ASET & SUB-SISTEM BUNKER</div>
+        </div>
+        <div class="loading-bar-shell">
+          <div id="loading-bar-fill" class="loading-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div class="loading-readout">
+          <span id="loading-status-text">MEMUAT FONT DAN GRAFIS...</span>
+          <span id="loading-percent" class="highlight-val">0%</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="menu-view" class="view-screen">
       <div class="menu-title-container">
         <div class="menu-kicker">SATGAS SIMULASI DARURAT / PROTOKOL 72</div>
         <h1 class="game-title">72 JAM PERTAMA</h1>
@@ -45,68 +63,7 @@
     <button id="settings-btn" class="settings-icon" aria-label="Pengaturan">⚙️</button>
 
     <section id="game-view" class="view-screen">
-      <div class="status-panel">
-        <div class="status-item">
-          <span>WAKTU: </span>
-          <span id="status-time" class="highlight-val">0 JAM</span>
-          <span class="muted-text"> / 72 JAM</span>
-        </div>
-        <div class="status-item">
-          <span>HARI: </span>
-          <span id="status-day" class="highlight-val">1</span>
-        </div>
-        <div class="status-item">
-          <span>KESIAPSIAGAAN: </span>
-          <span id="status-knowledge" class="highlight-val">5</span>
-          <span class="muted-text">/15</span>
-        </div>
-        <div class="status-item" id="hud-hunger">
-          <span>🍖 LAPAR: </span>
-          <span id="status-hunger" class="highlight-val">100</span>
-          <span class="muted-text">/100</span>
-        </div>
-        <div class="status-item" id="hud-thirst">
-          <span>💧 HAUS: </span>
-          <span id="status-thirst" class="highlight-val">100</span>
-          <span class="muted-text">/100</span>
-        </div>
-        <div class="status-item" id="hud-health">
-          <span>❤️ SEHAT: </span>
-          <span id="status-health" class="highlight-val">100</span>
-          <span class="muted-text">/100</span>
-        </div>
-      </div>
-
-      <div class="mission-panel">
-        <div class="progress-shell">
-          <span id="status-progress-bar" class="progress-fill"></span>
-        </div>
-        <div id="status-objective" class="objective-text">Masuk bunker dan amankan keluarga.</div>
-      </div>
-
-      <div class="resource-panel" aria-label="Inventaris bunker">
-        <div class="resource-item" data-resource="food" role="button" tabindex="0" aria-label="Gunakan Makanan Kaleng">
-          <img src="/src/assets/food_icon.png" alt="Makanan">
-          <span>Makanan</span>
-          <span class="resource-count" id="count-food">2</span>
-        </div>
-        <div class="resource-item" data-resource="drink" role="button" tabindex="0" aria-label="Gunakan Air Bersih">
-          <img src="/src/assets/drink_icon.png" alt="Air">
-          <span>Air</span>
-          <span class="resource-count" id="count-drink">2</span>
-        </div>
-        <div class="resource-item" data-resource="kit" role="button" tabindex="0" aria-label="Gunakan Kotak P3K">
-          <img src="/src/assets/kit_icon.png" alt="P3K">
-          <span>P3K</span>
-          <span class="resource-count" id="count-kit">1</span>
-        </div>
-        <div class="resource-item" data-resource="radio" role="button" tabindex="0" aria-label="Dengarkan Radio Portable">
-          <img src="/src/assets/radio_icon.png" alt="Radio">
-          <span>Radio</span>
-          <span class="resource-count" id="count-radio">∞</span>
-        </div>
-      </div>
-
+      <!-- Story box (Visual scene canvas, 100% full bleed inside #game-view) -->
       <div class="story-box" id="story-box">
         <div class="scene-vignette"></div>
         <div class="scene-atmosphere">
@@ -115,45 +72,149 @@
           <span class="dust dust-b"></span>
           <span class="warning-sweep"></span>
         </div>
-        <div class="environment-readout">
-          <div id="hud-air"><span>🫁 UDARA</span><strong id="status-air">STABIL</strong></div>
-          <div><span>STRUKTUR</span><strong id="status-structure">AMAN</strong></div>
-          <div><span>DAYA</span><strong id="status-power">NORMAL</strong></div>
-        </div>
 
-        <div class="dialogue-overlay">
-          <div id="speaker-name" class="speaker-name">Narator</div>
-          <div class="dialogue-body">
-            <div class="avatar-container" id="avatar-container">
-              <img id="speaker-avatar" class="speaker-avatar" src="" alt="Speaker Avatar">
+        <!-- Prolog Tap to Continue Hint -->
+        <div class="prolog-tap-continue" aria-hidden="true">tap to Continue</div>
+
+        <!-- Floating Dialog & Choice Card Overlay (Bottom Center with open gaps around it) -->
+        <div id="floating-interactive-card" class="floating-interactive-card">
+          <div class="card-header">
+            <div id="speaker-name" class="speaker-name">Narator</div>
+            <div class="header-actions">
+              <button id="quick-radio-btn" class="card-nav-toggle-btn radio-quick-btn" type="button" title="Buka Mini-Game Radio">📻 RADIO</button>
+              <button id="card-nav-toggle-btn" class="card-nav-toggle-btn" type="button" title="Toggle Pilihan / Cerita">
+                <span id="toggle-btn-label">PILIHAN AKSI</span>
+              </button>
             </div>
-            <div id="dialogue-text" class="dialogue-text">Mempersiapkan sistem bunker...</div>
+          </div>
+          
+          <div class="card-body">
+            <!-- Dialogue overlay container -->
+            <div class="dialogue-overlay" id="dialogue-container">
+              <div class="dialogue-body">
+                <div class="avatar-container" id="avatar-container">
+                  <img id="speaker-avatar" class="speaker-avatar" src="" alt="Speaker Avatar">
+                </div>
+                <div id="dialogue-text" class="dialogue-text">Mempersiapkan sistem bunker...</div>
+              </div>
+            </div>
+
+            <!-- Command Deck container -->
+            <div class="command-deck" id="command-deck-container">
+              <div class="choices-panel" id="choices-panel"></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="command-deck">
-        <div class="choices-panel" id="choices-panel"></div>
-      </div>
-
-      <!-- Tombol Toggle Jurnal -->
-      <button id="journal-btn" aria-label="Buka Jurnal Bunker" title="Jurnal Bunker">
-        <span class="journal-icon">📋</span>
-        <span class="journal-label">JURNAL</span>
+      <!-- Tombol Trigger Side Drawer (Tepi Kanan) -->
+      <button id="drawer-toggle-btn" class="drawer-toggle-btn" aria-label="Buka Sub-sistem Taktis & Log" title="Sub-sistem Taktis & Log">
+        <span class="drawer-icon">📦</span>
+        <span class="drawer-label">TAKTIS & LOG</span>
+        <span class="drawer-arrow">◀</span>
       </button>
 
-
-
-      <!-- Panel Jurnal — awalnya tersembunyi, muncul saat di-toggle -->
-      <aside id="journal-panel" class="journal-panel" aria-hidden="true">
-        <div class="journal-header">
-          <div class="panel-label">LOG PROTOKOL</div>
-          <button id="journal-close-btn" class="journal-close" aria-label="Tutup Jurnal">✕</button>
+      <!-- Sub-sistem Slide Drawer (Slide-in dari kanan) -->
+      <aside id="side-tactical-drawer" class="side-tactical-drawer" aria-hidden="true">
+        <div class="drawer-header">
+          <div class="panel-label">SUB-SISTEM & LOG BUNKER</div>
+          <button id="drawer-close-btn" class="drawer-close" aria-label="Tutup Panel Sub-sistem">✕</button>
         </div>
-        <div id="protocol-log-list" class="protocol-log-list">
-          <p>Menunggu keputusan pertama...</p>
+
+        <div class="drawer-content">
+          <!-- Section 1: Vital Stats & Objectives (Diegetik Log) -->
+          <div class="drawer-section">
+            <div class="drawer-section-title">STATUS VITAL & MISI</div>
+            <div class="status-panel">
+              <div class="status-item">
+                <span>WAKTU: </span>
+                <span id="status-time" class="highlight-val">0 JAM</span>
+                <span class="muted-text"> / 72 JAM</span>
+              </div>
+              <div class="status-item">
+                <span>HARI: </span>
+                <span id="status-day" class="highlight-val">1</span>
+              </div>
+              <div class="status-item">
+                <span>KESIAPSIAGAAN: </span>
+                <span id="status-knowledge" class="highlight-val">5</span>
+                <span class="muted-text">/15</span>
+              </div>
+              <div class="status-item" id="hud-hunger">
+                <span>🍖 LAPAR: </span>
+                <span id="status-hunger" class="highlight-val">100</span>
+                <span class="muted-text">/100</span>
+              </div>
+              <div class="status-item" id="hud-thirst">
+                <span>💧 HAUS: </span>
+                <span id="status-thirst" class="highlight-val">100</span>
+                <span class="muted-text">/100</span>
+              </div>
+              <div class="status-item" id="hud-health">
+                <span>❤️ SEHAT: </span>
+                <span id="status-health" class="highlight-val">100</span>
+                <span class="muted-text">/100</span>
+              </div>
+            </div>
+            <div class="mission-panel">
+              <div class="progress-shell">
+                <span id="status-progress-bar" class="progress-fill"></span>
+              </div>
+              <div id="status-objective" class="objective-text">Masuk bunker dan amankan keluarga.</div>
+            </div>
+          </div>
+
+          <!-- Section 2: Sub-sistem Lingkungan -->
+          <div class="drawer-section">
+            <div class="drawer-section-title">STATUS LINGKUNGAN</div>
+            <div class="environment-readout">
+              <div id="hud-air"><span>🫁 UDARA</span><strong id="status-air">STABIL</strong></div>
+              <div><span>STRUKTUR</span><strong id="status-structure">AMAN</strong></div>
+              <div><span>DAYA</span><strong id="status-power">NORMAL</strong></div>
+            </div>
+          </div>
+
+          <!-- Section 3: Inventaris Barang -->
+          <div class="drawer-section">
+            <div class="drawer-section-title">INVENTARIS BARANG</div>
+            <div class="resource-panel" aria-label="Inventaris bunker">
+              <div class="resource-item" data-resource="food" role="button" tabindex="0" aria-label="Gunakan Makanan Kaleng">
+                <img src="/src/assets/food_icon.png" alt="Makanan">
+                <span>Makanan</span>
+                <span class="resource-count" id="count-food">2</span>
+              </div>
+              <div class="resource-item" data-resource="drink" role="button" tabindex="0" aria-label="Gunakan Air Bersih">
+                <img src="/src/assets/drink_icon.png" alt="Air">
+                <span>Air</span>
+                <span class="resource-count" id="count-drink">2</span>
+              </div>
+              <div class="resource-item" data-resource="kit" role="button" tabindex="0" aria-label="Gunakan Kotak P3K">
+                <img src="/src/assets/kit_icon.png" alt="P3K">
+                <span>P3K</span>
+                <span class="resource-count" id="count-kit">1</span>
+              </div>
+              <div class="resource-item" data-resource="radio" role="button" tabindex="0" aria-label="Dengarkan Radio Portable">
+                <img src="/src/assets/radio_icon.png" alt="Radio">
+                <span>Radio</span>
+                <span class="resource-count" id="count-radio">∞</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Log Protokol Jurnal -->
+          <div class="drawer-section">
+            <div class="drawer-section-title">LOG PROTOKOL JURNAL</div>
+            <div id="journal-panel" class="journal-panel-drawer">
+              <div id="protocol-log-list" class="protocol-log-list">
+                <p>Menunggu keputusan pertama...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
+
+      <!-- Legacy hidden aliases to ensure complete JS backward compatibility -->
+      <button id="journal-btn" style="display:none;" aria-hidden="true"></button>
     </section>
 
     <section id="ending-view" class="view-screen">
@@ -201,31 +262,84 @@
       </div>
     </section>
 
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-content">
+        <h2>PENGATURAN SISTEM</h2>
+        <div id="volume-control" class="volume-control">
+          <button id="mute-btn" class="mute-btn" aria-label="Mute/Unmute Audio" title="Mute/Unmute">
+            <span id="mute-icon">🔊</span>
+          </button>
+          <input type="range" id="volume-slider" class="volume-slider"
+            min="0" max="1" step="0.05" value="0.6" aria-label="Volume Audio">
+        </div>
+        <div class="settings-option">
+          <label for="crt-toggle">Efek Visual Retro (CRT): </label>
+          <input type="checkbox" id="crt-toggle" checked>
+        </div>
+        <div class="settings-actions">
+          <button id="settings-menu-btn" class="choice-btn text-center">KEMBALI KE MENU UTAMA</button>
+          <button id="settings-close-btn" class="choice-btn text-center">TUTUP</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Mini-Game Radio Frequency Tuning -->
+    <div id="radio-minigame-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-content radio-modal-content">
+        <div class="radio-header">
+          <div class="panel-label">SUB-SISTEM RECEIVER DARURAT (VHF/FM)</div>
+          <button id="radio-modal-close-btn" class="drawer-close" aria-label="Tutup Radio">✕</button>
+        </div>
+
+        <div class="radio-display-panel">
+          <div class="radio-freq-readout">
+            <span class="readout-label">FREKUENSI:</span>
+            <span id="radio-freq-display" class="freq-value">91.2 MHz</span>
+          </div>
+
+          <div class="radio-meter-box">
+            <div class="meter-label-row">
+              <span>MUTU SINYAL</span>
+              <span id="radio-signal-status" class="signal-status">STATIC NOISE</span>
+            </div>
+            <div class="meter-bar-shell">
+              <div id="radio-signal-fill" class="meter-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="radio-indicator-row">
+            <span id="radio-lock-led" class="light active-red"></span>
+            <span class="indicator-text">STATUS LOCK KUNCI SINYAL</span>
+          </div>
+        </div>
+
+        <div class="radio-control-section">
+          <div class="knob-control-wrapper">
+            <div class="knob-side-label">88.0 MHz</div>
+            <div class="radio-knob-container">
+              <div id="radio-rotary-knob" class="radio-rotary-knob" title="Putar Kenop Frekuensi Radio">
+                <div class="knob-cap">
+                  <div id="radio-knob-dot" class="knob-dot"></div>
+                </div>
+              </div>
+            </div>
+            <div class="knob-side-label">108.0 MHz</div>
+          </div>
+          <label for="radio-freq-slider" class="slider-label">GESER / PUTAR KENOP FREKUENSI (88.0 - 108.0 MHz)</label>
+          <input type="range" id="radio-freq-slider" class="radio-slider" min="88.0" max="108.0" step="0.1" value="91.2">
+          <button id="radio-lock-btn" class="choice-btn lock-signal-btn" disabled>KUNCI SINYAL</button>
+        </div>
+
+        <div class="radio-broadcast-box">
+          <p id="radio-broadcast-text">Mencari sinyal radio darurat... Geser kenop frekuensi di atas.</p>
+        </div>
+      </div>
+    </div>
+
     <div class="crt-overlay"></div>
     <div class="crt-flicker"></div>
   </main>
-
-  <!-- Modal Pengaturan — semua style diatur di main.css Section 16 -->
-  <div id="settings-modal" class="modal hidden" aria-hidden="true">
-    <div class="modal-content">
-      <h2>PENGATURAN SISTEM</h2>
-      <div id="volume-control" class="volume-control">
-        <button id="mute-btn" class="mute-btn" aria-label="Mute/Unmute Audio" title="Mute/Unmute">
-          <span id="mute-icon">🔊</span>
-        </button>
-        <input type="range" id="volume-slider" class="volume-slider"
-          min="0" max="1" step="0.05" value="0.6" aria-label="Volume Audio">
-      </div>
-      <div class="settings-option">
-        <label for="crt-toggle">Efek Visual Retro (CRT): </label>
-        <input type="checkbox" id="crt-toggle" checked>
-      </div>
-      <div class="settings-actions">
-        <button id="settings-menu-btn" class="choice-btn text-center">KEMBALI KE MENU UTAMA</button>
-        <button id="settings-close-btn" class="choice-btn text-center">TUTUP</button>
-      </div>
-    </div>
-  </div>
 
   <script type="module" src="/src/js/main.js"></script>
 </body>
