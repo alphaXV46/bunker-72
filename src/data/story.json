@@ -1168,7 +1168,7 @@
     "day3_water_filter": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Wah... air yang tadi cokelat keruh jadi bening lagi! Boleh aku minum sekarang, Ibu? Tenggorokanku sudah nggak tahan...",
+      "text": "Wah... air yang tadi cokelat keruh jadi bening lagi! Boleh aku minum sekarang, Ibu? Tenggorokanku sudah nggak tahan...\n\nAyah menggenggam erat jemari Ibu yang gemetar saat menyodorkan cangkir ke bibir mungil itu. Di tengah dinginnya dinding semen, tatapan mata kedua orang tua itu saling menguatkan dalam keheningan yang tulus.",
       "conditionalText": [
         {
           "requiredFlag": "structural_damage",
@@ -1478,7 +1478,7 @@
     "day4_looters": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Mas — ada yang mencoba membongkar engsel pintu luar dengan linggis. Aku bisa merasakan getarannya merambat di lantai beton. Anak sudah kusiapkan di sudut terlindung... lakukan apa pun untuk melindungi pintu ini!",
+      "text": "Mas — ada yang mencoba membongkar engsel pintu luar dengan linggis. Aku bisa merasakan getarannya merambat di lantai beton. Anak sudah kusembunyikan di sudut terlindung... tadi dia sempat berbisik, 'Ibu sama Ayah kok nggak makan? Adek bagi dua ya biskuitnya...' Hatiku hancur mendengarnya, Mas. Lakukan apa pun untuk melindungi pintu ini!",
       "background": "rusak",
       "hour": "84 Jam",
       "objective": "Amankan pintu bunker dari ancaman penjarah.",
