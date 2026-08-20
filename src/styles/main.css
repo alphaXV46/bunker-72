@@ -1352,11 +1352,14 @@ body.title-card-active #settings-btn { display: none !important; }
   top: auto;
   width: min(47%, 580px);
   max-height: calc(100% - 72px);
+  overflow-x: hidden;
   overflow-y: auto;
   z-index: 25;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 4px 8px 4px 2px;
+  box-sizing: border-box;
 }
 
 #game-view.prolog-mode .story-box.has-interactive-choices .choices-panel {
@@ -1364,10 +1367,12 @@ body.title-card-active #settings-btn { display: none !important; }
   flex-direction: column;
   gap: 10px;
   width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 #game-view.prolog-mode .story-box.has-interactive-choices .choice-btn {
-  width: 100%;
+  width: calc(100% - 6px);
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 28px 1fr;
@@ -1388,7 +1393,7 @@ body.title-card-active #settings-btn { display: none !important; }
   background: linear-gradient(135deg, rgba(38, 48, 62, 0.98) 0%, rgba(20, 26, 36, 0.98) 100%);
   border-color: #ffffff;
   color: #ffffff;
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 #game-view.prolog-mode .story-box.has-interactive-choices .prolog-tap-continue {
@@ -1467,24 +1472,32 @@ body.title-card-active #settings-btn { display: none !important; }
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .choices-panel {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 #game-view .command-deck .choices-panel {
   gap: 8px;
-  padding: 0;
+  padding: 2px 6px 2px 2px;
   border: 0;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .choice-btn {
+  width: calc(100% - 4px);
+  box-sizing: border-box;
   min-height: clamp(44px, 5.4vh, 60px);
   background:
     linear-gradient(90deg, rgba(91,192,190,0.06), transparent 38%),
@@ -1511,7 +1524,7 @@ body.title-card-active #settings-btn { display: none !important; }
     linear-gradient(90deg, rgba(255,209,102,0.12), transparent 44%),
     linear-gradient(180deg, rgba(27,32,38,0.98), rgba(12,14,17,0.94));
   border-color: var(--warning-yellow-border);
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 .choice-btn:disabled { opacity: 0.36; cursor: not-allowed; }
