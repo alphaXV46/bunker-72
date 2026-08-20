@@ -11,6 +11,8 @@ import bgProlog1 from '../assets/bg_prolog1.png';
 import bgProlog2 from '../assets/bg_prolog2.png';
 import bgProlog3 from '../assets/bg_prolog3.png';
 import bgProlog4 from '../assets/bg_prolog4.png';
+import bgPrologPeaceful from '../assets/bg_prolog_peaceful.png';
+import bgPrologWindow from '../assets/bg_prolog_window.png';
 import bgDay1 from '../assets/bg_day1.png';
 import bgDay2 from '../assets/bg_day2.png';
 import bgDay3 from '../assets/bg_day3.png';
@@ -26,6 +28,8 @@ import snacks from '../assets/snacks.png';
 
 const ASSET_URLS = [
   bgMenu,
+  bgPrologPeaceful,
+  bgPrologWindow,
   bgProlog1,
   bgProlog2,
   bgProlog3,

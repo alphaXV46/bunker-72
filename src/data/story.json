@@ -3,21 +3,137 @@
     "prolog_home": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Lantai ubin ruang tamu kecil kami di Rakata Selatan masih menyimpan sisa hangat matahari sore. Ibu sedang sibuk menyiapkan makan malam di dapur. Di atas karpet usang, Anak masih asyik mendorong mobil-mobilan merahnya, tak menyadari langit di balik jendela mulai berubah warna menjadi tembaga pekat.",
-      "background": "prolog1",
+      "text": "Sore itu di pesisir Rakata Selatan terasa begitu tenteram. Cahaya senja keemasan menerobos jendela kayu ruang tamu. Di atas karpet, Anak tertawa riang mendorong mobil-mobilan merahnya, sementara dari arah dapur tercium aroma sedap masakan Ibu yang sedang menyiapkan makan malam.",
+      "background": "prolog_peaceful",
       "hour": "0 Jam",
-      "objective": "Saksikan tanda-tanda awal bencana.",
-      "autoNextSceneId": "prolog_alert",
-      "autoAdvanceDelay": 1200,
-      "choices": []
+      "objective": "Nikmati momen kedamaian sore bersama keluarga di rumah.",
+      "choices": [
+        {
+          "id": "c_prolog_talk_ibu",
+          "text": "🍳 Hampiri Ibu di dapur dan cicipi masakannya",
+          "nextSceneId": "prolog_with_ibu",
+          "knowledgeEffect": 0,
+          "log": "Menghampiri Ibu yang sedang memasak di dapur."
+        },
+        {
+          "id": "c_prolog_play_anak",
+          "text": "🚗 Duduk di karpet dan temani Anak bermain mobil-mobilan",
+          "nextSceneId": "prolog_with_anak",
+          "knowledgeEffect": 0,
+          "log": "Menemani Anak bermain di ruang tengah."
+        },
+        {
+          "id": "c_prolog_tune_radio",
+          "text": "📻 Putar kenop radio kayu untuk mendengar siaran musik sore",
+          "nextSceneId": "prolog_radio_peaceful",
+          "knowledgeEffect": 0,
+          "log": "Menyalakan radio kayu di ruang tengah."
+        },
+        {
+          "id": "c_prolog_skip",
+          "text": "⚡ [LEWATI KE DARURAT] Langsung ke simulasi alarm evakuasi",
+          "nextSceneId": "prolog_alert",
+          "knowledgeEffect": 0,
+          "log": "Memilih langsung merespons situasi darurat."
+        }
+      ]
+    },
+    "prolog_with_ibu": {
+      "speaker": "Ibu",
+      "avatar": "ibu",
+      "text": "\"Mas, pas sekali kamu sudah pulang! Coba cicipi sedikit kuah sayurnya... gurihnya sudah pas belum? Anak dari tadi siang menanyakan kapan Ayahnya pulang. Rasanya hangat sekali kalau kita bisa kumpul lengkap seperti ini.\"",
+      "background": "prolog_peaceful",
+      "hour": "0 Jam",
+      "objective": "Bercengkrama dengan keluarga sebelum santap malam.",
+      "choices": [
+        {
+          "id": "c_prolog_ibu_comfort",
+          "text": "❤️ \"Masakanmu selalu yang terbaik, Rin. Malam ini kita santap bersama ya.\"",
+          "nextSceneId": "prolog_radio_peaceful",
+          "knowledgeEffect": 1,
+          "log": "Menikmati kehangatan obrolan keluarga di dapur."
+        },
+        {
+          "id": "c_prolog_ibu_prepare",
+          "text": "🔍 \"Enak sekali. Tapi udara di luar terasa agak aneh dan pengap sore ini...\"",
+          "nextSceneId": "prolog_radio_peaceful",
+          "knowledgeEffect": 1,
+          "log": "Merasakan kejanggalan cuaca pesisir."
+        }
+      ]
+    },
+    "prolog_with_anak": {
+      "speaker": "Anak",
+      "avatar": "anak",
+      "text": "\"Ayah! Lihat, mobil pemadam kebakaranku bisa meluncur kencang! Nguuung... ciitt! Tapi roda belakangnya agak goyang, Yah. Nanti sehabis makan malam, Ayah bantu kencangkan bautnya ya?\"",
+      "background": "prolog_peaceful",
+      "hour": "0 Jam",
+      "objective": "Temani anak tersayang bermain sejenak.",
+      "choices": [
+        {
+          "id": "c_prolog_anak_promise",
+          "text": "🤝 \"Pasti, Jagoan! Nanti Ayah ambil obeng kecil dan kita perbaiki sama-sama.\"",
+          "nextSceneId": "prolog_radio_peaceful",
+          "knowledgeEffect": 1,
+          "log": "Menjanjikan waktu bermain dan perbaikan mainan untuk Anak."
+        },
+        {
+          "id": "c_prolog_anak_snack",
+          "text": "🍪 \"Siap komandan! Ini Ayah bawakan camilan kesukaanmu dulu.\"",
+          "nextSceneId": "prolog_radio_peaceful",
+          "knowledgeEffect": 1,
+          "log": "Membagikan camilan sore untuk Anak."
+        }
+      ]
+    },
+    "prolog_radio_peaceful": {
+      "speaker": "Radio Rakata",
+      "avatar": null,
+      "text": "[RADIO SUARA RAKATA 94.2 FM] Alunan petikan gitar akustik mengalun lembut dari corong radio tua. Penyiar bersuara hangat: \"...Selamat petang pendengar setia. Menjelang senja di pesisir barat, hembusan angin laut terpantau tenang... meski BMKG mencatat tremor mikro di kedalaman laut, seluruh aktivitas warga tetap kondusif...\"",
+      "background": "prolog_peaceful",
+      "hour": "0 Jam",
+      "objective": "Simak siaran radio senja di ruang tamu.",
+      "choices": [
+        {
+          "id": "c_prolog_listen_careful",
+          "text": "⚠️ Simak baik-baik laporan tremor mikro yang disebutkan penyiar",
+          "nextSceneId": "prolog_foreshadow",
+          "knowledgeEffect": 1,
+          "log": "Mencatat peringatan tremor mikro dari siaran radio lokal."
+        },
+        {
+          "id": "c_prolog_prepare_bag",
+          "text": "🎒 Lirik ransel siaga di dekat pintu untuk memastikan isinya siap",
+          "nextSceneId": "prolog_foreshadow",
+          "knowledgeEffect": 1,
+          "log": "Memastikan kesiapsiagaan tas darurat di dekat pintu."
+        }
+      ]
+    },
+    "prolog_foreshadow": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Tiba-tiba, lampu bohlam ruang tengah berkedip redup. Alunan musik di radio mendadak lenyap digantikan derau statis berdesing tajam. Di luar jendela, langit senja keemasan berubah seketika menjadi tembaga pekat dan ungu keabuan. Puluhan burung beterbangan panik meninggalkan dahan pohon, disusul dentuman getaran rendah di bawah lantai yang membuat cangkir teh di meja bergemerincing!",
+      "background": "prolog_window",
+      "hour": "0 Jam",
+      "objective": "Waspadai tanda-tanda ancaman mendadak di luar jendela.",
+      "choices": [
+        {
+          "id": "c_prolog_foreshadow_check",
+          "text": "🚨 Berteriak memperingatkan keluarga dan raih ransel!",
+          "nextSceneId": "prolog_alert",
+          "knowledgeEffect": 1,
+          "log": "Segera merespons tanda anomali alam di luar rumah."
+        }
+      ]
     },
     "prolog_alert": {
       "speaker": "TV Darurat",
       "avatar": null,
-      "text": "[SIARAN DARURAT BNPB] Layar televisi memotong tayangan dengan denging statis memekakkan telinga. Peta pesisir berkedip merah membara: aktivitas eksplosif Krakatau meningkat ke status Awas. Seluruh warga pesisir Rakata Selatan diperintahkan segera menuju bunker pertahanan sipil terdekat!",
+      "text": "[SIARAN DARURAT BNPB] Layar televisi memotong tayangan dengan denging statis memekakkan telinga. Peta pesisir berkedip merah membara: aktivitas eksplosif Krakatau meningkat drastis ke status Awas tingkat tertinggi! Seluruh warga pesisir Rakata Selatan diperintahkan segera mengungsi menuju bunker pertahanan sipil terdekat!",
       "background": "prolog2",
       "hour": "0 Jam",
-      "objective": "Simak peringatan evakuasi darurat.",
+      "objective": "Simak peringatan evakuasi darurat BNPB.",
       "autoNextSceneId": "prolog_question",
       "autoAdvanceDelay": 1200,
       "choices": []
@@ -25,7 +141,7 @@
     "prolog_question": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Rin, matikan kompornya sekarang! Bawa ransel darurat! Jalur evakuasi ke Bunker 72 akan tertutup hujan abu dalam hitungan menit!\n\nIbu: Apa saja yang harus kita masukkan ke dalam ransel, Mas?",
+      "text": "Ayah: \"Rin, matikan kompor sekarang juga! Peluk Anak dan bawa ransel darurat! Jalur evakuasi ke Bunker 72 akan tertutup hujan abu panas dalam hitungan menit!\"\n\nIbu: \"Apa saja barang paling krusial yang harus kita bawa di ransel, Mas?\"",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Pilih perbekalan hidup untuk ransel bunker.",
@@ -117,7 +233,7 @@
     "prolog_road": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Jangan lihat ke belakang, Sayang. Genggam jemari Ibu erat-erat. Pintu baja bunker sudah tepat di depan kita. Masuk dulu ke dalam, baru kita bernapas pelan-pelan...",
+      "text": "Ibu: \"Jangan lihat ke belakang, Sayang. Genggam jemari Ibu erat-erat. Pintu baja bunker sudah tepat di depan kita. Masuk dulu ke dalam, baru kita bernapas pelan-pelan...\"",
       "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Bimbing keluarga melewati akses darurat terakhir.",
@@ -128,7 +244,7 @@
     "prolog_threshold": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Lampu sensor berkedip hijau—ransel masuk, seluruh anggota keluarga terdeteksi di dalam lorong! Begitu tuas hidrolik ini ditarik dan pintu terkunci, kita hanya mengandalkan prosedur dan ketenangan batin untuk tetap hidup.",
+      "text": "Ayah: \"Lampu sensor berkedip hijau—ransel masuk, seluruh anggota keluarga terdeteksi di dalam lorong! Begitu tuas hidrolik ini ditarik dan pintu terkunci, kita hanya mengandalkan prosedur dan ketenangan batin untuk tetap hidup.\"",
       "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Masuk dan aktifkan segel utama bunker.",

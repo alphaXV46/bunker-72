@@ -422,6 +422,10 @@ export class GameView {
     const gameplayDayBg = hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
     const damagedBg = hour >= 48 ? 'bg-day3' : 'bg-rusak';
     const bgClassMap = {
+      peaceful: 'bg-prolog-peaceful',
+      prolog_peaceful: 'bg-prolog-peaceful',
+      window: 'bg-prolog-window',
+      prolog_window: 'bg-prolog-window',
       packing: 'bg-prolog-1',
       prolog: 'bg-prolog-1',
       prolog1: 'bg-prolog-1',
@@ -440,9 +444,10 @@ export class GameView {
       .forEach((className) => this.dom.storyBox.classList.remove(className));
 
     this.dom.storyBox.classList.remove(
+      'bg-prolog-peaceful', 'bg-prolog-window',
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
       'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-day2', 'bg-day3', 'bg-normal', 'bg-rusak', 'scene-alert',
-      'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator',
+      'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'has-interactive-choices',
       ...ENV_CLASSES
     );
 
@@ -550,6 +555,9 @@ export class GameView {
     this.canReviewNarrative = choices?.length > 0 && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title';
     this.updateBackButton();
 
+    const hasInteractiveChoices = choices?.length > 0 && currentSceneId !== 'prolog_packing' && currentSceneId !== 'prolog_title';
+    this.dom.storyBox.classList.toggle('has-interactive-choices', !!hasInteractiveChoices);
+
     const card = document.getElementById('floating-interactive-card');
     const toggleLabel = document.getElementById('toggle-btn-label');
     if (card && toggleLabel && choices?.length && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title') {
@@ -558,7 +566,10 @@ export class GameView {
       toggleLabel.textContent = 'BACA CERITA';
     }
 
-    if (!choices?.length) return;
+    if (!choices?.length) {
+      this.dom.storyBox.classList.remove('has-interactive-choices');
+      return;
+    }
 
     if (currentSceneId === 'prolog_packing') {
       this.renderPackingChoices(choices, flags, onChoiceClick);
@@ -715,7 +726,9 @@ export class GameView {
 
     let currentIndex   = 0;
     let lastTimestamp  = null;
-    const CHAR_INTERVAL = 12; // ms per character
+    let lastAudioTime  = 0;
+    const CHAR_INTERVAL = 28; // ms per character (standard dramatic VN pacing, ~35 chars/sec)
+    const AUDIO_INTERVAL = 70; // ms minimum gap between audio clicks
 
     const frame = (timestamp) => {
       if (!this.isTyping) return;
@@ -731,11 +744,10 @@ export class GameView {
 
         textNode.nodeValue = text.slice(0, currentIndex);
 
-        for (let i = prevIndex; i < currentIndex; i++) {
-          const char = text[i];
-          if (char && char.trim() && i % 2 === 0) {
-            this.controller?.audio?.playClick();
-          }
+        const currentChar = text[currentIndex - 1];
+        if (currentChar && currentChar.trim() && (timestamp - lastAudioTime >= AUDIO_INTERVAL)) {
+          this.controller?.audio?.playClick();
+          lastAudioTime = timestamp;
         }
       }
 

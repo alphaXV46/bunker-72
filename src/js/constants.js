@@ -60,6 +60,19 @@ export const SURVIVAL = Object.freeze({
 
 /** Evaluation matrix for post-game analytics mapping choices to quality levels. */
 export const CHOICE_QUALITY_MAP = Object.freeze({
+  // Prologue
+  'c_prolog_talk_ibu': 'Optimal',
+  'c_prolog_play_anak': 'Optimal',
+  'c_prolog_tune_radio': 'Optimal',
+  'c_prolog_ibu_comfort': 'Optimal',
+  'c_prolog_ibu_prepare': 'Optimal',
+  'c_prolog_anak_promise': 'Optimal',
+  'c_prolog_anak_snack': 'Optimal',
+  'c_prolog_listen_careful': 'Optimal',
+  'c_prolog_prepare_bag': 'Optimal',
+  'c_prolog_foreshadow_check': 'Optimal',
+  'c_prolog_skip': 'Optimal',
+
   // Day 1
   'c_day1_lock_auto': 'Acceptable',
   'c_day1_lock_open': 'Risky',

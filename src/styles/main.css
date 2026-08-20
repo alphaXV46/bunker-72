@@ -682,6 +682,8 @@ input[type="range"] {
 }
 
 /* Scene background classes */
+.story-box.bg-prolog-peaceful { background-image: url('../assets/bg_prolog_peaceful.png'); }
+.story-box.bg-prolog-window   { background-image: url('../assets/bg_prolog_window.png'); }
 .story-box.bg-prolog,
 .story-box.bg-prolog-1 { background-image: url('../assets/bg_prolog1.png'); }
 .story-box.bg-prolog-2 { background-image: url('../assets/bg_prolog2.png'); }
@@ -1203,17 +1205,21 @@ body.title-card-active #settings-btn { display: none !important; }
 }
 
 #game-view.prolog-mode .dialogue-overlay {
-  width: min(38%, 590px);
+  width: min(45%, 650px);
   min-height: auto;
   margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
+  padding: clamp(14px, 1.8vw, 22px) clamp(16px, 2.2vw, 26px);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 209, 102, 0.25);
+  border-left: 4px solid var(--warning-yellow-border);
+  background: linear-gradient(135deg, rgba(8, 11, 16, 0.88) 0%, rgba(14, 18, 25, 0.78) 100%);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.75), inset 0 0 16px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: absolute;
-  left: clamp(52px, 5vw, 86px);
-  bottom: clamp(66px, 8vh, 104px);
+  left: clamp(40px, 4.5vw, 76px);
+  bottom: clamp(48px, 6.5vh, 84px);
+  z-index: 15;
 }
 
 #game-view.prolog-mode .dialogue-overlay::before {
@@ -1227,10 +1233,11 @@ body.title-card-active #settings-btn { display: none !important; }
 
 #game-view.prolog-mode .dialogue-text {
   font-family: 'VT323', monospace;
-  font-size: clamp(1.65rem, 2.2vw, 2.55rem);
-  line-height: 1.12;
-  color: #fff2cc;
-  text-shadow: 0 3px 0 rgba(0,0,0,0.72), 0 0 18px rgba(0,0,0,0.82);
+  font-size: clamp(1.45rem, 1.85vw, 2.2rem);
+  line-height: 1.35;
+  color: #fff4d4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
+  letter-spacing: 0.5px;
 }
 
 #game-view.title-card-mode .story-box {
@@ -1303,23 +1310,15 @@ body.title-card-active #settings-btn { display: none !important; }
   transform: translateY(-2px);
 }
 
-#game-view.prolog-mode .scene-id-prolog_road .dialogue-overlay {
-  left: clamp(52px, 5vw, 86px);
-  right: auto;
-  bottom: clamp(58px, 7vh, 92px);
-  text-align: left;
-}
-
-#game-view.prolog-mode .scene-id-prolog_threshold .dialogue-overlay {
-  left: clamp(60px, 6vw, 110px);
-  top: clamp(72px, 10vh, 118px);
-  bottom: auto;
-}
-
+#game-view.prolog-mode .scene-id-prolog_road .dialogue-overlay,
+#game-view.prolog-mode .scene-id-prolog_threshold .dialogue-overlay,
 #game-view.prolog-mode .scene-id-prolog_surface .dialogue-overlay {
-  left: clamp(58px, 5.5vw, 96px);
-  bottom: clamp(74px, 9vh, 118px);
-  width: min(43%, 660px);
+  left: clamp(40px, 4.5vw, 76px);
+  right: auto;
+  top: auto;
+  bottom: clamp(48px, 6.5vh, 84px);
+  width: min(45%, 650px);
+  text-align: left;
 }
 
 #game-view.prolog-mode .command-deck {
@@ -1331,6 +1330,70 @@ body.title-card-active #settings-btn { display: none !important; }
 }
 
 #game-view.prolog-mode .choices-panel { align-items: flex-start; }
+
+/* ─── Dedicated Two-Column Layout for Interactive Prologue Scenes ─── */
+#game-view.prolog-mode .story-box.has-interactive-choices .dialogue-overlay {
+  position: absolute;
+  left: clamp(28px, 3.5vw, 60px);
+  right: auto;
+  bottom: clamp(28px, 4vh, 56px);
+  top: auto;
+  width: min(46%, 580px);
+  max-height: calc(100% - 72px);
+  overflow-y: auto;
+  z-index: 15;
+}
+
+#game-view.prolog-mode .story-box.has-interactive-choices .command-deck {
+  position: absolute;
+  left: auto;
+  right: clamp(28px, 3.5vw, 60px);
+  bottom: clamp(28px, 4vh, 56px);
+  top: auto;
+  width: min(47%, 580px);
+  max-height: calc(100% - 72px);
+  overflow-y: auto;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#game-view.prolog-mode .story-box.has-interactive-choices .choices-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+#game-view.prolog-mode .story-box.has-interactive-choices .choice-btn {
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: clamp(10px, 1.2vw, 14px);
+  background: linear-gradient(135deg, rgba(14, 18, 25, 0.95) 0%, rgba(8, 11, 16, 0.98) 100%);
+  border: 2px solid var(--warning-yellow-border);
+  color: #fff4d4;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+#game-view.prolog-mode .story-box.has-interactive-choices .choice-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(38, 48, 62, 0.98) 0%, rgba(20, 26, 36, 0.98) 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+#game-view.prolog-mode .story-box.has-interactive-choices .prolog-tap-continue {
+  display: none !important;
+}
 
 .prolog-continue {
   appearance: none;
@@ -2312,6 +2375,29 @@ body.title-card-active #settings-btn { display: none !important; }
   .environment-readout,
   #journal-btn,
   .journal-panel { display: none; }
+
+  /* ── Interactive Prologue two-column mobile stacking ── */
+  #game-view.prolog-mode .story-box.has-interactive-choices .dialogue-overlay {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    bottom: auto;
+    width: auto;
+    max-height: 38vh;
+    overflow-y: auto;
+  }
+
+  #game-view.prolog-mode .story-box.has-interactive-choices .command-deck {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    top: auto;
+    width: auto;
+    max-height: 52vh;
+    overflow-y: auto;
+  }
 
   /* ── Settings button position ── */
   #settings-btn {

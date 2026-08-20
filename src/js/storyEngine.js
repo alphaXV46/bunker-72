@@ -150,15 +150,33 @@ export class StoryEngine {
     this.model.currentSceneId = sceneId;
 
     // ── Audio ──
+    const isDomestic = ['prolog_home', 'prolog_with_ibu', 'prolog_with_anak'].includes(sceneId);
+    if (isDomestic) {
+      this.audio.playDomesticPeace();
+      this.audio.playClockTick();
+    } else if (sceneId === 'prolog_radio_peaceful') {
+      this.audio.playDomesticPeace();
+      this.audio.playRadioChime();
+    } else {
+      this.audio.stopDomesticPeace();
+    }
+
+    if (sceneId === 'prolog_foreshadow') {
+      this.audio.playRadioStatic();
+      this.audio.playForeshadowTremor();
+    }
+
     if (!isEnding && RADIO_SCENES.has(sceneId)) {
       this.audio.playRadioSound();
     } else {
       this.audio.stopRadioSound();
     }
+
     if (scene.background === 'prolog4' || ['day2_start', 'day2_damage_check', 'day3_pinch_start', 'day4_intro'].includes(sceneId)) {
       this.audio.playEarthquake();
     }
-    if (this.model.knowledge <= 4 || isEnding && this._isCollapseEnding(sceneId) || scene.alert === true) {
+
+    if (['prolog_alert', 'prolog_question'].includes(sceneId) || this.model.knowledge <= 4 || isEnding && this._isCollapseEnding(sceneId) || scene.alert === true) {
       this.audio.playAlarm();
     }
 

@@ -10,6 +10,8 @@ export class RetroAudio {
     this.radioSource = null;
     this.radioTimeout = null;
     this.activeSources = new Set();
+    this.domesticInterval = null;
+    this.isDomesticPlaying = false;
   }
 
   init() {
@@ -105,6 +107,7 @@ export class RetroAudio {
   }
 
   stopAll() {
+    this.stopDomesticPeace();
     this.stopRadioSound();
     this.stopBGM();
     this.activeSources.forEach((source) => {
@@ -216,20 +219,20 @@ export class RetroAudio {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     
-    osc.type = 'square';
+    osc.type = 'triangle';
     const now = this.ctx.currentTime;
-    osc.frequency.setValueAtTime(800, now);
-    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.04);
+    osc.frequency.setValueAtTime(950, now);
+    osc.frequency.exponentialRampToValueAtTime(400, now + 0.022);
     
-    gain.gain.setValueAtTime(0.05, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+    gain.gain.setValueAtTime(0.04, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.022);
     
     osc.connect(gain);
     gain.connect(this.masterGain);
     
     this._autoDisconnectNode(osc, gain);
     osc.start();
-    osc.stop(now + 0.04);
+    osc.stop(now + 0.022);
   }
 
   playAlarm() {
@@ -347,5 +350,152 @@ export class RetroAudio {
     osc2.start();
     osc1.stop(now + 0.6);
     osc2.stop(now + 0.6);
+  }
+
+  /**
+   * Procedural peaceful acoustic/sine arpeggio loop for the domestic prologue.
+   */
+  playDomesticPeace() {
+    this.init();
+    if (!this.ctx || this.isDomesticPlaying) return;
+
+    this.isDomesticPlaying = true;
+    const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 392.00, 329.63]; // C4, E4, G4, C5, A4, G4, E4
+
+    const playArpeggio = () => {
+      if (!this.isDomesticPlaying || !this.ctx || this.ctx.state !== 'running') return;
+      const startTime = this.ctx.currentTime;
+
+      notes.forEach((freq, index) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime + index * 0.45);
+
+        const noteStart = startTime + index * 0.45;
+        gain.gain.setValueAtTime(0.0001, noteStart);
+        gain.gain.exponentialRampToValueAtTime(0.045, noteStart + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.9);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        this._autoDisconnectNode(osc, gain);
+        osc.start(noteStart);
+        osc.stop(noteStart + 0.95);
+      });
+    };
+
+    playArpeggio();
+    this.domesticInterval = setInterval(() => {
+      if (this.isDomesticPlaying) {
+        playArpeggio();
+      }
+    }, 4200);
+  }
+
+  stopDomesticPeace() {
+    this.isDomesticPlaying = false;
+    if (this.domesticInterval) {
+      clearInterval(this.domesticInterval);
+      this.domesticInterval = null;
+    }
+  }
+
+  /**
+   * Procedural wooden clock tick-tock.
+   */
+  playClockTick() {
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.exponentialRampToValueAtTime(300, now + 0.015);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(800, now);
+    filter.Q.setValueAtTime(3.0, now);
+
+    gain.gain.setValueAtTime(0.06, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    this._autoDisconnectNode(osc, filter, gain);
+    osc.start(now);
+    osc.stop(now + 0.025);
+  }
+
+  /**
+   * Procedural ominous sub-bass tremor (30-45Hz) before disaster strikes.
+   */
+  playForeshadowTremor() {
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(34, now);
+    osc.frequency.linearRampToValueAtTime(42, now + 1.5);
+    osc.frequency.linearRampToValueAtTime(30, now + 3.0);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(60, now);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.18, now + 0.8);
+    gain.gain.linearRampToValueAtTime(0.12, now + 2.0);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    this._autoDisconnectNode(osc, filter, gain);
+    osc.start(now);
+    osc.stop(now + 3.3);
+  }
+
+  /**
+   * Procedural cozy 3-note radio chime when turning on domestic music.
+   */
+  playRadioChime() {
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const chimeNotes = [523.25, 659.25, 783.99]; // C5, E5, G5
+
+    chimeNotes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      const noteStart = now + idx * 0.18;
+      osc.frequency.setValueAtTime(freq, noteStart);
+
+      gain.gain.setValueAtTime(0.001, noteStart);
+      gain.gain.exponentialRampToValueAtTime(0.08, noteStart + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+
+      this._autoDisconnectNode(osc, gain);
+      osc.start(noteStart);
+      osc.stop(noteStart + 0.45);
+    });
   }
 }
