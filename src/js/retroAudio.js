@@ -529,4 +529,88 @@ export class RetroAudio {
       osc.stop(noteStart + 0.45);
     });
   }
+
+  /**
+   * Procedural evacuation siren wail for emergency scavenge.
+   */
+  playSiren() {
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.linearRampToValueAtTime(880, now + 1.2);
+    osc.frequency.linearRampToValueAtTime(440, now + 2.4);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.06, now + 0.2);
+    gain.gain.linearRampToValueAtTime(0.0001, now + 2.5);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    this._autoDisconnectNode(osc, gain);
+    osc.start(now);
+    osc.stop(now + 2.6);
+  }
+
+  /**
+   * Low rejection buzz (e.g. backpack full).
+   */
+  playBuzz() {
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(130, now);
+
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    this._autoDisconnectNode(osc, gain);
+    osc.start(now);
+    osc.stop(now + 0.3);
+  }
+
+  /**
+   * Heavy mechanical steel hatch lock slam.
+   */
+  playDoorLock() {
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    // Low thud
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    this._autoDisconnectNode(osc, gain);
+    osc.start(now);
+    osc.stop(now + 0.5);
+  }
 }
+
+export const retroAudio = new RetroAudio();
+
+

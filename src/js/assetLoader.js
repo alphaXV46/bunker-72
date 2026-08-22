@@ -69,14 +69,20 @@ export async function preloadAssets(onProgress) {
     }
   };
 
-  // 1. Wait for web fonts
+  // 1. Wait for web fonts (with safety timeout)
   const fontPromise = (async () => {
     if ('fonts' in document) {
       try {
-        await document.fonts.ready;
-        await Promise.allSettled([
-          document.fonts.load('1rem "VT323"'),
-          document.fonts.load('1rem "Share Tech Mono"'),
+        await Promise.race([
+          document.fonts.ready,
+          new Promise((res) => setTimeout(res, 1200))
+        ]);
+        await Promise.race([
+          Promise.allSettled([
+            document.fonts.load('1rem "VT323"'),
+            document.fonts.load('1rem "Share Tech Mono"'),
+          ]),
+          new Promise((res) => setTimeout(res, 1200))
         ]);
       } catch (err) {
         console.warn('[assetLoader] Font loading warning:', err);
@@ -102,5 +108,7 @@ export async function preloadAssets(onProgress) {
     });
   });
 
-  await Promise.all([fontPromise, ...imagePromises]);
+  const loaderPromise = Promise.all([fontPromise, ...imagePromises]);
+  const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2500));
+  await Promise.race([loaderPromise, timeoutPromise]);
 }

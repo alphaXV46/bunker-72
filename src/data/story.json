@@ -141,7 +141,7 @@
     "prolog_question": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Ayah: \"Rin, matikan kompor sekarang juga! Peluk Anak dan bawa ransel darurat! Jalur evakuasi ke Bunker 72 akan tertutup hujan abu panas dalam hitungan menit!\"\n\nIbu: \"Apa saja barang paling krusial yang harus kita bawa di ransel, Mas?\"",
+      "text": "Ayah: \"Rin, matikan kompor sekarang juga! Peluk Anak dan bawa ke lorong belakang! Palka bunker bawah tanah sudah kubuka. Kita harus masuk sebelum hujan abu panas menutupi rumah!\"\n\nIbu: \"Apa saja barang paling krusial yang harus kita bawa di ransel, Mas?\"",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Pilih perbekalan hidup untuk ransel bunker.",
@@ -152,7 +152,7 @@
     "prolog_packing": {
       "speaker": "Ransel Darurat",
       "avatar": null,
-      "text": "Pilih 5 barang paling krusial untuk bertahan hidup di Bunker 72. Klik barang di atas meja untuk memasukkannya ke dalam ransel.",
+      "text": "Pilih 5 barang paling krusial untuk bertahan hidup di bunker bawah tanah. Ambil perbekalan penting sebelum masuk ke dalam palka perlindungan.",
       "background": "packing",
       "hour": "0 Jam",
       "objective": "Kemasi ransel darurat Anda (5 slot barang).",
@@ -276,7 +276,7 @@
           "text": "Lanjutkan",
           "nextSceneId": "day1_lockdoor",
           "knowledgeEffect": 0,
-          "log": "Keluarga memasuki Bunker 72."
+          "log": "Keluarga memasuki bunker perlindungan bawah tanah."
         }
       ]
     },
@@ -538,7 +538,7 @@
     "day2_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BNPB] ...status siaga satu... radius bahaya diperluas... seluruh warga diimbau bertahan di ruang kedap udara... [STATIK]\n\nJam ke-30. Tiba-tiba, gemuruh dahsyat dari dalam perut bumi menggetarkan dinding beton! Gempa vulkanik susulan menghantam struktur Bunker 72 dengan keras. Debu semen berjatuhan dari plafon bagai hujan salju halus!",
+      "text": "[RADIO BNPB] ...status siaga satu... radius bahaya diperluas... seluruh warga diimbau bertahan di ruang kedap udara... [STATIK]\n\nJam ke-30. Tiba-tiba, gemuruh dahsyat dari dalam perut bumi menggetarkan dinding beton! Gempa vulkanik susulan menghantam struktur bunker dengan keras. Debu semen berjatuhan dari plafon bagai hujan salju halus!",
       "conditionalText": [
         {
           "requiredFlag": "air_uninspected",
@@ -1459,7 +1459,7 @@
     "ending_eval": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-72 tiba. Di luar, suara deru mesin kendaraan berat, sirene ambulans, dan suara pengeras suara tim evakuasi BNPB memecah kesunyian pesisir Rakata Selatan. Tim penyelamat mulai memotong segel pintu Bunker 72.",
+      "text": "Jam ke-72 tiba. Di luar, suara deru mesin kendaraan berat, sirene ambulans, dan suara pengeras suara tim evakuasi BNPB memecah kesunyian pesisir Rakata Selatan. Tim penyelamat mulai memotong segel pintu bunker.",
       "background": "rusak",
       "hour": "72 Jam",
       "objective": "Saksikan hasil akhir penyelamatan keluarga Anda.",
@@ -1665,7 +1665,7 @@
     "ending_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja yang melengkung terbongkar keluar, dan bersamaan dengan itu, cahaya matahari pagi pesisir Selat Sunda menyembur masuk bagai pedang perak—menyilaukan mata setelah tiga hari terkurung dalam gulita. Udara laut yang segar dan bersih menyapu bau belerang yang membusuk di sudut ruangan. Petugas berseragam hazmat melompat turun dan mengangkat tubuh Anak yang terlelap tenang ke atas tandu. Mobil-mobilan merahnya masih berada di dalam dekapan jemari kecilnya. Ayah terbatuk parau saat oksigen murni dari masker tim medis menyentuh paru-parunya. Dengan tubuh yang gemetar hebat, ia membuka mata dan melihat tangan Ibu yang lemah terulur dari selimut termal di atas tandu sebelah, jemarinya bergerak perlahan mencari genggamannya. Kedisiplinan menjaga sirkulasi udara, menghemat baterai radio, dan keteguhan melindungi pintu telah membayar lunas setiap rasa takut. Mereka melangkah keluar menuju kendaraan evakuasi, meninggalkan Bunker 72 sebagai saksi abadi ketangguhan sebuah keluarga.",
+      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja yang melengkung terbongkar keluar, dan bersamaan dengan itu, cahaya matahari pagi pesisir Selat Sunda menyembur masuk bagai pedang perak—menyilaukan mata setelah tiga hari terkurung dalam gulita. Udara laut yang segar dan bersih menyapu bau belerang yang membusuk di sudut ruangan. Petugas berseragam hazmat melompat turun dan mengangkat tubuh Anak yang terlelap tenang ke atas tandu. Mobil-mobilan merahnya masih berada di dalam dekapan jemari kecilnya. Ayah terbatuk parau saat oksigen murni dari masker tim medis menyentuh paru-parunya. Dengan tubuh yang gemetar hebat, ia membuka mata dan melihat tangan Ibu yang lemah terulur dari selimut termal di atas tandu sebelah, jemarinya bergerak perlahan mencari genggamannya. Kedisiplinan menjaga sirkulasi udara, menghemat baterai radio, dan keteguhan melindungi pintu telah membayar lunas setiap rasa takut. Mereka melangkah keluar menuju kendaraan evakuasi, meninggalkan bunker bawah tanah sebagai saksi abadi ketangguhan sebuah keluarga.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []
@@ -1673,7 +1673,7 @@
     "ending_fatal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Bor pneumatik tim penyelamat akhirnya berhasil menembus pengunci darurat pada jam ke-74. Ketika pelat baja seberat setengah ton itu terangkat, tidak ada suara batuk, tidak ada erangan minta tolong, dan tidak ada tangan yang terulur menyambut udara pagi. Hanya ada hembusan udara dingin yang berbau logam mati dan belerang yang telah lama mengendap. Lampu sorot petugas berhenti di sudut terjauh ruangan. Di sana, di bawah keremangan lampu darurat yang telah padam total, ketiga tubuh itu masih saling merangkul erat. Ayah menutupi kepala Ibu dengan jaket kerjanya yang robek, sementara tubuh kecil anak mereka terlelap tenang di tengah dekapan—terlindungi dari dinginnya semen oleh kehangatan terakhir kedua orang tuanya. Di lantai debu, mobil-mobilan merah tergeletak diam. 'Posko Utama...' lapor petugas medis dengan suara tercekat di radio, '...Bunker 72 selesai digeledah. Tidak ada yang selamat.' Sirene ambulans di luar terus berputar tanpa henti, memanggil mereka yang telah memilih untuk saling mendekap hingga napas terakhir habis di dalam perut bumi.",
+      "text": "Bor pneumatik tim penyelamat akhirnya berhasil menembus pengunci darurat pada jam ke-74. Ketika pelat baja seberat setengah ton itu terangkat, tidak ada suara batuk, tidak ada erangan minta tolong, dan tidak ada tangan yang terulur menyambut udara pagi. Hanya ada hembusan udara dingin yang berbau logam mati dan belerang yang telah lama mengendap. Lampu sorot petugas berhenti di sudut terjauh ruangan. Di sana, di bawah keremangan lampu darurat yang telah padam total, ketiga tubuh itu masih saling merangkul erat. Ayah menutupi kepala Ibu dengan jaket kerjanya yang robek, sementara tubuh kecil anak mereka terlelap tenang di tengah dekapan—terlindungi dari dinginnya semen oleh kehangatan terakhir kedua orang tuanya. Di lantai debu, mobil-mobilan merah tergeletak diam. 'Posko Utama...' lapor petugas medis dengan suara tercekat di radio, '...Shelter bawah tanah selesai digeledah. Tidak ada yang selamat.' Sirene ambulans di luar terus berputar tanpa henti, memanggil mereka yang telah memilih untuk saling mendekap hingga napas terakhir habis di dalam perut bumi.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1681,7 +1681,7 @@
     "ending_secret_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Setelah 96 jam yang terasa seperti seumur hidup, deru baling-baling helikopter berat menggetarkan plafon bunker. Pintu baja terkuak lebar, membanjiri koridor bawah tanah dengan semilir angin laut dan sinar keemasan fajar. 'Luar biasa... seluruh sistem kehidupan kalian masih utuh,' puji komandan SAR saat memeriksa kondisi keluarga. Ayah menatap langit biru yang perlahan bersih dari abu Krakatau, jemarinya menggenggam erat tangan Ibu dan Anak. Pengorbanan menahan lapar, ketelitian melindungi pintu dari penjarah, dan pengelolaan daya yang tak bercela telah membawa mereka melewati ujian paling mematikan. Mereka melangkah keluar tanpa luka permanen sedikit pun, meninggalkan Bunker 72 bukan sekadar sebagai benteng perlindungan, melainkan monumen cinta dan ketahanan manusia.",
+      "text": "Setelah 96 jam yang terasa seperti seumur hidup, deru baling-baling helikopter berat menggetarkan plafon bunker. Pintu baja terkuak lebar, membanjiri koridor bawah tanah dengan semilir angin laut dan sinar keemasan fajar. 'Luar biasa... seluruh sistem kehidupan kalian masih utuh,' puji komandan SAR saat memeriksa kondisi keluarga. Ayah menatap langit biru yang perlahan bersih dari abu Krakatau, jemarinya menggenggam erat tangan Ibu dan Anak. Pengorbanan menahan lapar, ketelitian melindungi pintu dari penjarah, dan pengelolaan daya yang tak bercela telah membawa mereka melewati ujian paling mematikan. Mereka melangkah keluar tanpa luka permanen sedikit pun, meninggalkan ruang perlindungan ini bukan sekadar sebagai benteng, melainkan monumen cinta dan ketahanan manusia.",
       "background": "normal",
       "hour": "96 Jam",
       "choices": []
@@ -1689,7 +1689,7 @@
     "ending_secret_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Deru helikopter evakuasi di permukaan tidak sempat mereka dengar. Kerusakan panel listrik akibat pintu interkom yang terbuka paksa telah mematikan pasokan oksigen terakhir di jam-jam penentuan. Dalam kegelapan pekat yang dingin, rintihan perlahan memudar menjadi keheningan. Ayah memeluk tubuh dingin istri dan anaknya dengan rasa sesal yang membeku di dada, menyadari keselamatan hanya berjarak beberapa jengkal di atas kepala mereka. Saat tim SAR mendobrak masuk, mereka hanya menemukan Bunker 72 yang telah hening selamanya—sebuah tragedi memilukan tentang nyawa yang terlepas tepat di ambang garis akhir penyelamatan.",
+      "text": "Deru helikopter evakuasi di permukaan tidak sempat mereka dengar. Kerusakan panel listrik akibat pintu interkom yang terbuka paksa telah mematikan pasokan oksigen terakhir di jam-jam penentuan. Dalam kegelapan pekat yang dingin, rintihan perlahan memudar menjadi keheningan. Ayah memeluk tubuh dingin istri dan anaknya dengan rasa sesal yang membeku di dada, menyadari keselamatan hanya berjarak beberapa jengkal di atas kepala mereka. Saat tim SAR mendobrak masuk, mereka hanya menemukan ruang bunker yang telah hening selamanya—sebuah tragedi memilukan tentang nyawa yang terlepas tepat di ambang garis akhir penyelamatan.",
       "background": "rusak",
       "hour": "96 Jam",
       "choices": []
@@ -1697,7 +1697,7 @@
     "ending_stranded_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Panggilan evakuasi yang dinanti tidak pernah terdengar. Baterai radio VHF yang mati sejak hari kedua meninggalkan kami dalam kesunyian yang mengerikan di bawah berton-ton debu vulkanik. Ibu terus memegangi perutnya yang tersiksa racun air pipa, sementara Anak menangis lirih dalam pelukan Ayah di tengah kegelapan lampu darurat yang perlahan padam. Tanpa koordinat pasti akibat matinya komunikasi, tim pencari di permukaan melewatkan posisi Bunker 72. Hingga akhirnya, keheningan mutlak menelan seluruh ruangan, mengubur harapan sebuah keluarga dalam gelapnya perut bumi.",
+      "text": "Panggilan evakuasi yang dinanti tidak pernah terdengar. Baterai radio VHF yang mati sejak hari kedua meninggalkan kami dalam kesunyian yang mengerikan di bawah berton-ton debu vulkanik. Ibu terus memegangi perutnya yang tersiksa racun air pipa, sementara Anak menangis lirih dalam pelukan Ayah di tengah kegelapan lampu darurat yang perlahan padam. Tanpa koordinat pasti akibat matinya komunikasi, tim pencari di permukaan melewatkan posisi shelter bunker kami. Hingga akhirnya, keheningan mutlak menelan seluruh ruangan, mengubur harapan sebuah keluarga dalam gelapnya perut bumi.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []

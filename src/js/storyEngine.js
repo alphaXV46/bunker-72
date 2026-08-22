@@ -76,14 +76,6 @@ export class StoryEngine {
     // Check health-zero fatal condition first, regardless of incoming scene.
     if (this._checkFatalCondition(sceneId)) return;
 
-    if (sceneId === 'prolog_packing') {
-      const packedCount = this._getPackedCount();
-      if (packedCount >= 5) {
-        this.renderScene('prolog_intro');
-        return;
-      }
-    }
-
     if (sceneId === 'day2_seal_leak') {
       const hasIgnored = this.model.history.some(entry => entry.choiceId === 'c_day2_air_remedy_ignore');
       if (this.model.flags.air_uninspected === true && !this.model.flags.air_remedied && !hasIgnored) {
@@ -237,7 +229,7 @@ export class StoryEngine {
     if (sceneId === 'prolog_packing') {
       this.view.dom.dialogueText.textContent = '';
       this.view.isTyping = false;
-      this.view.renderChoices(scene.choices, sceneId, this.model.flags, (choice) => this.handleChoiceSelect(choice));
+      this.view.startScavengerMinigame((result) => this.handleScavengerComplete(result));
       return;
     }
 
@@ -283,6 +275,35 @@ export class StoryEngine {
   }
 
   // ─── USER EVENT HANDLERS ──────────────────────────────────────────────────
+
+  /**
+   * Handles completion of 2D Top-Down Scavenger Minigame.
+   * @param {object} result - { collectedItems: string[], reason: string }
+   */
+  handleScavengerComplete(result) {
+    const items = result?.collectedItems || [];
+
+    // Reset packed flags
+    this.model.flags.food_packed = false;
+    this.model.flags.drink_packed = false;
+    this.model.flags.kit_packed = false;
+    this.model.flags.battery_packed = false;
+    this.model.flags.snack_packed = false;
+    this.model.flags.toy_packed = false;
+
+    // Apply collected supplies
+    items.forEach((itemId) => {
+      if (itemId === 'food') this.model.flags.food_packed = true;
+      if (itemId === 'drink') this.model.flags.drink_packed = true;
+      if (itemId === 'kit') this.model.flags.kit_packed = true;
+      if (itemId === 'radio') this.model.flags.battery_packed = true;
+      if (itemId === 'snack') this.model.flags.snack_packed = true;
+      if (itemId === 'toy') this.model.flags.toy_packed = true;
+    });
+
+    // Advance to evacuation intro
+    this.renderScene('prolog_intro');
+  }
 
   /**
    * Handles a player's choice selection.

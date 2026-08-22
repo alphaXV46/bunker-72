@@ -10,6 +10,7 @@
  */
 
 import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP, getTimePhase, getKnowledgeLabel, FACTS_MAP } from './constants.js';
+import { ScavengerMinigame } from './scavengerMinigame.js';
 
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
@@ -38,6 +39,7 @@ export class GameView {
     this.isTyping       = false;
     this.typingTimeoutId = null;
     this.typingRafId    = null;
+    this.scavengerGame  = null;
     this.activeText     = '';
     this._pendingChoicesPayload = null; // stored so skipTyping can re-render
     this.narrativeHistory = [];
@@ -501,6 +503,10 @@ export class GameView {
     document.body.classList.toggle('prolog-active', isProlog);
     document.body.classList.toggle('packing-active', isPacking);
     document.body.classList.toggle('title-card-active', isTitleCard);
+
+    if (!isPacking) {
+      this.destroyScavengerMinigame();
+    }
 
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
     this.dom.storyBox.classList.add(`scene-id-${sceneId}`);
@@ -1164,4 +1170,30 @@ export class GameView {
     }
     this.updateBackButton();
   }
+
+  /**
+   * Starts the 2D Top-Down Scavenger Minigame for Prologue Packing.
+   * @param {Function} onComplete - Callback receiving { collectedItems: string[] }
+   */
+  startScavengerMinigame(onComplete) {
+    this.destroyScavengerMinigame();
+    this.scavengerGame = new ScavengerMinigame(this.dom.storyBox, (result) => {
+      this.scavengerGame = null;
+      if (typeof onComplete === 'function') {
+        onComplete(result);
+      }
+    });
+    this.scavengerGame.start();
+  }
+
+  /**
+   * Destroys active Scavenger Minigame if running.
+   */
+  destroyScavengerMinigame() {
+    if (this.scavengerGame) {
+      this.scavengerGame.destroy();
+      this.scavengerGame = null;
+    }
+  }
 }
+

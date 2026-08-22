@@ -122,14 +122,18 @@ function showScreen(screenKey) {
 let storyEngine = null;
 
 async function initGame() {
-  // Preload fonts and images with progress updates
-  await preloadAssets((percent, loaded, total) => {
-    if (dom.loadingBarFill) dom.loadingBarFill.style.width = `${percent}%`;
-    if (dom.loadingPercent) dom.loadingPercent.textContent = `${percent}%`;
-    if (dom.loadingStatusText) {
-      dom.loadingStatusText.textContent = `MEMUAT ASET (${loaded}/${total})...`;
-    }
-  });
+  try {
+    // Preload fonts and images with progress updates
+    await preloadAssets((percent, loaded, total) => {
+      if (dom.loadingBarFill) dom.loadingBarFill.style.width = `${percent}%`;
+      if (dom.loadingPercent) dom.loadingPercent.textContent = `${percent}%`;
+      if (dom.loadingStatusText) {
+        dom.loadingStatusText.textContent = `MEMUAT ASET (${loaded}/${total})...`;
+      }
+    });
+  } catch (err) {
+    console.warn('[main] Asset preloading warning, continuing startup:', err);
+  }
 
   // Hide loading screen and reveal main menu
   if (dom.loadingScreen) {
@@ -305,4 +309,9 @@ async function initGame() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initGame);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGame);
+} else {
+  initGame();
+}
+
