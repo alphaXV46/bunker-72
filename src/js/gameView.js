@@ -214,6 +214,9 @@ export class GameView {
    * @param {object} audio - The RetroAudio instance.
    */
   setupVolumeControl(audio) {
+    if (this._volumeControlsInitialized) return;
+    this._volumeControlsInitialized = true;
+
     const volumeSlider = document.getElementById('volume-slider');
     const muteBtn      = document.getElementById('mute-btn');
     const muteIcon     = document.getElementById('mute-icon');
@@ -223,29 +226,66 @@ export class GameView {
     let isMuted     = false;
     let lastVolume  = 0.6;
 
+    const SVG_UNMUTED = `<svg class="speaker-pixel-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor"><path d="M2 7h4l5-5v16l-5-5H2V7z" /><path d="M14 6v2h2V6h-2z M16 8v4h2V8h-2z M14 12v2h2v-2h-2z" /></svg>`;
+    const SVG_MUTED   = `<svg class="speaker-pixel-icon muted" viewBox="0 0 20 20" width="18" height="18" fill="currentColor"><path d="M2 7h4l5-5v16l-5-5H2V7z" opacity="0.4" /><path d="M13 7l5 6 M18 7l-5 6" stroke="#ff5d5d" stroke-width="2.2" stroke-linecap="square" /></svg>`;
+
+    const updateIcon = (muted) => {
+      if (muteIcon) muteIcon.innerHTML = muted ? SVG_MUTED : SVG_UNMUTED;
+      muteBtn.classList.toggle('is-muted', muted);
+    };
+
     // Restore persisted volume before attaching listeners
     const savedVolume = parseFloat(localStorage.getItem('bunker72_volume'));
     if (!isNaN(savedVolume)) {
-      lastVolume            = savedVolume;
-      volumeSlider.value    = savedVolume;
-      audio._lastVolume     = savedVolume;
+      lastVolume         = savedVolume;
+      volumeSlider.value = savedVolume;
+      audio._lastVolume  = savedVolume;
+    }
+
+    const savedMuted = localStorage.getItem('bunker72_muted') === 'true';
+    if (savedMuted || savedVolume === 0) {
+      isMuted = true;
+      audio.setMuted(true);
+      updateIcon(true);
+    } else {
+      updateIcon(false);
     }
 
     volumeSlider.addEventListener('input', () => {
-      lastVolume        = parseFloat(volumeSlider.value);
-      audio._lastVolume = lastVolume;
-      // ✅ No audio.init() here — context is already running.
-      audio.setVolume(lastVolume);
-      isMuted           = lastVolume === 0;
-      muteIcon.textContent = isMuted ? '🔇' : '🔊';
+      const val = parseFloat(volumeSlider.value);
+      audio.init();
+      if (val === 0) {
+        isMuted = true;
+        audio.setMuted(true);
+        updateIcon(true);
+      } else {
+        lastVolume        = val;
+        isMuted           = false;
+        audio._lastVolume = val;
+        audio.setVolume(val);
+        audio.setMuted(false);
+        updateIcon(false);
+      }
       localStorage.setItem('bunker72_volume', lastVolume);
+      localStorage.setItem('bunker72_muted', String(isMuted));
     });
 
     muteBtn.addEventListener('click', () => {
-      isMuted              = !isMuted;
-      audio._lastVolume    = lastVolume;
-      audio.setMuted(isMuted);
-      muteIcon.textContent = isMuted ? '🔇' : '🔊';
+      audio.init();
+      isMuted = !isMuted;
+      if (isMuted) {
+        audio.setMuted(true);
+        volumeSlider.value = 0;
+        updateIcon(true);
+      } else {
+        if (lastVolume === 0) lastVolume = 0.6;
+        audio.setVolume(lastVolume);
+        audio.setMuted(false);
+        volumeSlider.value = lastVolume;
+        updateIcon(false);
+      }
+      localStorage.setItem('bunker72_muted', String(isMuted));
+      localStorage.setItem('bunker72_volume', lastVolume);
     });
   }
 
@@ -529,7 +569,7 @@ export class GameView {
         alertEl.className = 'system-alert-banner';
         container.appendChild(alertEl);
       }
-      alertEl.textContent = `⚠️ PERINGATAN SISTEM: ${alertTag} ⚠️`;
+      alertEl.textContent = `[PERINGATAN SISTEM: ${alertTag}]`;
       alertEl.style.display = 'block';
     } else {
       if (alertEl) {
@@ -602,18 +642,33 @@ export class GameView {
       const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
 
       // Wire up visual impact class based on knowledge effect
-      const impactClass = 'choice-neutral';
+      const impactClass = effect > 0 ? 'choice-good' : effect < 0 ? 'choice-risk' : 'choice-neutral';
 
       const btn       = document.createElement('button');
+      btn.type        = 'button';
       btn.className   = `choice-btn ${impactClass}`;
       btn.innerHTML   = `
-        <span class="choice-index">${renderedIndex}</span>
+        <span class="choice-index">${String(renderedIndex).padStart(2, '0')}</span>
         <span class="choice-copy">${choice.text}</span>
+        <span class="choice-arrow" aria-hidden="true">›</span>
       `;
       renderedIndex++;
 
       if (choice.item) btn.dataset.item = choice.item;
-      btn.addEventListener('click', () => onChoiceClick(choice));
+
+      btn.addEventListener('mouseenter', () => {
+        if (!btn.disabled) {
+          this.controller?.audio?.playHover?.();
+        }
+      });
+
+      btn.addEventListener('click', () => {
+        if (!btn.disabled) {
+          this.controller?.audio?.playClick?.();
+          onChoiceClick(choice);
+        }
+      });
+
       this.dom.choicesPanel.appendChild(btn);
     });
   }
@@ -658,7 +713,7 @@ export class GameView {
 
         let factHtml = '';
         if (fact) {
-          factHtml = `<br><span class="log-fact" style="color: var(--warning-yellow-border); font-size: 0.82rem; padding-left: 10px; display: inline-block; font-style: italic;">⚠️ Mitigasi: ${fact}</span>`;
+          factHtml = `<br><span class="log-fact" style="color: var(--warning-yellow-border); font-size: 0.82rem; padding-left: 10px; display: inline-block; font-style: italic;">[MITIGASI] ${fact}</span>`;
         }
         return `<p class="${itemClass}"><span>[${hour}]</span> <span>${text}</span>${badge}${factHtml}</p>`;
       })

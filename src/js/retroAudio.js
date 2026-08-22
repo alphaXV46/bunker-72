@@ -4,6 +4,7 @@ export class RetroAudio {
     this.staticNoiseBuffer = null;
     this.masterGain = null;
     this._lastVolume = 0.6;
+    this._isMuted = false;
     this.buffers = {};
     this.bgmSource = null;
     this.bgmState = 'playing'; // default to playing so it starts automatically on init
@@ -27,7 +28,7 @@ export class RetroAudio {
     }
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = this._lastVolume;
+    this.masterGain.gain.value = this._isMuted ? 0 : this._lastVolume;
     this.masterGain.connect(this.ctx.destination);
 
     if (this.bgmState === 'playing') {
@@ -49,21 +50,27 @@ export class RetroAudio {
 
   setVolume(value) {
     const vol = Math.max(0, Math.min(1, value));
-    if (vol > 0) this._lastVolume = vol;
+    if (vol > 0) {
+      this._lastVolume = vol;
+      this._isMuted = false;
+    } else {
+      this._isMuted = true;
+    }
     if (!this.ctx || !this.masterGain) return;
     this.masterGain.gain.setTargetAtTime(
       vol,
       this.ctx.currentTime,
-      0.05
+      0.02
     );
   }
 
   setMuted(muted) {
+    this._isMuted = !!muted;
     if (!this.ctx || !this.masterGain) return;
     this.masterGain.gain.setTargetAtTime(
       muted ? 0 : this._lastVolume,
       this.ctx.currentTime,
-      0.05
+      0.02
     );
   }
 
@@ -233,6 +240,30 @@ export class RetroAudio {
     this._autoDisconnectNode(osc, gain);
     osc.start();
     osc.stop(now + 0.022);
+  }
+
+  playHover() {
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'sine';
+      const now = this.ctx.currentTime;
+      osc.frequency.setValueAtTime(1400, now);
+      osc.frequency.exponentialRampToValueAtTime(900, now + 0.018);
+      
+      gain.gain.setValueAtTime(0.018, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
+      
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      
+      this._autoDisconnectNode(osc, gain);
+      osc.start();
+      osc.stop(now + 0.018);
+    } catch (e) {}
   }
 
   playAlarm() {

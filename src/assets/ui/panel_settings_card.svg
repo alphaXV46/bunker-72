@@ -1,0 +1,62 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="440" height="380" viewBox="0 0 440 380" fill="none" shape-rendering="crispEdges">
+  <!-- Outer Drop Shadow -->
+  <path d="M12 6 H428 L440 18 V368 L428 380 H12 L0 368 V18 Z" fill="#020305" opacity="0.85" />
+
+  <!-- Outer Chamfered Steel Frame Base -->
+  <path d="M12 0 H428 L440 12 V362 L428 374 H12 L0 362 V12 Z" fill="#242c38" />
+
+  <!-- Outer Bevel Highlights (Top/Left Light, Bottom/Right Shadow) -->
+  <path d="M12 0 H428 L440 12 H436 L426 2 H14 L2 14 V360 L0 362 V12 Z" fill="#4d5a6e" />
+  <path d="M440 12 V362 L428 374 H12 L0 362 H4 L14 372 H426 L436 362 V12 Z" fill="#07090c" />
+
+  <!-- Inner Plate Recess (Heavy Metal Bevel) -->
+  <path d="M14 4 H426 L434 12 V360 L426 368 H14 L6 360 V12 Z" fill="#141820" />
+  <path d="M16 6 H424 L430 12 V358 L424 364 H16 L10 358 V12 Z" fill="#0d1015" />
+
+  <!-- CRT Monitor Glass Screen (Recessed Display) -->
+  <rect x="18" y="14" width="404" height="346" fill="#0a0d12" />
+  <rect x="18" y="14" width="404" height="346" stroke="#1d2430" stroke-width="1" />
+
+  <!-- Glass Glare Top Highlight -->
+  <path d="M20 16 H420 V24 H20 Z" fill="#ffffff" opacity="0.025" />
+
+  <!-- Subtle Uniform Scanlines -->
+  <path d="
+    M18 20 H422 M18 28 H422 M18 36 H422 M18 44 H422 
+    M18 52 H422 M18 60 H422 M18 68 H422 M18 76 H422 
+    M18 84 H422 M18 92 H422 M18 100 H422 M18 108 H422 
+    M18 116 H422 M18 124 H422 M18 132 H422 M18 140 H422 
+    M18 148 H422 M18 156 H422 M18 164 H422 M18 172 H422 
+    M18 180 H422 M18 188 H422 M18 196 H422 M18 204 H422 
+    M18 212 H422 M18 220 H422 M18 228 H422 M18 236 H422 
+    M18 244 H422 M18 252 H422 M18 260 H422 M18 268 H422 
+    M18 276 H422 M18 284 H422 M18 292 H422 M18 300 H422 
+    M18 308 H422 M18 316 H422 M18 324 H422 M18 332 H422 
+    M18 340 H422 M18 348 H422 M18 356 H422
+  " stroke="#11161f" stroke-width="1" />
+
+  <!-- Top-Left Industrial Hazard Notch -->
+  <path d="M28 2 L36 2 L30 8 L22 8 Z" fill="#ffd166" opacity="0.85" />
+  <path d="M40 2 L48 2 L42 8 L34 8 Z" fill="#ffd166" opacity="0.85" />
+  <path d="M52 2 L60 2 L54 8 L46 8 Z" fill="#ffd166" opacity="0.85" />
+
+  <!-- Precision Corner Bolts (Hex Screws) -->
+  <!-- TL -->
+  <rect x="8" y="8" width="4" height="4" fill="#07090c" />
+  <rect x="8" y="8" width="2" height="2" fill="#6d7d94" />
+  <!-- TR -->
+  <rect x="428" y="8" width="4" height="4" fill="#07090c" />
+  <rect x="428" y="8" width="2" height="2" fill="#6d7d94" />
+  <!-- BL -->
+  <rect x="8" y="364" width="4" height="4" fill="#07090c" />
+  <rect x="8" y="364" width="2" height="2" fill="#6d7d94" />
+  <!-- BR -->
+  <rect x="428" y="364" width="4" height="4" fill="#07090c" />
+  <rect x="428" y="364" width="2" height="2" fill="#6d7d94" />
+
+  <!-- Tactical Reticles / Corner Brackets -->
+  <path d="M24 30 V22 H32" stroke="#5bc0be" stroke-width="1.5" opacity="0.6" />
+  <path d="M416 30 V22 H408" stroke="#5bc0be" stroke-width="1.5" opacity="0.6" />
+  <path d="M24 344 V352 H32" stroke="#5bc0be" stroke-width="1.5" opacity="0.6" />
+  <path d="M416 344 V352 H408" stroke="#5bc0be" stroke-width="1.5" opacity="0.6" />
+</svg>

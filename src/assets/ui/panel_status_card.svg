@@ -1,0 +1,46 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="560" height="150" viewBox="0 0 560 150" fill="none" shape-rendering="crispEdges">
+  <!-- Cast Shadow -->
+  <path d="M10 4 H550 L560 14 V140 L550 150 H10 L0 140 V14 Z" fill="#030406" opacity="0.8" />
+
+  <!-- Outer Chamfered Steel Frame Base -->
+  <path d="M10 0 H550 L560 10 V136 L550 146 H10 L0 136 V10 Z" fill="#262e3a" />
+
+  <!-- Top/Left Highlight Bevel -->
+  <path d="M10 0 H550 L560 10 H556 L548 2 H12 L2 12 V134 L0 136 V10 Z" fill="#4e5c70" />
+  <!-- Bottom/Right Shadow Bevel -->
+  <path d="M560 10 V136 L550 146 H10 L0 136 H4 L12 144 H548 L556 136 V10 Z" fill="#07090c" />
+
+  <!-- Inner Recess Bevel -->
+  <path d="M12 3 H548 L555 10 V134 L548 141 H12 L5 134 V10 Z" fill="#13171f" />
+  <path d="M14 5 H546 L551 10 V132 L546 137 H14 L9 132 V10 Z" fill="#0a0d12" />
+
+  <!-- Clean Display Surface -->
+  <rect x="12" y="8" width="536" height="126" fill="#0c0f15" />
+  <rect x="12" y="8" width="536" height="126" stroke="#1a212b" stroke-width="1" />
+
+  <!-- Subtle Uniform Scanlines -->
+  <path d="
+    M12 14 H548 M12 20 H548 M12 26 H548 M12 32 H548 
+    M12 38 H548 M12 44 H548 M12 50 H548 M12 56 H548 
+    M12 62 H548 M12 68 H548 M12 74 H548 M12 80 H548 
+    M12 86 H548 M12 92 H548 M12 98 H548 M12 104 H548 
+    M12 110 H548 M12 116 H548 M12 122 H548 M12 128 H548
+  " stroke="#11161f" stroke-width="1" />
+
+  <!-- Corner Rivets -->
+  <!-- TL -->
+  <rect x="6" y="6" width="3" height="3" fill="#07090c" />
+  <rect x="6" y="6" width="1" height="1" fill="#58677c" />
+  <!-- TR -->
+  <rect x="551" y="6" width="3" height="3" fill="#07090c" />
+  <rect x="551" y="6" width="1" height="1" fill="#58677c" />
+  <!-- BL -->
+  <rect x="6" y="137" width="3" height="3" fill="#07090c" />
+  <rect x="6" y="137" width="1" height="1" fill="#58677c" />
+  <!-- BR -->
+  <rect x="551" y="137" width="3" height="3" fill="#07090c" />
+  <rect x="551" y="137" width="1" height="1" fill="#58677c" />
+
+  <!-- Subtle Clean Top-Left Red Hazard Notch -->
+  <rect x="20" y="1" width="28" height="2" fill="#ff5d5d" opacity="0.85" />
+</svg>

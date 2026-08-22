@@ -10,28 +10,28 @@
       "choices": [
         {
           "id": "c_prolog_talk_ibu",
-          "text": "🍳 Hampiri Ibu di dapur dan cicipi masakannya",
+          "text": "Hampiri Ibu di dapur dan cicipi masakannya",
           "nextSceneId": "prolog_with_ibu",
           "knowledgeEffect": 0,
           "log": "Menghampiri Ibu yang sedang memasak di dapur."
         },
         {
           "id": "c_prolog_play_anak",
-          "text": "🚗 Duduk di karpet dan temani Anak bermain mobil-mobilan",
+          "text": "Duduk di karpet dan temani Anak bermain mobil-mobilan",
           "nextSceneId": "prolog_with_anak",
           "knowledgeEffect": 0,
           "log": "Menemani Anak bermain di ruang tengah."
         },
         {
           "id": "c_prolog_tune_radio",
-          "text": "📻 Putar kenop radio kayu untuk mendengar siaran musik sore",
+          "text": "Putar kenop radio kayu untuk mendengar siaran musik sore",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 0,
           "log": "Menyalakan radio kayu di ruang tengah."
         },
         {
           "id": "c_prolog_skip",
-          "text": "⚡ [LEWATI KE DARURAT] Langsung ke simulasi alarm evakuasi",
+          "text": "[LEWATI KE DARURAT] Langsung ke simulasi alarm evakuasi",
           "nextSceneId": "prolog_alert",
           "knowledgeEffect": 0,
           "log": "Memilih langsung merespons situasi darurat."
@@ -48,14 +48,14 @@
       "choices": [
         {
           "id": "c_prolog_ibu_comfort",
-          "text": "❤️ \"Masakanmu selalu yang terbaik, Rin. Malam ini kita santap bersama ya.\"",
+          "text": "️ \"Masakanmu selalu yang terbaik, Rin. Malam ini kita santap bersama ya.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 1,
           "log": "Menikmati kehangatan obrolan keluarga di dapur."
         },
         {
           "id": "c_prolog_ibu_prepare",
-          "text": "🔍 \"Enak sekali. Tapi udara di luar terasa agak aneh dan pengap sore ini...\"",
+          "text": "\"Enak sekali. Tapi udara di luar terasa agak aneh dan pengap sore ini...\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 1,
           "log": "Merasakan kejanggalan cuaca pesisir."
@@ -72,14 +72,14 @@
       "choices": [
         {
           "id": "c_prolog_anak_promise",
-          "text": "🤝 \"Pasti, Jagoan! Nanti Ayah ambil obeng kecil dan kita perbaiki sama-sama.\"",
+          "text": "\"Pasti, Jagoan! Nanti Ayah ambil obeng kecil dan kita perbaiki sama-sama.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 1,
           "log": "Menjanjikan waktu bermain dan perbaikan mainan untuk Anak."
         },
         {
           "id": "c_prolog_anak_snack",
-          "text": "🍪 \"Siap komandan! Ini Ayah bawakan camilan kesukaanmu dulu.\"",
+          "text": "\"Siap komandan! Ini Ayah bawakan camilan kesukaanmu dulu.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 1,
           "log": "Membagikan camilan sore untuk Anak."
@@ -96,14 +96,14 @@
       "choices": [
         {
           "id": "c_prolog_listen_careful",
-          "text": "⚠️ Simak baik-baik laporan tremor mikro yang disebutkan penyiar",
+          "text": "️ Simak baik-baik laporan tremor mikro yang disebutkan penyiar",
           "nextSceneId": "prolog_foreshadow",
           "knowledgeEffect": 1,
           "log": "Mencatat peringatan tremor mikro dari siaran radio lokal."
         },
         {
           "id": "c_prolog_prepare_bag",
-          "text": "🎒 Lirik ransel siaga di dekat pintu untuk memastikan isinya siap",
+          "text": "Lirik ransel siaga di dekat pintu untuk memastikan isinya siap",
           "nextSceneId": "prolog_foreshadow",
           "knowledgeEffect": 1,
           "log": "Memastikan kesiapsiagaan tas darurat di dekat pintu."
@@ -120,7 +120,7 @@
       "choices": [
         {
           "id": "c_prolog_foreshadow_check",
-          "text": "🚨 Berteriak memperingatkan keluarga dan raih ransel!",
+          "text": "Berteriak memperingatkan keluarga dan raih ransel!",
           "nextSceneId": "prolog_alert",
           "knowledgeEffect": 1,
           "log": "Segera merespons tanda anomali alam di luar rumah."
@@ -293,7 +293,7 @@
       "choices": [
         {
           "id": "c_day1_radio_minigame",
-          "text": "📻 Putar Kenop Radio VHF (Tuning Pencarian Frekuensi Evakuasi BNPB)",
+          "text": "Putar Kenop Radio VHF (Tuning Pencarian Frekuensi Evakuasi BNPB)",
           "nextSceneId": "day1_lockdoor",
           "knowledgeEffect": 0,
           "log": "Radio VHF diputar untuk pencarian sinyal.",
@@ -753,7 +753,7 @@
       "choices": [
         {
           "id": "c_day2_seal_radio",
-          "text": "📻 Putar Kenop Radio Darurat (Mini-Game Tuning Frekuensi Sinyal)",
+          "text": "Putar Kenop Radio Darurat (Mini-Game Tuning Frekuensi Sinyal)",
           "nextSceneId": "day2_radio_setup",
           "knowledgeEffect": 0,
           "log": "Radio darurat disiapkan.",

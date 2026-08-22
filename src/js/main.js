@@ -183,6 +183,9 @@ async function initGame() {
     },
   });
 
+  // Immediately initialize volume controls so settings modal works from the main menu
+  storyEngine.view.setupVolumeControl(storyEngine.audio);
+
   // Wire Radio Frequency Tuning Mini-Game
   const radioModalEl = document.getElementById('radio-minigame-modal');
   if (radioModalEl) {
@@ -216,6 +219,27 @@ async function initGame() {
       e.stopPropagation();
       storyEngine?.radioMiniGame?.open();
     });
+  }
+
+  // ── Menu buttons sound & interaction ──
+  const menuButtons = document.querySelectorAll('.bunker-menu-btn');
+  menuButtons.forEach((btn) => {
+    btn.addEventListener('mouseenter', () => {
+      if (!btn.disabled) {
+        storyEngine?.audio?.playHover();
+      }
+    });
+    btn.addEventListener('click', () => {
+      if (!btn.disabled) {
+        storyEngine?.audio?.playClick();
+      }
+    });
+  });
+
+  const settingsBtn = document.getElementById('settings-btn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('mouseenter', () => storyEngine?.audio?.playHover());
+    settingsBtn.addEventListener('click', () => storyEngine?.audio?.playClick());
   }
 
   // ── Menu buttons ──

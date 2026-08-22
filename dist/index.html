@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-DaYoTI4o.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CVpBViyF.css">
+  <script type="module" crossorigin src="/assets/index-CR8ngp6U.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-mCy6u-dF.css">
 </head>
 <body>
   <main id="game-container">
@@ -40,11 +40,13 @@
       </div>
 
       <div class="menu-decor">
-        <div class="flashing-warning">STATUS DARURAT: AKTIVITAS VULKANIK EKSTREM</div>
-        <div class="bunker-status-lights">
-          <span class="light active-red"></span>
-          <span class="light active-green"></span>
-          <span class="light"></span>
+        <div class="menu-decor-header">
+          <div class="flashing-warning">STATUS DARURAT: AKTIVITAS VULKANIK EKSTREM</div>
+          <div class="bunker-status-lights">
+            <span class="light active-red"></span>
+            <span class="light active-green"></span>
+            <span class="light"></span>
+          </div>
         </div>
         <div class="menu-readout">
           <span>Durasi simulasi: 72 jam</span>
@@ -53,15 +55,27 @@
         </div>
       </div>
 
-      <div class="menu-buttons-container choices-panel">
-        <button id="new-game-btn" class="choice-btn text-center">BARU (NEW GAME)</button>
-        <button id="continue-btn" class="choice-btn text-center" disabled>LANJUTKAN (CONTINUE)</button>
-        <button id="credits-btn" class="choice-btn text-center">KREDIT (CREDITS)</button>
+      <div class="menu-buttons-container">
+        <button id="new-game-btn" class="bunker-menu-btn" data-hover-sound="true">
+          <span class="btn-text">MULAI BARU</span>
+        </button>
+
+        <button id="continue-btn" class="bunker-menu-btn" data-hover-sound="true" disabled>
+          <span class="btn-text">LANJUTKAN</span>
+        </button>
+
+        <button id="credits-btn" class="bunker-menu-btn" data-hover-sound="true">
+          <span class="btn-text">KREDIT</span>
+        </button>
       </div>
     </section>
 
     <!-- Tombol Pengaturan -->
-    <button id="settings-btn" class="settings-icon" aria-label="Pengaturan">⚙️</button>
+    <button id="settings-btn" class="settings-tactical-btn" aria-label="Pengaturan Sistem" title="Pengaturan Sistem">
+      <svg class="gear-pixel-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+        <path d="M10.2 1h3.6l.6 2.6 1.8.8 2.2-1.6 2.5 2.5-1.6 2.2.8 1.8 2.6.6v3.6l-2.6.6-.8 1.8 1.6 2.2-2.5 2.5-2.2-1.6-1.8.8-.6 2.6h-3.6l-.6-2.6-1.8-.8-2.2 1.6-2.5-2.5 1.6-2.2-.8-1.8-2.6-.6v-3.6l2.6-.6.8-1.8-1.6-2.2 2.5-2.5 2.2 1.6 1.8-.8z M12 6.8a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4z M12 9.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z" />
+      </svg>
+    </button>
 
     <section id="game-view" class="view-screen">
       <!-- Story box (Visual scene canvas, 100% full bleed inside #game-view) -->
@@ -82,7 +96,7 @@
           <div class="card-header">
             <div id="speaker-name" class="speaker-name">Narator</div>
             <div class="header-actions">
-              <button id="quick-radio-btn" class="card-nav-toggle-btn radio-quick-btn" type="button" title="Buka Mini-Game Radio">📻 RADIO</button>
+              <button id="quick-radio-btn" class="card-nav-toggle-btn radio-quick-btn" type="button" title="Buka Mini-Game Radio">TUNING RADIO</button>
               <button id="card-nav-toggle-btn" class="card-nav-toggle-btn" type="button" title="Toggle Pilihan / Cerita">
                 <span id="toggle-btn-label">PILIHAN AKSI</span>
               </button>
@@ -109,23 +123,23 @@
       </div>
 
       <!-- Tombol Trigger Side Drawer (Tepi Kanan) -->
-      <button id="drawer-toggle-btn" class="drawer-toggle-btn" aria-label="Buka Sub-sistem Taktis & Log" title="Sub-sistem Taktis & Log">
-        <span class="drawer-icon">📦</span>
-        <span class="drawer-label">TAKTIS & LOG</span>
+      <button id="drawer-toggle-btn" class="drawer-toggle-btn" aria-label="Buka Sub-sistem Taktis &amp; Log" title="Sub-sistem Taktis &amp; Log">
+        <span class="drawer-icon">▦</span>
+        <span class="drawer-label">TAKTIS &amp; LOG</span>
         <span class="drawer-arrow">◀</span>
       </button>
 
       <!-- Sub-sistem Slide Drawer (Slide-in dari kanan) -->
       <aside id="side-tactical-drawer" class="side-tactical-drawer" aria-hidden="true">
         <div class="drawer-header">
-          <div class="panel-label">SUB-SISTEM & LOG BUNKER</div>
+          <div class="panel-label">SUB-SISTEM &amp; LOG BUNKER</div>
           <button id="drawer-close-btn" class="drawer-close" aria-label="Tutup Panel Sub-sistem">✕</button>
         </div>
 
         <div class="drawer-content">
           <!-- Section 1: Vital Stats & Objectives (Diegetik Log) -->
           <div class="drawer-section">
-            <div class="drawer-section-title">STATUS VITAL & MISI</div>
+            <div class="drawer-section-title">STATUS VITAL &amp; MISI</div>
             <div class="status-panel">
               <div class="status-item">
                 <span>WAKTU: </span>
@@ -142,17 +156,17 @@
                 <span class="muted-text">/15</span>
               </div>
               <div class="status-item" id="hud-hunger">
-                <span>🍖 LAPAR: </span>
+                <span>LAPAR: </span>
                 <span id="status-hunger" class="highlight-val">100</span>
                 <span class="muted-text">/100</span>
               </div>
               <div class="status-item" id="hud-thirst">
-                <span>💧 HAUS: </span>
+                <span>HAUS: </span>
                 <span id="status-thirst" class="highlight-val">100</span>
                 <span class="muted-text">/100</span>
               </div>
               <div class="status-item" id="hud-health">
-                <span>❤️ SEHAT: </span>
+                <span>SEHAT: </span>
                 <span id="status-health" class="highlight-val">100</span>
                 <span class="muted-text">/100</span>
               </div>
@@ -169,7 +183,7 @@
           <div class="drawer-section">
             <div class="drawer-section-title">STATUS LINGKUNGAN</div>
             <div class="environment-readout">
-              <div id="hud-air"><span>🫁 UDARA</span><strong id="status-air">STABIL</strong></div>
+              <div id="hud-air"><span>UDARA</span><strong id="status-air">STABIL</strong></div>
               <div><span>STRUKTUR</span><strong id="status-structure">AMAN</strong></div>
               <div><span>DAYA</span><strong id="status-power">NORMAL</strong></div>
             </div>
@@ -235,7 +249,7 @@
       </div>
 
       <div id="debrief-box" class="debrief-box hidden">
-        <h3>📋 CATATAN PROTOKOL (DESENTRALISASI MITIGASI)</h3>
+        <h3>CATATAN PROTOKOL (DESENTRALISASI MITIGASI)</h3>
         <ul id="debrief-list"></ul>
       </div>
 
@@ -265,22 +279,47 @@
 
     <!-- Modal Pengaturan -->
     <div id="settings-modal" class="modal hidden" aria-hidden="true">
-      <div class="modal-content">
-        <h2>PENGATURAN SISTEM</h2>
-        <div id="volume-control" class="volume-control">
-          <button id="mute-btn" class="mute-btn" aria-label="Mute/Unmute Audio" title="Mute/Unmute">
-            <span id="mute-icon">🔊</span>
-          </button>
-          <input type="range" id="volume-slider" class="volume-slider"
-            min="0" max="1" step="0.05" value="0.6" aria-label="Volume Audio">
+      <div class="modal-content settings-modal-card">
+        <div class="settings-card-header">
+          <div class="settings-kicker">KONSOL KONTROL // PROTOKOL 72</div>
+          <h2 class="settings-title">PENGATURAN SISTEM</h2>
         </div>
-        <div class="settings-option">
-          <label for="crt-toggle">Efek Visual Retro (CRT): </label>
-          <input type="checkbox" id="crt-toggle" checked>
+
+        <div class="settings-card-body">
+          <!-- Volume Setting Row -->
+          <div class="settings-option-row">
+            <span class="settings-label">VOLUME AUDIO:</span>
+            <div id="volume-control" class="volume-control">
+              <button id="mute-btn" class="mute-btn" aria-label="Mute/Unmute Audio" title="Mute/Unmute">
+                <span id="mute-icon">
+                  <svg class="speaker-pixel-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                    <path d="M2 7h4l5-5v16l-5-5H2V7z" />
+                    <path d="M14 6v2h2V6h-2z M16 8v4h2V8h-2z M14 12v2h2v-2h-2z" />
+                  </svg>
+                </span>
+              </button>
+              <input type="range" id="volume-slider" class="volume-slider"
+                min="0" max="1" step="0.05" value="0.6" aria-label="Volume Audio">
+            </div>
+          </div>
+
+          <!-- CRT Toggle Row -->
+          <div class="settings-option-row">
+            <span class="settings-label">EFEK VISUAL CRT:</span>
+            <label class="crt-toggle-wrapper">
+              <input type="checkbox" id="crt-toggle" checked>
+              <span class="crt-toggle-custom"></span>
+            </label>
+          </div>
         </div>
+
         <div class="settings-actions">
-          <button id="settings-menu-btn" class="choice-btn text-center">KEMBALI KE MENU UTAMA</button>
-          <button id="settings-close-btn" class="choice-btn text-center">TUTUP</button>
+          <button id="settings-menu-btn" class="bunker-menu-btn choice-btn text-center">
+            <span class="btn-text">KEMBALI KE MENU UTAMA</span>
+          </button>
+          <button id="settings-close-btn" class="bunker-menu-btn choice-btn text-center">
+            <span class="btn-text">TUTUP</span>
+          </button>
         </div>
       </div>
     </div>

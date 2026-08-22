@@ -1,0 +1,41 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="400" height="58" viewBox="0 0 400 58" fill="none" shape-rendering="crispEdges">
+  <!-- Outer Shadow -->
+  <rect x="0" y="3" width="400" height="55" fill="#030406" opacity="0.8" />
+  
+  <!-- Outer Bevel Metal Base (Golden Amber Highlight) -->
+  <rect x="0" y="0" width="400" height="55" fill="#ffd166" />
+  <rect x="2" y="2" width="396" height="51" fill="#1b2028" />
+  
+  <!-- Metallic Edge Highlights -->
+  <path d="M0 0 H400 V2 H2 V53 H0 Z" fill="#fff4d0" />
+  <path d="M400 55 H0 V53 H398 V2 H400 Z" fill="#996a12" />
+  
+  <!-- Inner Plate Frame -->
+  <rect x="4" y="4" width="392" height="47" fill="#1f2530" stroke="#d4942b" stroke-width="1" />
+  
+  <!-- Clean Center Surface with Warm Tint -->
+  <rect x="6" y="6" width="388" height="43" fill="#14181f" />
+  
+  <!-- Illuminated Scanlines -->
+  <path d="M6 10 H394 M6 15 H394 M6 20 H394 M6 25 H394 M6 30 H394 M6 35 H394 M6 40 H394 M6 45 H394" stroke="#1d232e" stroke-width="1" />
+
+  <!-- Corner Rivets (Illuminated Gold) -->
+  <!-- TL -->
+  <rect x="8" y="8" width="3" height="3" fill="#07090c" />
+  <rect x="8" y="8" width="1" height="1" fill="#ffd166" />
+  <!-- TR -->
+  <rect x="389" y="8" width="3" height="3" fill="#07090c" />
+  <rect x="389" y="8" width="1" height="1" fill="#ffd166" />
+  <!-- BL -->
+  <rect x="8" y="44" width="3" height="3" fill="#07090c" />
+  <rect x="8" y="44" width="1" height="1" fill="#ffd166" />
+  <!-- BR -->
+  <rect x="389" y="44" width="3" height="3" fill="#07090c" />
+  <rect x="389" y="44" width="1" height="1" fill="#ffd166" />
+
+  <!-- Clean Corner Accents (Illuminated) -->
+  <path d="M6 14 V6 H14" stroke="#ffd166" stroke-width="1" />
+  <path d="M394 14 V6 H386" stroke="#ffd166" stroke-width="1" />
+  <path d="M6 41 V49 H14" stroke="#ffd166" stroke-width="1" />
+  <path d="M394 41 V49 H386" stroke="#ffd166" stroke-width="1" />
+</svg>
