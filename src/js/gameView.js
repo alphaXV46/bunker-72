@@ -60,10 +60,88 @@ export class GameView {
     this._setupKeyboardShortcuts();
     this._setupInventoryListeners();
     this._setupSettingsModal();
+    this._setupFullscreenControls();
     this._setupCardAndDrawerListeners();
   }
 
   // ─── LISTENER SETUP (private) ─────────────────────────────────────────────
+
+  _setupFullscreenControls() {
+    const fullscreenBtn    = document.getElementById('fullscreen-btn');
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+    const expandIcon       = fullscreenBtn?.querySelector('.expand-icon');
+    const compressIcon     = fullscreenBtn?.querySelector('.compress-icon');
+
+    const isFullscreen = () => Boolean(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    );
+
+    const updateFullscreenUI = () => {
+      const active = isFullscreen();
+      if (expandIcon && compressIcon) {
+        expandIcon.classList.toggle('hidden', active);
+        compressIcon.classList.toggle('hidden', !active);
+      }
+      if (fullscreenBtn) {
+        fullscreenBtn.title = active ? 'Keluar Layar Penuh (F / Esc)' : 'Mode Layar Penuh (F)';
+        fullscreenBtn.setAttribute('aria-label', fullscreenBtn.title);
+      }
+      if (fullscreenToggle) {
+        fullscreenToggle.checked = active;
+      }
+    };
+
+    const toggleFullscreen = async () => {
+      try {
+        if (!isFullscreen()) {
+          const elem = document.documentElement;
+          if (elem.requestFullscreen) {
+            await elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) {
+            await elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) {
+            await elem.msRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            await document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            await document.msExitFullscreen();
+          }
+        }
+      } catch (err) {
+        console.warn('[gameView] Fullscreen toggle error:', err);
+      }
+      updateFullscreenUI();
+    };
+
+    fullscreenBtn?.addEventListener('click', toggleFullscreen);
+    fullscreenToggle?.addEventListener('change', toggleFullscreen);
+
+    document.addEventListener('fullscreenchange', updateFullscreenUI);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+    document.addEventListener('mozfullscreenchange', updateFullscreenUI);
+    document.addEventListener('MSFullscreenChange', updateFullscreenUI);
+
+    // Shortcut 'F' key to toggle fullscreen
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        const target = e.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return;
+        }
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    updateFullscreenUI();
+  }
 
   _setupDialogueClickListener() {
     const dialogueOverlay = this.dom.storyBox.querySelector('.dialogue-overlay');

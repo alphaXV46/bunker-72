@@ -62,6 +62,7 @@ const dom = {
   // Choices / log
   choicesPanel:     document.getElementById('choices-panel'),
   protocolLogList:  document.getElementById('protocol-log-list'),
+  bunkerMinigame:   document.getElementById('bunker-minigame'),
 
   // Ending screen
   endingTitle:     document.getElementById('ending-title'),
@@ -166,6 +167,7 @@ async function initGame() {
       dialogueText:      dom.dialogueText,
       choicesPanel:      dom.choicesPanel,
       protocolLogList:   dom.protocolLogList,
+      bunkerMinigame:    dom.bunkerMinigame,
       endingTitle:       dom.endingTitle,
       endingDesc:        dom.endingDesc,
       endingKnowledge:   dom.endingKnowledge,

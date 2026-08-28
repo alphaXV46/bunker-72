@@ -12,6 +12,7 @@
 import { GameModel  } from './gameModel.js';
 import { GameView   } from './gameView.js';
 import { RetroAudio } from './retroAudio.js';
+import { BunkerMinigame } from './bunkerMinigame.js';
 import { ENDING_IDS, SURVIVAL, parseHour, FACTS_MAP, CHOICE_QUALITY_MAP } from './constants.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
@@ -37,6 +38,13 @@ export class StoryEngine {
     this.view  = new GameView(this.dom);
     this.audio = new RetroAudio();
     this.pendingClickNextSceneId = null;
+    this.pendingBunkerEntryChoice = null;
+    this.bunkerEntryUnlocked = false;
+
+    this.bunkerMinigame = new BunkerMinigame({
+      root: this.dom.bunkerMinigame,
+      onComplete: () => this.finishBunkerEntry(),
+    });
 
     this._journalSetup = false;
     this._volumeSetup  = false;
@@ -321,6 +329,18 @@ export class StoryEngine {
       return;
     }
 
+    // Only the bunker-entry choice opens the console. All other story
+    // transitions continue through the existing narrative path unchanged.
+    if (choice.id === 'c_prolog_enter_day1' && !this.bunkerEntryUnlocked) {
+      this.pendingBunkerEntryChoice = choice;
+      this.bunkerMinigame.open();
+      return;
+    }
+
+    if (choice.id === 'c_prolog_enter_day1') {
+      this.bunkerEntryUnlocked = false;
+    }
+
     if (choice.id === 'c_prolog_pack_food') {
       this.model.addInventoryItem('food', 1);
       this.model.setFlag('food_packed');
@@ -480,6 +500,17 @@ export class StoryEngine {
     }
 
     this.renderScene(choice.nextSceneId);
+  }
+
+  /** Continue the original story choice after all entry stations are complete. */
+  finishBunkerEntry() {
+    const choice = this.pendingBunkerEntryChoice;
+    this.pendingBunkerEntryChoice = null;
+    if (!choice) return;
+
+    this.bunkerMinigame.close();
+    this.bunkerEntryUnlocked = true;
+    this.handleChoiceSelect(choice);
   }
 
   /**
