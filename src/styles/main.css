@@ -270,7 +270,7 @@ input[type="range"] {
   padding: 36px;
   background:
     linear-gradient(rgba(8,9,11,0.18), rgba(8,9,11,0.5)),
-    url('../assets/bg_menu.png') center / cover no-repeat;
+    url('../assets/bg_menu.webp') center / cover no-repeat;
 }
 
 .menu-title-container {
@@ -809,13 +809,13 @@ input[type="range"] {
 }
 
 /* Scene background classes */
-.story-box.bg-prolog-peaceful { background-image: url('../assets/bg_prolog_peaceful.png'); }
-.story-box.bg-prolog-window   { background-image: url('../assets/bg_prolog_window.png'); }
+.story-box.bg-prolog-peaceful { background-image: url('../assets/bg_prolog_peaceful.webp'); }
+.story-box.bg-prolog-window   { background-image: url('../assets/bg_prolog_window.webp'); }
 .story-box.bg-prolog,
-.story-box.bg-prolog-1 { background-image: url('../assets/bg_prolog1.png'); }
-.story-box.bg-prolog-2 { background-image: url('../assets/bg_prolog2.png'); }
-.story-box.bg-prolog-3 { background-image: url('../assets/bg_prolog3.png'); }
-.story-box.bg-prolog-4 { background-image: url('../assets/bg_prolog4.png'); }
+.story-box.bg-prolog-1 { background-image: url('../assets/bg_prolog1.webp'); }
+.story-box.bg-prolog-2 { background-image: url('../assets/bg_prolog2.webp'); }
+.story-box.bg-prolog-3 { background-image: url('../assets/bg_prolog3.webp'); }
+.story-box.bg-prolog-4 { background-image: url('../assets/bg_prolog4.webp'); }
 .story-box.bg-titlecard {
   background-image:
     radial-gradient(circle at 50% 42%, rgba(91,192,190,0.12), transparent 30%),
@@ -823,17 +823,17 @@ input[type="range"] {
 }
 .story-box.bg-hari1,
 .story-box.bg-day1,
-.story-box.bg-normal  { background-image: url('../assets/bg_day1.png'); }
+.story-box.bg-normal  { background-image: url('../assets/bg_day1.webp'); }
 .story-box.bg-day2 {
-  background-image: url('../assets/bg_day2.png');
+  background-image: url('../assets/bg_day2.webp');
 }
 .story-box.bg-day3 {
-  background-image: url('../assets/bg_day3.png');
+  background-image: url('../assets/bg_day3.webp');
 }
 .story-box.bg-rusak   {
   background-image:
     linear-gradient(rgba(20,8,8,0.22), rgba(0,0,0,0.12)),
-    url('../assets/bg_day2.png');
+    url('../assets/bg_day2.webp');
 }
 
 /* Scene vignette gradient */
@@ -2491,31 +2491,31 @@ body.title-card-active #settings-btn { display: none !important; }
   scrollbar-color: var(--line-bright) rgba(0,0,0,0.2);
   background:
     linear-gradient(rgba(8,9,11,0.18), rgba(8,9,11,0.56)),
-    url('../assets/bg_fatal_end.png') center / cover no-repeat;
+    url('../assets/bg_fatal_end.webp') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-bad {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.58)),
-    url('../assets/bg_bad_end.png') center / cover no-repeat;
+    url('../assets/bg_bad_end.webp') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-normal {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.55)),
-    url('../assets/bg_bad_end.png') center / cover no-repeat;
+    url('../assets/bg_bad_end.webp') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-best {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.48)),
-    url('../assets/bg_good_end.png') center / cover no-repeat;
+    url('../assets/bg_good_end.webp') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-fatal {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.62)),
-    url('../assets/bg_fatal_end.png') center / cover no-repeat;
+    url('../assets/bg_fatal_end.webp') center / cover no-repeat;
 }
 
 .ending-header {

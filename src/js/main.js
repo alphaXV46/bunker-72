@@ -124,7 +124,7 @@ let storyEngine = null;
 
 async function initGame() {
   try {
-    // Preload fonts and images with progress updates
+    // Preload fonts and all assets with real-time progress updates
     await preloadAssets((percent, loaded, total) => {
       if (dom.loadingBarFill) dom.loadingBarFill.style.width = `${percent}%`;
       if (dom.loadingPercent) dom.loadingPercent.textContent = `${percent}%`;
@@ -132,6 +132,12 @@ async function initGame() {
         dom.loadingStatusText.textContent = `MEMUAT ASET (${loaded}/${total})...`;
       }
     });
+
+    if (dom.loadingBarFill) dom.loadingBarFill.style.width = '100%';
+    if (dom.loadingPercent) dom.loadingPercent.textContent = '100%';
+    if (dom.loadingStatusText) dom.loadingStatusText.textContent = 'SEMUA ASET SIAP!';
+    // Brief 200ms pause so player sees 100% readiness
+    await new Promise((res) => setTimeout(res, 200));
   } catch (err) {
     console.warn('[main] Asset preloading warning, continuing startup:', err);
   }
