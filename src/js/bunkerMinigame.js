@@ -6,36 +6,44 @@
  * title card and the player can start the console again.
  */
 
-const STATIONS = [
-  {
-    id: 'power',
-    code: '01',
-    name: 'NAIKKAN DAYA',
-    shortName: 'DAYA UTAMA',
-    tutorial: 'Tekan tuas, lalu tarik ke atas sampai indikator mencapai ZONA AMAN.',
-  },
-  {
-    id: 'numbers',
-    code: '02',
-    name: 'KUNCI ROTOR',
-    shortName: 'KUNCI 1—2—3',
-    tutorial: 'Ketuk soket tepat saat angka target berhenti di depan reseptor bercahaya.',
-  },
-  {
+export const STATIONS = {
+  card: {
     id: 'card',
-    code: '03',
-    name: 'OTENTIKASI ID',
+    code: 'SEAL 72-A',
+    kicker: 'PINTU LUAR // PROTOKOL MASUK',
+    name: 'OTENTIKASI KARTU AKSES',
     shortName: 'KARTU AKSES',
-    tutorial: 'Geser kartu akses dari kiri ke kanan melewati pembaca tanpa melepasnya.',
+    tutorial: 'Geser kartu akses dari kiri ke kanan melewati sensor pembaca palka tanpa melepasnya.',
+    defaultSuccessMessage: 'KREDENSIAL 72-A DITERIMA // PINTU TERBUKA',
   },
-  {
+  power: {
+    id: 'power',
+    code: 'ACTUATOR A-01',
+    kicker: 'GENERATOR UTAMA // BOOT SISTEM',
+    name: 'NAIKKAN DAYA UTAMA',
+    shortName: 'TUAS DAYA',
+    tutorial: 'Tekan dan tarik tuas daya ke atas sampai indikator mencapai ZONA AMAN (100%).',
+    defaultSuccessMessage: 'BUS DAYA UTAMA STABIL // LAMPU MENYALA',
+  },
+  rotor: {
+    id: 'rotor',
+    code: 'TURBIN STABILIZER',
+    kicker: 'STRUKTUR BUNKER // REDAM GEMPA',
+    name: 'PENYELARASAN ROTOR 1—2—3',
+    shortName: 'KUNCI ROTOR',
+    tutorial: 'Ketuk masing-masing soket tepat saat angka berputar cocok dengan kotak target.',
+    defaultSuccessMessage: 'SEKUENSI 1—2—3 TERKUNCI // STRUKTUR STABIL',
+  },
+  wires: {
     id: 'wires',
-    code: '04',
-    name: 'SAMBUNG KABEL',
+    code: 'PATCH-04 BATERAI',
+    kicker: 'DISTRIBUSI DAYA // REKONFIGURASI',
+    name: 'SAMBUNG KABEL CADANGAN',
     shortName: 'KABEL WARNA',
-    tutorial: 'Tarik setiap terminal ke soket kanan dengan warna yang sama.',
+    tutorial: 'Tarik kabel dari setiap terminal kiri ke soket kanan dengan warna yang serasi.',
+    defaultSuccessMessage: 'SEMUA JALUR KABEL TERUJI // SIRKUIT ONLINE',
   },
-];
+};
 
 const COLORS = {
   red: { label: 'MERAH', hex: '#ef5b5b' },
@@ -47,9 +55,9 @@ const COLORS = {
 export class BunkerMinigame {
   constructor({ root, onComplete }) {
     this.root = root;
-    this.onComplete = onComplete;
-    this.currentStation = 0;
-    this.completed = new Set();
+    this.defaultOnComplete = onComplete;
+    this.currentStationId = null;
+    this.activeOptions = null;
     this.cleanupFns = [];
     this.timeouts = [];
     this.numberTimer = null;
@@ -58,120 +66,116 @@ export class BunkerMinigame {
     this.numberMistakes = 0;
     this.cardX = 0;
     this.wireConnections = {};
-    this.renderShell();
   }
 
-  renderShell() {
+  /**
+   * Opens a specific standalone minigame station.
+   * @param {'card'|'power'|'rotor'|'wires'|'numbers'} stationId
+   * @param {Object} options
+   */
+  openStation(stationId = 'card', options = {}) {
     if (!this.root) return;
-    this.root.innerHTML = `
-      <div class="mg-shell">
-        <header class="mg-header">
-          <div class="mg-brand-block">
-            <span class="mg-kicker">BUNKER 72 // PROTOKOL MASUK</span>
-            <strong class="mg-brand">KONTROL SEAL <span>72-A</span></strong>
-          </div>
-          <div class="mg-header-status">
-            <span class="mg-live-dot"></span>
-            <span>SESI DARURAT</span>
-            <b id="mg-progress">0 / 4</b>
-          </div>
-        </header>
+    this.reset();
 
-        <div class="mg-body">
-          <nav class="mg-rail" aria-label="Navigasi stasiun bunker">
-            <div class="mg-rail-label">URUTAN<br>AKTIVASI</div>
-            <div id="mg-station-list" class="mg-station-list"></div>
-            <div class="mg-rail-foot"><span class="mg-screw"></span><span class="mg-screw"></span><small>NO SIGNAL<br>EXTERNAL</small></div>
-          </nav>
+    if (stationId === 'numbers') stationId = 'rotor';
+    if (!STATIONS[stationId]) stationId = 'card';
 
-          <main class="mg-console" aria-live="polite">
-            <div class="mg-console-topline">
-              <span id="mg-station-code">STASIUN 01 / 04</span>
-              <span class="mg-console-rule"></span>
-              <span id="mg-console-clock">00:00:72</span>
-            </div>
-            <div id="mg-panel" class="mg-panel"></div>
-          </main>
-        </div>
+    this.currentStationId = stationId;
+    this.activeOptions = options;
+    const station = STATIONS[stationId];
 
-        <footer class="mg-footer">
-          <div class="mg-hint"><span class="mg-hint-mark">i</span><span id="mg-hint-text">Sistem menunggu intervensi manual.</span></div>
-          <div id="mg-feedback" class="mg-feedback" role="status">SIAP MENERIMA INPUT</div>
-        </footer>
-      </div>`;
-
-    this.stationList = this.root.querySelector('#mg-station-list');
-    this.panel = this.root.querySelector('#mg-panel');
-    this.progress = this.root.querySelector('#mg-progress');
-    this.stationCode = this.root.querySelector('#mg-station-code');
-    this.hint = this.root.querySelector('#mg-hint-text');
-    this.feedback = this.root.querySelector('#mg-feedback');
-    this.renderStationRail();
-  }
-
-  open() {
-    if (!this.root) return;
+    this.renderShell(station);
     this.root.hidden = false;
     this.root.setAttribute('aria-hidden', 'false');
-    this.renderStationRail();
-    this.renderStation(this.currentStation);
-  }
-
-  close() {
-    this.clearStation();
-    if (!this.root) return;
-    this.root.hidden = true;
-    this.root.setAttribute('aria-hidden', 'true');
-  }
-
-  renderStationRail() {
-    if (!this.stationList) return;
-    this.stationList.innerHTML = STATIONS.map((station, index) => {
-      const isComplete = this.completed.has(index);
-      const isCurrent = this.currentStation === index;
-      const locked = index > 0 && !this.completed.has(index - 1);
-      const state = isComplete ? 'complete' : isCurrent ? 'current' : locked ? 'locked' : 'ready';
-      return `
-        <button class="mg-station mg-station--${state}" data-station="${index}" ${locked ? 'disabled' : ''} aria-label="${station.name}${locked ? ' terkunci' : ''}" aria-current="${isCurrent ? 'step' : 'false'}">
-          <span class="mg-station-number">${station.code}</span>
-          <span class="mg-station-copy"><b>${station.shortName}</b><small>${isComplete ? 'SELESAI' : locked ? 'TERKUNCI' : isCurrent ? 'AKTIF' : 'SIAP'}</small></span>
-          <span class="mg-station-state">${isComplete ? '✓' : locked ? '×' : '·'}</span>
-        </button>`;
-    }).join('');
-
-    this.stationList.querySelectorAll('.mg-station:not(:disabled)').forEach((button) => {
-      button.addEventListener('click', () => {
-        const next = Number(button.dataset.station);
-        if (next <= this.completed.size) this.setStation(next);
-      });
-    });
-  }
-
-  setStation(index) {
-    if (index > 0 && !this.completed.has(index - 1)) return;
-    this.clearStation();
-    this.currentStation = index;
-    this.renderStationRail();
-    this.renderStation(index);
-  }
-
-  renderStation(index) {
-    const station = STATIONS[index];
-    if (!station || !this.panel) return;
-    this.stationCode.textContent = `STASIUN ${station.code} / 04`;
-    this.hint.textContent = station.tutorial;
-    this.setFeedback(index === 0 ? 'SISTEM MENUNGGU INPUT' : 'LANJUTKAN PROTOKOL', 'neutral');
 
     const intro = `
       <div class="mg-station-heading">
-        <div><span class="mg-eyebrow">MANUAL OVERRIDE // ${station.code}</span><h1>${station.name}</h1><p>${station.tutorial}</p></div>
-        <div class="mg-state-badge"><span class="mg-state-led"></span><span>STATUS <b>AKTIF</b></span></div>
+        <div>
+          <span class="mg-eyebrow">${options.kicker || station.kicker}</span>
+          <h1>${options.title || station.name}</h1>
+          <p>${options.tutorial || station.tutorial}</p>
+        </div>
+        <div class="mg-state-badge">
+          <span class="mg-state-led"></span>
+          <span>STATUS <b>AKTIF</b></span>
+        </div>
       </div>`;
 
-    if (station.id === 'power') this.renderPower(intro);
-    if (station.id === 'numbers') this.renderNumbers(intro);
-    if (station.id === 'card') this.renderCard(intro);
-    if (station.id === 'wires') this.renderWires(intro);
+    if (stationId === 'power') this.renderPower(intro);
+    else if (stationId === 'rotor') this.renderRotor(intro);
+    else if (stationId === 'card') this.renderCard(intro);
+    else if (stationId === 'wires') this.renderWires(intro);
+  }
+
+  /** Backwards-compatible open method defaults to 'card' */
+  open(stationId = 'card', options = {}) {
+    this.openStation(stationId, options);
+  }
+
+  close() {
+    this.reset();
+    if (!this.root) return;
+    this.root.hidden = true;
+    this.root.setAttribute('aria-hidden', 'true');
+    this.root.innerHTML = '';
+  }
+
+  reset() {
+    this.timeouts.forEach((t) => window.clearTimeout(t));
+    this.timeouts = [];
+    this.clearStation();
+    this.currentStationId = null;
+    this.activeOptions = null;
+    this.numberValues = [2, 3, 1];
+    this.numberLocked = [false, false, false];
+    this.numberMistakes = 0;
+    this.cardX = 0;
+    this.wireConnections = {};
+  }
+
+  renderShell(station) {
+    if (!this.root) return;
+    this.root.innerHTML = `
+      <div class="mg-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="mg-brand-title">
+        <div class="mg-shell">
+          <header class="mg-header">
+            <div class="mg-brand-block">
+              <span class="mg-kicker">${station.kicker}</span>
+              <strong id="mg-brand-title" class="mg-brand">${station.name} <span>[${station.code}]</span></strong>
+            </div>
+            <div class="mg-header-status">
+              <span class="mg-live-dot"></span>
+              <span class="mg-status-pill">SIAGA</span>
+              <button id="mg-close-btn" class="mg-close-btn" type="button" aria-label="Tutup konsol" title="Tutup / Batal">✕</button>
+            </div>
+          </header>
+
+          <main class="mg-console" aria-live="polite">
+            <div id="mg-panel" class="mg-panel"></div>
+          </main>
+
+          <footer class="mg-footer">
+            <div class="mg-hint">
+              <span class="mg-hint-mark">i</span>
+              <span id="mg-hint-text">${station.tutorial}</span>
+            </div>
+            <div id="mg-feedback" class="mg-feedback" role="status">SIAP MENERIMA INPUT</div>
+          </footer>
+        </div>
+      </div>`;
+
+    this.panel = this.root.querySelector('#mg-panel');
+    this.hint = this.root.querySelector('#mg-hint-text');
+    this.feedback = this.root.querySelector('#mg-feedback');
+
+    const closeBtn = this.root.querySelector('#mg-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        const onCancel = this.activeOptions?.onCancel || this.activeOptions?.onFailure;
+        this.close();
+        onCancel?.({ canceled: true, success: false, stationId: this.currentStationId });
+      });
+    }
   }
 
   renderPower(intro) {
@@ -205,7 +209,7 @@ export class BunkerMinigame {
       percent.textContent = `${Math.round(value).toString().padStart(2, '0')}%`;
       lever.style.setProperty('--lever-progress', `${value}%`);
       readout.textContent = value >= 100 ? 'BUS UTAMA TERKUNCI' : value > 0 ? 'DAYA MENINGKAT...' : 'MENUNGGU TARIKAN TUAS';
-      if (value >= 100) this.finishStation(0, 'DAYA UTAMA STABIL');
+      if (value >= 100) this.finishStation('power');
     };
     const start = (event) => {
       dragging = true;
@@ -284,23 +288,29 @@ export class BunkerMinigame {
           row.classList.add('is-locked');
           row.querySelector('.mg-row-status').textContent = 'TERKUNCI ✓';
           this.setFeedback(`ROTOR ${index + 1} TERKUNCI`, 'success');
-          if (this.numberLocked.every(Boolean)) this.finishStation(1, 'SEKUENSI 1—2—3 DITERIMA');
+          if (this.numberLocked.every(Boolean)) this.finishStation('rotor');
         } else {
           this.numberMistakes += 1;
           const lives = Math.max(0, 3 - this.numberMistakes);
-          this.panel.querySelector('#mg-number-lives b').textContent = lives;
-          this.setFeedback(lives ? 'SALAH WAKTU — TUNGGU ANGKA TARGET' : 'ROTOR RESET — KESEMPATAN DIPULIHKAN', 'error');
+          const livesEl = this.panel.querySelector('#mg-number-lives b');
+          if (livesEl) livesEl.textContent = lives;
+          this.setFeedback(lives ? 'SALAH WAKTU — TUNGGU ANGKA TARGET' : 'ROTOR GAGAL', 'error');
           dial.classList.remove('is-missed');
           void dial.offsetWidth;
           dial.classList.add('is-missed');
           if (!lives) {
-            this.numberMistakes = 0;
-            this.numberValues = [2, 3, 1];
-            this.numberLocked = [false, false, false];
-            this.panel.querySelectorAll('.mg-number-row').forEach((row) => row.classList.remove('is-locked'));
-            this.panel.querySelectorAll('.mg-row-status').forEach((status) => { status.textContent = 'TAP SAAT COCOK'; });
-            this.panel.querySelector('#mg-number-lives b').textContent = '3';
-            this.numberValues.forEach((_, index) => updateRow(index));
+            if (this.activeOptions?.allowFailure) {
+              this.failStation('rotor', 'SEKUENSI GAGAL — GETARAN MERUSAK STRUKTUR');
+            } else {
+              this.numberMistakes = 0;
+              this.numberValues = [2, 3, 1];
+              this.numberLocked = [false, false, false];
+              this.panel.querySelectorAll('.mg-number-row').forEach((row) => row.classList.remove('is-locked'));
+              this.panel.querySelectorAll('.mg-row-status').forEach((status) => { status.textContent = 'TAP SAAT COCOK'; });
+              if (livesEl) livesEl.textContent = '3';
+              this.setFeedback('ROTOR RESET — KESEMPATAN DIPULIHKAN', 'error');
+              this.numberValues.forEach((_, idx) => updateRow(idx));
+            }
           }
         }
       });
@@ -328,10 +338,11 @@ export class BunkerMinigame {
     let originX = 0;
     const maxX = () => Math.max(0, track.clientWidth - card.offsetWidth - 18);
     const update = (x) => {
-      this.cardX = Math.max(0, Math.min(maxX(), x));
+      const max = maxX();
+      this.cardX = Math.max(0, Math.min(max, x));
       card.style.transform = `translateX(${this.cardX}px)`;
-      card.style.setProperty('--swipe-progress', `${maxX() ? this.cardX / maxX() * 100 : 0}%`);
-      if (this.cardX >= maxX() - 3) {
+      card.style.setProperty('--swipe-progress', `${max ? (this.cardX / max) * 100 : 0}%`);
+      if (max > 20 && this.cardX >= max - 3) {
         status.textContent = 'KARTU TERBACA — TAHAN';
         status.parentElement.parentElement.classList.add('is-ready');
       } else if (dragging) {
@@ -355,9 +366,10 @@ export class BunkerMinigame {
       if (!dragging) return;
       dragging = false;
       card.classList.remove('is-grabbed');
-      if (this.cardX >= maxX() - 3) {
+      const max = maxX();
+      if (max > 20 && this.cardX >= max - 3) {
         status.textContent = 'AKSES DITERIMA';
-        this.finishStation(2, 'KREDENSIAL 72-A DITERIMA');
+        this.finishStation('card');
       } else {
         status.textContent = 'GESER LEBIH JAUH KE KANAN';
         card.classList.add('is-returning');
@@ -369,10 +381,11 @@ export class BunkerMinigame {
     const key = (event) => {
       if (event.key === 'ArrowRight' || event.key === ' ') {
         event.preventDefault();
-        update(this.cardX + maxX() * 0.18);
-        if (this.cardX >= maxX() - 3) {
+        const max = maxX();
+        update(this.cardX + max * 0.18);
+        if (max > 20 && this.cardX >= max - 3) {
           status.textContent = 'AKSES DITERIMA';
-          this.finishStation(2, 'KREDENSIAL 72-A DITERIMA');
+          this.finishStation('card');
         }
       }
     };
@@ -460,7 +473,7 @@ export class BunkerMinigame {
         const count = Object.keys(this.wireConnections).length;
         this.panel.querySelector('#mg-wire-count').textContent = `${count} / 4 TERHUBUNG`;
         this.setFeedback(`${COLORS[color].label} TERHUBUNG`, 'success');
-        if (count === colors.length) this.finishStation(3, 'SEMUA JALUR KABEL TERUJI');
+        if (count === colors.length) this.finishStation('wires');
       } else {
         drag.preview.remove();
         drag = null;
@@ -494,33 +507,65 @@ export class BunkerMinigame {
     window.requestAnimationFrame(redraw);
   }
 
-  finishStation(index, message) {
-    if (this.completed.has(index)) return;
-    this.completed.add(index);
+  finishStation(stationId) {
     this.clearStation({ keepPanel: true });
-    this.setFeedback(message, 'success');
-    this.renderStationRail();
-    const badge = this.panel.querySelector('.mg-state-badge');
+    const station = STATIONS[stationId] || {};
+    const successMsg = station.defaultSuccessMessage || 'PROTOKOL BERHASIL';
+    this.setFeedback(successMsg, 'success');
+
+    const badge = this.panel?.querySelector('.mg-state-badge');
     if (badge) {
       badge.classList.add('is-success');
-      badge.innerHTML = '<span class="mg-state-led"></span><span>STATUS <b>SELESAI</b></span>';
+      badge.innerHTML = '<span class="mg-state-led"></span><span>STATUS <b>SELESAI ✓</b></span>';
     }
-    this.progress.textContent = `${this.completed.size} / 4`;
-    if (this.completed.size === STATIONS.length) {
-      this.hint.textContent = 'Semua segel internal aktif. Pintu ruang kontrol siap dibuka.';
-      this.timeouts.push(window.setTimeout(() => this.onComplete?.(), 1050));
-      return;
+
+    const pill = this.root?.querySelector('.mg-status-pill');
+    if (pill) {
+      pill.textContent = 'SELESAI';
+      pill.classList.add('is-success');
     }
-    this.timeouts.push(window.setTimeout(() => this.setStation(index + 1), 720));
+
+    this.timeouts.push(window.setTimeout(() => {
+      const onDone = this.activeOptions?.onComplete || this.defaultOnComplete;
+      this.close();
+      onDone?.({ success: true, stationId });
+    }, 900));
+  }
+
+  failStation(stationId, message) {
+    this.clearStation({ keepPanel: true });
+    const failMsg = message || 'SEKUENSI GAGAL';
+    this.setFeedback(failMsg, 'error');
+
+    const badge = this.panel?.querySelector('.mg-state-badge');
+    if (badge) {
+      badge.classList.remove('is-success');
+      badge.style.borderColor = 'var(--mg-red)';
+      badge.innerHTML = '<span class="mg-state-led" style="background:var(--mg-red);box-shadow:0 0 10px var(--mg-red)"></span><span>STATUS <b>ERROR ✕</b></span>';
+    }
+
+    const pill = this.root?.querySelector('.mg-status-pill');
+    if (pill) {
+      pill.textContent = 'ERROR';
+      pill.classList.add('is-error');
+    }
+
+    this.timeouts.push(window.setTimeout(() => {
+      const onFail = this.activeOptions?.onFailure;
+      this.close();
+      onFail?.({ success: false, stationId });
+    }, 1000));
   }
 
   clearStation({ keepPanel = false } = {}) {
+    this.timeouts.forEach((t) => window.clearTimeout(t));
+    this.timeouts = [];
     if (this.numberTimer) {
       window.clearInterval(this.numberTimer);
       this.numberTimer = null;
     }
     this.cleanupFns.splice(0).forEach((cleanup) => cleanup());
-    if (!keepPanel) this.panel && (this.panel.innerHTML = '');
+    if (!keepPanel && this.panel) this.panel.innerHTML = '';
   }
 
   setFeedback(message, tone = 'neutral') {

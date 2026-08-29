@@ -269,14 +269,33 @@
       "text": "BUNKER 72\n72 JAM PERTAMA",
       "background": "titlecard",
       "hour": "0 Jam",
-      "objective": "Memulai hari pertama di dalam bunker.",
+      "objective": "Buka segel pintu baja palka luar dengan kartu akses.",
       "choices": [
         {
           "id": "c_prolog_enter_day1",
-          "text": "Lanjutkan",
+          "text": "Geser Kartu Akses 72-A & Buka Segel Pintu Baja",
+          "nextSceneId": "day1_power_boot",
+          "knowledgeEffect": 1,
+          "log": "Kartu akses 72-A berhasil diverifikasi dan pintu bunker terbuka.",
+          "triggerBunkerStation": "card"
+        }
+      ]
+    },
+    "day1_power_boot": {
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Pintu baja luar berhasil tersegel rapat di belakang kita. Suasana di dalam bunker masih gelap gulita—hanya ada dengungan darurat dari baterai statis. Sebelum filter udara dan lampu menyala, kita harus menaikkan tuas daya utama Actuator A-01 dari konsol generator.",
+      "background": "normal",
+      "hour": "0 Jam",
+      "objective": "Nyalakan bus daya utama untuk mengaktifkan sistem bunker.",
+      "choices": [
+        {
+          "id": "c_day1_pull_power",
+          "text": "Tarik Tuas Daya Utama Actuator A-01 (Nyalakan Generator)",
           "nextSceneId": "day1_lockdoor",
-          "knowledgeEffect": 0,
-          "log": "Keluarga memasuki bunker perlindungan bawah tanah."
+          "knowledgeEffect": 1,
+          "log": "Tuas daya utama ditarik ke atas; bus listrik dan lampu menyala.",
+          "triggerBunkerStation": "power"
         }
       ]
     },
@@ -591,10 +610,11 @@
         },
         {
           "id": "c_day2_hydraulic",
-          "text": "Aktifkan penyangga struktural hidrolik di panel kontrol utama.",
+          "text": "Kunci Penyelarasan Rotor Turbin Penyangga (Sinkronisasi 1—2—3)",
           "nextSceneId": "day2_calm_check",
           "knowledgeEffect": 2,
-          "log": "Penyangga struktural hidrolik diaktifkan."
+          "log": "Penyangga struktural hidrolik berhasil diselaraskan dan getaran bunker diredam.",
+          "triggerBunkerStation": "rotor"
         }
       ]
     },
@@ -837,13 +857,14 @@
       "choices": [
         {
           "id": "c_day2_power_save",
-          "text": "Matikan lampu utama ruangan, gunakan lampu indikator meja minimalis, dan nonaktifkan pemanas.",
+          "text": "Hubungkan kabel patch bay distribusi daya baterai cadangan (Mode Hemat)",
           "nextSceneId": "day2_power_good",
-          "knowledgeEffect": 1,
-          "log": "Daya bunker dialihkan to mode hemat.",
+          "knowledgeEffect": 2,
+          "log": "Sirkuit daya baterai cadangan berhasil disambung ke mode hemat.",
           "setFlags": [
             "power_saved"
-          ]
+          ],
+          "triggerBunkerStation": "wires"
         },
         {
           "id": "c_day2_power_alllight",
@@ -880,13 +901,14 @@
       "choices": [
         {
           "id": "c_day2_power_save_drain",
-          "text": "Matikan semua penerangan non-esensial dan andalkan satu lampu senter baterai.",
+          "text": "Sambungkan kabel patch bay ke jalur darurat dan matikan penerangan non-esensial",
           "nextSceneId": "day2_power_good",
-          "knowledgeEffect": 1,
-          "log": "Daya bunker dialihkan to mode hemat.",
+          "knowledgeEffect": 2,
+          "log": "Sirkuit daya darurat berhasil disambungkan ke mode hemat.",
           "setFlags": [
             "power_saved"
-          ]
+          ],
+          "triggerBunkerStation": "wires"
         },
         {
           "id": "c_day2_drain_alllight",

@@ -39,7 +39,9 @@ export class StoryEngine {
     this.audio = new RetroAudio();
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
+    this.pendingMinigameChoice = null;
     this.bunkerEntryUnlocked = false;
+    this._unlockedMinigameChoiceIds = new Set();
 
     this.bunkerMinigame = new BunkerMinigame({
       root: this.dom.bunkerMinigame,
@@ -58,6 +60,12 @@ export class StoryEngine {
    */
   start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
     this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health);
+    this.pendingClickNextSceneId = null;
+    this.pendingBunkerEntryChoice = null;
+    this.pendingMinigameChoice = null;
+    this.bunkerEntryUnlocked = false;
+    this._unlockedMinigameChoiceIds?.clear();
+    this.bunkerMinigame?.close();
 
     // One-time UI setups — guarded so restarting doesn't re-bind listeners.
     if (!this._journalSetup) {
@@ -329,17 +337,40 @@ export class StoryEngine {
       return;
     }
 
-    // Only the bunker-entry choice opens the console. All other story
-    // transitions continue through the existing narrative path unchanged.
-    if (choice.id === 'c_prolog_enter_day1' && !this.bunkerEntryUnlocked) {
+    // Check if the selected choice triggers a standalone bunker crisis minigame station
+    const stationTrigger = choice.triggerBunkerStation || (choice.id === 'c_prolog_enter_day1' ? 'card' : null);
+    if (stationTrigger && !this._unlockedMinigameChoiceIds?.has(choice.id) && !this.bunkerEntryUnlocked) {
+      this.pendingMinigameChoice = choice;
       this.pendingBunkerEntryChoice = choice;
-      this.bunkerMinigame.open();
+      this.bunkerMinigame.openStation(stationTrigger, {
+        allowFailure: stationTrigger === 'rotor',
+        onComplete: () => {
+          if (!this._unlockedMinigameChoiceIds) this._unlockedMinigameChoiceIds = new Set();
+          this._unlockedMinigameChoiceIds.add(choice.id);
+          this.pendingMinigameChoice = null;
+          this.pendingBunkerEntryChoice = null;
+          this.bunkerEntryUnlocked = true;
+          this.handleChoiceSelect(choice);
+        },
+        onFailure: () => {
+          this.pendingMinigameChoice = null;
+          this.pendingBunkerEntryChoice = null;
+          // Narrative consequence of failure on the high-stakes rotor puzzle
+          if (stationTrigger === 'rotor') {
+            this.model.setFlag('structural_damage');
+            this.model.knowledge = Math.max(0, this.model.knowledge - 1);
+            this.view.updateKnowledgeBadge(this.model.knowledge, -1);
+            this.renderScene('day2_panic_exit');
+          }
+        },
+      });
       return;
     }
 
-    if (choice.id === 'c_prolog_enter_day1') {
-      this.bunkerEntryUnlocked = false;
+    if (this._unlockedMinigameChoiceIds?.has(choice.id)) {
+      this._unlockedMinigameChoiceIds.delete(choice.id);
     }
+    this.bunkerEntryUnlocked = false;
 
     if (choice.id === 'c_prolog_pack_food') {
       this.model.addInventoryItem('food', 1);
@@ -502,9 +533,10 @@ export class StoryEngine {
     this.renderScene(choice.nextSceneId);
   }
 
-  /** Continue the original story choice after all entry stations are complete. */
+  /** Continue the story choice after a minigame station is complete. */
   finishBunkerEntry() {
-    const choice = this.pendingBunkerEntryChoice;
+    const choice = this.pendingMinigameChoice || this.pendingBunkerEntryChoice;
+    this.pendingMinigameChoice = null;
     this.pendingBunkerEntryChoice = null;
     if (!choice) return;
 
