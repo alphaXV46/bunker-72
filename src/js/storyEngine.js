@@ -313,18 +313,44 @@ export class StoryEngine {
     this.model.flags.drink_packed = false;
     this.model.flags.kit_packed = false;
     this.model.flags.battery_packed = false;
+    this.model.flags.extra_battery = false;
     this.model.flags.snack_packed = false;
     this.model.flags.toy_packed = false;
 
-    // Apply collected supplies
+    // Reset inventory to bunker starter base
+    this.model.inventory = { food: 1, drink: 1, kit: 0 };
+
+    // Apply collected supplies to BOTH flags and inventory counts
     items.forEach((itemId) => {
-      if (itemId === 'food') this.model.flags.food_packed = true;
-      if (itemId === 'drink') this.model.flags.drink_packed = true;
-      if (itemId === 'kit') this.model.flags.kit_packed = true;
-      if (itemId === 'radio') this.model.flags.battery_packed = true;
-      if (itemId === 'snack') this.model.flags.snack_packed = true;
-      if (itemId === 'toy') this.model.flags.toy_packed = true;
+      if (itemId === 'food') {
+        this.model.flags.food_packed = true;
+        this.model.addInventoryItem('food', 2);
+      } else if (itemId === 'drink') {
+        this.model.flags.drink_packed = true;
+        this.model.addInventoryItem('drink', 2);
+      } else if (itemId === 'kit') {
+        this.model.flags.kit_packed = true;
+        this.model.addInventoryItem('kit', 1);
+      } else if (itemId === 'radio') {
+        this.model.flags.battery_packed = true;
+        this.model.flags.extra_battery = true;
+      } else if (itemId === 'snack') {
+        this.model.flags.snack_packed = true;
+        this.model.addInventoryItem('food', 1);
+      } else if (itemId === 'toy') {
+        this.model.flags.toy_packed = true;
+      }
     });
+
+    // Update UI inventory drawer immediately
+    const isDisabledScene = this.model.isInventoryDisabledScene('prolog_intro');
+    this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
+
+    // Show toast for scavenger results
+    const count = items.length;
+    if (this.view.showTelltaleToast) {
+      this.view.showTelltaleToast(`LOGISTIK TERKUMPUL: ${count} barang berhasil dibawa ke bunker!`);
+    }
 
     // Advance to evacuation intro
     this.renderScene('prolog_intro');
