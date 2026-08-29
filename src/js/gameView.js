@@ -1127,7 +1127,7 @@ export class GameView {
     }
 
     // Single Long-Scroll: BNPB Disaster Mitigation Scorecard
-    const statsContainer = this.dom.endingStats;
+    const statsContainer = this.dom.endingStats || document.querySelector('.ending-stats');
     if (statsContainer) {
       statsContainer.innerHTML = `
         <div class="bnpb-scorecard-box">

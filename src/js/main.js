@@ -70,6 +70,7 @@ const dom = {
   endingKnowledge: document.getElementById('ending-knowledge'),
   endingGradeText: document.getElementById('ending-grade-text'),
   endingSummary:   document.getElementById('ending-summary'),
+  endingStats:     document.querySelector('.ending-stats'),
 
   // Inventory icons
   resourceItems: Array.from(document.querySelectorAll('.resource-item')),

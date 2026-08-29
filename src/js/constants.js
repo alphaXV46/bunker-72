@@ -31,19 +31,19 @@ export const SURVIVAL = Object.freeze({
   DECAY_INTERVAL_HOURS: 6,
 
   /** Hunger points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  HUNGER_DECAY_PER_INTERVAL: 18,
+  HUNGER_DECAY_PER_INTERVAL: 6,
 
   /** Thirst points lost per DECAY_INTERVAL_HOURS of elapsed time. */
-  THIRST_DECAY_PER_INTERVAL: 20,
+  THIRST_DECAY_PER_INTERVAL: 7,
 
   /** Health points lost per DECAY_INTERVAL_HOURS when hunger reaches zero. */
-  HEALTH_PENALTY_HUNGER: 10,
+  HEALTH_PENALTY_HUNGER: 3,
 
   /** Health points lost per DECAY_INTERVAL_HOURS when thirst reaches zero. */
-  HEALTH_PENALTY_THIRST: 15,
+  HEALTH_PENALTY_THIRST: 5,
 
   /** Health damage applied to the player for choosing to panic-exit. */
-  PANIC_HEALTH_PENALTY: 30,
+  PANIC_HEALTH_PENALTY: 20,
 
   /** Max knowledge score cap. */
   KNOWLEDGE_MAX: 15,
@@ -54,7 +54,7 @@ export const SURVIVAL = Object.freeze({
     hunger: 100,
     thirst: 100,
     health: 100,
-    inventory: Object.freeze({ food: 2, drink: 2, kit: 1 }),
+    inventory: Object.freeze({ food: 3, drink: 3, kit: 1 }),
   }),
 });
 
