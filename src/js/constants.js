@@ -238,6 +238,85 @@ export const FACTS_MAP = Object.freeze({
   'c_day3_door_open': 'Membuka pintu sebelum memverifikasi identitas dan kode sandi resmi bisa menyebabkan bunker diinvasi.',
   'c_day4_oxygen_vent': 'Menyalakan ventilasi paksa tanpa filter menyedot gas beracun dari luar, mempercepat keracunan.',
   'c_day4_looters_barter': 'Negosiasi dengan penjarah saat pertahanan sudah bocor memberi celah mereka untuk menyerang langsung.',
-  'c_day4_triage_save': 'Menyimpan seluruh persediaan saat kondisi kritis menyebabkan penurunan stamina ekstrem seluruh keluarga.'
+  'c_day4_triage_save': 'Menyimpan seluruh persediaan saat kondisi kritis menyebabkan penurunan stamina ekstrem seluruh keluarga.',
+  'c_day2_stranger_hostile': 'Menyerang atau mengusir penyintas lain yang tidak bersenjata secara agresif merusak peluang solidaritas sosial darurat.',
+  'c_day1_maya_harsh': 'Menekan mental anak di tengah trauma bencana meningkatkan risiko histeria dan penurunan daya tahan tubuh.',
+  'c_day4_scavenge_reckless': 'Menerobos reruntuhan yang tidak stabil tanpa perhitungan memperbesar risiko cedera fraktur dan terjebak debu panas.'
 });
+
+// ─── BNPB DISASTER MITIGATION EVALUATION ─────────────────────────────────────
+export const BNPB_EVALUATION = Object.freeze({
+  GRADES: Object.freeze({
+    S: Object.freeze({ minScore: 85, badge: 'GRADE S', label: 'PROTOKOL ELITE BNPB', desc: 'Keputusan tanggap darurat sempurna sesuai standar mitigasi profesional. Keluarga terlindungi maksimal.' }),
+    A: Object.freeze({ minScore: 70, badge: 'GRADE A', label: 'TANGGAP BENCANA UNGGUL', desc: 'Pemahaman keselamatan tinggi dengan mitigasi risiko yang sangat baik.' }),
+    B: Object.freeze({ minScore: 55, badge: 'GRADE B', label: 'SIAGA MEMADAI', desc: 'Keluarga bertahan hidup, meski beberapa prosedur isolasi dan keselamatan kurang optimal.' }),
+    C: Object.freeze({ minScore: 40, badge: 'GRADE C', label: 'WASPADA MINIMAL', desc: 'Banyak protokol keselamatan dilanggar; keluarga menanggung risiko infeksi dan trauma tinggi.' }),
+    D: Object.freeze({ minScore: 0,  badge: 'GRADE D', label: 'KRITIS / GAGAL PROSEDUR', desc: 'Pelanggaran fatal prosedur isolasi darurat membahayakan kelangsungan hidup bunker.' }),
+  }),
+  getGrade(score) {
+    if (score >= 85) return this.GRADES.S;
+    if (score >= 70) return this.GRADES.A;
+    if (score >= 55) return this.GRADES.B;
+    if (score >= 40) return this.GRADES.C;
+    return this.GRADES.D;
+  }
+});
+
+// ─── MAJOR DECISIONS METADATA (TELLTALE-STYLE RECAP) ─────────────────────────
+export const MAJOR_DECISIONS_META = Object.freeze([
+  {
+    id: 'decision_door_sealing',
+    title: 'Penyegelan Palka Masuk (Hari 1)',
+    choiceMap: {
+      'c_day1_lock_manual': { label: 'Kunci Palang Baja Manual', outcome: 'Palka terkunci kokoh dari guncangan seismik awal.', karma: 'positive' },
+      'c_day1_lock_auto':   { label: 'Kunci Otomatis Cepat', outcome: 'Palka tertutup aman meski mekanisme cadangan belum diperkuat.', karma: 'neutral' },
+      'c_day1_lock_open':   { label: 'Buka Celah Mengamati Luar', outcome: 'Abu vulkanik dan gas asam merembes masuk ke ruang dek.', karma: 'negative' },
+    }
+  },
+  {
+    id: 'decision_maya_comfort',
+    title: 'Kepanikan Maya di Ruang Gelap (Hari 1)',
+    choiceMap: {
+      'c_day1_maya_light':  { label: 'Nyalakan Lampu Darurat & Dekap Maya', outcome: 'Maya tenang dan merasa aman di tengah gempa susulan.', karma: 'positive' },
+      'c_day1_maya_toy':    { label: 'Berikan Mainan Mobil & Kisah Harapan', outcome: 'Moral Maya pulih tanpa memboroskan daya baterai.', karma: 'positive' },
+      'c_day1_maya_strict': { label: 'Tegur Maya Demi Penghematan Udara', outcome: 'Maya tertekan dan merasa terisolasi dalam gulita.', karma: 'negative' },
+    }
+  },
+  {
+    id: 'decision_stranger_day2',
+    title: 'Kontak Penyintas Luar di Palka (Hari 2)',
+    choiceMap: {
+      'c_day2_stranger_airlock':  { label: 'Bantu Lewat Kotak Airlock (Masker & Air)', outcome: 'Penyintas terselamatkan; mereka mengingat kebaikan keluarga Anda.', karma: 'positive' },
+      'c_day2_stranger_intercom': { label: 'Beri Petunjuk Posko BNPB via Interkom', outcome: 'Penyintas diarahkan ke posko resmi tanpa membuka pintu bunker.', karma: 'neutral' },
+      'c_day2_stranger_harsh':    { label: 'Gertak & Usir Secara Kasar', outcome: 'Penyintas pergi dengan rasa dendam dan putus asa.', karma: 'negative' },
+    }
+  },
+  {
+    id: 'decision_radio_management',
+    title: 'Manajemen Radio Komunikasi (Hari 2)',
+    choiceMap: {
+      'c_day2_radio_schedule':   { label: 'Jadwal Siar Teratur (10 Menit / 6 Jam)', outcome: 'Koordinat bunker tertangkap oleh posko SAR BNPB.', karma: 'positive' },
+      'c_day2_radio_always_on':  { label: 'Nyalakan Radio Nonstop Mencari Sinyal', outcome: 'Baterai radio habis sebelum pesan balasan SAR diterima.', karma: 'negative' },
+      'c_day2_radio_generator':  { label: 'Hubungkan Radio ke Bus Generator', outcome: 'Fluktuasi voltase merusak frekuensi receiver radio.', karma: 'negative' },
+    }
+  },
+  {
+    id: 'decision_water_filtration',
+    title: 'Pencemaran Air Pipa Endapan (Hari 3)',
+    choiceMap: {
+      'c_day3_water_filter': { label: 'Filtrasi Karbon Aktif & Klorin', outcome: 'Air steril dan bebas mineral endapan abu vulkanik.', karma: 'positive' },
+      'c_day3_water_boil':   { label: 'Rebus Langsung Air Keruh', outcome: 'Bakteri mati tetapi konsentrasi mineral asam merusak pencernaan.', karma: 'negative' },
+      'c_day3_water_settle': { label: 'Endapkan Semalaman Tanpa Filter', outcome: 'Partikel halus vulkanik terminum oleh keluarga.', karma: 'negative' },
+    }
+  },
+  {
+    id: 'decision_day4_scavenge',
+    title: 'Ekspedisi Scavenge Permukaan (Hari 4)',
+    choiceMap: {
+      'c_day4_scavenge_cooperate': { label: 'Bekerja Sama & Berbagi di Reruntuhan', outcome: 'Mendapat logistik air & makanan serta teman bertahan hidup.', karma: 'positive' },
+      'c_day4_scavenge_cautious':  { label: 'Geledah Reruntuhan Aman & Segera Balik', outcome: 'Membawa ransum darurat secukupnya dengan aman ke bunker.', karma: 'neutral' },
+      'c_day4_scavenge_reckless':  { label: 'Terobos Gudang & Ambil Semua Barang', outcome: 'Mendapat ransum melimpah tetapi menderita luka fisik serius.', karma: 'negative' },
+    }
+  }
+]);
 

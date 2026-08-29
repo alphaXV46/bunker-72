@@ -7,6 +7,9 @@ import avatarAnak from '../assets/avatar_anak.png';
 import avatarAyah from '../assets/avatar_ayah.png';
 import avatarIbu from '../assets/avatar_ibu.png';
 import avatarNarrator from '../assets/avatar_narrator.png';
+import avatarPenyintas from '../assets/avatar_penyintas.png';
+import avatarPenjarah from '../assets/avatar_penjarah.png';
+import avatarSar from '../assets/avatar_sar.png';
 
 // Optimized WebP Backgrounds (85%+ smaller, instant GPU decode)
 import bgMenu from '../assets/bg_menu.webp';
@@ -57,6 +60,9 @@ const ASSET_URLS = [
   avatarIbu,
   avatarAnak,
   avatarNarrator,
+  avatarPenyintas,
+  avatarPenjarah,
+  avatarSar,
   foodIcon,
   drinkIcon,
   kitIcon,

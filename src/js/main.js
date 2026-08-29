@@ -187,10 +187,10 @@ async function initGame() {
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     },
 
-    // ✅ endingSummary is now a 4th argument, flags is 5th, history is 6th
-    onEnd: (endingId, finalKnowledge, endingText, endingSummary, flags, history) => {
+    // ✅ endingSummary is 4th argument, flags is 5th, history is 6th, modularEnding is 7th
+    onEnd: (endingId, finalKnowledge, endingText, endingSummary, flags, history, modularEnding) => {
       localStorage.removeItem(SAVE_KEY); // clear save on completion
-      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags, history);
+      storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags, history, modularEnding);
       showScreen('ending');
     },
   });

@@ -4970,3 +4970,274 @@ body.disable-crt .crt-flicker { display: none !important; }
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   TELLTALE-STYLE NOTIFICATION TOAST (BANNER DIEGETIK)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.telltale-toast-container {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  width: 90%;
+  max-width: 650px;
+}
+
+.telltale-toast {
+  background: rgba(10, 14, 18, 0.95);
+  border: 1px solid var(--accent-cyan, #00f3ff);
+  border-top: 2px solid #fff;
+  border-bottom: 2px solid var(--accent-cyan, #00f3ff);
+  box-shadow: 0 4px 20px rgba(0, 243, 255, 0.25), 0 0 10px rgba(0, 0, 0, 0.8);
+  color: #e0f7fa;
+  font-family: 'Share Tech Mono', 'VT323', monospace;
+  font-size: clamp(0.78rem, 1vw, 0.95rem);
+  letter-spacing: 1.5px;
+  padding: 8px 18px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.96);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.telltale-toast.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.telltale-toast.fade-out {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.telltale-toast-bracket {
+  color: var(--accent-cyan, #00f3ff);
+  font-weight: bold;
+}
+
+.telltale-toast-text {
+  color: #ffffff;
+  text-shadow: 0 0 6px rgba(0, 243, 255, 0.6);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SINGLE LONG-SCROLL ENDING VIEW & MODULAR EPILOGUE
+   ══════════════════════════════════════════════════════════════════════════════ */
+#ending-view {
+  overflow-y: auto !important;
+  max-height: 100% !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(16px, 2.5vw, 32px) clamp(16px, 4vw, 48px);
+  gap: 20px;
+}
+
+#ending-view .ending-content-box {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(14, 18, 23, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(14px, 2vw, 24px);
+  border-radius: 4px;
+}
+
+.epilogue-modular-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.epilogue-card {
+  background: rgba(8, 12, 16, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--accent-cyan, #00f3ff);
+  border-radius: 3px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.epilogue-medical { border-left-color: #ff5252; }
+.epilogue-bunker  { border-left-color: #ffd740; }
+.epilogue-social  { border-left-color: #69f0ae; }
+.epilogue-family  { border-left-color: #40c4ff; }
+
+.epilogue-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.epilogue-icon {
+  font-size: 1.2rem;
+}
+
+.epilogue-card-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  color: #fff;
+  margin: 0;
+}
+
+.epilogue-card-body {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #cfd8dc;
+  margin: 0;
+}
+
+/* Telltale Major Choices Section */
+.telltale-recap-container {
+  width: 100%;
+  max-width: 900px;
+}
+
+.telltale-recap-section {
+  background: rgba(14, 18, 23, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 3px solid var(--accent-cyan, #00f3ff);
+  border-radius: 4px;
+  padding: 18px;
+}
+
+.recap-section-header {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+  color: var(--accent-cyan, #00f3ff);
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.recap-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.recap-decision-card {
+  background: rgba(10, 14, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recap-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.recap-decision-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: #90a4ae;
+  letter-spacing: 1px;
+}
+
+.recap-karma-badge {
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+}
+
+.badge-karma-pos { background: rgba(76, 175, 80, 0.2); color: #69f0ae; border: 1px solid #4caf50; }
+.badge-karma-neg { background: rgba(244, 67, 54, 0.2); color: #ff5252; border: 1px solid #f44336; }
+.badge-karma-neu { background: rgba(255, 193, 7, 0.2); color: #ffd54f; border: 1px solid #ffc107; }
+
+.recap-chosen-label {
+  font-size: 0.85rem;
+  color: #eceff1;
+}
+
+.recap-chosen-outcome {
+  font-size: 0.78rem;
+  color: #b0bec5;
+  line-height: 1.35;
+}
+
+/* BNPB Scorecard Box */
+.bnpb-scorecard-box {
+  background: rgba(14, 18, 23, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 5px solid #ff9800;
+  border-radius: 4px;
+  padding: 18px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.bnpb-scorecard-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.bnpb-grade-pill {
+  font-family: 'VT323', monospace;
+  font-size: 1.8rem;
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-weight: bold;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.bnpb-grade-pill.grade-s { background: rgba(0, 230, 118, 0.2); color: #00e676; border: 2px solid #00e676; }
+.bnpb-grade-pill.grade-a { background: rgba(33, 150, 243, 0.2); color: #29b6f6; border: 2px solid #29b6f6; }
+.bnpb-grade-pill.grade-b { background: rgba(255, 235, 59, 0.2); color: #ffee58; border: 2px solid #ffee58; }
+.bnpb-grade-pill.grade-c { background: rgba(255, 152, 0, 0.2); color: #ffa726; border: 2px solid #ffa726; }
+.bnpb-grade-pill.grade-d { background: rgba(244, 67, 54, 0.2); color: #ef5350; border: 2px solid #ef5350; }
+
+.bnpb-score-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bnpb-grade-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 1.5px;
+  color: #fff;
+  margin: 0;
+}
+
+.bnpb-score-val {
+  font-size: 0.85rem;
+  color: #cfd8dc;
+}
+
+.bnpb-grade-explanation {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #b0bec5;
+  margin: 0;
+}
+
+/* New Speakers */
+.speaker-penyintas .speaker-name { color: #80cbc4 !important; }
+.speaker-penjarah  .speaker-name { color: #ff8a80 !important; }
+.speaker-sar       .speaker-name { color: #ffb74d !important; }
+
+

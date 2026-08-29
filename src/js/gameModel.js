@@ -33,6 +33,18 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_prolog_pack_snack': 'snack_packed',
   'c_prolog_pack_toy': 'toy_packed',
   'c_day2_radio_battery': 'radio_saved',
+  'c_day1_maya_light': 'maya_comforted',
+  'c_day1_maya_toy': 'maya_comforted',
+  'c_day1_maya_strict': 'maya_sad',
+  'c_day2_stranger_airlock': 'helped_stranger',
+  'c_day2_stranger_intercom': 'stranger_guided',
+  'c_day2_stranger_harsh': 'stranger_hostile',
+  'c_day4_scavenge_cooperate': 'scavenge_success',
+  'c_day4_scavenge_cautious': 'scavenge_success',
+  'c_day4_scavenge_reckless': 'scavenge_injured',
+  'c_day4_looters_shock': 'looters_repelled',
+  'c_day4_looters_intercom': 'looters_repelled',
+  'c_day4_looters_barter': 'looters_breached',
 });
 
 export class GameModel {
@@ -272,93 +284,172 @@ export class GameModel {
   }
 
   /**
-   * Determines which ending or Day 4 scene the player routes to.
-   * Called from StoryEngine when sceneId === 'trigger_ending_eval'.
+   * Evaluates the ending route at Hour 72.
+   * If radio is active, rescues directly at 72h.
+   * If radio failed, transitions to Day 4 as a narrative second chance.
    * @returns {string} sceneId
    */
   evaluateEnding() {
     const doorOpened = this.flags.door_opened === true;
-    if (this.knowledge === 0 || doorOpened || this.health <= 0) return 'ending_fatal';
+    if (this.health <= 0 || doorOpened) return 'ending_fatal';
 
-    const hasKnowledge   = this.knowledge >= 8;
-    const hasRadioSave   = this.flags.radio_saved    === true;
-    const hasWaterFilter = this.flags.water_filtered === true;
-
-    const conditionsMet = (hasKnowledge ? 1 : 0) + (hasRadioSave ? 1 : 0) + (hasWaterFilter ? 1 : 0);
-
-    // Day 4 Secret Gate / Near Miss Evaluation
-    if (conditionsMet >= 2) {
-      if (conditionsMet === 2) {
-        this.flags.near_miss = true;
-        if (!hasRadioSave) {
-          this.flags.near_miss_radio = true;
-        } else if (!hasWaterFilter) {
-          this.flags.near_miss_water = true;
-        } else if (!hasKnowledge) {
-          this.flags.near_miss_knowledge = true;
-        }
-        this.health = clamp(this.health - 15, 0, this.getMaxStat('health'));
-        this.hunger = clamp(this.hunger - 15, 0, this.getMaxStat('hunger'));
-        this.thirst = clamp(this.thirst - 15, 0, this.getMaxStat('thirst'));
-        this.inventory.food = 0;
-        this.inventory.drink = 0;
+    // If radio communication succeeded, BNPB arrives on schedule at Hour 72
+    if (this.flags.radio_saved) {
+      if (this.health >= 60 && !this.flags.water_poisoned && !this.flags.smoke_poisoned) {
+        return 'ending_best';
       }
-      return 'day4_intro';
+      return 'ending_normal';
     }
 
-    // Communication Blackout Gate (conditionsMet <= 1):
-    // If the player failed BOTH radio management AND water filtration,
-    // they are stranded with no comms and poisoned water — a distinct
-    // failure mode from generic low-knowledge endings.
-    if (!hasRadioSave && !hasWaterFilter) {
-      return 'ending_stranded_bad';
-    }
-
-    // Standard Ending Matrix based on knowledge score
-    if (this.knowledge >= 8) return 'ending_best';
-    if (this.knowledge >= 4) return 'ending_normal';
-    return 'ending_bad';
+    // Radio failed or not scheduled: SAR cannot locate bunker yet -> continue to Day 4
+    return 'day4_intro';
   }
 
   /**
-   * Determines which secret ending the player routes to.
-   * Called from StoryEngine when sceneId === 'trigger_secret_ending_eval'.
+   * Evaluates the outcome of surviving to Day 4 (96 Hours).
    * @returns {string} sceneId
    */
   evaluateSecretEnding() {
-    const hasStructuralDamage = this.flags.structural_damage === true;
-    return (this.knowledge >= 12 && !hasStructuralDamage && this.health > 0)
-      ? 'ending_secret_best'
-      : 'ending_secret_bad';
+    if (this.health <= 0 || this.flags.looters_breached) {
+      return 'ending_secret_bad';
+    }
+    if (!this.flags.structural_damage && this.health >= 50) {
+      return 'ending_secret_best';
+    }
+    return 'ending_normal';
   }
 
   /**
-   * Returns a dynamically constructed text describing the specific reasons for failing Day 4.
+   * Constructs a comprehensive, modular Telltale-style epilogue.
+   * Evaluates Rescue, Health, Bunker Integrity, Social Karma, and Family State.
+   * @returns {object}
+   */
+  evaluateModularEnding() {
+    const isFatal = this.health <= 0 || this.flags.door_opened === true || this.flags.looters_breached === true;
+    const isDay4 = this.currentSceneId.startsWith('day4_') || this.currentSceneId === 'day4_eval';
+
+    // 1. Rescue Outcome
+    let endingId = 'ending_best';
+    let rescueBadge = 'RESCUE: EVAKUASI HELIKOPTER (72 JAM)';
+    let rescueTitle = 'Penyelamatan Sempurna Selat Sunda';
+
+    if (isFatal) {
+      endingId = 'ending_fatal';
+      rescueBadge = 'STATUS: GUGUR DI DALAM BUNKER';
+      rescueTitle = 'Makam Bunker 72: Keheningan di Perut Bumi';
+    } else if (isDay4) {
+      if (this.health > 0) {
+        endingId = 'ending_secret_best';
+        rescueBadge = 'RESCUE: TIM PENYISIRAN DARAT (96 JAM)';
+        rescueTitle = 'Bertahan 96 Jam: Fajar Kemenangan Sejati';
+      } else {
+        endingId = 'ending_secret_bad';
+        rescueBadge = 'STATUS: GUGUR DI GARIS AKHIR';
+        rescueTitle = 'Tragedi 96 Jam: Kelelahan Menjelang Fajar';
+      }
+    } else if (this.health < 60 || this.flags.water_poisoned || this.flags.smoke_poisoned) {
+      endingId = 'ending_normal';
+      rescueBadge = 'RESCUE: EVAKUASI MEDIS DARURAT (72 JAM)';
+      rescueTitle = 'Bertahan Hidup dengan Luka & Trauma';
+    }
+
+    // 2. Health & Physical Condition
+    let healthDesc = '';
+    if (isFatal) {
+      healthDesc = 'Seluruh anggota keluarga gugur di dalam bunker akibat paparan racun mematikan atau pelanggaran segel pelindung sebelum bantuan tiba.';
+    } else if (this.health >= 70 && !this.flags.water_poisoned && !this.flags.smoke_poisoned) {
+      healthDesc = 'Kondisi fisik seluruh anggota keluarga luar biasa prima. Tidak ada luka bakar asam atau kerusakan organ paru-paru yang berarti.';
+    } else if (this.health >= 40) {
+      healthDesc = 'Keluarga mengalami dehidrasi moderat dan iritasi pernapasan ringan akibat abu vulkanik, namun tim medis memastikan tidak ada komplikasi permanen.';
+    } else {
+      healthDesc = 'Keluarga dievakuasi dalam keadaan lemas kritis akibat dehidrasi akut dan keracunan belerang, membutuhkan infus serta perawatan intensif ICU.';
+    }
+
+    // 3. Bunker Infrastructure
+    let bunkerDesc = '';
+    if (this.flags.structural_damage) {
+      bunkerDesc = 'Bunker mengalami retakan struktural yang cukup mengkhawatirkan akibat guncangan gempa, namun pilar utama berhasil menahan runtuhan plafon.';
+    } else {
+      bunkerDesc = 'Integritas struktur Bunker 72 berdiri utuh tanpa retakan berarti—sebuah bukti keberhasilan manajemen peredam hidrolik yang disiplin.';
+    }
+
+    // 4. Social Karma & External Relationships
+    let karmaDesc = '';
+    if (this.flags.helped_stranger) {
+      karmaDesc = 'Solidaritas Anda menolong penyintas lain membuahkan berkah tak terduga; kebaikan Anda diingat dan memperkuat kerja sama di sektor pengungsian.';
+    } else if (this.flags.stranger_hostile || this.flags.looters_hostile) {
+      karmaDesc = 'Sikap defensif yang keras meninggalkan trauma dan ketegangan di antara para penyintas di sekitar sektor pengungsian.';
+    } else {
+      karmaDesc = 'Keluarga berhasil menjaga kerahasiaan tempat perlindungan secara disiplin tanpa memicu insiden dengan pihak luar.';
+    }
+
+    // 5. Family Bond & Maya's Morale
+    let familyDesc = '';
+    if (this.flags.maya_comforted || this.flags.toy_packed) {
+      familyDesc = 'Maya memeluk erat mobil-mobilan merahnya di atas tandu evakuasi, menatap hangat wajah Ayah dan Ibu dengan senyuman yang melegakan.';
+    } else {
+      familyDesc = 'Maya meringkuk dalam dekapan Ibu, matanya masih dibayangi ketakutan akan kegelapan ruang isolasi.';
+    }
+
+    const narrativeFull = `${healthDesc} ${bunkerDesc} ${karmaDesc} ${familyDesc}`;
+
+    // 6. Educational BNPB Mitigation Score (0 - 100)
+    let bnpbScore = 50;
+    bnpbScore += Math.round((this.health / 100) * 20);
+    bnpbScore += Math.round((this.hunger / 100) * 10);
+    bnpbScore += Math.round((this.thirst / 100) * 10);
+
+    if (this.flags.radio_saved) bnpbScore += 15;
+    if (this.flags.water_filtered && !this.flags.water_poisoned) bnpbScore += 15;
+    if (!this.flags.air_uninspected) bnpbScore += 10;
+    if (!this.flags.structural_damage) bnpbScore += 10;
+    if (this.flags.helped_stranger) bnpbScore += 5;
+    if (this.flags.door_opened) bnpbScore -= 40;
+    if (this.flags.looters_breached) bnpbScore -= 30;
+
+    bnpbScore = clamp(bnpbScore, 0, 100);
+
+    return {
+      endingId,
+      rescueBadge,
+      rescueTitle,
+      healthDesc,
+      bunkerDesc,
+      karmaDesc,
+      familyDesc,
+      narrativeFull,
+      bnpbScore,
+      health: this.health,
+      hunger: this.hunger,
+      thirst: this.thirst,
+      flags: { ...this.flags },
+    };
+  }
+
+  /**
+   * Returns a dynamically constructed text describing reasons for failing Day 4.
    * @returns {string}
    */
   getSecretBadEndingText() {
     const reasons = [];
     if (this.flags.structural_damage) {
-      reasons.push("bunker mengalami kerusakan struktural parah akibat guncangan hari kedua yang tidak diantisipasi dengan baik");
+      reasons.push("bunker mengalami kerusakan struktural parah akibat guncangan gempa yang tidak diredam");
     }
     if (this.flags.oxygen_depleted) {
-      reasons.push("kegagalan fatal dalam mengelola sirkulasi oksigen darurat (membuka ventilasi luar saat udara luar masih beracun)");
+      reasons.push("kegagalan fatal dalam sirkulasi oksigen darurat (membuka ventilasi luar saat udara beracun)");
     }
     if (this.flags.looters_breached) {
-      reasons.push("penjarah berhasil menerobos masuk karena keputusan membuka pintu untuk barter makanan");
+      reasons.push("penjarah berhasil menerobos masuk ke dalam palka bunker");
     }
-    if (this.knowledge < 12) {
-      reasons.push("tingkat kesiapsiagaan keluarga yang kurang memadai untuk menghadapi prosedur evakuasi akhir");
-    }
-    if (this.health <= 50) {
-      reasons.push("kondisi fisik keluarga yang sangat kritis dan cedera parah");
+    if (this.health <= 0) {
+      reasons.push("kondisi stamina fisik keluarga yang terkuras habis hingga batas akhir");
     }
 
     const reasonStr = reasons.length > 0 
       ? reasons.join(", serta ")
-      : "kombinasi kelelahan fisik dan kegagalan protokol darurat di saat-saat terakhir";
+      : "kelelahan fisik dan isolasi berkepanjangan di bawah tanah";
 
-    return `Gugur di Garis Akhir. Bencana melanda di saat-saat terakhir karena ${reasonStr}. Ketika tim penyelamat tiba di jam ke-96, Bunker 72 hanya menyisakan kegelapan dan keheningan.`;
+    return `Gugur di Garis Akhir. Bencana melanda di jam-jam penentuan karena ${reasonStr}. Ketika regu SAR tiba di jam ke-96, Bunker 72 hanya menyisakan keheningan.`;
   }
 
   /**

@@ -531,9 +531,10 @@
         {
           "id": "c_day1_rest_good",
           "text": "Tidur bergantian di atas alas dipan kering dan pasang selimut darurat untuk Anak.",
-          "nextSceneId": "day2_start",
+          "nextSceneId": "day1_maya_fear",
           "knowledgeEffect": 1,
-          "log": "Keluarga beristirahat bergantian."
+          "log": "Keluarga beristirahat bergantian.",
+          "telltaleNotice": "[PROTOKOL HIGIENIS: Area tidur bersih dan terlindungi]"
         }
       ]
     },
@@ -548,9 +549,44 @@
         {
           "id": "c_day1_rest_bad",
           "text": "Tidur bersamaan langsung di atas lantai semen tanpa alas demi kepraktisan.",
-          "nextSceneId": "day2_start",
+          "nextSceneId": "day1_maya_fear",
           "knowledgeEffect": -1,
-          "log": "Bunker dibiarkan berantakan semalaman."
+          "log": "Bunker dibiarkan berantakan semalaman.",
+          "telltaleNotice": "[KENYAMANAN TURUN: Risiko kontaminasi debu meningkat]"
+        }
+      ]
+    },
+    "day1_maya_fear": {
+      "speaker": "Anak",
+      "avatar": "anak",
+      "text": "Ayah... gelapnya pekat sekali... Setiap kali tanah di bawah kita bergetar pelan, aku merasa seperti terkubur hidup-hidup di dalam gua monster. Aku takut sekali, Ayah... bolehkah lampunya dinyalakan sebentar saja?",
+      "background": "normal",
+      "hour": "24 Jam",
+      "objective": "Tenangkan kepanikan Maya di tengah gulita malam pertama.",
+      "choices": [
+        {
+          "id": "c_day1_maya_light",
+          "text": "Nyalakan lampu darurat meja berdaya rendah dan peluk Maya hingga ia merasa aman.",
+          "nextSceneId": "day2_start",
+          "knowledgeEffect": 1,
+          "log": "Ayah menyalakan lampu darurat kecil dan mendekap Maya hingga tenang.",
+          "telltaleNotice": "[MAYA AKAN MENGINGAT INI: Rasa aman keluarga pulih]"
+        },
+        {
+          "id": "c_day1_maya_toy",
+          "text": "Raih mobil-mobilan merahnya di kegelapan, genggamkan ke jemari Maya, dan ceritakan kisah harapan.",
+          "nextSceneId": "day2_start",
+          "knowledgeEffect": 1,
+          "log": "Mobil-mobilan merah diberikan ke tangan Maya sebagai simbol keberanian.",
+          "telltaleNotice": "[IKATAN TERJALIN: Maya memegang erat janji perlindungan Ayah]"
+        },
+        {
+          "id": "c_day1_maya_strict",
+          "text": "Minta Maya menahan tangis dan bersikap tenang demi menghemat oksigen serta baterai.",
+          "nextSceneId": "day2_start",
+          "knowledgeEffect": 0,
+          "log": "Ayah menuntut ketenangan ketat dari Maya demi penghematan daya.",
+          "telltaleNotice": "[MAYA TERTEKAN: Keheningan dingin menyelimuti malam pertama]"
         }
       ]
     },
@@ -774,10 +810,64 @@
         {
           "id": "c_day2_seal_radio",
           "text": "Putar Kenop Radio Darurat (Mini-Game Tuning Frekuensi Sinyal)",
-          "nextSceneId": "day2_radio_setup",
+          "nextSceneId": "day2_stranger_knock",
           "knowledgeEffect": 0,
           "log": "Radio darurat disiapkan.",
           "triggerRadioMiniGame": true
+        }
+      ]
+    },
+    "day2_stranger_knock": {
+      "speaker": "Penyintas Luar",
+      "avatar": "penyintas",
+      "text": "Tolong... *uhuk-uhuk*... apakah ada orang di balik palka?! Nama saya Hendra dari desa pesisir barat... Rumah saya roboh tersapu tsunami sekunder. Tenggorokan saya terbakar abu... tolong, sedikit air atau masker saja... saya bersumpah tidak berniat jahat!",
+      "background": "normal",
+      "hour": "44 Jam",
+      "objective": "Tentukan sikap menghadapi permohonan penyintas luar di palka.",
+      "choices": [
+        {
+          "id": "c_day2_stranger_airlock",
+          "text": "Bantu lewat kotak transfer airlock (Berikan 1 botol air & masker cadangan tanpa membuka palka utama).",
+          "nextSceneId": "day2_stranger_resolved",
+          "knowledgeEffect": 2,
+          "log": "Memberikan bantuan air dan masker secara aman melalui kotak transfer airlock.",
+          "telltaleNotice": "[HENDRA AKAN MENGINGAT INI: Solidaritas kemanusiaan tercatat]",
+          "setFlags": ["helped_stranger"]
+        },
+        {
+          "id": "c_day2_stranger_intercom",
+          "text": "Gunakan pengeras suara interkom untuk mengarahkan Hendra ke posko evakuasi darurat BNPB di bukit timur.",
+          "nextSceneId": "day2_stranger_resolved",
+          "knowledgeEffect": 1,
+          "log": "Mengarahkan penyintas ke posko terdekat melalui panduan interkom.",
+          "telltaleNotice": "[HENDRA DIARAHKAN KE POSKO: Protokol keamanan bunker terjaga]",
+          "setFlags": ["stranger_guided"]
+        },
+        {
+          "id": "c_day2_stranger_harsh",
+          "text": "Nyalakan sirene pengusir dan gertak dia bahwa bunker dijaga senjata sebelum menarik perhatian penjarah.",
+          "nextSceneId": "day2_stranger_resolved",
+          "knowledgeEffect": -1,
+          "log": "Mengusir penyintas luar secara keras demi keamanan absolut.",
+          "telltaleNotice": "[KEBENCIAN TERTANAM: Hendra pergi dengan keputusasaan dan dendam]",
+          "setFlags": ["stranger_hostile"]
+        }
+      ]
+    },
+    "day2_stranger_resolved": {
+      "speaker": "Ibu",
+      "avatar": "ibu",
+      "text": "Melihat penderitaan orang di luar membuat hatiku remuk, Mas. Bencana ini merenggut segalanya dari mereka dalam sekejap. Kita harus semakin bijak menjaga persediaan dan mempersiapkan radio ini... mari kita atur jadwal frekuensinya sekarang.",
+      "background": "normal",
+      "hour": "46 Jam",
+      "objective": "Lanjutkan pengaturan radio komunikasi darurat.",
+      "choices": [
+        {
+          "id": "c_day2_continue_radio",
+          "text": "Siapkan konsol radio komunikasi darurat.",
+          "nextSceneId": "day2_radio_setup",
+          "knowledgeEffect": 0,
+          "log": "Persiapan radio dilanjutkan."
         }
       ]
     },
@@ -1481,169 +1571,164 @@
     "ending_eval": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-72 tiba. Di luar, suara deru mesin kendaraan berat, sirene ambulans, dan suara pengeras suara tim evakuasi BNPB memecah kesunyian pesisir Rakata Selatan. Tim penyelamat mulai memotong segel pintu bunker.",
+      "text": "Jam ke-72 tiba. Sistem evaluasi keselamatan menentukan apakah sinyal darurat radio berhasil terhubung dengan posko BNPB atau keluarga harus bertahan ekstra di bawah tanah.",
       "background": "rusak",
       "hour": "72 Jam",
-      "objective": "Saksikan hasil akhir penyelamatan keluarga Anda.",
+      "objective": "Evaluasi kontak penyelamatan jam ke-72.",
       "choices": [
         {
           "id": "c_ending_eval_trigger",
-          "text": "Buka pintu dan lihat hasil akhir penyelamatan.",
+          "text": "Periksa status penyelamatan luar.",
           "nextSceneId": "trigger_ending_eval",
           "knowledgeEffect": 0,
-          "log": "Evaluasi akhir dimulai."
+          "log": "Pemeriksaan sinyal evakuasi jam ke-72 dimulai."
+        }
+      ]
+    },
+    "ending_eval_rescued": {
+      "speaker": "Petugas SAR BNPB",
+      "avatar": "sar",
+      "text": "Penghuni Bunker 72! Kami mendeteksi transmisi sinyal darurat VHF Anda sesuai jadwal resmi BNPB. Posko Utama telah mencatat posisi koordinat Anda. Tetap tenang, tim pemotong hidrolik kami sedang membuka palka luar!",
+      "background": "normal",
+      "hour": "72 Jam",
+      "objective": "Buka palka dan sambut evakuasi helikopter BNPB.",
+      "choices": [
+        {
+          "id": "c_ending_eval_rescued_trigger",
+          "text": "Buka Palka Pintu dan Sambut Evakuasi BNPB",
+          "nextSceneId": "trigger_ending_eval",
+          "knowledgeEffect": 0,
+          "log": "Pintu dibuka dan keluarga menyambut evakuasi 72 jam BNPB."
         }
       ]
     },
     "day4_intro": {
-      "speaker": "Narator",
-      "avatar": null,
-      "text": "[RADIO BNPB] ...peringatan darurat... kelompok perusuh terdeteksi di sektor B... badai abu menutup akses pendaratan helikopter... evakuasi ditunda 24 jam... [STATIK]\n\nHarapan di jam ke-72 runtuh saat suara gemuruh di permukaan menjauh. Gempa susulan baru merontokkan dinding luar, menimbun sebagian perbekalan. Keluarga Anda dipaksa bertahan satu hari ekstra di dalam kegelapan.",
-      "conditionalText": [
-        {
-          "requiredFlag": "near_miss",
-          "text": " Tubuh seluruh keluarga gemetar hebat, menanggung beban kelalaian prosedur sebelumnya. Puing-puing semen yang runtuh semalam menimpa lemari penyimpanan kita, menghancurkan sisa botol air dan menimbun ransum makanan terakhir di bawah berton-ton beton. Kita terpaksa memulai hari ekstra ini dengan tangan hampa."
-        }
-      ],
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Jam ke-72 tiba... tapi hanya ada kesunyian yang mencekam. Deru baling-baling helikopter di kejauhan melintas dan terus menjauh ke arah pulau lain. Tanpa sinyal radio yang tepat waktu, mereka tidak tahu kita terkubur di sini. Cadangan air dan makanan kita sudah di titik kritis. Sarah, Maya... Ayah harus keluar ke permukaan reruntuhan abu untuk mencari logistik darurat. Kita tidak boleh menyerah.",
       "background": "rusak",
       "hour": "72 Jam",
-      "objective": "Bertahan ekstra 24 jam dalam kondisi darurat ekstrim.",
-      "focusItems": [
-        "food",
-        "drink",
-        "kit",
-        "radio"
-      ],
+      "objective": "Siapkan ekspedisi scavenge permukaan di tengah kabut abu vulkanik.",
       "choices": [
         {
-          "id": "c_day4_intro_start",
-          "text": "Mulai Protokol Darurat Hari ke-4.",
-          "nextSceneId": "day4_oxygen",
-          "knowledgeEffect": 0,
-          "log": "Protokol Hari ke-4 aktif."
+          "id": "c_day4_scavenge_start",
+          "text": "Kenakan masker respirator, bawa senter, dan naik ke palka darurat atas.",
+          "nextSceneId": "day4_scavenge_surface",
+          "knowledgeEffect": 1,
+          "log": "Ayah memulai ekspedisi pencarian logistik di permukaan reruntuhan abu.",
+          "telltaleNotice": "[EKSPEDISI DIMULAI: Aris melangkah ke zona abu vulkanik]"
         }
       ]
     },
-    "day4_oxygen": {
-      "speaker": "Anak",
-      "avatar": "anak",
-      "text": "Ayah... kenapa baling-baling kipas besarnya berhenti berputar? Kepalaku pening sekali dan dadaku sesak saat bernapas... Apakah mesinnya butuh istirahat juga?",
-      "statConditions": [
-        {
-          "stat": "health",
-          "operator": "lt",
-          "value": 30,
-          "text": "[REDAKSI FISIK] Kepala Anda terasa pening luar biasa karena kekurangan suplai oksigen. ",
-          "position": "prepend"
-        }
-      ],
+    "day4_scavenge_surface": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Palka atas berderit terbuka. Di luar, pesisir Selat Sunda tampak bagai lanskap planet mati—kelabu, dingin, diselimuti abu Krakatau setebal lutut. Di antara reruntuhan bangunan desa, Aris melihat dua lokasi potensial: reruntuhan minimarket di seberang jalan di mana ada siluet orang lain, atau puing rumah tetangga yang sepi.",
       "background": "rusak",
       "hour": "78 Jam",
-      "objective": "Atasi kelangkaan oksigen darurat.",
-      "focusItems": [
-        "kit"
-      ],
+      "objective": "Tentukan sasaran pencarian logistik darurat di reruntuhan abu.",
       "choices": [
         {
-          "id": "c_day4_oxygen_rest",
-          "text": "Batasi aktivitas fisik keluarga dan minta semua orang berbaring diam untuk menghemat napas.",
-          "nextSceneId": "day4_triage",
-          "knowledgeEffect": 1,
-          "log": "Aktivitas dibatasi untuk menghemat oksigen."
-        },
-        {
-          "id": "c_day4_oxygen_vent",
-          "text": "Buka paksa kisi ventilasi luar untuk menyedot udara segar permukaan.",
-          "nextSceneId": "day4_triage",
-          "knowledgeEffect": -3,
-          "log": "Ventilasi luar dibuka paksa, menghirup udara beracun.",
+          "id": "c_day4_scavenge_cooperate",
+          "text": "Mendekat ke reruntuhan minimarket dan ajak penyintas lain bekerja sama membongkar brankas ransum.",
+          "nextSceneId": "day4_scavenge_return",
+          "knowledgeEffect": 2,
+          "log": "Bekerja sama dengan penyintas luar dan membagi ransum makanan dan air secara adil.",
+          "telltaleNotice": "[KARMA BAIK: Kerja sama menghasilkan pasokan makanan & air]",
           "setFlags": [
-            "oxygen_depleted"
+            "helped_stranger",
+            "scavenge_success"
           ]
         },
         {
-          "id": "c_day4_oxygen_tank",
-          "text": "Gunakan tabung oksigen cadangan mini dari kotak medis P3K.",
-          "nextSceneId": "day4_triage",
-          "knowledgeEffect": 2,
-          "log": "Tabung oksigen darurat digunakan."
+          "id": "c_day4_scavenge_cautious",
+          "text": "Hindari semua kontak manusia, geledah sisa reruntuhan rumah terdekat yang aman dari pandangan orang.",
+          "nextSceneId": "day4_scavenge_return",
+          "knowledgeEffect": 1,
+          "log": "Mengambil ransum darurat seadanya dengan hati-hati dan menghindari kontak luar.",
+          "telltaleNotice": "[ARIS BERHATI-HATI: Logistik darurat diperoleh tanpa risiko]",
+          "setFlags": [
+            "scavenge_success"
+          ]
+        },
+        {
+          "id": "c_day4_scavenge_reckless",
+          "text": "Terobos gudang logistik utama dan ancam kelompok scavenger lain untuk merebut semua kaleng makanan.",
+          "nextSceneId": "day4_scavenge_return",
+          "knowledgeEffect": -2,
+          "log": "Merebut paksa persediaan dari scavenger lain, menderita luka dalam perkelahian.",
+          "telltaleNotice": "[PERMUSUHAN MEMUNCAK: Ransum melimpah tapi Aris terluka (-25 HP)]",
+          "setFlags": [
+            "looters_hostile",
+            "scavenge_injured"
+          ]
         }
       ]
     },
-    "day4_triage": {
-      "speaker": "Narator",
-      "avatar": null,
-      "text": "Jam ke-81. Pasokan oksigen yang menipis membuat udara terasa membakar paru-paru. Anak meringkuk lemas dengan bibir pucat, sementara batuk kering Ibu semakin berat di sudut ruangan. Dengan sisa perbekalan yang tersisa di lemari besi, keputusan pembagian harus diambil sekarang juga.",
-      "background": "rusak",
-      "hour": "81 Jam",
-      "objective": "Lakukan alokasi persediaan di bawah kelangkaan ekstrim.",
-      "focusItems": [
-        "food",
-        "drink",
-        "kit"
+    "day4_scavenge_return": {
+      "speaker": "Ibu",
+      "avatar": "ibu",
+      "text": "Mas! Kamu kembali dengan selamat... Ya Tuhan, lihat tanganmu gemetar dan jaketmu penuh debu panas! Terima kasih... air dan biskuit ini menyelamatkan nyawa kita hari ini. Minum dulu sedikit, Mas.",
+      "conditionalText": [
+        {
+          "requiredFlag": "scavenge_injured",
+          "text": " Bibir Aris berdarah dan lengannya memar akibat perkelahian di gudang logistik."
+        },
+        {
+          "requiredFlag": "helped_stranger",
+          "text": " Penyintas yang dibantu Aris sempat menitipkan beberapa botol air mineral steril tambahan untuk Maya."
+        }
       ],
+      "background": "rusak",
+      "hour": "82 Jam",
+      "objective": "Pulihkan tenaga keluarga dan hadapi jam-jam penentuan.",
       "choices": [
         {
-          "id": "c_day4_triage_food",
-          "text": "Berikan sisa ransum makanan terakhir untuk memulihkan tenaga Anak.",
+          "id": "c_day4_return_vigil",
+          "text": "Bagi rata persediaan kepada Ibu dan Maya, lalu bersiap menjaga palka.",
           "nextSceneId": "day4_looters",
           "knowledgeEffect": 1,
-          "log": "Mengalokasikan ransum makanan terakhir untuk memulihkan Anak."
-        },
-        {
-          "id": "c_day4_triage_drink",
-          "text": "Berikan sisa persediaan air bersih terakhir untuk meredakan demam Ibu.",
-          "nextSceneId": "day4_looters",
-          "knowledgeEffect": 1,
-          "log": "Mengalokasikan persediaan air terakhir untuk memulihkan Ibu."
-        },
-        {
-          "id": "c_day4_triage_kit",
-          "text": "Gunakan antiseptik dan perban P3K untuk mengobati luka memar Ayah.",
-          "nextSceneId": "day4_looters",
-          "knowledgeEffect": 1,
-          "log": "Menggunakan P3K terakhir untuk merawat trauma fisik Ayah."
-        },
-        {
-          "id": "c_day4_triage_save",
-          "text": "Simpan seluruh sisa pasokan demi ketidakpastian evakuasi berikutnya.",
-          "nextSceneId": "day4_looters",
-          "knowledgeEffect": -1,
-          "log": "Menyimpan seluruh sisa persediaan; seluruh keluarga mengalami penurunan stamina serentak."
+          "log": "Persediaan hasil scavenge dibagikan kepada keluarga."
         }
       ]
     },
     "day4_looters": {
-      "speaker": "Ibu",
-      "avatar": "ibu",
-      "text": "Mas — ada yang mencoba membongkar engsel pintu luar dengan linggis. Aku bisa merasakan getarannya merambat di lantai beton. Anak sudah kusembunyikan di sudut terlindung... tadi dia sempat berbisik, 'Ibu sama Ayah kok nggak makan? Adek bagi dua ya biskuitnya...' Hatiku hancur mendengarnya, Mas. Lakukan apa pun untuk melindungi pintu ini!",
-      "background": "rusak",
-      "hour": "84 Jam",
-      "objective": "Amankan pintu bunker dari ancaman penjarah.",
-      "focusItems": [
-        "radio"
+      "speaker": "Penjarah Bersenjata",
+      "avatar": "penjarah",
+      "text": "Woy di dalam! Kami tahu kalian baru bawa makanan masuk ke bunker ini! Buka pintunya atau kami bakar kisi ventilasi kalian dengan minyak!",
+      "conditionalText": [
+        {
+          "requiredFlag": "helped_stranger",
+          "text": " Tiba-tiba terdengar teriakan dari luar: 'Hei, jangan sentuh bunker itu! Warga sini sudah bergerak!' Penyintas yang Anda tolong memicu kepanikan dan mengecoh komplotan penjarah sehingga mereka kocar-kacir melarikan diri!"
+        }
       ],
+      "background": "rusak",
+      "hour": "88 Jam",
+      "objective": "Pertahankan pintu bunker dari ancaman penjarah.",
       "choices": [
         {
           "id": "c_day4_looters_shock",
           "text": "Aktifkan sistem kejut listrik pada gagang pintu luar melalui konsol darurat.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": 2,
-          "log": "Listrik kejut diaktifkan di pintu luar."
+          "log": "Listrik kejut diaktifkan di pintu luar melumpuhkan penjarah.",
+          "telltaleNotice": "[PERTAHANAN BERHASIL: Penjarah terpental dan melarikan diri]"
         },
         {
           "id": "c_day4_looters_intercom",
           "text": "Gunakan pengeras suara interkom untuk menggertak bahwa satgas militer bersenjata sudah dekat.",
           "nextSceneId": "day4_eval",
-          "knowledgeEffect": 0,
-          "log": "Interkom digunakan untuk menggertak penjarah."
+          "knowledgeEffect": 1,
+          "log": "Interkom digunakan untuk menggertak penjarah.",
+          "telltaleNotice": "[GERTAKAN BERHASIL: Penjarah ragu dan mundur perlahan]"
         },
         {
           "id": "c_day4_looters_barter",
           "text": "Buka celah kecil interkom untuk menegosiasikan barter makanan dengan mereka.",
           "nextSceneId": "day4_eval",
           "knowledgeEffect": -3,
-          "log": "Membuka pintu sedikit untuk barter makanan dengan penjarah.",
+          "log": "Membuka celah pintu memberi kesempatan penjarah mendobrak masuk.",
+          "telltaleNotice": "[KESALAHAN FATAL: Penjarah merusak engsel palka!]",
           "setFlags": [
             "looters_breached"
           ]
@@ -1652,19 +1737,19 @@
       "alert": true
     },
     "day4_eval": {
-      "speaker": "Narator",
-      "avatar": null,
-      "text": "Jam ke-96 tiba. Badai abu di permukaan akhirnya runtuh menjadi ketenangan fajar. Getaran baling-baling helikopter militer mendarat tepat di atas pintu keluar. Tim Penyelamat Gabungan akhirnya tiba untuk mengevakuasi keluarga Anda.",
+      "speaker": "Petugas SAR BNPB",
+      "avatar": "sar",
+      "text": "Jam ke-96! Tim evakuasi darat gabungan BNPB dan Basarnas berhasil menembus reruntuhan pesisir dengan kendaraan amfibi berat. 'Palka Bunker 72 teridentifikasi! Potong kuncinya sekarang!' Cahaya senter dan udara segar menyapu ruang bawah tanah.",
       "background": "rusak",
       "hour": "96 Jam",
-      "objective": "Lihat hasil akhir penyelamatan 96 jam.",
+      "objective": "Sambut tim evakuasi darat gabungan di jam ke-96.",
       "choices": [
         {
           "id": "c_day4_eval_trigger",
-          "text": "Saksikan hasil akhir penyelamatan 96 jam.",
+          "text": "Buka Palka dan Lihat Hasil Penyelamatan 96 Jam",
           "nextSceneId": "trigger_secret_ending_eval",
           "knowledgeEffect": 0,
-          "log": "Evaluasi akhir Hari ke-4 dimulai."
+          "log": "Evaluasi akhir penyelamatan 96 jam dimulai."
         }
       ]
     },

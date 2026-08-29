@@ -9,15 +9,18 @@
  * Dependencies: constants.js only (for POWER_THRESHOLDS and parseHour/clamp).
  */
 
-import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP, getTimePhase, getKnowledgeLabel, FACTS_MAP } from './constants.js';
+import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP, getTimePhase, getKnowledgeLabel, FACTS_MAP, BNPB_EVALUATION, MAJOR_DECISIONS_META } from './constants.js';
 import { ScavengerMinigame } from './scavengerMinigame.js';
 
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
-  ayah:     new URL('../assets/avatar_ayah.png',     import.meta.url).href,
-  ibu:      new URL('../assets/avatar_ibu.png',      import.meta.url).href,
-  anak:     new URL('../assets/avatar_anak.png',     import.meta.url).href,
-  narrator: new URL('../assets/avatar_narrator.png', import.meta.url).href,
+  ayah:      new URL('../assets/avatar_ayah.png',      import.meta.url).href,
+  ibu:       new URL('../assets/avatar_ibu.png',       import.meta.url).href,
+  anak:      new URL('../assets/avatar_anak.png',      import.meta.url).href,
+  narrator:  new URL('../assets/avatar_narrator.png',  import.meta.url).href,
+  penyintas: new URL('../assets/avatar_penyintas.png', import.meta.url).href,
+  penjarah:  new URL('../assets/avatar_penjarah.png',  import.meta.url).href,
+  sar:       new URL('../assets/avatar_sar.png',       import.meta.url).href,
 };
 
 const PACKING_ITEMS = {
@@ -622,10 +625,10 @@ export class GameView {
   renderSpeaker(scene) {
     const avatarKey   = scene.avatar || 'narrator';
     const avatarUrl   = AVATARS[avatarKey];
-    const speakerClass = ['ayah', 'ibu', 'anak'].includes(avatarKey) ? `speaker-${avatarKey}` : 'speaker-narrator';
+    const speakerClass = ['ayah', 'ibu', 'anak', 'penyintas', 'penjarah', 'sar'].includes(avatarKey) ? `speaker-${avatarKey}` : 'speaker-narrator';
 
     this.dom.speakerName.textContent = scene.speaker;
-    this.dom.storyBox.classList.remove('speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator');
+    this.dom.storyBox.classList.remove('speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'speaker-penyintas', 'speaker-penjarah', 'speaker-sar');
     this.dom.storyBox.classList.add(speakerClass);
 
     if (avatarUrl) {
@@ -660,6 +663,34 @@ export class GameView {
         alertEl.style.display = 'none';
       }
     }
+  }
+
+  /**
+   * Displays an atmospheric retro Telltale-style notification toast.
+   * e.g., "[SARAH AKAN MENGINGAT INI]", "[KARMA BAIK TERCATAT]"
+   * @param {string} text
+   */
+  showTelltaleToast(text) {
+    if (!text) return;
+    const container = document.getElementById('telltale-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'telltale-toast';
+    toast.innerHTML = `<span class="telltale-toast-bracket">▰▰</span> <span class="telltale-toast-text">${text}</span> <span class="telltale-toast-bracket">▰▰</span>`;
+    container.appendChild(toast);
+
+    // Force reflow for CSS transition
+    void toast.offsetWidth;
+    toast.classList.add('active');
+
+    setTimeout(() => {
+      toast.classList.remove('active');
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 500);
+    }, 3800);
   }
 
   /**
@@ -953,85 +984,164 @@ export class GameView {
    * @param {string} endingSummary    - Pre-computed by GameModel.getEndingSummary().
    * @param {object} flags            - Player state flags reconstructed from history.
    */
-  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = []) {
-    const endingKnowledgeParent = this.dom.endingKnowledge.parentElement;
-    if (endingKnowledgeParent) {
-      endingKnowledgeParent.innerHTML = `Skor Kesiapsiagaan Bencana: <span id="ending-knowledge" class="highlight-val">${finalKnowledge}</span> / 15 [${getKnowledgeLabel(finalKnowledge)}]`;
-      this.dom.endingKnowledge = document.getElementById('ending-knowledge');
-    }
-    this.dom.endingDesc.textContent      = endingText;
-    this.dom.endingSummary.textContent   = endingSummary;
+  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null) {
+    const score = typeof modularData?.bnpbScore === 'number' ? modularData.bnpbScore : Math.min(100, Math.round((finalKnowledge / 15) * 100));
+    const grade = BNPB_EVALUATION.getGrade(score);
 
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
 
     const ENDING_CONFIG = {
       ending_bad: {
-        title:      'ENDING BURUK: PENYELAMATAN DARURAT KRITIS',
+        title:      modularData?.rescueTitle || 'ENDING: PENYELAMATAN DARURAT KRITIS (72 JAM)',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-bad',
-        grade:      'PERINGKAT KESIAPSIAGAAN: KURANG (Keluarga Butuh Perawatan Intensif)',
-        gradeColor: 'var(--accent-red-border)',
       },
       ending_normal: {
-        title:      'ENDING NORMAL: BERTAHAN HIDUP DENGAN LUKA',
+        title:      modularData?.rescueTitle || 'ENDING: BERTAHAN HIDUP DENGAN LUKA (72 JAM)',
         titleClass: 'ending-normal',
         bgClass:    'ending-bg-normal',
-        grade:      'PERINGKAT KESIAPSIAGAAN: CUKUP (Keluarga Terluka/Dehidrasi)',
-        gradeColor: 'var(--warning-yellow-border)',
       },
       ending_best: {
-        title:      'ENDING TERBAIK: SELAMAT & PRIMA',
+        title:      modularData?.rescueTitle || 'ENDING TERBAIK: PENYELAMATAN SEMPURNA (72 JAM)',
         titleClass: 'ending-best',
         bgClass:    'ending-bg-best',
-        grade:      'PERINGKAT KESIAPSIAGAAN: SANGAT BAIK (Keluarga Sehat & Selamat)',
-        gradeColor: 'var(--accent-green-border)',
       },
       ending_fatal: {
-        title:      'ENDING FATAL: MAKAM BUNKER 72',
+        title:      modularData?.rescueTitle || 'ENDING FATAL: MAKAM BUNKER 72',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
-        grade:      'PERINGKAT KESIAPSIAGAAN: SANGAT BURUK (Keluarga Gugur/Bunker Kebobolan)',
-        gradeColor: 'var(--accent-red-border)',
       },
       ending_secret_best: {
-        title:      'ENDING RAHASIA: PENYELAMATAN SEMPURNA',
+        title:      modularData?.rescueTitle || 'ENDING RAHASIA: PENYELAMATAN 96 JAM',
         titleClass: 'ending-best',
         bgClass:    'ending-bg-best',
-        grade:      'PERINGKAT KESIAPSIAGAAN: LEGENDA (Keluarga Sehat, Aman & Selamat 96 Jam)',
-        gradeColor: 'var(--accent-green-border)',
       },
       ending_secret_bad: {
-        title:      'ENDING RAHASIA: GUGUR DI GARIS AKHIR',
+        title:      modularData?.rescueTitle || 'ENDING RAHASIA: GUGUR DI GARIS AKHIR (96 JAM)',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
-        grade:      'PERINGKAT KESIAPSIAGAAN: GAGAL (Krisis Hari Ke-4 Melumpuhkan Keluarga)',
-        gradeColor: 'var(--accent-red-border)',
       },
       ending_near_miss: {
-        title:      'ENDING NYARIS: SATU KESALAHAN FATAL',
+        title:      modularData?.rescueTitle || 'ENDING NYARIS: PENYELAMATAN KRITIS',
         titleClass: 'ending-normal',
         bgClass:    'ending-bg-normal',
-        grade:      'PERINGKAT KESIAPSIAGAAN: CUKUP (Dievakuasi Dengan Cedera Parah)',
-        gradeColor: 'var(--warning-yellow-border)',
       },
       ending_stranded_bad: {
-        title:      'ENDING BURUK: TERDAMPAR TANPA HARAPAN',
+        title:      modularData?.rescueTitle || 'ENDING: TERPUTUS DARI KOMUNIKASI',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
-        grade:      'PERINGKAT KESIAPSIAGAAN: GAGAL (Keluarga Terdampar & Gugur)',
-        gradeColor: 'var(--accent-red-border)',
       },
     };
 
-    const cfg = ENDING_CONFIG[endingId];
-    if (!cfg) return;
+    const cfg = ENDING_CONFIG[endingId] || ENDING_CONFIG.ending_normal;
 
-    this.dom.endingTitle.textContent         = cfg.title;
+    this.dom.endingTitle.textContent = cfg.title;
     this.dom.endingTitle.classList.add(cfg.titleClass);
     this.dom.endingView.classList.add(cfg.bgClass);
-    this.dom.endingGradeText.textContent     = cfg.grade;
-    this.dom.endingGradeText.style.color     = cfg.gradeColor;
+
+    // Format Modular Epilogue
+    if (modularData && modularData.healthDesc) {
+      this.dom.endingDesc.innerHTML = `
+        <div class="epilogue-modular-grid">
+          <div class="epilogue-card epilogue-medical">
+            <div class="epilogue-card-header">
+              <span class="epilogue-icon">🩺</span>
+              <h4 class="epilogue-card-title">KONDISI MEDIS KELUARGA</h4>
+            </div>
+            <p class="epilogue-card-body">${modularData.healthDesc}</p>
+          </div>
+          <div class="epilogue-card epilogue-bunker">
+            <div class="epilogue-card-header">
+              <span class="epilogue-icon">🛡️</span>
+              <h4 class="epilogue-card-title">INTEGRITAS BUNKER 72</h4>
+            </div>
+            <p class="epilogue-card-body">${modularData.bunkerDesc}</p>
+          </div>
+          <div class="epilogue-card epilogue-social">
+            <div class="epilogue-card-header">
+              <span class="epilogue-icon">🤝</span>
+              <h4 class="epilogue-card-title">SOLIDARITAS & KARMA SOSIAL</h4>
+            </div>
+            <p class="epilogue-card-body">${modularData.karmaDesc}</p>
+          </div>
+          <div class="epilogue-card epilogue-family">
+            <div class="epilogue-card-header">
+              <span class="epilogue-icon">🧸</span>
+              <h4 class="epilogue-card-title">IKATAN MORAL & MAYA</h4>
+            </div>
+            <p class="epilogue-card-body">${modularData.familyDesc}</p>
+          </div>
+        </div>
+      `;
+    } else {
+      this.dom.endingDesc.textContent = endingText;
+    }
+
+    // Single Long-Scroll: Telltale-style Major Choices Recap
+    let recapContainer = document.getElementById('telltale-recap-container');
+    if (!recapContainer) {
+      recapContainer = document.createElement('div');
+      recapContainer.id = 'telltale-recap-container';
+      recapContainer.className = 'telltale-recap-container';
+      this.dom.endingDesc.parentNode.insertBefore(recapContainer, this.dom.endingDesc.nextSibling);
+    }
+
+    // Build choice cards from history matching MAJOR_DECISIONS_META
+    const historyChoiceIds = new Set(history.map(h => h.choiceId).filter(Boolean));
+    const majorCardsHtml = MAJOR_DECISIONS_META.map((meta) => {
+      let chosenKey = null;
+      for (const [cId] of Object.entries(meta.choiceMap)) {
+        if (historyChoiceIds.has(cId)) {
+          chosenKey = cId;
+          break;
+        }
+      }
+      if (!chosenKey) return '';
+
+      const decision = meta.choiceMap[chosenKey];
+      const karmaBadgeClass = decision.karma === 'positive' ? 'badge-karma-pos' : (decision.karma === 'negative' ? 'badge-karma-neg' : 'badge-karma-neu');
+      const karmaText = decision.karma === 'positive' ? 'KARMA POSITIF' : (decision.karma === 'negative' ? 'BERISIKO' : 'NETRAL');
+
+      return `
+        <div class="recap-decision-card">
+          <div class="recap-card-top">
+            <span class="recap-decision-title">${meta.title}</span>
+            <span class="recap-karma-badge ${karmaBadgeClass}">${karmaText}</span>
+          </div>
+          <div class="recap-chosen-label">Pilihan Anda: <strong>${decision.label}</strong></div>
+          <div class="recap-chosen-outcome">${decision.outcome}</div>
+        </div>
+      `;
+    }).filter(Boolean).join('');
+
+    if (majorCardsHtml) {
+      recapContainer.innerHTML = `
+        <div class="telltale-recap-section">
+          <h3 class="recap-section-header">PILIHAN-PILIHAN KRUSIAL ANDA</h3>
+          <div class="recap-cards-grid">${majorCardsHtml}</div>
+        </div>
+      `;
+    } else {
+      recapContainer.innerHTML = '';
+    }
+
+    // Single Long-Scroll: BNPB Disaster Mitigation Scorecard
+    const statsContainer = this.dom.endingStats;
+    if (statsContainer) {
+      statsContainer.innerHTML = `
+        <div class="bnpb-scorecard-box">
+          <div class="bnpb-scorecard-header">
+            <div class="bnpb-grade-pill grade-${grade.badge.split(' ')[1].toLowerCase()}">${grade.badge}</div>
+            <div class="bnpb-score-title-group">
+              <h3 class="bnpb-grade-label">${grade.label}</h3>
+              <div class="bnpb-score-val">Skor Mitigasi Bencana: <strong>${score}</strong> / 100</div>
+            </div>
+          </div>
+          <p class="bnpb-grade-explanation">${grade.desc}</p>
+        </div>
+      `;
+    }
 
     // Dynamic debrief list generation based on flag history
     const debriefList = document.getElementById('debrief-list');

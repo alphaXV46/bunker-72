@@ -101,6 +101,14 @@ export class StoryEngine {
     }
 
     // Resolve logic-trigger pseudo-scenes before doing anything else.
+    if (sceneId === 'ending_eval') {
+      if (this.model.flags.radio_saved) {
+        this.renderScene('ending_eval_rescued');
+      } else {
+        this.renderScene('day4_intro');
+      }
+      return;
+    }
     if (sceneId === 'trigger_ending_eval') {
       this.renderScene(this.model.evaluateEnding());
       return;
@@ -205,11 +213,12 @@ export class StoryEngine {
       this.view.openJournal();
 
       if (this.onEnd) {
+        const modular = this.model.evaluateModularEnding();
         let endingText = scene.text;
         if (sceneId === 'ending_secret_bad') {
           endingText = this.model.getSecretBadEndingText();
         }
-        this.onEnd(sceneId, this.model.knowledge, endingText, this.model.getEndingSummary(), this.model.flags, this.model.history);
+        this.onEnd(sceneId, modular.bnpbScore, endingText, this.model.getEndingSummary(), this.model.flags, this.model.history, modular);
       }
       return;
     }
@@ -394,6 +403,63 @@ export class StoryEngine {
     }
     if (choice.id === 'c_prolog_pack_toy') {
       this.model.setFlag('toy_packed');
+    }
+
+    // Trigger Telltale notification banner if choice declares telltaleNotice
+    if (choice.telltaleNotice) {
+      this.view.showTelltaleToast(choice.telltaleNotice);
+    }
+
+    // Day 1 Maya comfort dilemmata
+    if (choice.id === 'c_day1_maya_light') {
+      this.model.setFlag('maya_comforted');
+    }
+    if (choice.id === 'c_day1_maya_toy') {
+      this.model.setFlag('maya_comforted');
+      this.model.setFlag('toy_bonded');
+    }
+    if (choice.id === 'c_day1_maya_strict') {
+      this.model.setFlag('maya_sad');
+    }
+
+    // Day 2 Outside Stranger dilemmata
+    if (choice.id === 'c_day2_stranger_airlock') {
+      this.model.setFlag('helped_stranger');
+      if (this.model.inventory.drink > 0) {
+        this.model.addInventoryItem('drink', -1);
+      }
+    }
+    if (choice.id === 'c_day2_stranger_intercom') {
+      this.model.setFlag('stranger_guided');
+    }
+    if (choice.id === 'c_day2_stranger_harsh') {
+      this.model.setFlag('stranger_hostile');
+    }
+
+    // Day 4 Surface Scavenge dilemmata
+    if (choice.id === 'c_day4_scavenge_cooperate') {
+      this.model.addInventoryItem('food', 2);
+      this.model.addInventoryItem('drink', 2);
+      this.model.setFlag('helped_stranger');
+      this.model.setFlag('scavenge_success');
+    }
+    if (choice.id === 'c_day4_scavenge_cautious') {
+      this.model.addInventoryItem('food', 1);
+      this.model.addInventoryItem('drink', 1);
+      this.model.setFlag('scavenge_success');
+    }
+    if (choice.id === 'c_day4_scavenge_reckless') {
+      this.model.addInventoryItem('food', 3);
+      this.model.addInventoryItem('drink', 2);
+      this.model.modifyHealth(-25);
+      this.model.setFlag('scavenge_injured');
+      this.model.setFlag('looters_hostile');
+    }
+    if (choice.id === 'c_day4_looters_shock') {
+      this.model.setFlag('looters_repelled');
+    }
+    if (choice.id === 'c_day4_looters_intercom') {
+      this.model.setFlag('looters_repelled');
     }
 
     const prevHealth = this.model.health;

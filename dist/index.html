@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-CkGPWmcf.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BAueMbSA.css">
+  <script type="module" crossorigin src="/assets/index-BOVvmdtp.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-8TQ3htdc.css">
 </head>
 <body>
   <main id="game-container">
@@ -70,12 +70,24 @@
       </div>
     </section>
 
-    <!-- Tombol Pengaturan -->
-    <button id="settings-btn" class="settings-tactical-btn" aria-label="Pengaturan Sistem" title="Pengaturan Sistem">
-      <svg class="gear-pixel-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+    <!-- Tombol Taktis Header (Fullscreen & Pengaturan) -->
+    <button id="fullscreen-btn" class="tactical-header-btn fullscreen-tactical-btn" aria-label="Mode Layar Penuh (F)" title="Layar Penuh (F)">
+      <svg class="fullscreen-icon expand-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M3 3h7v2H5v5H3V3zm18 0v7h-2V5h-5V3h7zm0 18h-7v-2h5v-5h2v7zM3 21v-7h2v5h5v2H3z" />
+      </svg>
+      <svg class="fullscreen-icon compress-icon hidden" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M5 8h5V3H8v3H3v2h2zm11-5v5h5V6h-3V3h-2zm3 13h-5v5h2v-3h3v-2zM8 16H3v2h3v3h2v-5z" />
+      </svg>
+    </button>
+
+    <button id="settings-btn" class="tactical-header-btn settings-tactical-btn" aria-label="Pengaturan Sistem" title="Pengaturan Sistem">
+      <svg class="gear-pixel-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
         <path d="M10.2 1h3.6l.6 2.6 1.8.8 2.2-1.6 2.5 2.5-1.6 2.2.8 1.8 2.6.6v3.6l-2.6.6-.8 1.8 1.6 2.2-2.5 2.5-2.2-1.6-1.8.8-.6 2.6h-3.6l-.6-2.6-1.8-.8-2.2 1.6-2.5-2.5 1.6-2.2-.8-1.8-2.6-.6v-3.6l2.6-.6.8-1.8-1.6-2.2 2.5-2.5 2.2 1.6 1.8-.8z M12 6.8a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4z M12 9.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z" />
       </svg>
     </button>
+
+    <!-- Telltale-style Notification Toast Container -->
+    <div id="telltale-toast-container" class="telltale-toast-container" aria-live="polite"></div>
 
     <section id="game-view" class="view-screen">
       <!-- Bunker Entry Maintenance Console Minigame Container -->
@@ -311,6 +323,15 @@
             <span class="settings-label">EFEK VISUAL CRT:</span>
             <label class="crt-toggle-wrapper">
               <input type="checkbox" id="crt-toggle" checked>
+              <span class="crt-toggle-custom"></span>
+            </label>
+          </div>
+
+          <!-- Fullscreen Toggle Row -->
+          <div class="settings-option-row">
+            <span class="settings-label">MODE LAYAR PENUH (F):</span>
+            <label class="crt-toggle-wrapper">
+              <input type="checkbox" id="fullscreen-toggle">
               <span class="crt-toggle-custom"></span>
             </label>
           </div>
