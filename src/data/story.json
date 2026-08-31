@@ -1756,7 +1756,7 @@
     "ending_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Tim evakuasi mendobrak pintu baja yang rusak dengan peralatan hidrolik berat. 'Cepat, pasang ventilator darurat! Detak jantung mereka sangat lemah!' jerit petugas medis saat menemukan kami terkapar di lantai yang lembab dan berbau asam menyengat. Ayah memegang jemari anak kami dengan sisa tenaga yang nyaris habis, matanya menatap hampa ke langit-langit bunker. Kegagalan menambal retakan gas dan kontaminasi air telah merusak organ pernapasan kami secara mendalam. Diangkut keluar di atas tandu dengan masker oksigen menutup wajah, kami menatap langit kelabu yang suram—menyadari bahwa meski selamat dari bunker, kehidupan kami tidak akan pernah sama lagi.",
+      "text": "Bor pneumatik tim penyelamat akhirnya berhasil menembus pengunci darurat pada jam ke-74. Ketika pelat baja seberat setengah ton itu terangkat, tidak ada suara batuk, tidak ada erangan minta tolong, dan tidak ada tangan yang terulur menyambut udara pagi. Hanya ada hembusan udara dingin yang berbau logam mati dan belerang yang telah lama mengendap. Lampu sorot petugas berhenti di sudut terjauh ruangan—ketiga tubuh itu masih saling merangkul erat dalam kepasrahan terakhir. Di lantai debu, mobil-mobilan merah tergeletak diam. 'Posko Utama...' lapor komandan SAR dengan suara tercekat di radio, '...Shelter bawah tanah selesai digeledah. Tidak ada yang selamat.' Bunker 72 kini menjadi makam abadi di bawah pekatnya abu vulkanik Krakatau.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1764,15 +1764,23 @@
     "ending_normal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sorot lampu senter tim evakuasi menembus kabut tipis di dalam koridor. 'Bawa tandu ke sini!' teriak petugas medis saat menemukan keluarga kami terduduk lemas di dekat pilar tengah. Ibu terbatuk pelan, menyandarkan kepalanya yang pusing di pundak Ayah. Udara ruangan masih menyisakan perih belerang yang sempat meracuni tenggorokan kami selama berhari-hari. 'Kita berhasil keluar, Rin...' bisik Ayah dengan suara serak yang nyaris hilang. Dehidrasi dan luka trauma yang kami tanggung adalah harga mahal dari beberapa keputusan panik di bawah tanah. Meski akhirnya melangkah keluar menuju ambulans, rasa perih di dada dan dinginnya dinding bunker akan menjadi bayang-bayang yang membekas lama di ingatan kami.",
+      "text": "Sorot lampu senter tim evakuasi menembus koridor bawah tanah. Keluarga kami berhasil keluar hidup-hidup setelah 72 jam terkurung di dalam shelter. Namun ketika kami melangkah ke atas tandu di tengah posko pengungsian yang riuh, suasana terasa begitu dingin dan hampa. Ayah menunduk dalam keheningan, teringat bagaimana pintu palka ditutup rapat tanpa ampun saat seorang penyintas menangis memohon seteguk air di hari kedua. Maya memeluk Ayah dengan tatapan bingung dan murung: \"Ayah... bapak yang kemarin menangis minta tolong di pintu palka kita... dia ke mana?\" Ayah terdiam, lidahnya kelu tak sanggup menjawab. Kami selamat secara fisik... tetapi nurani kemanusiaan kami telah tertinggal selamanya di dalam kegelapan bunker.",
       "background": "rusak",
+      "hour": "72 Jam",
+      "choices": []
+    },
+    "ending_good": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja terbongkar keluar, membanjiri koridor bawah tanah dengan sinar keemasan fajar pesisir Selat Sunda. Di antara petugas SAR berseragam oranye, tampak sosok yang sangat kami kenal—Hendra, penyintas yang dulu kami bantu dengan sebotol air dan masker melalui kotak airlock! Dengan mata berkaca-kaca, Hendra berseru: \"Pak Aris! Ibu! Saya yang memandu tim SAR ke pipa ventilasi bunker bapak! Kebaikan bapak dan ibu di hari kedua telah menyelamatkan nyawa saya, dan hari ini saya bersumpah membawa bantuan untuk keluarga bapak!\" Maya tertawa riang memeluk mobil-mobilan merahnya, menatap Ayah dan Ibu dengan senyuman paling bangga: \"Ayah pahlawan kita!\" Di tengah kiamat letusan Krakatau, kebaikan yang tulus ternyata menjadi cahaya penuntun yang menyelamatkan hidup kami.",
+      "background": "normal",
       "hour": "72 Jam",
       "choices": []
     },
     "ending_best": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja yang melengkung terbongkar keluar, dan bersamaan dengan itu, cahaya matahari pagi pesisir Selat Sunda menyembur masuk bagai pedang perak—menyilaukan mata setelah tiga hari terkurung dalam gulita. Udara laut yang segar dan bersih menyapu bau belerang yang membusuk di sudut ruangan. Petugas berseragam hazmat melompat turun dan mengangkat tubuh Anak yang terlelap tenang ke atas tandu. Mobil-mobilan merahnya masih berada di dalam dekapan jemari kecilnya. Ayah terbatuk parau saat oksigen murni dari masker tim medis menyentuh paru-parunya. Dengan tubuh yang gemetar hebat, ia membuka mata dan melihat tangan Ibu yang lemah terulur dari selimut termal di atas tandu sebelah, jemarinya bergerak perlahan mencari genggamannya. Kedisiplinan menjaga sirkulasi udara, menghemat baterai radio, dan keteguhan melindungi pintu telah membayar lunas setiap rasa takut. Mereka melangkah keluar menuju kendaraan evakuasi, meninggalkan bunker bawah tanah sebagai saksi abadi ketangguhan sebuah keluarga.",
+      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja terbongkar keluar, membanjiri koridor bawah tanah dengan sinar keemasan fajar pesisir Selat Sunda. Di antara petugas SAR berseragam oranye, tampak sosok yang sangat kami kenal—Hendra, penyintas yang dulu kami bantu dengan sebotol air dan masker melalui kotak airlock! Dengan mata berkaca-kaca, Hendra berseru: \"Pak Aris! Ibu! Saya yang memandu tim SAR ke pipa ventilasi bunker bapak! Kebaikan bapak dan ibu di hari kedua telah menyelamatkan nyawa saya, dan hari ini saya bersumpah membawa bantuan untuk keluarga bapak!\" Maya tertawa riang memeluk mobil-mobilan merahnya, menatap Ayah dan Ibu dengan senyuman paling bangga: \"Ayah pahlawan kita!\" Di tengah kiamat letusan Krakatau, kebaikan yang tulus ternyata menjadi cahaya penuntun yang menyelamatkan hidup kami.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []

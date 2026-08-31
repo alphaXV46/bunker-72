@@ -12,6 +12,7 @@
 export const ENDING_IDS = Object.freeze([
   'ending_bad',
   'ending_normal',
+  'ending_good',
   'ending_best',
   'ending_fatal',
   'ending_secret_best',

@@ -22,17 +22,19 @@ The gameplay revolves around a deterministic 4-day (96-hour) survival loop:
 ```
 
 ### 2.1 Survival Mechanics & Progression
+*   **Dokumen Acuan Utama:** [GDD Lengkap Definitif](file:///c:/laragon/www/bunker%2072/docs/GDD_Bunker_72_Lengkap.md) & [GDD Singkat](file:///c:/laragon/www/bunker%2072/docs/GDD_Bunker_72_Singkat.md).
 *   **Time Blocks:** The story progresses in chunks of **6 hours** per major decision.
 *   **Time Phases:** Hours correspond to specific day/night cycles:
     *   `00:00 - 06:00` (PAGI / Morning)
     *   `06:00 - 12:00` (SIANG / Afternoon)
     *   `12:00 - 18:00` (SORE / Evening)
     *   `18:00 - 00:00` (MALAM / Night)
-*   **Stat Decay Calculations:**
-    *   **Hunger Decay:** `-14` points per 6-hour interval.
-    *   **Thirst Decay:** `-14` points per 6-hour interval.
-    *   **Health Penalty (Hunger):** If hunger reaches `0`, health decays by `-10` points per interval.
-    *   **Health Penalty (Thirst):** If thirst reaches `0`, health decays by `-15` points per interval.
+*   **Stat Decay Calculations (`src/js/constants.js`):**
+    *   **Hunger Decay:** `-6` points per 6-hour interval (+3 penalty if air leak).
+    *   **Thirst Decay:** `-7` points per 6-hour interval (+3 penalty if structural damage).
+    *   **Health Penalty (Hunger):** If hunger reaches `0`, health decays by `-3` points per interval.
+    *   **Health Penalty (Thirst):** If thirst reaches `0`, health decays by `-5` points per interval.
+    *   **Health-Zero Instant Death:** If health drops to `0`, instant game over to `ending_fatal`.
 *   **Resource Consumption:**
     *   **Food:** Restores `+30` Hunger (uses 1 Food).
     *   **Drink:** Restores `+30` Thirst (uses 1 Drink).

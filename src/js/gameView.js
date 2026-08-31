@@ -14,13 +14,19 @@ import { ScavengerMinigame } from './scavengerMinigame.js';
 
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
-  ayah:      new URL('../assets/avatar_ayah.png',      import.meta.url).href,
-  ibu:       new URL('../assets/avatar_ibu.png',       import.meta.url).href,
-  anak:      new URL('../assets/avatar_anak.png',      import.meta.url).href,
-  narrator:  new URL('../assets/avatar_narrator.png',  import.meta.url).href,
-  penyintas: new URL('../assets/avatar_penyintas.png', import.meta.url).href,
-  penjarah:  new URL('../assets/avatar_penjarah.png',  import.meta.url).href,
-  sar:       new URL('../assets/avatar_sar.png',       import.meta.url).href,
+  ayah:        new URL('../assets/avatars/ayah/ayah_serius.png', import.meta.url).href,
+  ayah_serius: new URL('../assets/avatars/ayah/ayah_serius.png', import.meta.url).href,
+  ayah_senyum: new URL('../assets/avatars/ayah/ayah_senyum.png', import.meta.url).href,
+  ayah_cemas:  new URL('../assets/avatars/ayah/ayah_cemas.png',  import.meta.url).href,
+  ibu:         new URL('../assets/avatars/ibu/ibu_serius.png', import.meta.url).href,
+  ibu_serius:  new URL('../assets/avatars/ibu/ibu_serius.png', import.meta.url).href,
+  ibu_senyum:  new URL('../assets/avatars/ibu/ibu_senyum.png', import.meta.url).href,
+  ibu_cemas:   new URL('../assets/avatars/ibu/ibu_cemas.png',  import.meta.url).href,
+  anak:        new URL('../assets/avatar_anak.png',      import.meta.url).href,
+  narrator:    new URL('../assets/avatar_narrator.png',  import.meta.url).href,
+  penyintas:   new URL('../assets/avatar_penyintas.png', import.meta.url).href,
+  penjarah:    new URL('../assets/avatar_penjarah.png',  import.meta.url).href,
+  sar:         new URL('../assets/avatar_sar.png',       import.meta.url).href,
 };
 
 const PACKING_ITEMS = {
@@ -624,8 +630,12 @@ export class GameView {
    */
   renderSpeaker(scene) {
     const avatarKey   = scene.avatar || 'narrator';
-    const avatarUrl   = AVATARS[avatarKey];
-    const speakerClass = ['ayah', 'ibu', 'anak', 'penyintas', 'penjarah', 'sar'].includes(avatarKey) ? `speaker-${avatarKey}` : 'speaker-narrator';
+    const avatarUrl   = AVATARS[avatarKey] || (avatarKey.startsWith('ayah') ? AVATARS.ayah : AVATARS.narrator);
+    const baseSpeaker = avatarKey.startsWith('ayah') ? 'ayah'
+      : avatarKey.startsWith('ibu') ? 'ibu'
+      : avatarKey.startsWith('anak') ? 'anak'
+      : avatarKey;
+    const speakerClass = ['ayah', 'ibu', 'anak', 'penyintas', 'penjarah', 'sar'].includes(baseSpeaker) ? `speaker-${baseSpeaker}` : 'speaker-narrator';
 
     this.dom.speakerName.textContent = scene.speaker;
     this.dom.storyBox.classList.remove('speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'speaker-penyintas', 'speaker-penjarah', 'speaker-sar');
@@ -993,42 +1003,47 @@ export class GameView {
 
     const ENDING_CONFIG = {
       ending_bad: {
-        title:      modularData?.rescueTitle || 'ENDING: PENYELAMATAN DARURAT KRITIS (72 JAM)',
+        title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TRAGEDI DI PERUT BUMI)',
         titleClass: 'ending-bad',
-        bgClass:    'ending-bg-bad',
+        bgClass:    'ending-bg-fatal',
       },
       ending_normal: {
-        title:      modularData?.rescueTitle || 'ENDING: BERTAHAN HIDUP DENGAN LUKA (72 JAM)',
+        title:      modularData?.rescueTitle || 'ENDING: SELAMAT SENDIRIAN (HARGA SEBUAH EGOISME)',
         titleClass: 'ending-normal',
         bgClass:    'ending-bg-normal',
       },
+      ending_good: {
+        title:      modularData?.rescueTitle || 'SPECIAL ENDING: KEBAIKAN BERBALAS (CAHAYA KEMANUSIAAN)',
+        titleClass: 'ending-best',
+        bgClass:    'ending-bg-best',
+      },
       ending_best: {
-        title:      modularData?.rescueTitle || 'ENDING TERBAIK: PENYELAMATAN SEMPURNA (72 JAM)',
+        title:      modularData?.rescueTitle || 'SPECIAL ENDING: KEBAIKAN BERBALAS (CAHAYA KEMANUSIAAN)',
         titleClass: 'ending-best',
         bgClass:    'ending-bg-best',
       },
       ending_fatal: {
-        title:      modularData?.rescueTitle || 'ENDING FATAL: MAKAM BUNKER 72',
+        title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TRAGEDI DI PERUT BUMI)',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
       },
       ending_secret_best: {
-        title:      modularData?.rescueTitle || 'ENDING RAHASIA: PENYELAMATAN 96 JAM',
+        title:      modularData?.rescueTitle || 'SPECIAL ENDING: KEBAIKAN BERBALAS (CAHAYA KEMANUSIAAN)',
         titleClass: 'ending-best',
         bgClass:    'ending-bg-best',
       },
       ending_secret_bad: {
-        title:      modularData?.rescueTitle || 'ENDING RAHASIA: GUGUR DI GARIS AKHIR (96 JAM)',
+        title:      modularData?.rescueTitle || 'ENDING: GUGUR DI GARIS AKHIR',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
       },
       ending_near_miss: {
-        title:      modularData?.rescueTitle || 'ENDING NYARIS: PENYELAMATAN KRITIS',
+        title:      modularData?.rescueTitle || 'ENDING: BERTAHAN HIDUP DENGAN LUKA',
         titleClass: 'ending-normal',
         bgClass:    'ending-bg-normal',
       },
       ending_stranded_bad: {
-        title:      modularData?.rescueTitle || 'ENDING: TERPUTUS DARI KOMUNIKASI',
+        title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TERPUTUS KOMUNIKASI)',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
       },

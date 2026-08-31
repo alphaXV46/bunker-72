@@ -1,0 +1,225 @@
+/* ============================================================
+   radio-tuner.css — Radio Tuning Mini-Game Modal
+   Triggered from inventory to tune BNPB emergency broadcast signal.
+   ============================================================ */
+
+.radio-modal-content {
+  width: min(92%, 520px);
+  background: linear-gradient(180deg, rgba(14, 18, 23, 0.98), rgba(8, 10, 14, 0.99));
+  border: 2px solid var(--warning-yellow-border);
+  box-shadow: 0 0 35px rgba(255, 209, 102, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: clamp(16px, 2.5vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.radio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(114, 128, 138, 0.3);
+  padding-bottom: 8px;
+}
+
+.radio-display-panel {
+  background: rgba(5, 7, 9, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-freq-readout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.radio-freq-readout .readout-label {
+  color: #a8b2ba;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.radio-freq-readout .freq-value {
+  font-family: 'VT323', monospace;
+  font-size: 2.2rem;
+  color: var(--warning-yellow-border);
+  text-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+}
+
+.radio-meter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meter-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-family: 'Share Tech Mono', monospace;
+  color: #a8b2ba;
+}
+
+.meter-bar-shell {
+  width: 100%;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--cyan);
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+.meter-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-red), var(--warning-yellow-border), var(--accent-green-border));
+  transition: width 0.1s ease-out;
+}
+
+.radio-indicator-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #a8b2ba;
+}
+
+.radio-control-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Rotary Knob Dial ── */
+.knob-control-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 6px 0;
+}
+
+.knob-side-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--warning-yellow-border);
+  letter-spacing: 1px;
+}
+
+.radio-knob-container {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-rotary-knob {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a4856 0%, #151d26 70%, #0a0d12 100%);
+  border: 3px solid var(--cyan);
+  box-shadow: 0 0 18px rgba(91, 192, 190, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  cursor: grab;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.radio-rotary-knob:active {
+  cursor: grabbing;
+  border-color: var(--warning-yellow-border);
+  box-shadow: 0 0 22px rgba(255, 209, 102, 0.5);
+}
+
+.knob-cap {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #202a35 0%, #10161d 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.knob-dot {
+  position: absolute;
+  top: 8px;
+  width: 6px;
+  height: 16px;
+  background: var(--warning-yellow-border);
+  border-radius: 3px;
+  box-shadow: 0 0 8px var(--warning-yellow-border);
+  transform-origin: 50% 27px;
+  transition: transform 0.05s linear;
+}
+
+.slider-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  color: #a8b2ba;
+  letter-spacing: 1px;
+}
+
+.radio-slider {
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: #1a222a;
+  outline: none;
+  border: 1px solid var(--cyan);
+  cursor: pointer;
+}
+
+.radio-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--warning-yellow-border);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 209, 102, 0.8);
+}
+
+.lock-signal-btn {
+  width: 100%;
+  padding: 10px;
+  letter-spacing: 2px;
+}
+
+.radio-broadcast-box {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(91, 192, 190, 0.4);
+  padding: 10px 14px;
+  min-height: 54px;
+  border-radius: 4px;
+}
+
+.radio-broadcast-box p {
+  margin: 0;
+  font-family: 'VT323', monospace;
+  font-size: 1.25rem;
+  color: #d1d8de;
+  line-height: 1.2;
+}
+
+.radio-broadcast-box.broadcast-active p {
+  color: #fff2cc;
+  text-shadow: 0 0 8px rgba(255, 209, 102, 0.4);
+}

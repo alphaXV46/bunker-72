@@ -13,6 +13,8 @@ Koleksi Custom Skills untuk **Antigravity** yang dirancang untuk membangun dan m
 | **`vn-state-manager`** | [`.agents/skills/vn-state-manager/SKILL.md`](./vn-state-manager/SKILL.md) | Systems Architect & State Engineer | Manajemen state/flags, survival decay math, inventaris, serialize save/load, persistent unlocks, MVC integrity. |
 | **`vn-ui-styling`** | [`.agents/skills/vn-ui-styling/SKILL.md`](./vn-ui-styling/SKILL.md) | UI/UX Designer & Frontend Stylist | Styling retro-terminal CRT, tata letak 16:9 responsive, typewriter cursor, tombol pilihan, HUD survival. |
 | **`vn-asset-pipeline`** | [`.agents/skills/vn-asset-pipeline/SKILL.md`](./vn-asset-pipeline/SKILL.md) | Technical Artist & Asset Specialist | Standar resolusi 16:9 & 1:1, pixel-art rendering, kompresi WebP/OGG, preloading manifest & fallbacks. |
+| **`sequential-thinking`** | [`.agents/skills/sequential-thinking/SKILL.md`](./sequential-thinking/SKILL.md) | Cognitive Architect & Deep Reasoner | Pemecahan masalah bertahap via MCP Sequential Thinking, pengujian hipotesis, backtracking logika, verifikasi state & collision. |
+| **`code-refactorer`** | [`.agents/skills/code-refactorer/SKILL.md`](./code-refactorer/SKILL.md) | Principal Software Architect & Refactoring Specialist | Pemetaan ketergantungan antar-file (call graph), eliminasi dead code, optimasi performa runtime, pemisahan modular tanpa merusak fungsionalitas. |
 
 ---
 

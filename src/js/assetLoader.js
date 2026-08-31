@@ -5,7 +5,13 @@
 
 import avatarAnak from '../assets/avatar_anak.png';
 import avatarAyah from '../assets/avatar_ayah.png';
+import avatarAyahSerius from '../assets/avatars/ayah/ayah_serius.png';
+import avatarAyahSenyum from '../assets/avatars/ayah/ayah_senyum.png';
+import avatarAyahCemas from '../assets/avatars/ayah/ayah_cemas.png';
 import avatarIbu from '../assets/avatar_ibu.png';
+import avatarIbuSerius from '../assets/avatars/ibu/ibu_serius.png';
+import avatarIbuSenyum from '../assets/avatars/ibu/ibu_senyum.png';
+import avatarIbuCemas from '../assets/avatars/ibu/ibu_cemas.png';
 import avatarNarrator from '../assets/avatar_narrator.png';
 import avatarPenyintas from '../assets/avatar_penyintas.png';
 import avatarPenjarah from '../assets/avatar_penjarah.png';
@@ -57,7 +63,13 @@ const ASSET_URLS = [
   spritesheetFather,
   spritesheetMother,
   avatarAyah,
+  avatarAyahSerius,
+  avatarAyahSenyum,
+  avatarAyahCemas,
   avatarIbu,
+  avatarIbuSerius,
+  avatarIbuSenyum,
+  avatarIbuCemas,
   avatarAnak,
   avatarNarrator,
   avatarPenyintas,

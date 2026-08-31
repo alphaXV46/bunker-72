@@ -284,25 +284,25 @@ export class GameModel {
   }
 
   /**
-   * Evaluates the ending route at Hour 72.
-   * If radio is active, rescues directly at 72h.
-   * If radio failed, transitions to Day 4 as a narrative second chance.
+   * Evaluates the ending route at Hour 72 or endgame.
+   * - Bad: Health <= 0, door breached, or catastrophic failure.
+   * - Good / Special: Survived AND helped the stranger (karmic salvation).
+   * - Normal: Survived, but was selfish / ignored the stranger.
    * @returns {string} sceneId
    */
   evaluateEnding() {
     const doorOpened = this.flags.door_opened === true;
-    if (this.health <= 0 || doorOpened) return 'ending_fatal';
-
-    // If radio communication succeeded, BNPB arrives on schedule at Hour 72
-    if (this.flags.radio_saved) {
-      if (this.health >= 60 && !this.flags.water_poisoned && !this.flags.smoke_poisoned) {
-        return 'ending_best';
-      }
-      return 'ending_normal';
+    if (this.health <= 0 || doorOpened || this.flags.looters_breached) {
+      return 'ending_bad';
     }
 
-    // Radio failed or not scheduled: SAR cannot locate bunker yet -> continue to Day 4
-    return 'day4_intro';
+    // Special Good Ending requires passing the heavy moral dilemma (helping stranger)
+    if (this.flags.helped_stranger) {
+      return 'ending_good';
+    }
+
+    // Selfish / Pragmatic survival without helping stranger -> Normal Ending
+    return 'ending_normal';
   }
 
   /**
@@ -311,46 +311,36 @@ export class GameModel {
    */
   evaluateSecretEnding() {
     if (this.health <= 0 || this.flags.looters_breached) {
-      return 'ending_secret_bad';
+      return 'ending_bad';
     }
-    if (!this.flags.structural_damage && this.health >= 50) {
-      return 'ending_secret_best';
+    if (this.flags.helped_stranger) {
+      return 'ending_good';
     }
     return 'ending_normal';
   }
 
   /**
-   * Constructs a comprehensive, modular Telltale-style epilogue.
+   * Constructs a comprehensive, modular Telltale-style epilogue for the 3 endings.
    * Evaluates Rescue, Health, Bunker Integrity, Social Karma, and Family State.
    * @returns {object}
    */
   evaluateModularEnding() {
     const isFatal = this.health <= 0 || this.flags.door_opened === true || this.flags.looters_breached === true;
-    const isDay4 = this.currentSceneId.startsWith('day4_') || this.currentSceneId === 'day4_eval';
+    const helped = this.flags.helped_stranger === true;
 
-    // 1. Rescue Outcome
-    let endingId = 'ending_best';
-    let rescueBadge = 'RESCUE: EVAKUASI HELIKOPTER (72 JAM)';
-    let rescueTitle = 'Penyelamatan Sempurna Selat Sunda';
+    // 1. Rescue Outcome (3 Core Endings)
+    let endingId = 'ending_normal';
+    let rescueBadge = 'RESCUE: SELAMAT SENDIRIAN (HARGA EGOISME)';
+    let rescueTitle = 'Selamat Sendirian: Harga Sebuah Egoisme';
 
     if (isFatal) {
-      endingId = 'ending_fatal';
+      endingId = 'ending_bad';
       rescueBadge = 'STATUS: GUGUR DI DALAM BUNKER';
-      rescueTitle = 'Makam Bunker 72: Keheningan di Perut Bumi';
-    } else if (isDay4) {
-      if (this.health > 0) {
-        endingId = 'ending_secret_best';
-        rescueBadge = 'RESCUE: TIM PENYISIRAN DARAT (96 JAM)';
-        rescueTitle = 'Bertahan 96 Jam: Fajar Kemenangan Sejati';
-      } else {
-        endingId = 'ending_secret_bad';
-        rescueBadge = 'STATUS: GUGUR DI GARIS AKHIR';
-        rescueTitle = 'Tragedi 96 Jam: Kelelahan Menjelang Fajar';
-      }
-    } else if (this.health < 60 || this.flags.water_poisoned || this.flags.smoke_poisoned) {
-      endingId = 'ending_normal';
-      rescueBadge = 'RESCUE: EVAKUASI MEDIS DARURAT (72 JAM)';
-      rescueTitle = 'Bertahan Hidup dengan Luka & Trauma';
+      rescueTitle = 'Makam Bunker 72: Tragedi di Perut Bumi';
+    } else if (helped) {
+      endingId = 'ending_good';
+      rescueBadge = 'SPECIAL RESCUE: KEBAIKAN BERBALAS BUDI';
+      rescueTitle = 'Cahaya Kemanusiaan: Penyelamatan Berbalas Budi';
     }
 
     // 2. Health & Physical Condition
@@ -373,22 +363,24 @@ export class GameModel {
       bunkerDesc = 'Integritas struktur Bunker 72 berdiri utuh tanpa retakan berarti—sebuah bukti keberhasilan manajemen peredam hidrolik yang disiplin.';
     }
 
-    // 4. Social Karma & External Relationships
+    // 4. Social Karma & Moral Dilemma Resolution
     let karmaDesc = '';
-    if (this.flags.helped_stranger) {
-      karmaDesc = 'Solidaritas Anda menolong penyintas lain membuahkan berkah tak terduga; kebaikan Anda diingat dan memperkuat kerja sama di sektor pengungsian.';
+    if (helped) {
+      karmaDesc = 'Solidaritas Anda menolong Hendra di palka airlock membuahkan mukjizat nyata. Hendra memandu langsung tim SAR ke lokasi palka Bunker 72 di tengah pekatnya badai abu!';
     } else if (this.flags.stranger_hostile || this.flags.looters_hostile) {
-      karmaDesc = 'Sikap defensif yang keras meninggalkan trauma dan ketegangan di antara para penyintas di sekitar sektor pengungsian.';
+      karmaDesc = 'Pengusiran kasar terhadap penyintas luar yang memohon bantuan meninggalkan penyesalan mendalam. Anda menyelamatkan tubuh sendiri, namun mengorbankan empati kemanusiaan.';
     } else {
-      karmaDesc = 'Keluarga berhasil menjaga kerahasiaan tempat perlindungan secara disiplin tanpa memicu insiden dengan pihak luar.';
+      karmaDesc = 'Keluarga memilih bertahan secara dingin dan terisolasi tanpa memedulikan nasib penyintas lain di luar palka.';
     }
 
     // 5. Family Bond & Maya's Morale
     let familyDesc = '';
-    if (this.flags.maya_comforted || this.flags.toy_packed) {
-      familyDesc = 'Maya memeluk erat mobil-mobilan merahnya di atas tandu evakuasi, menatap hangat wajah Ayah dan Ibu dengan senyuman yang melegakan.';
+    if (helped) {
+      familyDesc = 'Maya memeluk erat mobil-mobilannya sambil tersenyum bangga menatap Ayah dan Ibu di atas tandu: "Ayah orang baik... Ayah pahlawan kita!"';
+    } else if (isFatal) {
+      familyDesc = 'Maya terlelap tenang dalam dekapan terakhir kedua orang tuanya di tengah keheningan ruang bawah tanah.';
     } else {
-      familyDesc = 'Maya meringkuk dalam dekapan Ibu, matanya masih dibayangi ketakutan akan kegelapan ruang isolasi.';
+      familyDesc = 'Maya terdiam menatap ke luar jendela ambulans dengan tatapan murung: "Ayah... orang yang kemarin menangis minta tolong di pintu palka... dia ke mana?"';
     }
 
     const narrativeFull = `${healthDesc} ${bunkerDesc} ${karmaDesc} ${familyDesc}`;
@@ -403,7 +395,7 @@ export class GameModel {
     if (this.flags.water_filtered && !this.flags.water_poisoned) bnpbScore += 15;
     if (!this.flags.air_uninspected) bnpbScore += 10;
     if (!this.flags.structural_damage) bnpbScore += 10;
-    if (this.flags.helped_stranger) bnpbScore += 5;
+    if (this.flags.helped_stranger) bnpbScore += 15;
     if (this.flags.door_opened) bnpbScore -= 40;
     if (this.flags.looters_breached) bnpbScore -= 30;
 
