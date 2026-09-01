@@ -3,47 +3,45 @@
  * and decodes image bitmaps in memory before entering gameplay for zero pop-in and silky-smooth transitions.
  */
 
-import avatarAnak from '../assets/avatar_anak.png';
-import avatarAyah from '../assets/avatar_ayah.png';
 import avatarAyahSerius from '../assets/avatars/ayah/ayah_serius.png';
 import avatarAyahSenyum from '../assets/avatars/ayah/ayah_senyum.png';
 import avatarAyahCemas from '../assets/avatars/ayah/ayah_cemas.png';
-import avatarIbu from '../assets/avatar_ibu.png';
 import avatarIbuSerius from '../assets/avatars/ibu/ibu_serius.png';
 import avatarIbuSenyum from '../assets/avatars/ibu/ibu_senyum.png';
 import avatarIbuCemas from '../assets/avatars/ibu/ibu_cemas.png';
-import avatarNarrator from '../assets/avatar_narrator.png';
-import avatarPenyintas from '../assets/avatar_penyintas.png';
-import avatarPenjarah from '../assets/avatar_penjarah.png';
-import avatarSar from '../assets/avatar_sar.png';
+import avatarAnak from '../assets/avatars/avatar_anak.png';
+import avatarNarrator from '../assets/avatars/avatar_narrator.png';
+import avatarPenyintas from '../assets/avatars/avatar_penyintas.png';
+import avatarPenjarah from '../assets/avatars/avatar_penjarah.png';
+import avatarSar from '../assets/avatars/avatar_sar.png';
 
 // Optimized WebP Backgrounds (85%+ smaller, instant GPU decode)
-import bgMenu from '../assets/bg_menu.webp';
-import bgPrologPeaceful from '../assets/bg_prolog_peaceful.webp';
-import bgPrologWindow from '../assets/bg_prolog_window.webp';
-import bgProlog1 from '../assets/bg_prolog1.webp';
-import bgProlog2 from '../assets/bg_prolog2.webp';
-import bgProlog3 from '../assets/bg_prolog3.webp';
-import bgProlog4 from '../assets/bg_prolog4.webp';
-import bgDay1 from '../assets/bg_day1.webp';
-import bgDay2 from '../assets/bg_day2.webp';
-import bgDay3 from '../assets/bg_day3.webp';
-import bgGoodEnd from '../assets/bg_good_end.webp';
-import bgBadEnd from '../assets/bg_bad_end.webp';
-import bgFatalEnd from '../assets/bg_fatal_end.webp';
+import bgMenu from '../assets/backgrounds/bg_menu.webp';
+import bgPrologPeaceful from '../assets/backgrounds/bg_prolog_peaceful.webp';
+import bgPrologWindow from '../assets/backgrounds/bg_prolog_window.webp';
+import bgProlog1 from '../assets/backgrounds/bg_prolog1.webp';
+import bgProlog2 from '../assets/backgrounds/bg_prolog2.webp';
+import bgProlog3 from '../assets/backgrounds/bg_prolog3.webp';
+import bgProlog4 from '../assets/backgrounds/bg_prolog4.webp';
+import bgDay1 from '../assets/backgrounds/bg_day1.webp';
+import bgDay2 from '../assets/backgrounds/bg_day2.webp';
+import bgDay3 from '../assets/backgrounds/bg_day3.webp';
+import bgGoodEnd from '../assets/backgrounds/bg_good_end.webp';
+import bgBadEnd from '../assets/backgrounds/bg_bad_end.webp';
+import bgFatalEnd from '../assets/backgrounds/bg_fatal_end.webp';
 
 // Minigame maps & sprites
-import scavengerMap from '../assets/scavenger_house_map.webp';
+import scavengerMap from '../assets/backgrounds/scavenger_house_map.webp';
 import spritesheetFather from '../assets/sprites/sheets/spritesheet_father.png';
 import spritesheetMother from '../assets/sprites/sheets/spritesheet_mother.png';
 
 // Items & Icons
-import carToy from '../assets/car_toy.png';
-import drinkIcon from '../assets/drink_icon.png';
-import foodIcon from '../assets/food_icon.png';
-import kitIcon from '../assets/kit_icon.png';
-import radioIcon from '../assets/radio_icon.png';
-import snacks from '../assets/snacks.png';
+import carToy from '../assets/items/car_toy.png';
+import drinkIcon from '../assets/items/drink_icon.png';
+import foodIcon from '../assets/items/food_icon.png';
+import kitIcon from '../assets/items/kit_icon.png';
+import radioIcon from '../assets/items/radio_icon.png';
+import snacks from '../assets/items/snacks.png';
 
 const ASSET_URLS = [
   bgMenu,
@@ -62,11 +60,9 @@ const ASSET_URLS = [
   scavengerMap,
   spritesheetFather,
   spritesheetMother,
-  avatarAyah,
   avatarAyahSerius,
   avatarAyahSenyum,
   avatarAyahCemas,
-  avatarIbu,
   avatarIbuSerius,
   avatarIbuSenyum,
   avatarIbuCemas,

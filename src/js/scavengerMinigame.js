@@ -9,16 +9,42 @@
 import { retroAudio } from './retroAudio.js';
 
 // Assets
-const SPRITESHEET_SRC = new URL('../assets/sprites/sheets/spritesheet_all.png', import.meta.url).href;
-const MAP_SRC = new URL('../assets/scavenger_house_map.webp', import.meta.url).href;
+const SPRITESHEET_SRC = new URL('../assets/sprites/sheets/spritesheet_father.png', import.meta.url).href;
+const MAP_SRC = new URL('../assets/backgrounds/scavenger_house_map.webp', import.meta.url).href;
 
 const ITEM_ASSETS = {
-  food:  { image: new URL('../assets/food_icon.png',  import.meta.url).href, label: 'Makanan Kaleng', desc: '+15 Makanan' },
-  drink: { image: new URL('../assets/drink_icon.png', import.meta.url).href, label: 'Air Bersih',     desc: '+15 Air' },
-  kit:   { image: new URL('../assets/kit_icon.png',   import.meta.url).href, label: 'Kotak P3K',       desc: '+10 Kesehatan' },
-  radio: { image: new URL('../assets/radio_icon.png', import.meta.url).href, label: 'Radio Portable', desc: 'Info & Sinyal SAR' },
-  snack: { image: new URL('../assets/snacks.png',     import.meta.url).href, label: 'Snack Darurat',   desc: '+5 Makanan Cepat' },
-  toy:   { image: new URL('../assets/car_toy.png',    import.meta.url).href, label: 'Mainan Anak',     desc: 'Moral Keluarga' }
+  food:  { image: new URL('../assets/items/food_icon.png',  import.meta.url).href, label: 'Makanan Kaleng', desc: '+15 Makanan' },
+  drink: { image: new URL('../assets/items/drink_icon.png', import.meta.url).href, label: 'Air Bersih',     desc: '+15 Air' },
+  kit:   { image: new URL('../assets/items/kit_icon.png',   import.meta.url).href, label: 'Kotak P3K',       desc: '+10 Kesehatan' },
+  radio: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Radio Portable', desc: 'Info & Sinyal SAR' },
+  snack: { image: new URL('../assets/items/snacks.png',     import.meta.url).href, label: 'Snack Darurat',   desc: '+5 Makanan Cepat' },
+  toy:   { image: new URL('../assets/items/car_toy.png',    import.meta.url).href, label: 'Mainan Anak',     desc: 'Moral Keluarga' }
+};
+
+// Each pose has different transparent padding inside its 256x256 cell.
+// These anchors pin the visible body center and lowest opaque foot pixel to a
+// stable world-space pivot, preventing the sprite from jumping between frames.
+const FATHER_FRAME_ANCHORS = {
+  down: [
+    { x: 168, y: 251 },
+    { x: 124.5, y: 251 },
+    { x: 77.5, y: 251 },
+  ],
+  left: [
+    { x: 169.5, y: 234 },
+    { x: 126.5, y: 234 },
+    { x: 81.5, y: 233 },
+  ],
+  right: [
+    { x: 167, y: 255 },
+    { x: 118, y: 255 },
+    { x: 77.5, y: 255 },
+  ],
+  up: [
+    { x: 168, y: 227 },
+    { x: 125, y: 226 },
+    { x: 82.5, y: 227 },
+  ],
 };
 
 export class ScavengerMinigame {
@@ -421,12 +447,11 @@ export class ScavengerMinigame {
     this.player.isMoving = (vx !== 0 || vy !== 0);
 
     if (this.player.isMoving) {
-      // Set Direction
-      if (vy > 0 && vx < 0) this.player.dir = 'front_left';
-      else if (vy > 0) this.player.dir = 'down';
+      // 4 cardinal directions (standard RPG)
+      if (vx < 0 && Math.abs(vx) >= Math.abs(vy)) this.player.dir = 'left';
+      else if (vx > 0 && Math.abs(vx) >= Math.abs(vy)) this.player.dir = 'right';
       else if (vy < 0) this.player.dir = 'up';
-      else if (vx < 0) this.player.dir = 'left';
-      else if (vx > 0) this.player.dir = 'right';
+      else if (vy > 0) this.player.dir = 'down';
 
       // Diagonal Normalization
       if (vx !== 0 && vy !== 0) {
@@ -441,17 +466,15 @@ export class ScavengerMinigame {
       if (this._canMoveTo(nextX, this.player.y)) this.player.x = nextX;
       if (this._canMoveTo(this.player.x, nextY)) this.player.y = nextY;
 
-      // Animate Walk Frames
+      // Animate 4-step walk cycle ([1, 0, 1, 2] -> Idle -> Left -> Idle -> Right)
       this.player.animTimer += dt;
       if (this.player.animTimer >= 1 / this.player.fps) {
         this.player.animTimer = 0;
-        this.player.frame = (this.player.frame + 1) % 6;
+        this.player.frame = (this.player.frame + 1) % 4;
       }
     } else {
       this.player.frame = 0;
       this.player.animTimer = 0;
-      // Reset to standby idle pose facing forward towards screen/camera
-      this.player.dir = 'down';
     }
 
     // Smooth Follow Camera Lerp
@@ -606,22 +629,29 @@ export class ScavengerMinigame {
     const p = this.player;
 
     if (this.spritesLoaded && this.spritesheet.complete) {
-      // Row Mapping in spritesheet_all.png (640x1280, 5 cols x 5 rows, each 128x256)
-      const dirMap = { down: 0, right: 1, up: 2, front_left: 3, left: 4 };
+      // Row Mapping in 3x4 spritesheet (768x1024, 3 cols x 4 rows, each 256x256)
+      // Row 0: down, Row 1: left, Row 2: right, Row 3: up
+      const dirMap = { down: 0, left: 1, right: 2, up: 3 };
       const row = dirMap[p.dir] !== undefined ? dirMap[p.dir] : 0;
-      const col = p.frame;
 
-      const sw = 128;
+      // 3-frame walk loop: [1, 0, 1, 2] -> Idle -> Left -> Idle -> Right
+      const walkFrames = [1, 0, 1, 2];
+      const col = p.isMoving ? walkFrames[p.frame % 4] : 1; // 1 is idle center standing pose
+
+      const sw = 256;
       const sh = 256;
       const sx = col * sw;
       const sy = row * sh;
 
       // Render size on canvas
       const scale = 0.38;
-      const dw = sw * scale; // ~48px
-      const dh = sh * scale; // ~96px
-      const dx = p.x - dw / 2;
-      const dy = p.y - dh + 12;
+      const dw = sw * scale; // ~97px
+      const dh = sh * scale; // ~97px
+      const frameAnchors = FATHER_FRAME_ANCHORS[p.dir] || FATHER_FRAME_ANCHORS.down;
+      const anchor = frameAnchors[col] || { x: sw / 2, y: sh - 5 };
+      const groundOffset = 16;
+      const dx = p.x - anchor.x * scale;
+      const dy = p.y + groundOffset - anchor.y * scale;
 
       // Drop shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';

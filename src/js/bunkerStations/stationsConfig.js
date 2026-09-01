@@ -9,7 +9,7 @@ export const STATIONS = {
     kicker: 'PINTU LUAR // PROTOKOL MASUK',
     name: 'OTENTIKASI KARTU AKSES',
     shortName: 'KARTU AKSES',
-    tutorial: 'Geser kartu akses dari kiri ke kanan melewati sensor pembaca palka tanpa melepasnya.',
+    tutorial: 'Tahan kartu, dorong ke atas sampai mentok, lalu lanjutkan slide ke kanan tanpa melepas dengan kecepatan sedang.',
     defaultSuccessMessage: 'KREDENSIAL 72-A DITERIMA // PINTU TERBUKA',
   },
   power: {

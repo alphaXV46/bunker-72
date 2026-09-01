@@ -1,16 +1,23 @@
 /**
  * wireStation.js — Station PATCH-04 BATERAI (Sambung Kabel Cadangan)
  *
- * Implements patch bay cable dragging, trigonometry line rendering,
- * color matching verification, and resize recalculations.
+ * A direct cable-matching task: pull one exposed lead from the left bank to
+ * its matching socket on the right. SVG paths keep each cable thick, curved,
+ * and attached to its source while it follows any pointer type.
  */
 
 import { COLORS } from './stationsConfig.js';
+
+const COLORS_IN_ORDER = ['red', 'yellow', 'blue', 'green'];
+const RIGHT_ORDER = ['blue', 'green', 'red', 'yellow'];
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export class WireStation {
   constructor() {
     this.wireConnections = {};
     this.cleanupFns = [];
+    this.resizeObserver = null;
+    this.activeDrag = null;
   }
 
   /**
@@ -25,134 +32,233 @@ export class WireStation {
     this.destroy();
     this.wireConnections = {};
 
-    const colors = ['red', 'yellow', 'blue', 'green'];
-    const rightOrder = ['blue', 'green', 'red', 'yellow'];
+    const socket = (color, side) => `
+      <button class="mg-wire-terminal mg-wire-terminal--${side} wire-${color}" type="button" data-color="${color}" aria-label="Socket ${COLORS[color].label} ${side === 'left' ? 'kabel' : 'tujuan'}">
+        <span class="mg-wire-socket" aria-hidden="true"><span></span></span>
+      </button>`;
 
     panel.innerHTML = `${introHtml}
-      <div class="mg-wire-head"><span>PATCH BAY / 04 CHANNELS</span><b id="mg-wire-count">0 / 4 TERHUBUNG</b></div>
+      <div class="mg-wire-head"><span>HUBUNGKAN WARNA</span><b id="mg-wire-count">0 / 4</b></div>
       <div class="mg-wire-board" id="mg-wire-board">
-        <div class="mg-wire-column"><span class="mg-wire-column-label">SUMBER</span>${colors.map((color) => `<button class="mg-wire-terminal mg-wire-terminal--left wire-${color}" data-color="${color}" aria-label="Terminal ${COLORS[color].label} kiri"><i></i><b>${COLORS[color].label}</b><small>OUT</small></button>`).join('')}</div>
-        <div class="mg-wire-cables" id="mg-wire-cables"></div>
-        <div class="mg-wire-column mg-wire-column--right"><span class="mg-wire-column-label">DISTRIBUSI</span>${rightOrder.map((color) => `<button class="mg-wire-terminal mg-wire-terminal--right wire-${color}" data-color="${color}" aria-label="Terminal ${COLORS[color].label} kanan"><i></i><b>${COLORS[color].label}</b><small>IN</small></button>`).join('')}</div>
-        <div class="mg-wire-harness"><span></span><span></span><span></span><span></span></div>
+        <svg class="mg-wire-cables" id="mg-wire-cables" aria-hidden="true"></svg>
+        <div class="mg-wire-column mg-wire-column--left">${COLORS_IN_ORDER.map((color) => socket(color, 'left')).join('')}</div>
+        <div class="mg-wire-column mg-wire-column--right">${RIGHT_ORDER.map((color) => socket(color, 'right')).join('')}</div>
+        <span class="mg-wire-screw mg-wire-screw--tl" aria-hidden="true"></span><span class="mg-wire-screw mg-wire-screw--tr" aria-hidden="true"></span>
+        <span class="mg-wire-screw mg-wire-screw--bl" aria-hidden="true"></span><span class="mg-wire-screw mg-wire-screw--br" aria-hidden="true"></span>
       </div>
-      <div class="mg-instruction-strip"><span class="mg-strip-icon">⌁</span><span>Tarik kabel dari terminal SUMBER menuju DISTRIBUSI dengan warna yang sama.</span><span class="mg-strip-code">PATCH-04</span></div>`;
+      <div class="mg-instruction-strip"><span class="mg-strip-icon">⌁</span><span>Tarik ujung kabel dari kiri ke socket warna yang sama di kanan.</span><span class="mg-strip-code">PATCH-04</span></div>`;
 
     const board = panel.querySelector('#mg-wire-board');
     const cableLayer = panel.querySelector('#mg-wire-cables');
     const countEl = panel.querySelector('#mg-wire-count');
     if (!board || !cableLayer || !countEl) return;
 
-    let drag = null;
+    let redrawFrame = null;
 
-    const pointFor = (element) => {
+    const makeSvg = (name) => document.createElementNS(SVG_NS, name);
+
+    const pointFor = (terminal) => {
+      const socketEl = terminal.querySelector('.mg-wire-socket') || terminal;
       const boardRect = board.getBoundingClientRect();
-      const rect = element.getBoundingClientRect();
+      const rect = socketEl.getBoundingClientRect();
       return {
         x: rect.left - boardRect.left + rect.width / 2,
         y: rect.top - boardRect.top + rect.height / 2,
       };
     };
 
-    const drawLine = (line, from, to, color) => {
+    const cablePath = (from, to) => {
       const dx = to.x - from.x;
-      const dy = to.y - from.y;
-      const length = Math.sqrt(dx * dx + dy * dy);
-      line.style.left = `${from.x}px`;
-      line.style.top = `${from.y}px`;
-      line.style.width = `${length}px`;
-      line.style.setProperty('--wire-color', COLORS[color].hex);
-      line.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+      const pull = Math.max(42, Math.min(150, Math.abs(dx) * 0.4));
+      const curve = Math.max(-38, Math.min(38, (to.y - from.y) * 0.24));
+      return `M ${from.x} ${from.y} C ${from.x + pull} ${from.y + curve}, ${to.x - pull} ${to.y - curve}, ${to.x} ${to.y}`;
     };
 
-    const redraw = () => {
-      cableLayer.querySelectorAll('.mg-wire-cable').forEach((line) => {
-        const from = board.querySelector(`[data-color="${line.dataset.color}"].mg-wire-terminal--left`);
-        const to = board.querySelector(`[data-color="${line.dataset.color}"].mg-wire-terminal--right`);
-        if (from && to) drawLine(line, pointFor(from), pointFor(to), line.dataset.color);
+    const createCable = (color, preview = false) => {
+      const group = makeSvg('g');
+      group.classList.add('mg-wire-cable');
+      if (preview) group.classList.add('mg-wire-cable--preview');
+      group.dataset.color = color;
+      group.style.setProperty('--wire-color', COLORS[color].hex);
+
+      ['shadow', 'body', 'shine'].forEach((part) => {
+        const path = makeSvg('path');
+        path.classList.add(`mg-wire-cable__${part}`);
+        group.appendChild(path);
       });
-      if (drag?.preview) drawLine(drag.preview, pointFor(drag.from), drag.pointer, drag.color);
+
+      const plug = makeSvg('circle');
+      plug.classList.add('mg-wire-cable__plug');
+      plug.setAttribute('r', '8');
+      group.appendChild(plug);
+      cableLayer.appendChild(group);
+      return group;
     };
 
-    const move = (event) => {
+    const drawCable = (cable, from, to) => {
+      const path = cablePath(from, to);
+      cable.querySelectorAll('path').forEach((part) => part.setAttribute('d', path));
+      const plug = cable.querySelector('.mg-wire-cable__plug');
+      if (plug) {
+        plug.setAttribute('cx', to.x);
+        plug.setAttribute('cy', to.y);
+      }
+    };
+
+    const resizeSvg = () => {
+      const rect = board.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      cableLayer.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      cableLayer.setAttribute('width', width);
+      cableLayer.setAttribute('height', height);
+    };
+
+    const drawConnections = () => {
+      resizeSvg();
+      Object.entries(this.wireConnections).forEach(([color, connection]) => {
+        drawCable(connection.cable, pointFor(connection.from), pointFor(connection.to));
+      });
+      if (this.activeDrag) {
+        drawCable(this.activeDrag.preview, pointFor(this.activeDrag.from), this.activeDrag.pointer);
+      }
+    };
+
+    const scheduleRedraw = () => {
+      if (redrawFrame !== null) window.cancelAnimationFrame(redrawFrame);
+      redrawFrame = window.requestAnimationFrame(() => {
+        redrawFrame = null;
+        drawConnections();
+      });
+    };
+
+    const updateCount = () => {
+      countEl.textContent = `${Object.keys(this.wireConnections).length} / ${COLORS_IN_ORDER.length}`;
+    };
+
+    const targetAt = (clientX, clientY) => Array.from(board.querySelectorAll('.mg-wire-terminal--right')).find((target) => {
+      if (target.classList.contains('is-connected')) return false;
+      const rect = target.getBoundingClientRect();
+      const padding = Math.max(14, Math.min(rect.width, rect.height) * 0.38);
+      return clientX >= rect.left - padding && clientX <= rect.right + padding
+        && clientY >= rect.top - padding && clientY <= rect.bottom + padding;
+    }) || null;
+
+    const finishDrag = (event, cancelled = false) => {
+      const drag = this.activeDrag;
       if (!drag) return;
+
+      const target = cancelled ? null : targetAt(event.clientX, event.clientY);
+      const color = drag.color;
+      const isCorrect = target?.dataset.color === color && !this.wireConnections[color];
+
+      if (drag.from.hasPointerCapture?.(drag.pointerId)) drag.from.releasePointerCapture?.(drag.pointerId);
+      drag.preview.remove();
+      drag.from.classList.remove('is-dragging');
+      board.classList.remove('is-dragging');
+      this.activeDrag = null;
+
+      if (!isCorrect) {
+        setFeedback(target ? 'WARNA TIDAK SESUAI — COBA LAGI' : 'KABEL DILEPAS — CARI SOCKET WARNA SAMA', 'error');
+        return;
+      }
+
+      const cable = createCable(color);
+      this.wireConnections[color] = { from: drag.from, to: target, cable };
+      drag.from.classList.add('is-connected');
+      target.classList.add('is-connected');
+      drawCable(cable, pointFor(drag.from), pointFor(target));
+      updateCount();
+      setFeedback(`${COLORS[color].label} TERHUBUNG`, 'success');
+
+      if (Object.keys(this.wireConnections).length === COLORS_IN_ORDER.length) {
+        onComplete('wires');
+      }
+    };
+
+    const startDrag = (event) => {
+      const terminal = event.currentTarget;
+      const color = terminal.dataset.color;
+      if (!color || this.activeDrag || this.wireConnections[color]) return;
+      if (event.button !== undefined && event.button !== 0) return;
+
+      const boardRect = board.getBoundingClientRect();
+      resizeSvg();
+      const preview = createCable(color, true);
+      this.activeDrag = {
+        color,
+        from: terminal,
+        pointerId: event.pointerId,
+        preview,
+        pointer: { x: event.clientX - boardRect.left, y: event.clientY - boardRect.top },
+      };
+      terminal.classList.add('is-dragging');
+      board.classList.add('is-dragging');
+      terminal.setPointerCapture?.(event.pointerId);
+      drawCable(preview, pointFor(terminal), this.activeDrag.pointer);
+      setFeedback(`TARIK KABEL ${COLORS[color].label}`, 'neutral');
+      event.preventDefault();
+    };
+
+    const moveDrag = (event) => {
+      const drag = this.activeDrag;
+      if (!drag || drag.pointerId !== event.pointerId) return;
       const rect = board.getBoundingClientRect();
       drag.pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-      drawLine(drag.preview, pointFor(drag.from), drag.pointer, drag.color);
+      drawCable(drag.preview, pointFor(drag.from), drag.pointer);
       event.preventDefault();
     };
 
-    const end = (event) => {
-      if (!drag) return;
-      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.mg-wire-terminal--right');
-      const color = drag.color;
-
-      if (target?.dataset.color === color && !this.wireConnections[color]) {
-        this.wireConnections[color] = target;
-        drag.preview.remove();
-        drag = null;
-
-        const left = board.querySelector(`[data-color="${color}"].mg-wire-terminal--left`);
-        const line = document.createElement('div');
-        line.className = 'mg-wire-cable';
-        line.dataset.color = color;
-        cableLayer.appendChild(line);
-
-        if (left) left.classList.add('is-connected');
-        target.classList.add('is-connected');
-        if (left) drawLine(line, pointFor(left), pointFor(target), color);
-
-        const count = Object.keys(this.wireConnections).length;
-        countEl.textContent = `${count} / 4 TERHUBUNG`;
-        setFeedback(`${COLORS[color].label} TERHUBUNG`, 'success');
-
-        if (count === colors.length) {
-          onComplete('wires');
-        }
-      } else {
-        drag.preview.remove();
-        drag = null;
-        setFeedback(target ? 'SALAH WARNA — KABEL DILEPAS' : 'KABEL TERPUTUS — COBA LAGI', 'error');
-      }
+    const endDrag = (event) => {
+      if (!this.activeDrag || this.activeDrag.pointerId !== event.pointerId) return;
+      finishDrag(event);
       event.preventDefault();
     };
 
-    const start = (event) => {
-      const terminal = event.target.closest('.mg-wire-terminal--left');
-      if (!terminal || this.wireConnections[terminal.dataset.color]) return;
-
-      const preview = document.createElement('div');
-      preview.className = 'mg-wire-cable mg-wire-cable--preview';
-      cableLayer.appendChild(preview);
-
-      drag = { color: terminal.dataset.color, from: terminal, preview, pointer: pointFor(terminal) };
-      board.setPointerCapture?.(event.pointerId);
+    const cancelDrag = (event) => {
+      if (!this.activeDrag || this.activeDrag.pointerId !== event.pointerId) return;
+      finishDrag(event, true);
       event.preventDefault();
     };
 
-    board.addEventListener('pointerdown', start);
-    board.addEventListener('pointermove', move);
-    board.addEventListener('pointerup', end);
-    board.addEventListener('pointercancel', end);
-    window.addEventListener('resize', redraw);
+    const leftTerminals = Array.from(board.querySelectorAll('.mg-wire-terminal--left'));
+    leftTerminals.forEach((terminal) => terminal.addEventListener('pointerdown', startDrag));
+    board.addEventListener('pointermove', moveDrag);
+    board.addEventListener('pointerup', endDrag);
+    board.addEventListener('pointercancel', cancelDrag);
+    window.addEventListener('resize', scheduleRedraw);
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(scheduleRedraw);
+      this.resizeObserver.observe(board);
+    }
 
     this.cleanupFns.push(() => {
-      window.removeEventListener('resize', redraw);
-      board.removeEventListener('pointerdown', start);
-      board.removeEventListener('pointermove', move);
-      board.removeEventListener('pointerup', end);
-      board.removeEventListener('pointercancel', end);
+      if (redrawFrame !== null) window.cancelAnimationFrame(redrawFrame);
+      if (this.activeDrag?.from.hasPointerCapture?.(this.activeDrag.pointerId)) {
+        this.activeDrag.from.releasePointerCapture?.(this.activeDrag.pointerId);
+      }
+      this.activeDrag?.preview.remove();
+      this.activeDrag = null;
+      this.resizeObserver?.disconnect();
+      this.resizeObserver = null;
+      window.removeEventListener('resize', scheduleRedraw);
+      leftTerminals.forEach((terminal) => terminal.removeEventListener('pointerdown', startDrag));
+      board.removeEventListener('pointermove', moveDrag);
+      board.removeEventListener('pointerup', endDrag);
+      board.removeEventListener('pointercancel', cancelDrag);
     });
 
-    window.requestAnimationFrame(redraw);
+    scheduleRedraw();
   }
 
-  /**
-   * Cleans up all event listeners, resize observer, and connection state.
-   */
+  /** Cleans up listeners, active pointer state, observer, and connections. */
   destroy() {
-    this.cleanupFns.forEach((fn) => fn());
+    this.cleanupFns.forEach((cleanup) => cleanup());
     this.cleanupFns = [];
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.activeDrag = null;
     this.wireConnections = {};
   }
 }
