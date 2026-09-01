@@ -8,7 +8,13 @@
  * Dependencies: constants.js only.
  */
 
-import { clamp, ENDING_IDS, SURVIVAL } from './constants.js';
+import { clamp, ENDING_IDS, ENDING_RULES, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
+
+const INITIAL_SCENE_ID = 'prolog_home';
+const DEFAULT_FLAGS = Object.freeze({
+  promised_maya: false,
+  radio_reward_claimed: false,
+});
 
 // ─── FLAG RECONSTRUCTION MAP ────────────────────────────────────────────────
 // Maps stable Choice IDs → the boolean flags they activate.
@@ -39,17 +45,12 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day2_stranger_airlock': 'helped_stranger',
   'c_day2_stranger_intercom': 'stranger_guided',
   'c_day2_stranger_harsh': 'stranger_hostile',
-  'c_day4_scavenge_cooperate': 'scavenge_success',
-  'c_day4_scavenge_cautious': 'scavenge_success',
-  'c_day4_scavenge_reckless': 'scavenge_injured',
-  'c_day4_looters_shock': 'looters_repelled',
-  'c_day4_looters_intercom': 'looters_repelled',
-  'c_day4_looters_barter': 'looters_breached',
+  'c_prolog_anak_promise': 'promised_maya',
 });
 
 export class GameModel {
   constructor() {
-    this.currentSceneId = 'day1_start';
+    this.currentSceneId = INITIAL_SCENE_ID;
     this.knowledge     = SURVIVAL.DEFAULTS.knowledge;
     this.hunger        = SURVIVAL.DEFAULTS.hunger;
     this.thirst        = SURVIVAL.DEFAULTS.thirst;
@@ -147,16 +148,34 @@ export class GameModel {
    * @param {number}   health
    */
   init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
-    this.currentSceneId = sceneId || 'day1_start';
+    this.currentSceneId = sceneId || INITIAL_SCENE_ID;
+    this.history        = Array.isArray(history) ? history : [];
+
+    const restoredFlags = flags && typeof flags === 'object' && !Array.isArray(flags) ? flags : {};
+    this.flags = {
+      ...DEFAULT_FLAGS,
+      ...this._reconstructFlagsFromHistory(this.history),
+      ...restoredFlags,
+    };
+    if (!Object.prototype.hasOwnProperty.call(restoredFlags, 'radio_reward_claimed')) {
+      this.flags.radio_reward_claimed = this.history.some((entry) =>
+        typeof entry?.text === 'string' && entry.text.startsWith('[MINI-GAME] Radio VHF Terkunci:')
+      );
+    }
+
     this.knowledge      = (typeof knowledge === 'number' && !isNaN(knowledge)) ? clamp(knowledge, 0, SURVIVAL.KNOWLEDGE_MAX) : SURVIVAL.DEFAULTS.knowledge;
     this.hunger         = (typeof hunger    === 'number' && !isNaN(hunger))    ? clamp(hunger, 0, this.getMaxStat('hunger'))    : SURVIVAL.DEFAULTS.hunger;
     this.thirst         = (typeof thirst    === 'number' && !isNaN(thirst))    ? clamp(thirst, 0, this.getMaxStat('thirst'))    : SURVIVAL.DEFAULTS.thirst;
     this.health         = (typeof health    === 'number' && !isNaN(health))    ? clamp(health, 0, this.getMaxStat('health'))    : SURVIVAL.DEFAULTS.health;
-    this.history        = Array.isArray(history) ? history : [];
-    this.inventory      = inventory ? { ...inventory } : { ...SURVIVAL.DEFAULTS.inventory };
-
-    // Use provided flags directly, or reconstruct them from history via Choice IDs.
-    this.flags = flags ?? this._reconstructFlagsFromHistory(this.history);
+    const restoredInventory = inventory && typeof inventory === 'object' && !Array.isArray(inventory)
+      ? inventory
+      : {};
+    this.inventory = Object.fromEntries(
+      Object.entries(SURVIVAL.DEFAULTS.inventory).map(([key, defaultValue]) => {
+        const value = restoredInventory[key];
+        return [key, typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : defaultValue];
+      })
+    );
 
     // Dynamic New Game+ progression check.
     this.flags.ng_plus = localStorage.getItem('bunker72_game_completed') === 'true';
@@ -195,7 +214,7 @@ export class GameModel {
    * @returns {boolean}
    */
   isInventoryDisabledScene(sceneId) {
-    const DISABLED_SCENES = ['ending_eval', 'day4_eval', 'trigger_ending_eval', 'trigger_secret_ending_eval', 'day3_pinch_water_resolved', 'day3_pinch_vent_inspected'];
+    const DISABLED_SCENES = ['ending_eval', 'trigger_ending_eval', 'day3_pinch_water_resolved', 'day3_pinch_vent_inspected'];
     return DISABLED_SCENES.includes(sceneId) || ENDING_IDS.includes(sceneId);
   }
 
@@ -285,37 +304,35 @@ export class GameModel {
 
   /**
    * Evaluates the ending route at Hour 72 or endgame.
-   * - Bad: Health <= 0, door breached, or catastrophic failure.
-   * - Good / Special: Survived AND helped the stranger (karmic salvation).
-   * - Normal: Survived, but was selfish / ignored the stranger.
+   * - Bad: Fatal survival state or a catastrophic breach.
+   * - Good: Preparedness, health, and critical bunker systems are sufficient.
+   * - Normal: The family survives with incomplete preparation or unstable systems.
    * @returns {string} sceneId
    */
   evaluateEnding() {
-    const doorOpened = this.flags.door_opened === true;
-    if (this.health <= 0 || doorOpened || this.flags.looters_breached) {
+    const fatalCondition = this.health <= 0
+      || this.flags.door_opened === true
+      || this.flags.looters_breached === true;
+    if (fatalCondition) {
       return 'ending_bad';
     }
 
-    // Special Good Ending requires passing the heavy moral dilemma (helping stranger)
-    if (this.flags.helped_stranger) {
+    const criticalSystemsAreStable = this.flags.radio_saved === true
+      && this.flags.water_filtered === true
+      && this.flags.water_poisoned !== true
+      && this.flags.air_uninspected !== true
+      && this.flags.smoke_poisoned !== true
+      && this.flags.power_saved === true
+      && this.flags.structural_damage !== true;
+
+    if (
+      this.knowledge >= ENDING_RULES.GOOD_PREPAREDNESS_MIN
+      && this.health >= ENDING_RULES.GOOD_HEALTH_MIN
+      && criticalSystemsAreStable
+    ) {
       return 'ending_good';
     }
 
-    // Selfish / Pragmatic survival without helping stranger -> Normal Ending
-    return 'ending_normal';
-  }
-
-  /**
-   * Evaluates the outcome of surviving to Day 4 (96 Hours).
-   * @returns {string} sceneId
-   */
-  evaluateSecretEnding() {
-    if (this.health <= 0 || this.flags.looters_breached) {
-      return 'ending_bad';
-    }
-    if (this.flags.helped_stranger) {
-      return 'ending_good';
-    }
     return 'ending_normal';
   }
 
@@ -325,22 +342,20 @@ export class GameModel {
    * @returns {object}
    */
   evaluateModularEnding() {
-    const isFatal = this.health <= 0 || this.flags.door_opened === true || this.flags.looters_breached === true;
+    const endingId = this.evaluateEnding();
+    const isFatal = endingId === 'ending_bad';
     const helped = this.flags.helped_stranger === true;
 
     // 1. Rescue Outcome (3 Core Endings)
-    let endingId = 'ending_normal';
-    let rescueBadge = 'RESCUE: SELAMAT SENDIRIAN (HARGA EGOISME)';
-    let rescueTitle = 'Selamat Sendirian: Harga Sebuah Egoisme';
+    let rescueBadge = 'RESCUE: SELAMAT DENGAN KONSEKUENSI';
+    let rescueTitle = 'Selamat dengan Kondisi Belum Stabil';
 
     if (isFatal) {
-      endingId = 'ending_bad';
       rescueBadge = 'STATUS: GUGUR DI DALAM BUNKER';
       rescueTitle = 'Makam Bunker 72: Tragedi di Perut Bumi';
-    } else if (helped) {
-      endingId = 'ending_good';
-      rescueBadge = 'SPECIAL RESCUE: KEBAIKAN BERBALAS BUDI';
-      rescueTitle = 'Cahaya Kemanusiaan: Penyelamatan Berbalas Budi';
+    } else if (endingId === 'ending_good') {
+      rescueBadge = 'RESCUE: KONDISI STABIL';
+      rescueTitle = 'Penyelamatan Stabil di Jam ke-72';
     }
 
     // 2. Health & Physical Condition
@@ -368,19 +383,19 @@ export class GameModel {
     if (helped) {
       karmaDesc = 'Solidaritas Anda menolong Hendra di palka airlock membuahkan mukjizat nyata. Hendra memandu langsung tim SAR ke lokasi palka Bunker 72 di tengah pekatnya badai abu!';
     } else if (this.flags.stranger_hostile || this.flags.looters_hostile) {
-      karmaDesc = 'Pengusiran kasar terhadap penyintas luar yang memohon bantuan meninggalkan penyesalan mendalam. Anda menyelamatkan tubuh sendiri, namun mengorbankan empati kemanusiaan.';
+      karmaDesc = 'Pengusiran kasar terhadap penyintas luar meninggalkan beban emosional bagi keluarga setelah evakuasi.';
     } else {
-      karmaDesc = 'Keluarga memilih bertahan secara dingin dan terisolasi tanpa memedulikan nasib penyintas lain di luar palka.';
+      karmaDesc = 'Keluarga memprioritaskan keselamatan bunker dan tidak membuka akses, sementara nasib Hendra tetap menjadi pertanyaan setelah evakuasi.';
     }
 
     // 5. Family Bond & Maya's Morale
     let familyDesc = '';
-    if (helped) {
-      familyDesc = 'Maya memeluk erat mobil-mobilannya sambil tersenyum bangga menatap Ayah dan Ibu di atas tandu: "Ayah orang baik... Ayah pahlawan kita!"';
-    } else if (isFatal) {
+    if (isFatal) {
       familyDesc = 'Maya terlelap tenang dalam dekapan terakhir kedua orang tuanya di tengah keheningan ruang bawah tanah.';
+    } else if (this.flags.maya_comforted || this.flags.toy_bonded) {
+      familyDesc = 'Maya tetap dekat dengan kedua orang tuanya sepanjang evakuasi; dukungan yang ia terima membantu meredakan ketakutannya.';
     } else {
-      familyDesc = 'Maya terdiam menatap ke luar jendela ambulans dengan tatapan murung: "Ayah... orang yang kemarin menangis minta tolong di pintu palka... dia ke mana?"';
+      familyDesc = 'Maya selamat, tetapi kelelahan dan ketakutan selama tiga hari meninggalkan jarak emosional yang perlu dipulihkan bersama.';
     }
 
     const narrativeFull = `${healthDesc} ${bunkerDesc} ${karmaDesc} ${familyDesc}`;
@@ -395,7 +410,6 @@ export class GameModel {
     if (this.flags.water_filtered && !this.flags.water_poisoned) bnpbScore += 15;
     if (!this.flags.air_uninspected) bnpbScore += 10;
     if (!this.flags.structural_damage) bnpbScore += 10;
-    if (this.flags.helped_stranger) bnpbScore += 15;
     if (this.flags.door_opened) bnpbScore -= 40;
     if (this.flags.looters_breached) bnpbScore -= 30;
 
@@ -419,32 +433,6 @@ export class GameModel {
   }
 
   /**
-   * Returns a dynamically constructed text describing reasons for failing Day 4.
-   * @returns {string}
-   */
-  getSecretBadEndingText() {
-    const reasons = [];
-    if (this.flags.structural_damage) {
-      reasons.push("bunker mengalami kerusakan struktural parah akibat guncangan gempa yang tidak diredam");
-    }
-    if (this.flags.oxygen_depleted) {
-      reasons.push("kegagalan fatal dalam sirkulasi oksigen darurat (membuka ventilasi luar saat udara beracun)");
-    }
-    if (this.flags.looters_breached) {
-      reasons.push("penjarah berhasil menerobos masuk ke dalam palka bunker");
-    }
-    if (this.health <= 0) {
-      reasons.push("kondisi stamina fisik keluarga yang terkuras habis hingga batas akhir");
-    }
-
-    const reasonStr = reasons.length > 0 
-      ? reasons.join(", serta ")
-      : "kelelahan fisik dan isolasi berkepanjangan di bawah tanah";
-
-    return `Gugur di Garis Akhir. Bencana melanda di jam-jam penentuan karena ${reasonStr}. Ketika regu SAR tiba di jam ke-96, Bunker 72 hanya menyisakan keheningan.`;
-  }
-
-  /**
    * Produces a human-readable summary string of the player's decision history.
    * @returns {string}
    */
@@ -462,6 +450,7 @@ export class GameModel {
    */
   toSaveData() {
     return {
+      version:   SAVE_SCHEMA_VERSION,
       sceneId:   this.currentSceneId,
       knowledge: this.knowledge,
       history:   this.history,

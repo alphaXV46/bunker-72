@@ -394,10 +394,8 @@ export class GameView {
    */
   renderHud(scene, knowledge, currentSceneId, flags, hunger = 100, thirst = 100, health = 100) {
     const hour    = parseHour(scene.hour);
-    const isDay4  = hour > 72 || currentSceneId.startsWith('day4');
-    const maxHour = isDay4 ? 96 : 72;
-    const day     = clamp(Math.floor(hour / 24) + 1, 1, 4);
-    const progress = clamp((hour / maxHour) * 100, 0, 100);
+    const day      = clamp(Math.floor(hour / 24) + 1, 1, 3);
+    const progress = clamp((hour / 72) * 100, 0, 100);
 
     this.dom.statusTime.textContent      = `${scene.hour} (${getTimePhase(hour)})`;
     this.dom.statusDay.textContent       = day;
@@ -421,7 +419,7 @@ export class GameView {
 
     // Structure status
     let structureText = 'AMAN';
-    if (currentSceneId === 'ending_secret_bad' || currentSceneId === 'ending_fatal') {
+    if (currentSceneId === 'ending_bad' || currentSceneId === 'ending_fatal') {
       structureText = 'RUNTUH';
     } else if (flags.structural_damage === true || scene.background === 'rusak') {
       structureText = 'RETAK';
@@ -764,14 +762,9 @@ export class GameView {
         if (hasForbidden) return;
       }
 
-      const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
-
-      // Wire up visual impact class based on knowledge effect
-      const impactClass = effect > 0 ? 'choice-good' : effect < 0 ? 'choice-risk' : 'choice-neutral';
-
       const btn       = document.createElement('button');
       btn.type        = 'button';
-      btn.className   = `choice-btn ${impactClass}`;
+      btn.className   = 'choice-btn choice-neutral';
       btn.innerHTML   = `
         <span class="choice-index">${String(renderedIndex).padStart(2, '0')}</span>
         <span class="choice-copy">${choice.text}</span>
@@ -1008,42 +1001,17 @@ export class GameView {
         bgClass:    'ending-bg-fatal',
       },
       ending_normal: {
-        title:      modularData?.rescueTitle || 'ENDING: SELAMAT SENDIRIAN (HARGA SEBUAH EGOISME)',
+        title:      modularData?.rescueTitle || 'NORMAL ENDING: SELAMAT DENGAN KONSEKUENSI',
         titleClass: 'ending-normal',
         bgClass:    'ending-bg-normal',
       },
       ending_good: {
-        title:      modularData?.rescueTitle || 'SPECIAL ENDING: KEBAIKAN BERBALAS (CAHAYA KEMANUSIAAN)',
-        titleClass: 'ending-best',
-        bgClass:    'ending-bg-best',
-      },
-      ending_best: {
-        title:      modularData?.rescueTitle || 'SPECIAL ENDING: KEBAIKAN BERBALAS (CAHAYA KEMANUSIAAN)',
+        title:      modularData?.rescueTitle || 'GOOD ENDING: PENYELAMATAN STABIL',
         titleClass: 'ending-best',
         bgClass:    'ending-bg-best',
       },
       ending_fatal: {
         title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TRAGEDI DI PERUT BUMI)',
-        titleClass: 'ending-bad',
-        bgClass:    'ending-bg-fatal',
-      },
-      ending_secret_best: {
-        title:      modularData?.rescueTitle || 'SPECIAL ENDING: KEBAIKAN BERBALAS (CAHAYA KEMANUSIAAN)',
-        titleClass: 'ending-best',
-        bgClass:    'ending-bg-best',
-      },
-      ending_secret_bad: {
-        title:      modularData?.rescueTitle || 'ENDING: GUGUR DI GARIS AKHIR',
-        titleClass: 'ending-bad',
-        bgClass:    'ending-bg-fatal',
-      },
-      ending_near_miss: {
-        title:      modularData?.rescueTitle || 'ENDING: BERTAHAN HIDUP DENGAN LUKA',
-        titleClass: 'ending-normal',
-        bgClass:    'ending-bg-normal',
-      },
-      ending_stranded_bad: {
-        title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TERPUTUS KOMUNIKASI)',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
       },

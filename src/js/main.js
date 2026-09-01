@@ -12,7 +12,7 @@
 
 import storyData from '../data/story.json';
 import { StoryEngine } from './storyEngine.js';
-import { SAVE_KEY, SURVIVAL } from './constants.js';
+import { SAVE_KEY, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
 import { preloadAssets } from './assetLoader.js';
 import { RadioMiniGame } from './radioMiniGame.js';
 
@@ -78,6 +78,68 @@ const dom = {
 
 // ─── SAVE HELPERS ────────────────────────────────────────────────────────────
 
+const INITIAL_SCENE_ID = 'prolog_home';
+const SUPPORTED_RUNTIME_SCENES = new Set([
+  'ending_eval',
+  'trigger_ending_eval',
+  'day3_pinch_water_resolved',
+  'day3_pinch_vent_inspected',
+]);
+const LEGACY_DAY4_SCENES = new Set([
+  'trigger_secret_ending_eval',
+  'ending_best',
+  'ending_secret_best',
+  'ending_secret_bad',
+  'ending_stranded_bad',
+  'ending_near_miss',
+]);
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function createFreshSave(loadNotice) {
+  return {
+    version: SAVE_SCHEMA_VERSION,
+    sceneId: INITIAL_SCENE_ID,
+    knowledge: SURVIVAL.DEFAULTS.knowledge,
+    history: [],
+    flags: {},
+    inventory: { food: 0, drink: 0, kit: 0 },
+    hunger: SURVIVAL.DEFAULTS.hunger,
+    thirst: SURVIVAL.DEFAULTS.thirst,
+    health: SURVIVAL.DEFAULTS.health,
+    loadNotice,
+  };
+}
+
+function normalizeSaveData(save) {
+  if (!isPlainObject(save)) return null;
+
+  const storedSceneId = typeof save.sceneId === 'string' ? save.sceneId : '';
+  const isLegacyDay4 = storedSceneId.startsWith('day4_') || LEGACY_DAY4_SCENES.has(storedSceneId);
+  const isValidScene = Boolean(storyData.scenes[storedSceneId]) || SUPPORTED_RUNTIME_SCENES.has(storedSceneId);
+
+  if (!isValidScene && !isLegacyDay4) {
+    return createFreshSave('Save lama menunjuk adegan yang sudah tidak tersedia. Permainan dimulai kembali dengan aman.');
+  }
+
+  return {
+    version: SAVE_SCHEMA_VERSION,
+    sceneId: isLegacyDay4 ? 'ending_eval' : storedSceneId,
+    knowledge: typeof save.knowledge === 'number' ? save.knowledge : SURVIVAL.DEFAULTS.knowledge,
+    history: Array.isArray(save.history) ? save.history : [],
+    flags: isPlainObject(save.flags) ? save.flags : null,
+    inventory: isPlainObject(save.inventory) ? save.inventory : {},
+    hunger: save.hunger,
+    thirst: save.thirst,
+    health: save.health,
+    loadNotice: isLegacyDay4
+      ? 'Save Day 4 lama dipindahkan ke evaluasi akhir jam ke-72.'
+      : null,
+  };
+}
+
 /**
  * Reads and validates a save from localStorage.
  * Enables or disables the Continue button accordingly.
@@ -87,8 +149,8 @@ function checkSaveData() {
   const raw = localStorage.getItem(SAVE_KEY);
   if (raw) {
     try {
-      const save = JSON.parse(raw);
-      if (save?.sceneId && typeof save.knowledge === 'number') {
+      const save = normalizeSaveData(JSON.parse(raw));
+      if (save) {
         dom.continueBtn.disabled = false;
         return save;
       }
@@ -206,8 +268,12 @@ async function initGame() {
       modalEl: radioModalEl,
       audio: storyEngine.audio,
       onSuccess: (broadcastText) => {
-        storyEngine.model.knowledge = Math.min(15, storyEngine.model.knowledge + 1);
-        storyEngine.view.pulseKnowledge(1);
+        const isFirstReward = storyEngine.model.flags.radio_reward_claimed !== true;
+        if (isFirstReward) {
+          storyEngine.model.modifyKnowledge(1);
+          storyEngine.model.setFlag('radio_reward_claimed');
+          storyEngine.view.pulseKnowledge(1);
+        }
         const scene = storyEngine.storyData.scenes[storyEngine.model.currentSceneId];
         if (scene) {
           storyEngine.view.renderHud(
@@ -215,13 +281,16 @@ async function initGame() {
             storyEngine.model.flags, storyEngine.model.hunger, storyEngine.model.thirst, storyEngine.model.health
           );
         }
-        storyEngine.model.history.push({
-          hour: scene?.hour ?? '--',
-          text: `[MINI-GAME] Radio VHF Terkunci: ${broadcastText}`,
-          choiceId: null,
-          effect: 1,
-        });
+        if (isFirstReward) {
+          storyEngine.model.history.push({
+            hour: scene?.hour ?? '--',
+            text: `[MINI-GAME] Radio VHF Terkunci: ${broadcastText}`,
+            choiceId: null,
+            effect: 1,
+          });
+        }
         storyEngine.view.renderProtocolLog(storyEngine.model.history);
+        storyEngine.onSave?.(storyEngine.model.toSaveData());
       },
     });
   }
@@ -279,6 +348,9 @@ async function initGame() {
       save.thirst,
       save.health,
     );
+    if (save.loadNotice) {
+      storyEngine.view.showTelltaleToast(save.loadNotice);
+    }
   });
 
   dom.restartBtn.addEventListener('click', () => {

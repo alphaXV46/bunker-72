@@ -101,20 +101,8 @@ export class StoryEngine {
     }
 
     // Resolve logic-trigger pseudo-scenes before doing anything else.
-    if (sceneId === 'ending_eval') {
-      if (this.model.flags.radio_saved) {
-        this.renderScene('ending_eval_rescued');
-      } else {
-        this.renderScene('day4_intro');
-      }
-      return;
-    }
-    if (sceneId === 'trigger_ending_eval') {
+    if (sceneId === 'ending_eval' || sceneId === 'trigger_ending_eval') {
       this.renderScene(this.model.evaluateEnding());
-      return;
-    }
-    if (sceneId === 'trigger_secret_ending_eval') {
-      this.renderScene(this.model.evaluateSecretEnding());
       return;
     }
     if (sceneId === 'trigger_scavenge_eval') {
@@ -131,8 +119,8 @@ export class StoryEngine {
       return;
     }
     if (sceneId === 'day3_pinch_vent_inspected') {
-      // Optimal choice: vent secured successfully without punishing the player.
-      this.renderScene('day3_vent_success_water_check');
+      const isFiltered = this.model.flags.water_filtered === true;
+      this.renderScene(isFiltered && !this.model.flags.water_ruined ? 'day3_water_filter' : 'day3_water_poisoned');
       return;
     }
 
@@ -157,7 +145,7 @@ export class StoryEngine {
     const elapsed    = currHour - prevHour;
     const isEnding   = ENDING_IDS.includes(sceneId);
 
-    if (elapsed > 0 && !isEnding && sceneId !== 'day1_start') {
+    if (elapsed > 0 && !isEnding) {
       this.model.updateSurvivalStats(elapsed);
       if (this._checkFatalCondition(sceneId)) return;
     }
@@ -188,7 +176,7 @@ export class StoryEngine {
       this.audio.stopRadioSound();
     }
 
-    if (scene.background === 'prolog4' || ['day2_start', 'day2_damage_check', 'day3_pinch_start', 'day4_intro'].includes(sceneId)) {
+    if (scene.background === 'prolog4' || ['day2_start', 'day2_damage_check', 'day3_pinch_start'].includes(sceneId)) {
       this.audio.playEarthquake();
     }
 
@@ -214,11 +202,7 @@ export class StoryEngine {
 
       if (this.onEnd) {
         const modular = this.model.evaluateModularEnding();
-        let endingText = scene.text;
-        if (sceneId === 'ending_secret_bad') {
-          endingText = this.model.getSecretBadEndingText();
-        }
-        this.onEnd(sceneId, modular.bnpbScore, endingText, this.model.getEndingSummary(), this.model.flags, this.model.history, modular);
+        this.onEnd(sceneId, modular.bnpbScore, scene.text, this.model.getEndingSummary(), this.model.flags, this.model.history, modular);
       }
       return;
     }
@@ -462,32 +446,6 @@ export class StoryEngine {
       this.model.setFlag('stranger_hostile');
     }
 
-    // Day 4 Surface Scavenge dilemmata
-    if (choice.id === 'c_day4_scavenge_cooperate') {
-      this.model.addInventoryItem('food', 2);
-      this.model.addInventoryItem('drink', 2);
-      this.model.setFlag('helped_stranger');
-      this.model.setFlag('scavenge_success');
-    }
-    if (choice.id === 'c_day4_scavenge_cautious') {
-      this.model.addInventoryItem('food', 1);
-      this.model.addInventoryItem('drink', 1);
-      this.model.setFlag('scavenge_success');
-    }
-    if (choice.id === 'c_day4_scavenge_reckless') {
-      this.model.addInventoryItem('food', 3);
-      this.model.addInventoryItem('drink', 2);
-      this.model.modifyHealth(-25);
-      this.model.setFlag('scavenge_injured');
-      this.model.setFlag('looters_hostile');
-    }
-    if (choice.id === 'c_day4_looters_shock') {
-      this.model.setFlag('looters_repelled');
-    }
-    if (choice.id === 'c_day4_looters_intercom') {
-      this.model.setFlag('looters_repelled');
-    }
-
     const prevHealth = this.model.health;
 
     if (choice.id === 'c_day2_air_remedy_inspect') {
@@ -534,52 +492,6 @@ export class StoryEngine {
       this.model.modifyHealth(-20);
       this.model.setFlag('smoke_poisoned');
     }
-    if (choice.id === 'c_day4_oxygen_vent') {
-      this.model.modifyHealth(-30);
-      this.model.setFlag('oxygen_depleted');
-    }
-    if (choice.id === 'c_day4_looters_barter') {
-      this.model.setFlag('looters_breached');
-    }
-
-    // Day 4 triage choices consequences
-    if (choice.id === 'c_day4_triage_food') {
-      if (this.model.inventory.food > 0) {
-        this.model.addInventoryItem('food', -1);
-        this.model.modifyHunger(30);
-        choice.log = "Mengalokasikan ransum makanan terakhir untuk memulihkan Anak.";
-      } else {
-        this.model.modifyHealth(-25);
-        choice.log = "Gagal memberikan makanan kepada Anak karena inventaris kosong (stres fisik parah).";
-      }
-    }
-    if (choice.id === 'c_day4_triage_drink') {
-      if (this.model.inventory.drink > 0) {
-        this.model.addInventoryItem('drink', -1);
-        this.model.modifyThirst(30);
-        choice.log = "Mengalokasikan persediaan air terakhir untuk memulihkan Ibu.";
-      } else {
-        this.model.modifyHealth(-25);
-        choice.log = "Gagal memberikan air kepada Ibu karena inventaris kosong (dehidrasi ekstrem).";
-      }
-    }
-    if (choice.id === 'c_day4_triage_kit') {
-      if (this.model.inventory.kit > 0) {
-        this.model.addInventoryItem('kit', -1);
-        this.model.modifyHealth(40);
-        choice.log = "Menggunakan P3K terakhir untuk merawat trauma fisik Ayah.";
-      } else {
-        this.model.modifyHealth(-25);
-        choice.log = "Gagal menggunakan P3K karena habis (kondisi fisik Ayah terus memburuk).";
-      }
-    }
-    if (choice.id === 'c_day4_triage_save') {
-      this.model.modifyHunger(-15);
-      this.model.modifyThirst(-15);
-      this.model.modifyHealth(-15);
-      choice.log = "Menyimpan seluruh sisa persediaan; seluruh keluarga mengalami penurunan stamina serentak.";
-    }
-
     // Panic-exit incurs a direct health penalty.
     if (choice.id === 'c_day2_panic_exit') {
       this.model.modifyHealth(-SURVIVAL.PANIC_HEALTH_PENALTY);
@@ -749,7 +661,7 @@ export class StoryEngine {
    * @private
    */
   _isCollapseEnding(sceneId) {
-    return sceneId === 'ending_secret_bad' || sceneId === 'ending_fatal';
+    return sceneId === 'ending_bad' || sceneId === 'ending_fatal';
   }
 
   _getPackedCount() {

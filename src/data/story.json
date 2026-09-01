@@ -50,7 +50,7 @@
           "id": "c_prolog_ibu_comfort",
           "text": "️ \"Masakanmu selalu yang terbaik, Rin. Malam ini kita santap bersama ya.\"",
           "nextSceneId": "prolog_radio_peaceful",
-          "knowledgeEffect": 1,
+          "knowledgeEffect": 0,
           "log": "Menikmati kehangatan obrolan keluarga di dapur."
         },
         {
@@ -74,14 +74,17 @@
           "id": "c_prolog_anak_promise",
           "text": "\"Pasti, Jagoan! Nanti Ayah ambil obeng kecil dan kita perbaiki sama-sama.\"",
           "nextSceneId": "prolog_radio_peaceful",
-          "knowledgeEffect": 1,
-          "log": "Menjanjikan waktu bermain dan perbaikan mainan untuk Anak."
+          "knowledgeEffect": 0,
+          "log": "Menjanjikan waktu bermain dan perbaikan mainan untuk Anak.",
+          "setFlags": [
+            "promised_maya"
+          ]
         },
         {
           "id": "c_prolog_anak_snack",
           "text": "\"Siap komandan! Ini Ayah bawakan camilan kesukaanmu dulu.\"",
           "nextSceneId": "prolog_radio_peaceful",
-          "knowledgeEffect": 1,
+          "knowledgeEffect": 0,
           "log": "Membagikan camilan sore untuk Anak."
         }
       ]
@@ -568,7 +571,7 @@
           "id": "c_day1_maya_light",
           "text": "Nyalakan lampu darurat meja berdaya rendah dan peluk Maya hingga ia merasa aman.",
           "nextSceneId": "day2_start",
-          "knowledgeEffect": 1,
+          "knowledgeEffect": 0,
           "log": "Ayah menyalakan lampu darurat kecil dan mendekap Maya hingga tenang.",
           "telltaleNotice": "[MAYA AKAN MENGINGAT INI: Rasa aman keluarga pulih]"
         },
@@ -576,7 +579,7 @@
           "id": "c_day1_maya_toy",
           "text": "Raih mobil-mobilan merahnya di kegelapan, genggamkan ke jemari Maya, dan ceritakan kisah harapan.",
           "nextSceneId": "day2_start",
-          "knowledgeEffect": 1,
+          "knowledgeEffect": 0,
           "log": "Mobil-mobilan merah diberikan ke tangan Maya sebagai simbol keberanian.",
           "telltaleNotice": "[IKATAN TERJALIN: Maya memegang erat janji perlindungan Ayah]"
         },
@@ -829,7 +832,7 @@
           "id": "c_day2_stranger_airlock",
           "text": "Bantu lewat kotak transfer airlock (Berikan 1 botol air & masker cadangan tanpa membuka palka utama).",
           "nextSceneId": "day2_stranger_resolved",
-          "knowledgeEffect": 2,
+          "knowledgeEffect": 0,
           "log": "Memberikan bantuan air dan masker secara aman melalui kotak transfer airlock.",
           "telltaleNotice": "[HENDRA AKAN MENGINGAT INI: Solidaritas kemanusiaan tercatat]",
           "setFlags": ["helped_stranger"]
@@ -838,7 +841,7 @@
           "id": "c_day2_stranger_intercom",
           "text": "Gunakan pengeras suara interkom untuk mengarahkan Hendra ke posko evakuasi darurat BNPB di bukit timur.",
           "nextSceneId": "day2_stranger_resolved",
-          "knowledgeEffect": 1,
+          "knowledgeEffect": 0,
           "log": "Mengarahkan penyintas ke posko terdekat melalui panduan interkom.",
           "telltaleNotice": "[HENDRA DIARAHKAN KE POSKO: Protokol keamanan bunker terjaga]",
           "setFlags": ["stranger_guided"]
@@ -847,7 +850,7 @@
           "id": "c_day2_stranger_harsh",
           "text": "Nyalakan sirene pengusir dan gertak dia bahwa bunker dijaga senjata sebelum menarik perhatian penjarah.",
           "nextSceneId": "day2_stranger_resolved",
-          "knowledgeEffect": -1,
+          "knowledgeEffect": 0,
           "log": "Mengusir penyintas luar secara keras demi keamanan absolut.",
           "telltaleNotice": "[KEBENCIAN TERTANAM: Hendra pergi dengan keputusasaan dan dendam]",
           "setFlags": ["stranger_hostile"]
@@ -979,7 +982,7 @@
       "conditionalText": [
         {
           "requiredFlag": "ng_plus",
-          "text": " Sinyal pemancar padam sepenuhnya. Tanpa energi cadangan, helikopter penyelamat di Hari ke-4 tidak akan pernah mendengar koordinat pertahanan kita."
+          "text": " Sinyal pemancar padam sepenuhnya. Tanpa energi cadangan, tim penyelamat akan kesulitan menerima koordinat bunker sebelum batas 72 jam."
         }
       ],
       "background": "normal",
@@ -1764,7 +1767,7 @@
     "ending_normal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sorot lampu senter tim evakuasi menembus koridor bawah tanah. Keluarga kami berhasil keluar hidup-hidup setelah 72 jam terkurung di dalam shelter. Namun ketika kami melangkah ke atas tandu di tengah posko pengungsian yang riuh, suasana terasa begitu dingin dan hampa. Ayah menunduk dalam keheningan, teringat bagaimana pintu palka ditutup rapat tanpa ampun saat seorang penyintas menangis memohon seteguk air di hari kedua. Maya memeluk Ayah dengan tatapan bingung dan murung: \"Ayah... bapak yang kemarin menangis minta tolong di pintu palka kita... dia ke mana?\" Ayah terdiam, lidahnya kelu tak sanggup menjawab. Kami selamat secara fisik... tetapi nurani kemanusiaan kami telah tertinggal selamanya di dalam kegelapan bunker.",
+      "text": "Sorot lampu senter tim evakuasi menembus koridor bawah tanah tepat setelah batas 72 jam. Keluarga Aris berhasil keluar hidup-hidup, tetapi persediaan telah menipis dan beberapa sistem bunker tidak lagi stabil. Petugas medis segera memeriksa kondisi mereka sebelum membawa keluarga menuju posko pengungsian. Mereka selamat, meski keputusan teknis selama tiga hari meninggalkan konsekuensi yang masih harus dipulihkan.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1772,7 +1775,7 @@
     "ending_good": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72 dengan jeritan logam yang melegakan. Pintu baja terbongkar keluar, membanjiri koridor bawah tanah dengan sinar keemasan fajar pesisir Selat Sunda. Di antara petugas SAR berseragam oranye, tampak sosok yang sangat kami kenal—Hendra, penyintas yang dulu kami bantu dengan sebotol air dan masker melalui kotak airlock! Dengan mata berkaca-kaca, Hendra berseru: \"Pak Aris! Ibu! Saya yang memandu tim SAR ke pipa ventilasi bunker bapak! Kebaikan bapak dan ibu di hari kedua telah menyelamatkan nyawa saya, dan hari ini saya bersumpah membawa bantuan untuk keluarga bapak!\" Maya tertawa riang memeluk mobil-mobilan merahnya, menatap Ayah dan Ibu dengan senyuman paling bangga: \"Ayah pahlawan kita!\" Di tengah kiamat letusan Krakatau, kebaikan yang tulus ternyata menjadi cahaya penuntun yang menyelamatkan hidup kami.",
+      "text": "Entakan keras pemotong hidrolik membelah kesunyian jam ke-72. Pintu baja terbuka dan cahaya fajar memenuhi koridor Bunker 72. Tim SAR menemukan keluarga Aris dalam kondisi stabil: air telah ditangani dengan aman, daya darurat masih tersisa, dan komunikasi radio membantu memastikan lokasi mereka. Tiga hari persiapan yang disiplin memberi keluarga itu cukup kekuatan untuk melangkah keluar bersama menuju posko evakuasi.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []
@@ -1842,7 +1845,7 @@
     "day3_final_vigil": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Jam ke-71 lewat tiga puluh menit. Mesin filtrasi terbatuk lalu mati dalam desis singkat. Sisa masker oksigen medis mini hanya tinggal satu di atas meja. Kupasangkan tali karetnya ke wajah kecil Anak kami. Dia sempat menatapku bingung di balik kabut plastik, 'Ayah... maskernya dingin. Kenapa Ibu nggak pakai juga?'\n\nIbu menepis lembut tanganku saat kucoba menyodorkan sisa tabung kepadanya. 'Pasang ke dia, Mas... biarkan Adek lihat matahari lagi.' Kurangkul Ibu erat-erat di sudut lantai semen, menutupi kepala kami berdua dengan jaket kerja di tengah gulita, menunggu dentuman alat pemotong tim evakuasi.",
+      "text": "Jam ke-72. Mesin filtrasi terbatuk lalu mati dalam desis singkat. Sisa masker oksigen medis mini hanya tinggal satu di atas meja. Kupasangkan tali karetnya ke wajah kecil Anak kami. Dia sempat menatapku bingung di balik kabut plastik, 'Ayah... maskernya dingin. Kenapa Ibu nggak pakai juga?'\n\nIbu menepis lembut tanganku saat kucoba menyodorkan sisa tabung kepadanya. 'Pasang ke dia, Mas... biarkan Adek lihat matahari lagi.' Kurangkul Ibu erat-erat di sudut lantai semen, menutupi kepala kami berdua dengan jaket kerja di tengah gulita, menunggu dentuman alat pemotong tim evakuasi.",
       "conditionalText": [
         {
           "requiredFlag": "structural_damage",
@@ -1850,7 +1853,7 @@
         }
       ],
       "background": "rusak",
-      "hour": "71 Jam",
+      "hour": "72 Jam",
       "objective": "Hadapi saat-saat penentuan sebelum pintu bunker dibuka.",
       "choices": [
         {
@@ -1858,7 +1861,7 @@
           "text": "Dekap keluarga erat-erat dalam kegelapan dan sambut tim penyelamat.",
           "nextSceneId": "ending_eval",
           "knowledgeEffect": 0,
-          "log": "Keluarga saling mendekap dalam kepasrahan dan cinta di jam ke-71."
+          "log": "Keluarga saling mendekap dalam kepasrahan dan cinta di jam ke-72."
         }
       ]
     }

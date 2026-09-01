@@ -13,13 +13,14 @@ export const ENDING_IDS = Object.freeze([
   'ending_bad',
   'ending_normal',
   'ending_good',
-  'ending_best',
   'ending_fatal',
-  'ending_secret_best',
-  'ending_secret_bad',
-  'ending_stranded_bad',
-  'ending_near_miss',
 ]);
+
+/** Temporary Phase 1 thresholds for the single Bad / Normal / Good evaluator. */
+export const ENDING_RULES = Object.freeze({
+  GOOD_PREPAREDNESS_MIN: 10,
+  GOOD_HEALTH_MIN: 60,
+});
 
 // ─── SURVIVAL SYSTEM CONFIGURATION ─────────────────────────────────────────
 
@@ -157,7 +158,7 @@ export const CHOICE_QUALITY_MAP = Object.freeze({
  * Used exclusively by GameView.renderHud().
  */
 export const POWER_THRESHOLDS = Object.freeze({
-  EMERGENCY_CUTOFF: 78,  // After this hour, power status depends on power_saved flag
+  EMERGENCY_CUTOFF: 72,  // At the playable endpoint, power depends on power_saved flag
   EMERGENCY_START: 54,   // After this hour, power is at DARURAT
   ECONOMY_START: 44,     // After this hour, power is at HEMAT
 });
@@ -166,6 +167,9 @@ export const POWER_THRESHOLDS = Object.freeze({
 
 /** localStorage key for the primary game save slot. */
 export const SAVE_KEY = 'bunker72_save_v1';
+
+/** Current lightweight save schema version. */
+export const SAVE_SCHEMA_VERSION = 2;
 
 // ─── PURE UTILITY FUNCTIONS ─────────────────────────────────────────────────
 
