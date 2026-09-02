@@ -10,6 +10,9 @@ import avatarIbuSerius from '../assets/avatars/ibu/ibu_serius.png';
 import avatarIbuSenyum from '../assets/avatars/ibu/ibu_senyum.png';
 import avatarIbuCemas from '../assets/avatars/ibu/ibu_cemas.png';
 import avatarAnak from '../assets/avatars/avatar_anak.png';
+import avatarAnakSenyum from '../assets/avatars/anak/anak_senyum.png';
+import avatarAnakSerius from '../assets/avatars/anak/anak_serius.png';
+import avatarAnakCemas from '../assets/avatars/anak/anak_cemas.png';
 import avatarNarrator from '../assets/avatars/avatar_narrator.png';
 import avatarPenyintas from '../assets/avatars/avatar_penyintas.png';
 import avatarPenjarah from '../assets/avatars/avatar_penjarah.png';
@@ -67,6 +70,9 @@ const ASSET_URLS = [
   avatarIbuSenyum,
   avatarIbuCemas,
   avatarAnak,
+  avatarAnakSenyum,
+  avatarAnakSerius,
+  avatarAnakCemas,
   avatarNarrator,
   avatarPenyintas,
   avatarPenjarah,

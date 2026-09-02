@@ -37,6 +37,16 @@ const DEFAULT_FLAGS = Object.freeze({
   hendra_encountered: false,
   stranger_family_first: false,
   medical_mask_ready: false,
+  has_radio: false,
+  radio_packed: false,
+  extra_battery: false,
+  battery_packed: false,
+  food_packed: false,
+  drink_packed: false,
+  kit_packed: false,
+  snack_packed: false,
+  toy_packed: false,
+  late_evacuation: false,
 });
 
 // ─── FLAG RECONSTRUCTION MAP ────────────────────────────────────────────────
@@ -60,6 +70,7 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_prolog_pack_drink': 'drink_packed',
   'c_prolog_pack_kit': 'kit_packed',
   'c_prolog_pack_battery': 'extra_battery',
+  'c_prolog_pack_radio': 'radio_packed',
   'c_prolog_pack_snack': 'snack_packed',
   'c_prolog_pack_toy': 'toy_packed',
   'c_day1_maya_light': 'maya_comforted',
@@ -262,6 +273,12 @@ export class GameModel {
       flags.extra_battery = true;
       flags.battery_packed = true;
     }
+    if (history.some(e => e.choiceId === 'c_prolog_pack_radio')) {
+      // Legacy history records only carried the packing choice; restore the
+      // independent possession flag without implying a battery or power route.
+      flags.has_radio = true;
+      flags.radio_packed = true;
+    }
     // A history-only save may not carry the flags object. Reconstruct the
     // single latest Hendra outcome so the encounter cannot repeat on resume.
     const latestHendra = [...history].reverse().find((entry) => [
@@ -417,7 +434,7 @@ export class GameModel {
 
     const resourceReadiness = [
       ['food_packed', 2], ['drink_packed', 2], ['kit_packed', 3], ['snack_packed', 1],
-      ['extra_battery', 4], ['medical_mask_ready', 4], ['inspected_medical', 2], ['inspected_supply', 2],
+      ['radio_packed', 2], ['extra_battery', 4], ['medical_mask_ready', 4], ['inspected_medical', 2], ['inspected_supply', 2],
     ].reduce((total, [flag, value]) => total + (this.flags[flag] === true ? value : 0), 0);
     addCategory('resources', 'Logistik & Medis', resourceReadiness, 20,
       resourceReadiness >= 14 ? 'Logistik dan perlengkapan medis memberi cadangan yang berarti.' : resourceReadiness >= 7 ? 'Sebagian logistik penting berhasil diamankan.' : 'Cadangan logistik dan medis terbatas ketika tekanan akhir datang.');

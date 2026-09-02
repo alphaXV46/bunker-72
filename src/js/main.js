@@ -401,6 +401,17 @@ async function initGame() {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) storyEngine?.audio.stopAll();
   });
+
+  // ── Developer Console (Dev Mode Only) ──
+  if (import.meta.env.DEV) {
+    import('./debug/developerConsole.js')
+      .then(({ initDeveloperConsole }) => {
+        initDeveloperConsole({ storyEngine, dom });
+      })
+      .catch((err) => {
+        console.warn('[main] Could not initialize Developer Console:', err);
+      });
+  }
 }
 
 if (document.readyState === 'loading') {

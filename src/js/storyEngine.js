@@ -59,6 +59,7 @@ export class StoryEngine {
 
     this._journalSetup = false;
     this._volumeSetup  = false;
+    this._debugBypassSave = false;
 
     this.view.init(this);
   }
@@ -168,7 +169,7 @@ export class StoryEngine {
     }
 
     // ── Save ──
-    if (!isEnding && this.onSave) {
+    if (!isEnding && this.onSave && !this._debugBypassSave) {
       // ✅ Single-object save: model serializes itself via toSaveData().
       this.onSave(this.model.toSaveData());
     }
@@ -295,49 +296,64 @@ export class StoryEngine {
    */
   handleScavengerComplete(result) {
     const items = result?.collectedItems || [];
+    const fallbackCounts = {
+      food: items.filter((id) => id === 'food').length,
+      drink: items.filter((id) => id === 'drink').length,
+      kit: items.filter((id) => id === 'kit').length,
+      radio: items.filter((id) => id === 'radio').length,
+      battery: items.filter((id) => id === 'battery').length,
+      toy: items.filter((id) => id === 'toy').length,
+      snack: items.filter((id) => id === 'snack').length,
+    };
+    const rawResourceCounts = result?.resourceCounts || {};
+    const resourceCounts = Object.fromEntries(Object.keys(fallbackCounts).map((key) => {
+      const value = rawResourceCounts[key] ?? fallbackCounts[key];
+      return [key, Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : 0];
+    }));
+    const isLate = Boolean(result?.lateEvacuation || result?.reason === 'time_out');
+    const lostItem = result?.lostItem || null;
 
     // Reset packed flags
-    this.model.flags.food_packed = false;
-    this.model.flags.drink_packed = false;
-    this.model.flags.kit_packed = false;
-    this.model.flags.battery_packed = false;
-    this.model.flags.extra_battery = false;
-    this.model.flags.snack_packed = false;
-    this.model.flags.toy_packed = false;
+    this.model.flags.food_packed = (resourceCounts.food || 0) > 0;
+    this.model.flags.drink_packed = (resourceCounts.drink || 0) > 0;
+    this.model.flags.kit_packed = (resourceCounts.kit || 0) > 0;
+    this.model.flags.has_radio = (resourceCounts.radio || 0) > 0;
+    this.model.flags.radio_packed = (resourceCounts.radio || 0) > 0;
+    this.model.flags.extra_battery = (resourceCounts.battery || 0) > 0;
+    this.model.flags.battery_packed = (resourceCounts.battery || 0) > 0;
+    this.model.flags.toy_packed = (resourceCounts.toy || 0) > 0;
+    this.model.flags.snack_packed = (resourceCounts.snack || 0) > 0;
+    this.model.flags.late_evacuation = isLate;
 
-    // Reset inventory to bunker starter base
-    this.model.inventory = { food: 1, drink: 1, kit: 0 };
-
-    // Apply collected supplies to BOTH flags and inventory counts
-    items.forEach((itemId) => {
-      if (itemId === 'food') {
-        this.model.flags.food_packed = true;
-        this.model.addInventoryItem('food', 2);
-      } else if (itemId === 'drink') {
-        this.model.flags.drink_packed = true;
-        this.model.addInventoryItem('drink', 2);
-      } else if (itemId === 'kit') {
-        this.model.flags.kit_packed = true;
-        this.model.addInventoryItem('kit', 1);
-      } else if (itemId === 'radio') {
-        this.model.flags.battery_packed = true;
-        this.model.flags.extra_battery = true;
-      } else if (itemId === 'snack') {
-        this.model.flags.snack_packed = true;
-        this.model.addInventoryItem('food', 1);
-      } else if (itemId === 'toy') {
-        this.model.flags.toy_packed = true;
-      }
-    });
+    // Reset inventory to bunker starter base (1 food, 1 drink) + exact collected items
+    this.model.inventory = {
+      food: 1 + (resourceCounts.food || 0) + (resourceCounts.snack || 0),
+      drink: 1 + (resourceCounts.drink || 0),
+      kit: (resourceCounts.kit || 0),
+    };
 
     // Update UI inventory drawer immediately
     const isDisabledScene = this.model.isInventoryDisabledScene('prolog_intro');
     this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
 
-    // Show toast for scavenger results
-    const count = items.length;
-    if (this.view.showTelltaleToast) {
-      this.view.showTelltaleToast(`LOGISTIK TERKUMPUL: ${count} barang berhasil dibawa ke bunker!`);
+    // Persist the exact stackable payoff and independent radio/battery/toy
+    // flags before the next scene renders. Older saves remain valid because
+    // this uses the existing inventory and flag schema.
+    this.onSave?.(this.model.toSaveData());
+
+    const summary = {
+      ...(result?.summary || {}),
+      itemCount: items.length,
+      lateEvacuation: isLate,
+      lostItem,
+      timeRemaining: Number.isFinite(Number(result?.timeRemaining)) ? Math.max(0, Number(result.timeRemaining)) : 0,
+      reason: isLate ? 'WAKTU HABIS' : (result?.reason === 'entered_hatch' ? 'PALKA TERKUNCI' : 'RUTE SELESAI'),
+      title: isLate ? 'EVAKUASI TERLAMBAT' : 'EVAKUASI SELESAI',
+    };
+    if (this.view.showScavengerResult) {
+      this.view.showScavengerResult({ ...result, collectedItems: items, resourceCounts, summary });
+    } else if (this.view.showTelltaleToast) {
+      this.view.showTelltaleToast(`${summary.title}: ${items.length} barang diamankan.`);
     }
 
     // Advance to evacuation intro
@@ -814,6 +830,18 @@ export class StoryEngine {
       }
     }
 
+    // Dynamic narrative adaptation for prologue evacuation
+    if (sceneId === 'prolog_threshold') {
+      const hasSupplies = this.model.flags.food_packed || this.model.flags.drink_packed ||
+        this.model.flags.kit_packed || this.model.flags.has_radio || this.model.flags.extra_battery || this.model.flags.toy_packed;
+
+      if (this.model.flags.late_evacuation) {
+        processedText = 'Ayah: "Pintu dibanting di detik terakhir saat gempa merontokkan atap teras! Napas kita masih terengah-engah, tapi seluruh anggota keluarga sudah berada di dalam lorong. Begitu tuas hidrolik ini ditarik dan segel terkunci, kita bertahan dengan apa pun yang sempat kita bawa."';
+      } else if (!hasSupplies) {
+        processedText = 'Ayah: "Ransel perbekalan kosong—tak ada waktu untuk mengais barang di dalam rumah! Yang terpenting seluruh anggota keluarga selamat di dalam lorong. Begitu tuas hidrolik ini ditarik dan pintu terkunci, kita harus mengandalkan apa yang tersisa di dalam bunker."';
+      }
+    }
+
     return processedText;
   }
 
@@ -861,6 +889,42 @@ export class StoryEngine {
         this._prepareSceneChoices(scene.choices), this.model.currentSceneId, this.model.flags,
         (choice) => this.handleChoiceSelect(choice)
       );
+    }
+  }
+
+  // ─── DEVELOPER CONSOLE & DEBUG HOOKS ────────────────────────────────────
+
+  debugJumpToScene(sceneId) {
+    if (!this.storyData.scenes[sceneId] && sceneId !== 'ending_eval' && sceneId !== 'trigger_ending_eval') {
+      console.warn(`[StoryEngine] Invalid debug scene ID: "${sceneId}"`);
+      return false;
+    }
+
+    this.view.destroyScavengerMinigame();
+    this.bunkerMinigame?.close();
+    this.radioMiniGame?.close();
+    this.pendingClickNextSceneId = null;
+    this.pendingBunkerEntryChoice = null;
+    this.pendingMinigameChoice = null;
+    this._unlockedMinigameChoiceIds?.clear();
+
+    const prevBypass = this._debugBypassSave;
+    this._debugBypassSave = true;
+    try {
+      this.renderScene(sceneId);
+    } finally {
+      this._debugBypassSave = prevBypass;
+    }
+    return true;
+  }
+
+  debugEvaluateEnding() {
+    return this.model.getEndingResult();
+  }
+
+  debugSetTimeScale(scale = 1.0) {
+    if (this.view?.scavengerGame) {
+      this.view.scavengerGame.setTimeScale(scale);
     }
   }
 }

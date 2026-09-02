@@ -21,8 +21,10 @@ const AVATARS = {
   ibu:         new URL('../assets/avatars/ibu/ibu_serius.png',   import.meta.url).href,
   ibu_serius:  new URL('../assets/avatars/ibu/ibu_serius.png',   import.meta.url).href,
   ibu_senyum:  new URL('../assets/avatars/ibu/ibu_senyum.png',   import.meta.url).href,
-  ibu_cemas:   new URL('../assets/avatars/ibu/ibu_cemas.png',    import.meta.url).href,
-  anak:        new URL('../assets/avatars/avatar_anak.png',      import.meta.url).href,
+  anak:        new URL('../assets/avatars/anak/anak_senyum.png', import.meta.url).href,
+  anak_senyum: new URL('../assets/avatars/anak/anak_senyum.png', import.meta.url).href,
+  anak_serius: new URL('../assets/avatars/anak/anak_serius.png', import.meta.url).href,
+  anak_cemas:  new URL('../assets/avatars/anak/anak_cemas.png',  import.meta.url).href,
   narrator:    new URL('../assets/avatars/avatar_narrator.png',  import.meta.url).href,
   penyintas:   new URL('../assets/avatars/avatar_penyintas.png', import.meta.url).href,
   penjarah:    new URL('../assets/avatars/avatar_penjarah.png',  import.meta.url).href,
@@ -713,6 +715,66 @@ export class GameView {
         toast.remove();
       }, 500);
     }, 3800);
+  }
+
+  /**
+   * Displays the compact diegetic summary emitted by the scavenger run.
+   * Structured DOM nodes keep item names safe while preserving the existing
+   * toast lifecycle and story flow.
+   * @param {object} result
+   */
+  showScavengerResult(result) {
+    if (!result) return;
+    const container = document.getElementById('telltale-toast-container');
+    if (!container) return;
+
+    const summary = result.summary || {};
+    const toast = document.createElement('div');
+    toast.className = 'telltale-toast scavenger-result-toast';
+
+    const bracketStart = document.createElement('span');
+    bracketStart.className = 'telltale-toast-bracket';
+    bracketStart.textContent = '▰▰';
+
+    const content = document.createElement('div');
+    content.className = 'scavenger-result-content';
+
+    const title = document.createElement('strong');
+    title.className = 'scavenger-result-title';
+    title.textContent = summary.title || 'HASIL EVAKUASI';
+    content.appendChild(title);
+
+    const detail = document.createElement('span');
+    detail.className = 'scavenger-result-detail';
+    const count = Number.isFinite(summary.itemCount) ? summary.itemCount : (result.collectedItems?.length || 0);
+    detail.textContent = `${count} barang diamankan · ${summary.reason || (result.reason || 'RUTE SELESAI').toUpperCase()}`;
+    content.appendChild(detail);
+
+    const time = document.createElement('span');
+    time.className = 'scavenger-result-time';
+    const seconds = Math.max(0, Math.ceil(Number(summary.timeRemaining ?? result.timeRemaining ?? 0)));
+    time.textContent = `SISA WAKTU 00:${seconds < 10 ? '0' : ''}${seconds}`;
+    content.appendChild(time);
+
+    if (summary.lostItem?.name || result.lostItem?.name) {
+      const lost = document.createElement('span');
+      lost.className = 'scavenger-result-lost';
+      lost.textContent = `TERTINGGAL: ${summary.lostItem?.name || result.lostItem.name}`;
+      content.appendChild(lost);
+    }
+
+    const bracketEnd = bracketStart.cloneNode(true);
+    toast.append(bracketStart, content, bracketEnd);
+    container.appendChild(toast);
+
+    void toast.offsetWidth;
+    toast.classList.add('active');
+
+    setTimeout(() => {
+      toast.classList.remove('active');
+      toast.classList.add('fade-out');
+      setTimeout(() => toast.remove(), 500);
+    }, 4800);
   }
 
   clearDay1Hotspots() {
