@@ -18,7 +18,7 @@ export const STATIONS = {
     kicker: 'GENERATOR UTAMA // BOOT SISTEM',
     name: 'NAIKKAN DAYA UTAMA',
     shortName: 'TUAS DAYA',
-    tutorial: 'Tekan dan tarik tuas daya ke atas sampai indikator mencapai ZONA AMAN (100%).',
+    tutorial: 'Tekan SPASI berulang kali untuk menaikkan daya. Jika jedanya terlalu lama, indikator akan turun kembali.',
     defaultSuccessMessage: 'BUS DAYA UTAMA STABIL // LAMPU MENYALA',
   },
   rotor: {

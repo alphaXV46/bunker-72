@@ -27,6 +27,7 @@ export class BunkerMinigame {
     this.activeOptions = null;
     this.activeStation = null;
     this.timeouts = [];
+    this.finishingStation = false;
 
     this.stations = {
       card: new CardStation(),
@@ -43,6 +44,7 @@ export class BunkerMinigame {
    */
   openStation(stationId = 'card', options = {}) {
     if (!this.root) return;
+    this.finishingStation = false;
     this.reset();
 
     if (stationId === 'numbers') stationId = 'rotor';
@@ -166,6 +168,8 @@ export class BunkerMinigame {
    * @param {string} stationId
    */
   finishStation(stationId) {
+    if (this.finishingStation) return;
+    this.finishingStation = true;
     this.clearStation({ keepPanel: true });
     const station = STATIONS[stationId] || {};
     const successMsg = station.defaultSuccessMessage || 'PROTOKOL BERHASIL';
@@ -183,12 +187,13 @@ export class BunkerMinigame {
       pill.classList.add('is-success');
     }
 
+    const completionDelay = stationId === 'power' ? 0 : 900;
     this.timeouts.push(
       window.setTimeout(() => {
         const onDone = this.activeOptions?.onComplete || this.defaultOnComplete;
         this.close();
         onDone?.({ success: true, stationId });
-      }, 900)
+      }, completionDelay)
     );
   }
 

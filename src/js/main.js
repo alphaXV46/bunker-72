@@ -358,6 +358,14 @@ async function initGame() {
     }
   });
 
+  // Allow Continue to be activated with Space while the main menu is visible.
+  window.addEventListener('keydown', (event) => {
+    if (event.code !== 'Space' || event.repeat) return;
+    if (!dom.menuView?.classList.contains('active') || dom.continueBtn.disabled) return;
+    event.preventDefault();
+    dom.continueBtn.click();
+  });
+
   dom.restartBtn.addEventListener('click', () => {
     checkSaveData(); // refresh Continue button state
     showScreen('menu');

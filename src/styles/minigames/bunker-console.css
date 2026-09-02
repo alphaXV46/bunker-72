@@ -338,7 +338,7 @@
 
 .mg-power-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   flex: 1;
   min-height: 180px;
@@ -355,6 +355,7 @@
 }
 
 .mg-meter-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -367,7 +368,9 @@
 
 .mg-power-meter {
   position: relative;
-  height: 34px;
+  width: 74px;
+  height: 190px;
+  margin: 8px auto;
   background: #090e10;
   border: 2px solid #3c4c53;
   overflow: hidden;
@@ -376,21 +379,29 @@
 #mg-power-fill {
   position: absolute;
   left: 0;
-  top: 0;
+  top: auto;
   bottom: 0;
-  width: 0%;
-  background: linear-gradient(90deg, #d33f49, #f49d37 55%, #63e6be 95%);
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(0deg, #d33f49, #f49d37 55%, #63e6be 95%);
   box-shadow: 0 0 14px rgba(99,230,190,0.6);
   transition: width 0.08s linear;
 }
 
-.mg-meter-zone { position: absolute; top: 0; bottom: 0; opacity: 0.25; pointer-events: none; }
-.zone-yellow { left: 55%; width: 25%; background: var(--mg-amber); }
-.zone-green { left: 80%; width: 20%; background: var(--mg-green); }
+.mg-meter-zone { position: absolute; left: 0; right: 0; opacity: 0.25; pointer-events: none; }
+.zone-yellow { bottom: 55%; height: 25%; background: var(--mg-amber); }
+.zone-green { bottom: 80%; height: 20%; background: var(--mg-green); }
 
 .mg-meter-scale {
   display: flex;
+  flex-direction: column-reverse;
   justify-content: space-between;
+  height: 190px;
+  width: 74px;
+  position: absolute;
+  left: calc(50% + 48px);
+  top: 70px;
+  margin: 0;
   font-size: 0.52rem;
   color: var(--mg-muted);
   letter-spacing: 1px;
@@ -408,6 +419,7 @@
 }
 
 .mg-lever-console {
+  display: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -458,7 +470,9 @@
   transition: filter 0.1s ease;
 }
 
-.mg-lever.is-grabbed { filter: brightness(1.2); }
+.mg-lever.is-grabbed,
+.mg-lever.is-powered { filter: brightness(1.2); }
+.mg-lever.is-powered { box-shadow: 0 0 18px rgba(244, 157, 55, 0.65); }
 .mg-lever-notch {
   position: absolute;
   width: 14px;

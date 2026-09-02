@@ -168,6 +168,28 @@ export class GameView {
 
   _setupKeyboardShortcuts() {
     window.addEventListener('keydown', (event) => {
+      if (event.code === 'Space' && !event.repeat) {
+        const minigameOpen = this.dom.bunkerMinigame && !this.dom.bunkerMinigame.hidden;
+        const gameScreenActive = this.dom.storyBox
+          ?.closest('#game-view')
+          ?.classList.contains('active');
+        const choicesVisible = this.dom.choicesPanel?.children.length > 0;
+
+        if (gameScreenActive && !minigameOpen) {
+          event.preventDefault();
+          if (this.isTyping) {
+            this.skipTyping();
+          } else if (choicesVisible) {
+            // The prolog's single "continue" choice is also keyboard accessible.
+            const continueButton = this.dom.choicesPanel.querySelector('.title-continue');
+            if (continueButton) continueButton.click();
+          } else {
+            this.controller.handleDialogueClick();
+          }
+          return;
+        }
+      }
+
       if (!this.dom.choicesPanel?.children.length) return;
       const keyNumber = Number(event.key);
       if (!Number.isInteger(keyNumber) || keyNumber < 1 || keyNumber > 3) return;
