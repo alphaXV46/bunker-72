@@ -15,6 +15,7 @@ import { StoryEngine } from './storyEngine.js';
 import { SAVE_KEY, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
 import { preloadAssets } from './assetLoader.js';
 import { RadioMiniGame } from './radioMiniGame.js';
+import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
 
 // ─── DOM REFERENCES ──────────────────────────────────────────────────────────
 const dom = {
@@ -82,10 +83,10 @@ const INITIAL_SCENE_ID = 'prolog_home';
 const SUPPORTED_RUNTIME_SCENES = new Set([
   'ending_eval',
   'trigger_ending_eval',
-  'day3_pinch_water_resolved',
-  'day3_pinch_vent_inspected',
 ]);
-const LEGACY_DAY4_SCENES = new Set([
+// Removed scenes are mapped by ID only; their old story content is not loaded.
+const LEGACY_DAY4_IDS = new Set([
+  'ending_fatal',
   'trigger_secret_ending_eval',
   'ending_best',
   'ending_secret_best',
@@ -93,9 +94,28 @@ const LEGACY_DAY4_SCENES = new Set([
   'ending_stranded_bad',
   'ending_near_miss',
 ]);
+const LEGACY_DAY2_EXPEDITION_SCENES = new Set([
+  'day2_damage_check', 'day2_panic_exit', 'day2_calm_check', 'day2_find_leak',
+  'day2_leak_poor_fix', 'day2_remedy_air', 'day2_remedy_air_success', 'day2_seal_leak',
+  'day2_stranger_knock', 'day2_stranger_resolved', 'day2_radio_setup', 'day2_radio_save',
+  'day2_radio_drain', 'day2_power_good', 'day2_power_bad', 'day2_scavenge_check',
+  'day2_scavenge_success', 'day2_scavenge_fail', 'day2_scavenge_bypass_fail', 'day2_scavenge_slow_success', 'trigger_scavenge_eval',
+]);
+const LEGACY_DAY3_CONSEQUENCE_SCENES = new Set([
+  'day3_water_issue', 'day3_pressure_pinch', 'day3_pinch_water_resolved', 'day3_pinch_vent_inspected',
+  'day3_water_poisoned', 'day3_water_boil', 'day3_water_filter', 'day3_signal_bad', 'day3_signal_good',
+  'day3_knock_hear', 'day3_knock_verify', 'day3_knock_open', 'day3_final_vigil',
+]);
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeExpeditionLocations(value) {
+  const validIds = new Set(Object.keys(EXPEDITION_CONFIGS));
+  return Array.isArray(value)
+    ? [...new Set(value.filter((id) => typeof id === 'string' && validIds.has(id)))]
+    : [];
 }
 
 function createFreshSave(loadNotice) {
@@ -109,6 +129,7 @@ function createFreshSave(loadNotice) {
     hunger: SURVIVAL.DEFAULTS.hunger,
     thirst: SURVIVAL.DEFAULTS.thirst,
     health: SURVIVAL.DEFAULTS.health,
+    expeditionVisitedLocations: [],
     loadNotice,
   };
 }
@@ -117,7 +138,9 @@ function normalizeSaveData(save) {
   if (!isPlainObject(save)) return null;
 
   const storedSceneId = typeof save.sceneId === 'string' ? save.sceneId : '';
-  const isLegacyDay4 = storedSceneId.startsWith('day4_') || LEGACY_DAY4_SCENES.has(storedSceneId);
+  const isLegacyDay4 = storedSceneId.startsWith('day4_') || LEGACY_DAY4_IDS.has(storedSceneId);
+  const isLegacyDay2 = LEGACY_DAY2_EXPEDITION_SCENES.has(storedSceneId);
+  const isLegacyDay3 = LEGACY_DAY3_CONSEQUENCE_SCENES.has(storedSceneId);
   const isValidScene = Boolean(storyData.scenes[storedSceneId]) || SUPPORTED_RUNTIME_SCENES.has(storedSceneId);
 
   if (!isValidScene && !isLegacyDay4) {
@@ -126,7 +149,7 @@ function normalizeSaveData(save) {
 
   return {
     version: SAVE_SCHEMA_VERSION,
-    sceneId: isLegacyDay4 ? 'ending_eval' : storedSceneId,
+    sceneId: isLegacyDay4 ? 'ending_eval' : isLegacyDay2 ? 'day2_expedition_setup' : isLegacyDay3 ? 'day3_start' : storedSceneId,
     knowledge: typeof save.knowledge === 'number' ? save.knowledge : SURVIVAL.DEFAULTS.knowledge,
     history: Array.isArray(save.history) ? save.history : [],
     flags: isPlainObject(save.flags) ? save.flags : null,
@@ -134,9 +157,14 @@ function normalizeSaveData(save) {
     hunger: save.hunger,
     thirst: save.thirst,
     health: save.health,
+    expeditionVisitedLocations: normalizeExpeditionLocations(save.expeditionVisitedLocations),
     loadNotice: isLegacyDay4
       ? 'Save Day 4 lama dipindahkan ke evaluasi akhir jam ke-72.'
-      : null,
+      : isLegacyDay2
+        ? 'Save Day 2 lama dipindahkan ke titik persiapan ekspedisi baru.'
+        : isLegacyDay3
+          ? 'Save Day 3 lama dipindahkan ke awal rangkaian konsekuensi baru.'
+        : null,
   };
 }
 
@@ -267,31 +295,7 @@ async function initGame() {
     storyEngine.radioMiniGame = new RadioMiniGame({
       modalEl: radioModalEl,
       audio: storyEngine.audio,
-      onSuccess: (broadcastText) => {
-        const isFirstReward = storyEngine.model.flags.radio_reward_claimed !== true;
-        if (isFirstReward) {
-          storyEngine.model.modifyKnowledge(1);
-          storyEngine.model.setFlag('radio_reward_claimed');
-          storyEngine.view.pulseKnowledge(1);
-        }
-        const scene = storyEngine.storyData.scenes[storyEngine.model.currentSceneId];
-        if (scene) {
-          storyEngine.view.renderHud(
-            scene, storyEngine.model.knowledge, storyEngine.model.currentSceneId,
-            storyEngine.model.flags, storyEngine.model.hunger, storyEngine.model.thirst, storyEngine.model.health
-          );
-        }
-        if (isFirstReward) {
-          storyEngine.model.history.push({
-            hour: scene?.hour ?? '--',
-            text: `[MINI-GAME] Radio VHF Terkunci: ${broadcastText}`,
-            choiceId: null,
-            effect: 1,
-          });
-        }
-        storyEngine.view.renderProtocolLog(storyEngine.model.history);
-        storyEngine.onSave?.(storyEngine.model.toSaveData());
-      },
+      onFinalResult: (result) => storyEngine.handleFinalRadioResult(result),
     });
   }
 
@@ -330,7 +334,7 @@ async function initGame() {
     showScreen('game');
     storyEngine.audio.playBGM();
     const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
-    storyEngine.start('prolog_home', knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health);
+    storyEngine.start('prolog_home', knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health, []);
   });
 
   dom.continueBtn.addEventListener('click', () => {
@@ -347,6 +351,7 @@ async function initGame() {
       save.hunger,
       save.thirst,
       save.health,
+      save.expeditionVisitedLocations,
     );
     if (save.loadNotice) {
       storyEngine.view.showTelltaleToast(save.loadNotice);

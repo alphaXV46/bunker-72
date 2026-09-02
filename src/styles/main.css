@@ -1235,107 +1235,6 @@ body.title-card-active #settings-btn { display: none !important; }
   pointer-events: none;
 }
 
-#game-view.packing-mode .choices-panel.packing-grid {
-  position: relative;
-  z-index: 1;
-  width: min(58vw, 720px);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(10px, 1.1vw, 14px);
-  padding: clamp(16px, 1.6vw, 24px);
-  border: 2px solid rgba(114, 128, 138, 0.82);
-  border-left: 6px solid rgba(255, 209, 102, 0.86);
-  background:
-    linear-gradient(180deg, rgba(13, 16, 19, 0.88), rgba(5, 7, 9, 0.92)),
-    linear-gradient(90deg, rgba(91,192,190,0.12), transparent 52%);
-  box-shadow: 10px 10px 0 rgba(0,0,0,0.44), 0 0 46px rgba(0,0,0,0.62);
-  backdrop-filter: blur(4px);
-  pointer-events: auto;
-}
-
-.packing-hint {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 6px;
-  color: #fff2cc;
-  font-family: 'VT323', monospace;
-  font-size: clamp(1.35rem, 1.7vw, 1.9rem);
-  line-height: 1;
-  padding-bottom: 8px;
-  margin-bottom: 2px;
-  border-bottom: 1px solid rgba(114, 128, 138, 0.55);
-  text-shadow: 0 3px 0 rgba(0,0,0,0.72), 0 0 18px rgba(0,0,0,0.8);
-}
-
-.packing-hint span {
-  color: var(--cyan);
-  font-family: 'Share Tech Mono', 'Courier New', monospace;
-  font-size: clamp(0.76rem, 0.9vw, 1rem);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.packing-item {
-  position: relative;
-  min-height: clamp(58px, 6.4vh, 78px);
-  border: 2px solid rgba(66, 74, 80, 0.9);
-  background:
-    linear-gradient(90deg, rgba(91,192,190,0.08), transparent 50%),
-    rgba(8, 10, 12, 0.78);
-  color: var(--text-pixel);
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: clamp(42px, 4.4vw, 58px) auto;
-  align-items: center;
-  justify-items: center;
-  gap: clamp(8px, 0.9vw, 12px);
-  padding: clamp(10px, 1vw, 14px);
-  overflow: hidden;
-  font-family: inherit;
-  font-size: clamp(0.78rem, 0.86vw, 0.96rem);
-  text-shadow: 0 2px 0 rgba(0,0,0,0.86), 0 0 10px rgba(0,0,0,0.9);
-  pointer-events: auto;
-  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, opacity 0.12s ease;
-}
-
-.packing-item:hover {
-  transform: translateY(-4px);
-  border-color: var(--warning-yellow-border);
-  background:
-    linear-gradient(90deg, rgba(255,209,102,0.14), transparent 58%),
-    rgba(12, 14, 17, 0.92);
-}
-
-.packing-item img {
-  width: clamp(34px, 3.4vw, 48px);
-  height: clamp(34px, 3.4vw, 48px);
-  object-fit: contain;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 5px 0 rgba(0,0,0,0.28)) drop-shadow(0 0 8px rgba(0,0,0,0.7));
-}
-
-.packing-item span:last-child {
-  min-width: 0;
-  width: auto;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  opacity: 1;
-  overflow-wrap: anywhere;
-  text-align: center;
-  line-height: 1.08;
-}
-
-.packing-item:hover span:last-child {
-  opacity: 1;
-}
-
-.packing-item.packing-picked {
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(-8px) scale(0.96);
-}
-
 /* ─── Scavenger Minigame Container ─── */
 .scavenger-game-wrapper {
   position: absolute;
@@ -2628,67 +2527,6 @@ body.title-card-active #settings-btn { display: none !important; }
   flex-shrink: 0;
 }
 
-#ending-view #educational-debrief-container {
-  width: min(700px, 58%);
-  margin-left: clamp(22px, 4vw, 64px);
-  padding-bottom: 14px;
-}
-
-.educational-debrief-box {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  padding: clamp(10px, 1vw, 14px);
-  border: 2px solid var(--cyan);
-  background: rgba(9, 20, 22, 0.78);
-  box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
-  backdrop-filter: blur(4px);
-}
-
-.educational-debrief-box h3 {
-  grid-column: 1 / -1;
-  margin: 0 0 4px;
-  color: var(--cyan);
-  font-family: 'VT323', monospace;
-  font-size: clamp(1.35rem, 2vw, 1.8rem);
-  letter-spacing: 1px;
-}
-
-.educational-debrief-box section {
-  min-height: auto;
-  max-height: 76px;
-  overflow-y: auto;
-  padding: 8px;
-  border: 1px solid rgba(114,128,138,0.54);
-  background: rgba(8,9,11,0.44);
-}
-
-.educational-debrief-box h4 {
-  margin: 0 0 6px;
-  font-size: 0.92rem;
-  letter-spacing: 1px;
-}
-
-.educational-debrief-box ul {
-  margin: 0;
-  padding-left: 16px;
-  color: var(--text-pixel);
-  font-size: 0.74rem;
-  line-height: 1.32;
-}
-
-.educational-debrief-box li { margin-bottom: 6px; }
-.empty-note {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-style: italic;
-}
-.debrief-good { color: var(--accent-green-border); }
-.debrief-risk { color: var(--accent-red-border); }
-.debrief-guide { color: var(--warning-yellow-border); }
-
-
 /* ============================================================
    SECTION 18: KEYFRAME ANIMATIONS
    ============================================================ */
@@ -3184,36 +3022,6 @@ body.disable-crt .crt-flicker { display: none !important; }
 
 #ending-view .debrief-box {
   display: none;
-}
-
-/* Post-Game Quality Badges */
-.badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 1px 6px;
-  margin-left: 10px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.badge-opt {
-  background-color: rgba(31, 111, 74, 0.3);
-  color: var(--accent-green-border);
-  border: 1px solid var(--accent-green-border);
-}
-
-.badge-acc {
-  background-color: rgba(179, 125, 32, 0.3);
-  color: var(--warning-yellow-border);
-  border: 1px solid var(--warning-yellow-border);
-}
-
-.badge-risk {
-  background-color: rgba(143, 29, 35, 0.3);
-  color: var(--accent-red-border);
-  border: 1px solid var(--accent-red-border);
 }
 
 /* Scrollbar styling for debrief-box */
@@ -3731,15 +3539,6 @@ body.disable-crt .crt-flicker { display: none !important; }
     font-size: 0.82rem;
   }
 
-  /* Packing Grid */
-  #game-view.packing-mode .choices-panel.packing-grid {
-    gap: 6px;
-    padding: 6px;
-  }
-  .packing-item {
-    padding: 6px 10px;
-  }
-
   /* Modals */
   .modal-content,
   .journal-modal-content,
@@ -3918,6 +3717,10 @@ body.disable-crt .crt-flicker { display: none !important; }
 .epilogue-bunker  { border-left-color: #ffd740; }
 .epilogue-social  { border-left-color: #69f0ae; }
 .epilogue-family  { border-left-color: #40c4ff; }
+.epilogue-rescue { border-left-color: #00e5ff; }
+.epilogue-maya { border-left-color: #ce93d8; }
+.epilogue-hendra { border-left-color: #69f0ae; }
+.epilogue-preparedness { border-left-color: #ffb74d; }
 
 .epilogue-card-header {
   display: flex;
@@ -3944,84 +3747,8 @@ body.disable-crt .crt-flicker { display: none !important; }
   margin: 0;
 }
 
-/* Telltale Major Choices Section */
-.telltale-recap-container {
-  width: 100%;
-  max-width: 900px;
-}
-
-.telltale-recap-section {
-  background: rgba(14, 18, 23, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-top: 3px solid var(--accent-cyan, #00f3ff);
-  border-radius: 4px;
-  padding: 18px;
-}
-
-.recap-section-header {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 1.05rem;
-  letter-spacing: 2px;
-  color: var(--accent-cyan, #00f3ff);
-  margin: 0 0 16px 0;
-  text-align: center;
-}
-
-.recap-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-}
-
-.recap-decision-card {
-  background: rgba(10, 14, 18, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.recap-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.recap-decision-title {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem;
-  color: #90a4ae;
-  letter-spacing: 1px;
-}
-
-.recap-karma-badge {
-  font-size: 0.65rem;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 2px;
-  letter-spacing: 1px;
-}
-
-.badge-karma-pos { background: rgba(76, 175, 80, 0.2); color: #69f0ae; border: 1px solid #4caf50; }
-.badge-karma-neg { background: rgba(244, 67, 54, 0.2); color: #ff5252; border: 1px solid #f44336; }
-.badge-karma-neu { background: rgba(255, 193, 7, 0.2); color: #ffd54f; border: 1px solid #ffc107; }
-
-.recap-chosen-label {
-  font-size: 0.85rem;
-  color: #eceff1;
-}
-
-.recap-chosen-outcome {
-  font-size: 0.78rem;
-  color: #b0bec5;
-  line-height: 1.35;
-}
-
-/* BNPB Scorecard Box */
-.bnpb-scorecard-box {
+/* Preparedness report scorecard */
+.preparedness-scorecard-box {
   background: rgba(14, 18, 23, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-left: 5px solid #ff9800;
@@ -4031,14 +3758,14 @@ body.disable-crt .crt-flicker { display: none !important; }
   max-width: 900px;
 }
 
-.bnpb-scorecard-header {
+.preparedness-scorecard-header {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 10px;
 }
 
-.bnpb-grade-pill {
+.preparedness-grade-pill {
   font-family: 'VT323', monospace;
   font-size: 1.8rem;
   padding: 4px 14px;
@@ -4047,19 +3774,19 @@ body.disable-crt .crt-flicker { display: none !important; }
   text-shadow: 0 0 8px currentColor;
 }
 
-.bnpb-grade-pill.grade-s { background: rgba(0, 230, 118, 0.2); color: #00e676; border: 2px solid #00e676; }
-.bnpb-grade-pill.grade-a { background: rgba(33, 150, 243, 0.2); color: #29b6f6; border: 2px solid #29b6f6; }
-.bnpb-grade-pill.grade-b { background: rgba(255, 235, 59, 0.2); color: #ffee58; border: 2px solid #ffee58; }
-.bnpb-grade-pill.grade-c { background: rgba(255, 152, 0, 0.2); color: #ffa726; border: 2px solid #ffa726; }
-.bnpb-grade-pill.grade-d { background: rgba(244, 67, 54, 0.2); color: #ef5350; border: 2px solid #ef5350; }
+.preparedness-grade-pill.grade-s { background: rgba(0, 230, 118, 0.2); color: #00e676; border: 2px solid #00e676; }
+.preparedness-grade-pill.grade-a { background: rgba(33, 150, 243, 0.2); color: #29b6f6; border: 2px solid #29b6f6; }
+.preparedness-grade-pill.grade-b { background: rgba(255, 235, 59, 0.2); color: #ffee58; border: 2px solid #ffee58; }
+.preparedness-grade-pill.grade-c { background: rgba(255, 152, 0, 0.2); color: #ffa726; border: 2px solid #ffa726; }
+.preparedness-grade-pill.grade-d { background: rgba(244, 67, 54, 0.2); color: #ef5350; border: 2px solid #ef5350; }
 
-.bnpb-score-title-group {
+.preparedness-score-title-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.bnpb-grade-label {
+.preparedness-grade-label {
   font-family: 'Share Tech Mono', monospace;
   font-size: 1.1rem;
   letter-spacing: 1.5px;
@@ -4067,12 +3794,12 @@ body.disable-crt .crt-flicker { display: none !important; }
   margin: 0;
 }
 
-.bnpb-score-val {
+.preparedness-score-val {
   font-size: 0.85rem;
   color: #cfd8dc;
 }
 
-.bnpb-grade-explanation {
+.preparedness-grade-explanation {
   font-size: 0.88rem;
   line-height: 1.4;
   color: #b0bec5;
@@ -4084,4 +3811,125 @@ body.disable-crt .crt-flicker { display: none !important; }
 .speaker-penjarah  .speaker-name { color: #ff8a80 !important; }
 .speaker-sar       .speaker-name { color: #ffb74d !important; }
 
+/* Day 1 bunker inspection overlay */
+.day1-hotspot-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
 
+.preparedness-debrief-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.preparedness-debrief-item span {
+  color: #b0bec5;
+}
+
+.day1-hotspot-layer ~ .dialogue-overlay,
+.dialogue-overlay { z-index: 12; }
+
+.day1-hotspot-status {
+  position: absolute;
+  top: 4%;
+  left: 3%;
+  display: grid;
+  gap: 3px;
+  min-width: 190px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 193, 7, 0.55);
+  border-left: 3px solid var(--warning-yellow-border, #fbc02d);
+  background: rgba(13, 17, 20, 0.88);
+  color: #e8edf0;
+  font: 0.78rem/1.2 'Share Tech Mono', monospace;
+  letter-spacing: 0.7px;
+  pointer-events: auto;
+}
+
+.day1-hotspot-status strong { color: #fbc02d; font-size: 0.68rem; letter-spacing: 1.3px; }
+
+.day1-hotspot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 2px;
+  border: 2px solid rgba(255, 193, 7, 0.9);
+  border-radius: 5px;
+  background: rgba(26, 34, 39, 0.24);
+  color: #ffe082;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 140ms ease, border-color 140ms ease, opacity 140ms ease;
+}
+
+.day1-hotspot:hover,
+.day1-hotspot:focus-visible { background: rgba(255, 193, 7, 0.25); border-color: #fff3b0; outline: 3px solid rgba(255, 193, 7, 0.4); outline-offset: 2px; }
+.day1-hotspot.is-inspected { border-color: rgba(176, 190, 197, 0.6); background: rgba(20, 25, 28, 0.42); color: #cfd8dc; cursor: default; opacity: 0.68; }
+.hotspot-marker { font: 1.35rem/1 'Share Tech Mono', monospace; text-shadow: 0 1px 2px #000; }
+.hotspot-label { max-width: 130px; padding: 3px 5px; background: rgba(8, 11, 13, 0.9); font: 0.72rem/1.15 'Share Tech Mono', monospace; letter-spacing: 0.3px; opacity: 1; transform: translateY(0); transition: opacity 140ms ease, transform 140ms ease; }
+.day1-hotspot:hover .hotspot-label,
+.day1-hotspot:focus-visible .hotspot-label { opacity: 1; transform: translateY(0); }
+.day1-hotspot.is-inspected .hotspot-label { opacity: 0.75; }
+
+.day1-hotspot-finish {
+  position: absolute;
+  right: 3%;
+  bottom: 7%;
+  min-height: 48px;
+  padding: 10px 15px;
+  border: 1px solid #fbc02d;
+  background: rgba(15, 20, 23, 0.92);
+  color: #ffe082;
+  font: 0.78rem 'Share Tech Mono', monospace;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.day1-hotspot-finish:hover:not(:disabled), .day1-hotspot-finish:focus-visible:not(:disabled) { background: rgba(255, 193, 7, 0.22); outline: 3px solid rgba(255, 193, 7, 0.3); outline-offset: 2px; }
+.day1-hotspot-finish:disabled { border-color: rgba(144, 164, 174, 0.35); color: #78909c; cursor: not-allowed; opacity: 0.7; }
+
+@media (max-width: 768px) {
+  .day1-hotspot-status { top: 2%; left: 2%; min-width: 155px; padding: 7px 9px; }
+  .day1-hotspot-finish { right: 2%; bottom: 4%; font-size: 0.68rem; }
+  .hotspot-label { max-width: 92px; font-size: 0.58rem; }
+}
+
+/* Day 2 expedition map and route HUD */
+.expedition-map-panel {
+  width: min(100%, 920px);
+  margin: 0 auto;
+  padding: clamp(10px, 1.3vw, 18px);
+  border: 1px solid var(--line-bright);
+  background: rgba(10, 14, 18, 0.9);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.4);
+}
+.expedition-map-header { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 10px; color: var(--warning-yellow-border); font: 0.84rem 'Share Tech Mono', monospace; letter-spacing: 1px; }
+.expedition-map-header span { color: var(--text-muted); font-size: 0.74rem; }
+.expedition-map-route { display: grid; grid-template-rows: auto 1fr auto auto; gap: 4px; margin: 7px auto 14px; color: var(--cyan); font: 0.64rem 'Share Tech Mono', monospace; text-align: center; }
+.route-node { display: inline-block; padding: 4px 8px; border: 1px solid rgba(91, 192, 190, 0.38); background: rgba(20, 35, 40, 0.65); letter-spacing: 0.6px; }
+.route-crossing { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+.route-crossing b { color: var(--warning-yellow-border); font-weight: normal; letter-spacing: 1.4px; }
+.route-stem { width: 1px; height: 16px; justify-self: center; background: rgba(91, 192, 190, 0.5); }
+.route-north, .route-south { justify-self: center; }
+.expedition-map-locations { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.expedition-location-card { min-height: 118px; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 12px; border: 1px solid var(--line); background: rgba(23, 31, 36, 0.94); color: var(--text-pixel); text-align: left; cursor: pointer; transition: transform 140ms ease, border-color 140ms ease, background 140ms ease; }
+.expedition-location-card:hover:not(:disabled), .expedition-location-card:focus-visible:not(:disabled) { transform: translateY(-2px); border-color: var(--warning-yellow-border); background: rgba(43, 48, 47, 0.98); outline: 3px solid rgba(255, 209, 102, 0.25); outline-offset: 2px; }
+.expedition-location-card:disabled { cursor: not-allowed; opacity: 0.62; }
+.expedition-location-card.is-visited { border-style: dashed; }
+.location-card-title { color: var(--cyan); font: 0.9rem 'Share Tech Mono', monospace; letter-spacing: 0.8px; }
+.location-card-risk { color: var(--warning-yellow-border); font: 0.72rem 'Share Tech Mono', monospace; }
+.location-card-resource { color: var(--text-muted); font: 0.72rem/1.3 'Share Tech Mono', monospace; }
+.location-card-state { margin-top: auto; color: #a9d8c0; font: 0.66rem 'Share Tech Mono', monospace; letter-spacing: 0.6px; }
+.scavenger-expedition-objective { max-width: min(48vw, 520px); padding: 6px 10px; border: 1px solid rgba(255, 209, 102, 0.55); background: rgba(12, 16, 18, 0.9); color: var(--warning-yellow-border); font: 0.72rem/1.25 'Share Tech Mono', monospace; }
+.scavenger-timer-badge.no-timer { border-color: rgba(91, 192, 190, 0.65); color: var(--cyan); }
+@media (max-width: 768px) {
+  .expedition-map-route { display: none; }
+  .expedition-map-locations { grid-template-columns: 1fr; }
+  .expedition-location-card { min-height: 78px; }
+  .scavenger-expedition-objective { max-width: 55vw; font-size: 0.62rem; }
+}

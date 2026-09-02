@@ -18,7 +18,9 @@ const ITEM_ASSETS = {
   kit:   { image: new URL('../assets/items/kit_icon.png',   import.meta.url).href, label: 'Kotak P3K',       desc: '+10 Kesehatan' },
   radio: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Radio Portable', desc: 'Info & Sinyal SAR' },
   snack: { image: new URL('../assets/items/snacks.png',     import.meta.url).href, label: 'Snack Darurat',   desc: '+5 Makanan Cepat' },
-  toy:   { image: new URL('../assets/items/car_toy.png',    import.meta.url).href, label: 'Mainan Anak',     desc: 'Moral Keluarga' }
+  toy:   { image: new URL('../assets/items/car_toy.png',    import.meta.url).href, label: 'Mainan Anak',     desc: 'Moral Keluarga' },
+  battery: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Baterai Ekstra', desc: 'Cadangan daya' },
+  mask: { image: new URL('../assets/items/kit_icon.png', import.meta.url).href, label: 'Masker Medis', desc: 'Perlindungan napas' }
 };
 
 // Each pose has different transparent padding inside its 256x256 cell.
@@ -52,9 +54,15 @@ export class ScavengerMinigame {
    * @param {HTMLElement} containerEl - Container element (#story-box or dedicated wrapper)
    * @param {Function} onComplete - Callback receiving { collectedItems: string[] }
    */
-  constructor(containerEl, onComplete) {
+  constructor(containerEl, onComplete, config = null) {
     this.container = containerEl;
     this.onComplete = onComplete;
+    this.config = config || null;
+    this.mode = config?.mode || 'prologue';
+    this.elapsedSeconds = 0;
+    this.aftershockTriggered = false;
+    this.finishTimeoutId = null;
+    this.hazardNoticeIds = new Set();
 
     this.canvas = null;
     this.ctx = null;
@@ -99,7 +107,8 @@ export class ScavengerMinigame {
       y: 650,
       w: 20, // Compact collision box for smooth navigation
       h: 14,
-      speed: 4.4,
+      // Pixels per second; movement is multiplied by frame delta in _update().
+      speed: 264,
       dir: 'up', // Faces inside the house on spawn
       isMoving: false,
       frame: 0,
@@ -189,6 +198,7 @@ export class ScavengerMinigame {
     // Emergency Timer & Tremor
     this.duration = 40; // 40 seconds
     this.timeLeft = this.duration;
+    this.timerEnabled = true;
     this.lastTime = 0;
     this.screenShake = 0;
     this.notificationText = '';
@@ -200,6 +210,26 @@ export class ScavengerMinigame {
     // Controls
     this.keys = {};
     this._bindEvents();
+    this._applyConfig(config);
+  }
+
+  _applyConfig(config) {
+    if (!config) return;
+    this.mode = config.mode || this.mode;
+    this.MAP_W = config.mapWidth || this.MAP_W;
+    this.MAP_H = config.mapHeight || this.MAP_H;
+    this.VIEW_W = config.viewport?.width || this.VIEW_W;
+    this.VIEW_H = config.viewport?.height || this.VIEW_H;
+    this.timerEnabled = config.timerEnabled !== false;
+    this.duration = Number.isFinite(config.duration) ? config.duration : this.duration;
+    this.maxCapacity = config.capacity || this.maxCapacity;
+    this.exits = (config.exits || []).map((exit) => ({ ...exit }));
+    this.hazards = (config.hazards || []).map((hazard) => ({ ...hazard }));
+    if (Array.isArray(config.colliders)) this.colliders = config.colliders.map((collider) => ({ ...collider }));
+    if (Array.isArray(config.items)) this.items = config.items.map((item, index) => ({ ...item, uid: `${item.id}-${index}`, collected: false }));
+    if (config.spawnPosition) Object.assign(this.player, config.spawnPosition);
+    if (Number.isFinite(config.playerSpeed)) this.player.speed = config.playerSpeed;
+    if (config.mapSrc) this.mapImage.src = config.mapSrc;
   }
 
   _bindEvents() {
@@ -232,6 +262,9 @@ export class ScavengerMinigame {
     this.isActive = true;
     this.backpack = [];
     this.timeLeft = this.duration;
+    this.elapsedSeconds = 0;
+    this.aftershockTriggered = false;
+    this.hazardNoticeIds.clear();
     this.lastTime = performance.now();
 
     // Initial camera position centered on player
@@ -255,14 +288,15 @@ export class ScavengerMinigame {
     this.hudHeader = document.createElement('div');
     this.hudHeader.className = 'scavenger-hud-header';
     this.hudHeader.innerHTML = `
-      <div class="scavenger-timer-badge" id="scavenger-timer">
-        <span class="timer-icon">⚠</span> EVAKUASI: <strong id="timer-val">00:40</strong>
+      <div class="scavenger-timer-badge${this.timerEnabled ? '' : ' no-timer'}" id="scavenger-timer">
+        <span class="timer-icon">${this.timerEnabled ? '⚠' : '◷'}</span> ${this.timerEnabled ? 'EVAKUASI:' : 'EKSPEDISI:'} <strong id="timer-val">${this.timerEnabled ? '00:40' : 'TANPA BATAS WAKTU'}</strong>
       </div>
       <div class="scavenger-room-badge" id="scavenger-room" style="background: rgba(14, 18, 26, 0.92); border: 1px solid #5bc0be; color: #5bc0be; font-family: 'Share Tech Mono', monospace; padding: 6px 14px; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 1px; box-shadow: 0 4px 16px rgba(0,0,0,0.7);">
-        📍 <span id="room-name-val">RUANG KELUARGA</span>
+        📍 <span id="room-name-val">${this.config?.label || 'RUANG KELUARGA'}</span>
       </div>
+      ${this.mode === 'expedition' ? `<div class="scavenger-expedition-objective">⌖ ${this.config?.objective || 'Kembali ke titik aman.'}</div>` : ''}
       <div class="scavenger-backpack-badge" id="scavenger-backpack">
-        <span class="backpack-icon">🎒</span> RANSEL: <strong id="backpack-count">0 / 5</strong>
+        <span class="backpack-icon">🎒</span> RANSEL: <strong id="backpack-count">0 / ${this.maxCapacity}</strong>
       </div>
     `;
 
@@ -306,8 +340,13 @@ export class ScavengerMinigame {
       const release = (e) => { e.preventDefault(); this.keys[key] = false; };
       btn.addEventListener('touchstart', press, { passive: false });
       btn.addEventListener('touchend', release, { passive: false });
+      btn.addEventListener('touchcancel', release, { passive: false });
       btn.addEventListener('mousedown', press);
       btn.addEventListener('mouseup', release);
+      btn.addEventListener('mouseleave', release);
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointerleave', release);
+      btn.addEventListener('pointercancel', release);
     };
 
     this.touchControls.querySelectorAll('.touch-btn').forEach(btn => {
@@ -332,7 +371,7 @@ export class ScavengerMinigame {
     const nearbyItem = this.items.find(it => !it.collected && this._getDist(this.player, it) < 70);
     if (nearbyItem) {
       if (this.backpack.length >= this.maxCapacity) {
-        this._showNotification('Ransel penuh! Maksimal 5 barang.');
+        this._showNotification(`Ransel penuh! Maksimal ${this.maxCapacity} barang.`);
         retroAudio.playBuzz?.();
         return;
       }
@@ -345,11 +384,12 @@ export class ScavengerMinigame {
       return;
     }
 
-    // Check if near Bunker Hatch
-    const hatchCenter = { x: this.bunkerHatch.x + this.bunkerHatch.w / 2, y: this.bunkerHatch.y + this.bunkerHatch.h / 2 };
-    if (this._getDist(this.player, hatchCenter) < 85) {
-      this._finishMinigame('entered_hatch');
-    }
+    const exits = this.exits?.length ? this.exits : [this.bunkerHatch];
+    const nearbyExit = exits.find((exit) => {
+      const center = { x: exit.x + exit.w / 2, y: exit.y + exit.h / 2 };
+      return this._getDist(this.player, center) < 85;
+    });
+    if (nearbyExit) this._finishMinigame(nearbyExit.reason || 'entered_hatch');
   }
 
   _updateHUD() {
@@ -371,6 +411,12 @@ export class ScavengerMinigame {
   }
 
   _getCurrentRoomName() {
+    if (this.mode === 'expedition') {
+      const zone = (this.config?.roomZones || []).find((room) =>
+        this.player.x >= room.x && this.player.x <= room.x + room.w && this.player.y >= room.y && this.player.y <= room.y + room.h
+      );
+      return zone?.name || this.config?.label || 'RUTE EKSPEDISI';
+    }
     const px = this.player.x;
     const py = this.player.y;
 
@@ -399,17 +445,19 @@ export class ScavengerMinigame {
   }
 
   _update(dt) {
-    // Timer Countdown
-    this.timeLeft -= dt;
-    if (this.timeLeft <= 0) {
-      this.timeLeft = 0;
-      this._finishMinigame('time_out');
-      return;
+    this.elapsedSeconds += dt;
+    if (this.timerEnabled) {
+      this.timeLeft -= dt;
+      if (this.timeLeft <= 0) {
+        this.timeLeft = 0;
+        this._finishMinigame('time_out');
+        return;
+      }
     }
 
     // Update Timer HUD
     const timerEl = document.getElementById('timer-val');
-    if (timerEl) {
+    if (timerEl && this.timerEnabled) {
       const s = Math.ceil(this.timeLeft);
       timerEl.textContent = `00:${s < 10 ? '0' : ''}${s}`;
       if (s <= 10) {
@@ -429,7 +477,7 @@ export class ScavengerMinigame {
     }
 
     // Tremor intensity
-    const elapsedRatio = 1 - (this.timeLeft / this.duration);
+    const elapsedRatio = this.timerEnabled && this.duration > 0 ? 1 - (this.timeLeft / this.duration) : 0;
     if (Math.random() < 0.15 + elapsedRatio * 0.25) {
       this.screenShake = (1.2 + elapsedRatio * 4.5) * (Math.random() - 0.5);
     } else {
@@ -459,8 +507,8 @@ export class ScavengerMinigame {
         vy *= 0.7071;
       }
 
-      const nextX = this.player.x + vx * this.player.speed;
-      const nextY = this.player.y + vy * this.player.speed;
+      const nextX = this.player.x + vx * this.player.speed * dt;
+      const nextY = this.player.y + vy * this.player.speed * dt;
 
       // Map bounds & Wall collisions
       if (this._canMoveTo(nextX, this.player.y)) this.player.x = nextX;
@@ -482,6 +530,39 @@ export class ScavengerMinigame {
     const targetCamY = Math.max(0, Math.min(this.MAP_H - this.VIEW_H, this.player.y - this.VIEW_H / 2));
     this.camera.x += (targetCamX - this.camera.x) * 0.12;
     this.camera.y += (targetCamY - this.camera.y) * 0.12;
+
+    this._updateHazards();
+  }
+
+  _updateHazards() {
+    if (this.mode !== 'expedition') return;
+    this.hazards.forEach((hazard) => {
+      if (hazard.type === 'aftershock' && !this.aftershockTriggered && this.elapsedSeconds >= (hazard.aftershockAt || 0)) {
+        this.aftershockTriggered = true;
+        if (hazard.blocker) this.colliders.push({ ...hazard.blocker });
+        this.screenShake = 8;
+        this._showNotification(hazard.message || 'Aftershock mengubah jalur. Cari rute lain.');
+        retroAudio.playForeshadowTremor?.();
+      }
+      if (hazard.type === 'cable' && !this.hazardNoticeIds.has(hazard.id) && this._isNearRect(hazard, 76)) {
+        this.hazardNoticeIds.add(hazard.id);
+        this._showNotification(hazard.message || 'Kabel menyentuh air. Cari jalur lain.');
+      }
+      if (hazard.type === 'rubble' && !this.hazardNoticeIds.has(hazard.id) && this._isNearRect(hazard, 76)) {
+        this.hazardNoticeIds.add(hazard.id);
+        this._showNotification(hazard.message || 'Jalan tertutup puing. Putar melalui sisi lain.');
+      }
+      if (hazard.type === 'ash' && !this.hazardNoticeIds.has(hazard.id) && this._isNearRect(hazard, 20)) {
+        this.hazardNoticeIds.add(hazard.id);
+        this._showNotification(hazard.message || 'Abu tebal mengurangi jarak pandang.');
+      }
+    });
+  }
+
+  _isNearRect(rect, padding = 0) {
+    const closestX = Math.max(rect.x, Math.min(this.player.x, rect.x + rect.w));
+    const closestY = Math.max(rect.y, Math.min(this.player.y, rect.y + rect.h));
+    return Math.hypot(this.player.x - closestX, this.player.y - closestY) <= padding;
   }
 
   _canMoveTo(x, y) {
@@ -520,12 +601,15 @@ export class ScavengerMinigame {
     const camY = Math.round(this.camera.y);
     ctx.translate(-camX + this.screenShake, -camY + this.screenShake * 0.5);
 
-    // ── 1. DRAW HOUSE FLOORPLAN MAP ──
-    // ── 1. DRAW PROCEDURAL SCHEMATIC HOUSE BLUEPRINT ──
-    this._renderHouseLayout(ctx);
-
-    // ── 2. DRAW BUNKER ENTRANCE HATCH PULSING BEACON ──
-    this._renderBunkerHatch(ctx);
+    if (this.mode === 'expedition') {
+      this._renderExpeditionLayout(ctx);
+      this._renderExpeditionExits(ctx);
+    } else {
+      // ── 1. DRAW PROCEDURAL SCHEMATIC HOUSE BLUEPRINT ──
+      this._renderHouseLayout(ctx);
+      // ── 2. DRAW BUNKER ENTRANCE HATCH PULSING BEACON ──
+      this._renderBunkerHatch(ctx);
+    }
 
     // ── 3. DRAW COLLECTIBLE ITEMS ──
     this._renderItems(ctx);
@@ -543,6 +627,7 @@ export class ScavengerMinigame {
 
     ctx.restore(); // Restore Camera World Coordinates
 
+    if (this.mode === 'expedition') this._renderExpeditionAtmosphere(ctx);
     // ── 6. DRAW FIXED SCREEN HUD OVERLAYS (Minimap Radar & Notifications) ──
     this._renderScreenHUD(ctx);
 
@@ -563,6 +648,71 @@ export class ScavengerMinigame {
     ctx.strokeStyle = '#00ff88';
     ctx.fillRect(this.player.x - this.player.w / 2, this.player.y - this.player.h / 2, this.player.w, this.player.h);
     ctx.strokeRect(this.player.x - this.player.w / 2, this.player.y - this.player.h / 2, this.player.w, this.player.h);
+    ctx.restore();
+  }
+
+  _renderExpeditionLayout(ctx) {
+    const palette = this.config?.palette || { floor: '#252b32', accent: '#5bc0be', hazard: '#ffd166' };
+    ctx.fillStyle = palette.floor;
+    ctx.fillRect(0, 0, this.MAP_W, this.MAP_H);
+
+    ctx.strokeStyle = 'rgba(91, 192, 190, 0.08)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < this.MAP_W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.MAP_H); ctx.stroke(); }
+    for (let y = 0; y < this.MAP_H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(this.MAP_W, y); ctx.stroke(); }
+
+    (this.config?.roomZones || []).forEach((zone) => {
+      ctx.fillStyle = zone.color || '#263238';
+      ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(zone.x, zone.y, zone.w, zone.h);
+      ctx.fillStyle = palette.accent;
+      ctx.font = 'bold 12px "Share Tech Mono", monospace';
+      ctx.fillText(`[ ${zone.name} ]`, zone.x + 12, zone.y + 22);
+    });
+
+    this.colliders.forEach((collider) => {
+      ctx.fillStyle = collider.id.includes('rubble') || collider.id.includes('cable') ? 'rgba(104, 78, 67, 0.92)' : 'rgba(7, 12, 17, 0.78)';
+      ctx.fillRect(collider.x, collider.y, collider.w, collider.h);
+      ctx.strokeStyle = collider.id.includes('cable') ? '#e36a5d' : 'rgba(168, 183, 191, 0.6)';
+      ctx.strokeRect(collider.x, collider.y, collider.w, collider.h);
+    });
+
+    this.hazards.filter((hazard) => hazard.type !== 'aftershock').forEach((hazard) => {
+      ctx.save();
+      ctx.globalAlpha = hazard.type === 'ash' ? 0.22 : 0.78;
+      ctx.fillStyle = hazard.type === 'cable' ? '#e36a5d' : hazard.type === 'ash' ? '#d7dde0' : '#8d6e63';
+      ctx.fillRect(hazard.x, hazard.y, hazard.w, hazard.h);
+      ctx.restore();
+    });
+  }
+
+  _renderExpeditionExits(ctx) {
+    const exits = this.exits?.length ? this.exits : [];
+    exits.forEach((exit) => {
+      const pulse = 0.55 + 0.45 * Math.sin(Date.now() * 0.006);
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 255, 136, 0.12)';
+      ctx.fillRect(exit.x, exit.y, exit.w, exit.h);
+      ctx.strokeStyle = `rgba(0, 255, 136, ${pulse})`;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(exit.x, exit.y, exit.w, exit.h);
+      ctx.fillStyle = '#8fffc4';
+      ctx.font = 'bold 10px "Share Tech Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(exit.label || 'KEMBALI', exit.x + exit.w / 2, exit.y + exit.h / 2 + 3);
+      ctx.restore();
+    });
+  }
+
+  _renderExpeditionAtmosphere(ctx) {
+    const ash = this.hazards.find((hazard) => hazard.type === 'ash' && this._isNearRect(hazard, 0));
+    if (!ash) return;
+    const hasMask = this.backpack.includes('mask');
+    ctx.save();
+    ctx.fillStyle = hasMask ? 'rgba(220, 230, 232, 0.08)' : 'rgba(220, 230, 232, 0.18)';
+    ctx.fillRect(0, 0, this.VIEW_W, this.VIEW_H);
     ctx.restore();
   }
 
@@ -676,13 +826,14 @@ export class ScavengerMinigame {
       this._drawBadge(ctx, nearbyItem.x, nearbyItem.y - 32, `[ SPASI / KLIK: AMBIL ${nearbyItem.name.toUpperCase()} ]`, '#ffd166');
     }
 
-    // Proximity hatch tooltip
-    const hatchCenter = { x: this.bunkerHatch.x + this.bunkerHatch.w / 2, y: this.bunkerHatch.y + this.bunkerHatch.h / 2 };
-    if (this._getDist(this.player, hatchCenter) < 85) {
+    const exits = this.exits?.length ? this.exits : [this.bunkerHatch];
+    const nearbyExit = exits.find((exit) => this._getDist(this.player, { x: exit.x + exit.w / 2, y: exit.y + exit.h / 2 }) < 85);
+    if (nearbyExit) {
+      const exitCenter = { x: nearbyExit.x + nearbyExit.w / 2, y: nearbyExit.y + nearbyExit.h / 2 };
       const msg = this.backpack.length > 0
-        ? `[ SPASI / KLIK: MASUK KE BUNKER DENGAN ${this.backpack.length} BARANG ]`
-        : `[ SPASI / KLIK: MASUK KE BUNKER ]`;
-      this._drawBadge(ctx, hatchCenter.x, hatchCenter.y - 38, msg, '#00ff88');
+        ? `[ SPASI / KLIK: KEMBALI DENGAN ${this.backpack.length} BARANG ]`
+        : '[ SPASI / KLIK: KEMBALI KE TITIK AMAN ]';
+      this._drawBadge(ctx, exitCenter.x, exitCenter.y - 38, msg, '#00ff88');
     }
   }
 
@@ -734,7 +885,7 @@ export class ScavengerMinigame {
     // Label
     ctx.font = '9px "Share Tech Mono", monospace';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.fillText('RADAR RUMAH', mx + 6, my + 11);
+    ctx.fillText(this.mode === 'expedition' ? 'RADAR RUTE' : 'RADAR RUMAH', mx + 6, my + 11);
 
     // Scale factors
     const sx = mw / this.MAP_W;
@@ -745,9 +896,12 @@ export class ScavengerMinigame {
     ctx.lineWidth = 1;
     ctx.strokeRect(mx + this.camera.x * sx, my + this.camera.y * sy, this.VIEW_W * sx, this.VIEW_H * sy);
 
-    // Bunker Hatch Indicator (Pulsing Green Box)
-    ctx.fillStyle = '#00ff88';
-    ctx.fillRect(mx + this.bunkerHatch.x * sx, my + this.bunkerHatch.y * sy, 7, 5);
+    // Exit indicator
+    const exits = this.exits?.length ? this.exits : [this.bunkerHatch];
+    exits.forEach((exit) => {
+      ctx.fillStyle = '#00ff88';
+      ctx.fillRect(mx + exit.x * sx, my + exit.y * sy, 7, 5);
+    });
 
     // Items (Yellow dots)
     this.items.forEach(it => {
@@ -940,7 +1094,8 @@ export class ScavengerMinigame {
     retroAudio.playDoorLock?.();
 
     // Transition delay
-    setTimeout(() => {
+    this.finishTimeoutId = setTimeout(() => {
+      this.finishTimeoutId = null;
       this.destroy();
       if (typeof this.onComplete === 'function') {
         this.onComplete({
@@ -957,6 +1112,12 @@ export class ScavengerMinigame {
       cancelAnimationFrame(this.animId);
       this.animId = null;
     }
+    if (this.finishTimeoutId) {
+      clearTimeout(this.finishTimeoutId);
+      this.finishTimeoutId = null;
+    }
+
+    Object.keys(this.keys).forEach((key) => { this.keys[key] = false; });
 
     window.removeEventListener('keydown', this._handleKeyDown);
     window.removeEventListener('keyup', this._handleKeyUp);

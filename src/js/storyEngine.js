@@ -13,12 +13,21 @@ import { GameModel  } from './gameModel.js';
 import { GameView   } from './gameView.js';
 import { RetroAudio } from './retroAudio.js';
 import { BunkerMinigame } from './bunkerMinigame.js';
-import { ENDING_IDS, SURVIVAL, parseHour, FACTS_MAP, CHOICE_QUALITY_MAP } from './constants.js';
+import { ENDING_IDS, parseHour } from './constants.js';
+import { getExpeditionConfig, EXPEDITION_CONFIGS } from './expeditionConfig.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
-const RADIO_SCENES = new Set(['day2_radio_setup', 'day2_radio_save', 'day3_signal_bad', 'day3_start', 'day3_water_issue']);
-const PROLOG_PACK_FLAGS = ['food_packed', 'drink_packed', 'kit_packed', 'battery_packed', 'snack_packed', 'toy_packed'];
+const RADIO_SCENES = new Set(['day3_start', 'day3_radio_rescue']);
+const DAY1_HOTSPOTS = Object.freeze([
+  { id: 'supply', flag: 'inspected_supply', label: 'Lemari Persediaan', x: 29, y: 23, w: 24, h: 34, text: 'Rak persediaan masih tertata. Satu kaleng makanan dan botol air bisa dipindahkan ke meja kerja tanpa mengusik cadangan utama.', reward: { item: 'food', amount: 1 } },
+  { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 58, y: 45, w: 12, h: 19, text: 'Loker P3K berisi kasa dan antiseptik yang masih kering. Kotak ini mudah dijangkau bila ada yang terluka.', reward: { item: 'kit', amount: 1 } },
+  { id: 'ventilation', flag: 'inspected_ventilation', label: 'Ventilasi', x: 57, y: 18, w: 12, h: 20, text: 'Kisi ventilasi berdebu, tetapi di balik panel ada filter cadangan yang belum terpasang. Pengetahuan teknis +1.', knowledge: 1, setFlags: ['found_spare_filter'] },
+  { id: 'power', flag: 'inspected_power', label: 'Panel Daya', x: 25, y: 24, w: 6, h: 14, text: 'Panel daya menyala stabil. Menandai sakelar pemutus utama akan mempercepat respons jika arus kembali melonjak. Pengetahuan teknis +1.', knowledge: 1 },
+  { id: 'radio', flag: 'inspected_radio', label: 'Radio VHF', x: 34, y: 62, w: 13, h: 12, text: 'Radio VHF masih menerima dengung statik. Frekuensi darurat bisa dicari nanti, setelah udara benar-benar aman.' },
+  { id: 'family_storage', flag: 'inspected_family_storage', label: 'Penyimpanan Keluarga', x: 84, y: 73, w: 13, h: 18, text: 'Kotak penyimpanan keluarga berisi selimut dan foto lama. Menaruhnya dekat dipan membuat malam pertama terasa sedikit lebih manusiawi.' },
+]);
+const EXPEDITION_LOCATIONS = Object.freeze(Object.values(EXPEDITION_CONFIGS).map(({ id, label, risk, resourceHint }) => ({ id, label, risk, resourceHint })));
 
 export class StoryEngine {
   /**
@@ -58,14 +67,15 @@ export class StoryEngine {
    * Initializes the model and begins rendering from the given scene.
    * Called for both new games and save-file loads.
    */
-  start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health) {
-    this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health);
+  start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
+    this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health, expeditionVisitedLocations);
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
     this.pendingMinigameChoice = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds?.clear();
     this.bunkerMinigame?.close();
+    this.radioMiniGame?.resetFinalResult();
 
     // One-time UI setups — guarded so restarting doesn't re-bind listeners.
     if (!this._journalSetup) {
@@ -92,38 +102,11 @@ export class StoryEngine {
     // Check health-zero fatal condition first, regardless of incoming scene.
     if (this._checkFatalCondition(sceneId)) return;
 
-    if (sceneId === 'day2_seal_leak') {
-      const hasIgnored = this.model.history.some(entry => entry.choiceId === 'c_day2_air_remedy_ignore');
-      if (this.model.flags.air_uninspected === true && !this.model.flags.air_remedied && !hasIgnored) {
-        this.renderScene('day2_remedy_air');
-        return;
-      }
-    }
-
     // Resolve logic-trigger pseudo-scenes before doing anything else.
     if (sceneId === 'ending_eval' || sceneId === 'trigger_ending_eval') {
       this.renderScene(this.model.evaluateEnding());
       return;
     }
-    if (sceneId === 'trigger_scavenge_eval') {
-      const success = this.model.evaluateScavenge();
-      this.renderScene(success ? 'day2_scavenge_success' : 'day2_scavenge_fail');
-      return;
-    }
-    if (sceneId === 'day3_pinch_water_resolved') {
-      const isFiltered = this.model.flags.water_filtered === true;
-      const target = (isFiltered && !this.model.flags.water_ruined) ? 'day3_water_filter' : 'day3_water_poisoned';
-      this.model.flags.structural_damage = true;
-      this.model.health = Math.max(0, this.model.health - 15);
-      this.renderScene(target);
-      return;
-    }
-    if (sceneId === 'day3_pinch_vent_inspected') {
-      const isFiltered = this.model.flags.water_filtered === true;
-      this.renderScene(isFiltered && !this.model.flags.water_ruined ? 'day3_water_filter' : 'day3_water_poisoned');
-      return;
-    }
-
     const scene = this.storyData.scenes[sceneId];
     if (!scene) {
       console.error(`[StoryEngine] Scene "${sceneId}" not found in story data.`);
@@ -176,7 +159,7 @@ export class StoryEngine {
       this.audio.stopRadioSound();
     }
 
-    if (scene.background === 'prolog4' || ['day2_start', 'day2_damage_check', 'day3_pinch_start'].includes(sceneId)) {
+    if (scene.background === 'prolog4' || sceneId === 'day2_start') {
       this.audio.playEarthquake();
     }
 
@@ -195,7 +178,7 @@ export class StoryEngine {
       this.view.renderSystemAlert(null);
       // Persist game completed state to unlock NG+
       localStorage.setItem('bunker72_game_completed', 'true');
-      // Force render of entire protocol log with analytics quality tags
+      // Preserve the player's full decision record without scoring it morally.
       this.view.renderProtocolLog(this.model.history, true);
       // Auto-open journal panel so player immediately views analytics
       this.view.openJournal();
@@ -221,7 +204,7 @@ export class StoryEngine {
 
     // Build choices payload for use by typeText and skipTyping.
     const choicesPayload = {
-      choices:       scene.choices,
+      choices:       this._prepareSceneChoices(scene.choices),
       currentSceneId: sceneId,
       flags:         this.model.flags,
       onChoiceClick: (choice) => this.handleChoiceSelect(choice),
@@ -239,6 +222,28 @@ export class StoryEngine {
       this.view.dom.dialogueText.textContent = '';
       this.view.isTyping = false;
       this.view.startScavengerMinigame((result) => this.handleScavengerComplete(result));
+      return;
+    }
+
+    if (sceneId === 'day1_inspection') {
+      const showInspection = () => this.view.renderDay1Hotspots(
+        DAY1_HOTSPOTS,
+        this.model.flags,
+        (hotspotId) => this.handleDay1Inspection(hotspotId),
+        () => this.renderScene('day1_lockdoor')
+      );
+      this.view.typeText(modifiedText, showInspection, { ...choicesPayload, choices: [], inspectionReady: showInspection });
+      return;
+    }
+
+    if (sceneId === 'day2_expedition_map') {
+      const showMap = () => this.view.renderExpeditionMap(
+        EXPEDITION_LOCATIONS,
+        this.model.expeditionVisitedLocations,
+        Math.max(0, 2 - this.model.expeditionVisitedLocations.length),
+        (locationId) => this.startExpedition(locationId)
+      );
+      this.view.typeText(modifiedText, showMap, { ...choicesPayload, choices: [], expeditionMapReady: showMap });
       return;
     }
 
@@ -270,12 +275,11 @@ export class StoryEngine {
     // Pass choicesPayload so skipTyping can render choices without model access.
     this.view.typeText(modifiedText, () => {
       this.view.renderChoices(
-        scene.choices, sceneId, this.model.flags,
+        choicesPayload.choices, sceneId, this.model.flags,
         (choice) => this.handleChoiceSelect(choice)
       );
 
-      // Auto-trigger Radio Mini-Game if scene specifies it or is day2_radio_setup
-      if (scene.autoTriggerRadio === true || sceneId === 'day2_radio_setup') {
+      if (scene.autoTriggerRadio === true) {
         setTimeout(() => {
           this.radioMiniGame?.open();
         }, 400);
@@ -340,6 +344,107 @@ export class StoryEngine {
     this.renderScene('prolog_intro');
   }
 
+  handleDay1Inspection(hotspotId) {
+    const hotspot = DAY1_HOTSPOTS.find((spot) => spot.id === hotspotId);
+    if (!hotspot || this.model.flags[hotspot.flag]) return;
+    const inspectionCount = DAY1_HOTSPOTS.filter((spot) => this.model.flags[spot.flag]).length;
+    if (inspectionCount >= 3) return;
+
+    this.model.setFlag(hotspot.flag);
+    hotspot.setFlags?.forEach((flag) => this.model.setFlag(flag));
+    if (hotspot.reward?.item) this.model.addInventoryItem(hotspot.reward.item, hotspot.reward.amount || 1);
+    const knowledge = hotspot.knowledge || 0;
+    if (knowledge) {
+      this.model.modifyKnowledge(knowledge);
+      this.view.pulseKnowledge(knowledge);
+    }
+
+    this.model.history.push({
+      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '6 Jam',
+      text: `[INSPEKSI] ${hotspot.label}: ${hotspot.text}`,
+      choiceId: `inspection_${hotspot.id}`,
+      effect: knowledge,
+    });
+    this.view.renderProtocolLog(this.model.history);
+    this.view.showDay1InspectionFeedback(hotspot.text);
+    this.view.renderHud(this.storyData.scenes[this.model.currentSceneId], this.model.knowledge, this.model.currentSceneId, this.model.flags,
+      this.model.hunger, this.model.thirst, this.model.health);
+    this.view.updateInventoryUI(this.model.isInventoryDisabledScene(this.model.currentSceneId), this.model.inventory);
+    this.view.renderDay1Hotspots(DAY1_HOTSPOTS, this.model.flags,
+      (id) => this.handleDay1Inspection(id),
+      () => this.renderScene('day1_lockdoor'));
+    this.onSave?.(this.model.toSaveData());
+  }
+
+  startExpedition(locationId) {
+    const config = getExpeditionConfig(locationId);
+    if (!config || this.model.expeditionVisitedLocations.includes(locationId) || this.model.expeditionVisitedLocations.length >= 2) return;
+    this.view.dom.choicesPanel.innerHTML = '';
+    this.view.dom.storyBox.classList.remove('has-interactive-choices');
+    this.view.startScavengerMinigame(
+      (result) => this.handleExpeditionComplete({ ...result, locationId }),
+      config
+    );
+  }
+
+  _applyExpeditionResult(result) {
+    const collectedItems = Array.isArray(result?.collectedItems) ? result.collectedItems : [];
+    collectedItems.forEach((itemId) => {
+      if (itemId === 'food') this.model.addInventoryItem('food', 1);
+      if (itemId === 'drink') this.model.addInventoryItem('drink', 1);
+      if (itemId === 'kit') this.model.addInventoryItem('kit', 1);
+      if (itemId === 'snack') this.model.addInventoryItem('food', 1);
+      if (itemId === 'battery') this.model.setFlag('extra_battery');
+      if (itemId === 'mask') this.model.setFlag('medical_mask_ready');
+    });
+  }
+
+  handleExpeditionComplete(result) {
+    const locationId = result?.locationId;
+    if (!getExpeditionConfig(locationId) || this.model.expeditionVisitedLocations.includes(locationId)) return;
+    this.model.expeditionVisitedLocations.push(locationId);
+    this._applyExpeditionResult(result);
+    const config = getExpeditionConfig(locationId);
+    this.model.history.push({
+      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '30 Jam',
+      text: `[EKSPEDISI] ${config.label}: ${result.collectedItems?.length || 0} unit dibawa pulang (${result.reason || 'returned'}).`,
+      choiceId: `expedition_${locationId}`,
+      effect: 0,
+    });
+    this.view.renderProtocolLog(this.model.history);
+    this.view.updateInventoryUI(false, this.model.inventory);
+    this.onSave?.(this.model.toSaveData());
+
+    if (!this.model.flags.hendra_encountered) {
+      this.renderScene('day2_hendra_encounter');
+    } else if (this.model.expeditionVisitedLocations.length >= 2) {
+      this.renderScene('day2_expedition_return');
+    } else {
+      this.renderScene('day2_expedition_map');
+    }
+  }
+
+  /** Stores the one final radio grade, saves it, then returns to the story. */
+  handleFinalRadioResult(result) {
+    const requestedQuality = result?.quality;
+    const committed = this.model.setRadioQuality(requestedQuality);
+    const quality = committed ? requestedQuality : this.model.flags.radio_quality;
+    if (!['clear', 'weak', 'failed'].includes(quality)) return;
+
+    const scene = this.storyData.scenes[this.model.currentSceneId];
+    if (committed) {
+      this.model.history.push({
+        hour: scene?.hour ?? '68 Jam',
+        text: `[RADIO SAR] Transmisi akhir ${quality.toUpperCase()} pada ${Number(result.frequency).toFixed(1)} MHz (${result.strength}% sinyal).`,
+        choiceId: `radio_${quality}`,
+        effect: 0,
+      });
+      this.view.renderProtocolLog(this.model.history);
+      this.onSave?.(this.model.toSaveData());
+    }
+    this.renderScene(`day3_radio_${quality}`);
+  }
+
   /**
    * Handles a player's choice selection.
    * If text is still typing, skip it and defer the actual choice.
@@ -356,13 +461,19 @@ export class StoryEngine {
       return;
     }
 
+    if (choice.disabled) return;
+
+    if (choice.id === 'c_day2_hendra_help' && this.model.inventory.drink <= 0 && this.model.inventory.food <= 0) {
+      this.view.showTelltaleToast('AIR & MAKANAN HABIS: Aris tidak bisa membagi persediaan.');
+      return;
+    }
+
     // Check if the selected choice triggers a standalone bunker crisis minigame station
-    const stationTrigger = choice.triggerBunkerStation || (choice.id === 'c_prolog_enter_day1' ? 'card' : null);
+    const stationTrigger = choice.triggerBunkerStation || null;
     if (stationTrigger && !this._unlockedMinigameChoiceIds?.has(choice.id) && !this.bunkerEntryUnlocked) {
       this.pendingMinigameChoice = choice;
       this.pendingBunkerEntryChoice = choice;
       this.bunkerMinigame.openStation(stationTrigger, {
-        allowFailure: stationTrigger === 'rotor',
         onComplete: () => {
           if (!this._unlockedMinigameChoiceIds) this._unlockedMinigameChoiceIds = new Set();
           this._unlockedMinigameChoiceIds.add(choice.id);
@@ -370,17 +481,6 @@ export class StoryEngine {
           this.pendingBunkerEntryChoice = null;
           this.bunkerEntryUnlocked = true;
           this.handleChoiceSelect(choice);
-        },
-        onFailure: () => {
-          this.pendingMinigameChoice = null;
-          this.pendingBunkerEntryChoice = null;
-          // Narrative consequence of failure on the high-stakes rotor puzzle
-          if (stationTrigger === 'rotor') {
-            this.model.setFlag('structural_damage');
-            this.model.knowledge = Math.max(0, this.model.knowledge - 1);
-            this.view.updateKnowledgeBadge(this.model.knowledge, -1);
-            this.renderScene('day2_panic_exit');
-          }
         },
       });
       return;
@@ -390,30 +490,6 @@ export class StoryEngine {
       this._unlockedMinigameChoiceIds.delete(choice.id);
     }
     this.bunkerEntryUnlocked = false;
-
-    if (choice.id === 'c_prolog_pack_food') {
-      this.model.addInventoryItem('food', 1);
-      this.model.setFlag('food_packed');
-    }
-    if (choice.id === 'c_prolog_pack_drink') {
-      this.model.addInventoryItem('drink', 1);
-      this.model.setFlag('drink_packed');
-    }
-    if (choice.id === 'c_prolog_pack_kit') {
-      this.model.addInventoryItem('kit', 1);
-      this.model.setFlag('kit_packed');
-    }
-    if (choice.id === 'c_prolog_pack_battery') {
-      this.model.setFlag('extra_battery');
-      this.model.setFlag('battery_packed');
-    }
-    if (choice.id === 'c_prolog_pack_snack') {
-      this.model.addInventoryItem('food', 1);
-      this.model.setFlag('snack_packed');
-    }
-    if (choice.id === 'c_prolog_pack_toy') {
-      this.model.setFlag('toy_packed');
-    }
 
     // Trigger Telltale notification banner if choice declares telltaleNotice
     if (choice.telltaleNotice) {
@@ -431,84 +507,84 @@ export class StoryEngine {
     if (choice.id === 'c_day1_maya_strict') {
       this.model.setFlag('maya_sad');
     }
-
-    // Day 2 Outside Stranger dilemmata
-    if (choice.id === 'c_day2_stranger_airlock') {
-      this.model.setFlag('helped_stranger');
-      if (this.model.inventory.drink > 0) {
-        this.model.addInventoryItem('drink', -1);
-      }
-    }
-    if (choice.id === 'c_day2_stranger_intercom') {
-      this.model.setFlag('stranger_guided');
-    }
-    if (choice.id === 'c_day2_stranger_harsh') {
-      this.model.setFlag('stranger_hostile');
-    }
-
-    const prevHealth = this.model.health;
-
-    if (choice.id === 'c_day2_air_remedy_inspect') {
+    if (choice.id === 'c_day1_air_fix') {
       this.model.deleteFlag('air_uninspected');
       this.model.setFlag('air_remedied');
     }
 
-    if (choice.id === 'c_day2_scavenge_bypass') {
-      if (this.model.knowledge >= 8) {
-        this.model.addInventoryItem('food', 1);
-        this.model.addInventoryItem('drink', 1);
-        this.model.setFlag('scavenged');
-        choice.nextSceneId = 'day2_scavenge_success';
-        choice.log = "Melakukan pencarian perbekalan di kompartemen luar dengan mem-bypass kunci solenoid secara sukses.";
-      } else {
-        this.model.modifyHealth(-20);
-        this.model.setFlag('generator_damaged');
-        this.model.setFlag('scavenged');
-        choice.nextSceneId = 'day2_scavenge_bypass_fail';
-        choice.log = "Gagal mem-bypass kunci solenoid, memicu sengatan listrik korsleting regulator generator (-20 HP).";
+    // Day 2 Hendra encounter: exactly one narrative outcome.
+    if (choice.id === 'c_day2_hendra_help') {
+      this.model.deleteFlag('stranger_guided');
+      this.model.deleteFlag('stranger_family_first');
+      this.model.setFlag('helped_stranger');
+      if (this.model.inventory.drink > 0) {
+        this.model.addInventoryItem('drink', -1);
+      } else if (this.model.inventory.food > 0) {
+        this.model.addInventoryItem('food', -1);
       }
     }
-
-    if (choice.id === 'c_day2_scavenge_slow') {
-      this.model.addInventoryItem('food', 1);
-      this.model.addInventoryItem('drink', 1);
-      this.model.setFlag('scavenged');
-      this.model.updateSurvivalStats(6);
-      choice.nextSceneId = 'day2_scavenge_slow_success';
-      choice.log = "Pencarian perbekalan manual dilakukan secara lambat (memakan waktu 6 jam ekstra).";
+    if (choice.id === 'c_day2_hendra_guide') {
+      this.model.deleteFlag('helped_stranger');
+      this.model.deleteFlag('stranger_family_first');
+      this.model.setFlag('stranger_guided');
     }
+    if (choice.id === 'c_day2_hendra_family') {
+      this.model.deleteFlag('helped_stranger');
+      this.model.deleteFlag('stranger_guided');
+      this.model.setFlag('stranger_family_first');
+    }
+
+    // Day 3 keeps resource consequences small and explicit rather than adding
+    // another subsystem. The choices below alter the later available options.
+    if (choice.id === 'c_day3_water_reserve') {
+      this.model.addInventoryItem('drink', -1);
+      this.model.modifyThirst(12);
+      this.model.setFlag('water_reserve_used');
+    }
+    if (choice.id === 'c_day3_water_filter') {
+      this.model.setFlag('water_filtered');
+      this.model.setFlag('power_strained');
+    }
+    if (choice.id === 'c_day3_water_ration') {
+      this.model.modifyThirst(-12);
+      this.model.setFlag('water_rationed');
+    }
+    if (choice.id === 'c_day3_power_radio') {
+      this.model.setFlag('power_radio_priority');
+      this.model.setFlag('radio_power_stable');
+    }
+    if (choice.id === 'c_day3_power_air') {
+      this.model.setFlag('power_saved');
+      this.model.setFlag('radio_power_limited');
+    }
+    if (choice.id === 'c_day3_power_dual') {
+      this.model.setFlag('power_saved');
+      this.model.setFlag('radio_power_stable');
+      this.model.setFlag('battery_committed');
+    }
+    if (choice.id === 'c_day3_power_route') {
+      this.model.setFlag('power_saved');
+      this.model.setFlag('radio_power_stable');
+      this.model.setFlag('power_routed');
+    }
+    if (choice.id === 'c_day2_hendra_help' || choice.id === 'c_day2_hendra_guide' || choice.id === 'c_day2_hendra_family') {
+      this.model.setFlag('hendra_encountered');
+    }
+
+    const prevHealth = this.model.health;
 
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
     this.model.modifyKnowledge(effect);
     this.view.pulseKnowledge(effect);
 
-    // Severe Choice Consequences mapping
-    if (choice.id === 'c_day3_water_boil' || choice.id === 'c_day3_water_settle') {
-      this.model.modifyHealth(-30);
-      this.model.setFlag('water_poisoned');
-    }
-    if (choice.id === 'c_day2_leak_cloth' || choice.id === 'c_day2_leak_fan') {
-      this.model.modifyHealth(-20);
-      this.model.setFlag('smoke_poisoned');
-    }
-    // Panic-exit incurs a direct health penalty.
-    if (choice.id === 'c_day2_panic_exit') {
-      this.model.modifyHealth(-SURVIVAL.PANIC_HEALTH_PENALTY);
-    }
-
     // Record decision in history.
-    const quality = CHOICE_QUALITY_MAP[choice.id];
     const historyEntry = {
       hour:     this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
       text:     choice.log || choice.text,
       choiceId: choice.id  ?? null,
       effect,
     };
-    if (quality === 'Risky') {
-      historyEntry.fact = FACTS_MAP[choice.id];
-      this.view.notifyJournal();
-    }
     this.model.history.push(historyEntry);
 
     // Activate any flags declared on this choice.
@@ -524,11 +600,26 @@ export class StoryEngine {
       this.audio.playDamageAlert();
     }
 
-    const isBadChoice = effect < 0 || choice.id === 'c_day2_panic_exit'
+    const isBadChoice = effect < 0
       || (choice.nextSceneId?.includes('bad') ?? false);
     isBadChoice ? this.audio.playBadChoice() : this.audio.playClick();
 
-    if (choice.triggerRadioMiniGame === true || choice.id === 'c_day2_seal_radio') {
+    if (choice.id === 'c_day3_radio_attempt') {
+      const existingQuality = this.model.flags.radio_quality;
+      if (['clear', 'weak', 'failed'].includes(existingQuality)) {
+        this.renderScene(`day3_radio_${existingQuality}`);
+        return;
+      }
+      const opened = this.radioMiniGame?.open({
+        finalAttempt: true,
+        inspectedRadio: this.model.flags.inspected_radio === true,
+        extraBattery: this.model.flags.extra_battery === true,
+      });
+      if (!opened) this.handleFinalRadioResult({ quality: 'failed', frequency: 0, strength: 0 });
+      return;
+    }
+
+    if (choice.triggerRadioMiniGame === true) {
       setTimeout(() => {
         this.radioMiniGame?.open();
       }, 300);
@@ -645,9 +736,9 @@ export class StoryEngine {
    * @private
    */
   _checkFatalCondition(sceneId) {
-    if (this.model.health <= 0 && sceneId !== 'ending_fatal') {
+    if (this.model.health <= 0 && sceneId !== 'ending_bad') {
       this.model.health = 0;
-      this.renderScene('ending_fatal');
+      this.renderScene('ending_bad');
       return true;
     }
     return false;
@@ -661,11 +752,20 @@ export class StoryEngine {
    * @private
    */
   _isCollapseEnding(sceneId) {
-    return sceneId === 'ending_bad' || sceneId === 'ending_fatal';
+    return sceneId === 'ending_bad';
   }
 
-  _getPackedCount() {
-    return PROLOG_PACK_FLAGS.filter((flag) => this.model.flags[flag] === true).length;
+  _prepareSceneChoices(choices = []) {
+    return choices.map((choice) => {
+      const isDirectHendraHelp = choice.id === 'c_day2_hendra_help';
+      if (isDirectHendraHelp && this.model.inventory.drink <= 0 && this.model.inventory.food <= 0) {
+        return { ...choice, disabled: true, disabledReason: 'Persediaan habis — pilih arah atau lanjutkan ke bunker.' };
+      }
+      if (choice.id === 'c_day3_water_reserve' && this.model.inventory.drink <= 0) {
+        return { ...choice, disabled: true, disabledReason: 'Tidak ada air aman tersisa untuk dipakai sekarang.' };
+      }
+      return { ...choice };
+    });
   }
 
   /**
@@ -677,19 +777,6 @@ export class StoryEngine {
    */
   processNarrativeText(sceneId, rawText, speaker) {
     let processedText = rawText;
-
-    if (sceneId === 'prolog_packing') {
-      const packedCount = this._getPackedCount();
-      const itemsList = [];
-      if (this.model.flags.food_packed) itemsList.push('Makanan');
-      if (this.model.flags.drink_packed) itemsList.push('Air');
-      if (this.model.flags.kit_packed) itemsList.push('P3K');
-      if (this.model.flags.battery_packed) itemsList.push('Radio');
-      if (this.model.flags.snack_packed) itemsList.push('Snack');
-      if (this.model.flags.toy_packed) itemsList.push('Mainan');
-      const itemsStr = itemsList.length > 0 ? itemsList.join(', ') : 'Belum ada';
-      processedText = `Ransel ${packedCount}/5 slot.` + "\n" + `Isi: ${itemsStr}.` + "\n\n" + processedText;
-    }
 
     const scene = this.storyData.scenes[sceneId];
     if (scene) {
@@ -762,9 +849,18 @@ export class StoryEngine {
       cancelAnimationFrame(this.view.typingRafId);
       this.view.typingRafId = null;
     }
-    this.view.renderChoices(
-      scene.choices, this.model.currentSceneId, this.model.flags,
-      (choice) => this.handleChoiceSelect(choice)
-    );
+    if (this.model.currentSceneId === 'day2_expedition_map') {
+      this.view.renderExpeditionMap(
+        EXPEDITION_LOCATIONS,
+        this.model.expeditionVisitedLocations,
+        Math.max(0, 2 - this.model.expeditionVisitedLocations.length),
+        (locationId) => this.startExpedition(locationId)
+      );
+    } else {
+      this.view.renderChoices(
+        this._prepareSceneChoices(scene.choices), this.model.currentSceneId, this.model.flags,
+        (choice) => this.handleChoiceSelect(choice)
+      );
+    }
   }
 }

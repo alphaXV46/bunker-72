@@ -9,7 +9,7 @@
  * Dependencies: constants.js only (for POWER_THRESHOLDS and parseHour/clamp).
  */
 
-import { clamp, parseHour, POWER_THRESHOLDS, CHOICE_QUALITY_MAP, getTimePhase, getKnowledgeLabel, FACTS_MAP, BNPB_EVALUATION, MAJOR_DECISIONS_META } from './constants.js';
+import { clamp, parseHour, POWER_THRESHOLDS, getTimePhase, getKnowledgeLabel, PREPAREDNESS_EVALUATION } from './constants.js';
 import { ScavengerMinigame } from './scavengerMinigame.js';
 
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
@@ -27,15 +27,6 @@ const AVATARS = {
   penyintas:   new URL('../assets/avatars/avatar_penyintas.png', import.meta.url).href,
   penjarah:    new URL('../assets/avatars/avatar_penjarah.png',  import.meta.url).href,
   sar:         new URL('../assets/avatars/avatar_sar.png',       import.meta.url).href,
-};
-
-const PACKING_ITEMS = {
-  food:  { image: new URL('../assets/items/food_icon.png',  import.meta.url).href, label: 'Makanan Kaleng' },
-  drink: { image: new URL('../assets/items/drink_icon.png', import.meta.url).href, label: 'Air Bersih' },
-  kit:   { image: new URL('../assets/items/kit_icon.png',   import.meta.url).href, label: 'Kotak P3K' },
-  radio: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Radio Portable' },
-  snack: { image: new URL('../assets/items/snacks.png',     import.meta.url).href, label: 'Snack' },
-  toy:   { image: new URL('../assets/items/car_toy.png',    import.meta.url).href, label: 'Mainan Anak' },
 };
 
 export class GameView {
@@ -419,7 +410,7 @@ export class GameView {
 
     // Structure status
     let structureText = 'AMAN';
-    if (currentSceneId === 'ending_bad' || currentSceneId === 'ending_fatal') {
+    if (currentSceneId === 'ending_bad') {
       structureText = 'RUNTUH';
     } else if (flags.structural_damage === true || scene.background === 'rusak') {
       structureText = 'RETAK';
@@ -545,6 +536,7 @@ export class GameView {
    * @param {object} scene
    */
   renderSceneArt(scene, flags = {}, sceneId = '') {
+    if (sceneId !== 'day1_inspection') this.clearDay1Hotspots();
     const hour = parseHour(scene.hour);
     const gameplayDayBg = hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
     const damagedBg = hour >= 48 ? 'bg-day3' : 'bg-rusak';
@@ -701,6 +693,94 @@ export class GameView {
     }, 3800);
   }
 
+  clearDay1Hotspots() {
+    this.dom.storyBox?.querySelector('.day1-hotspot-layer')?.remove();
+  }
+
+  renderDay1Hotspots(hotspots, flags = {}, onInspect, onFinish) {
+    this.clearDay1Hotspots();
+    const layer = document.createElement('div');
+    layer.className = 'day1-hotspot-layer';
+    layer.setAttribute('role', 'group');
+    layer.setAttribute('aria-label', 'Titik inspeksi bunker');
+
+    const inspectedCount = hotspots.filter((spot) => flags[spot.flag]).length;
+    const status = document.createElement('div');
+    status.className = 'day1-hotspot-status';
+    status.setAttribute('aria-live', 'polite');
+    status.innerHTML = `<strong>INSPEKSI BUNKER</strong><span>${inspectedCount}/3 titik diperiksa</span>`;
+    layer.appendChild(status);
+
+    hotspots.forEach((spot) => {
+      const inspected = flags[spot.flag] === true;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `day1-hotspot${inspected ? ' is-inspected' : ''}`;
+      button.style.left = `${spot.x}%`;
+      button.style.top = `${spot.y}%`;
+      button.style.width = `${spot.w || 8}%`;
+      button.style.height = `${spot.h || 8}%`;
+      button.disabled = inspected;
+      button.setAttribute('aria-label', `${spot.label}${inspected ? ' (sudah diperiksa)' : ''}`);
+      button.innerHTML = `<span class="hotspot-marker" aria-hidden="true">${inspected ? '✓' : '+'}</span><span class="hotspot-label">${spot.label}</span>`;
+      if (!inspected) button.addEventListener('click', () => onInspect?.(spot.id));
+      layer.appendChild(button);
+    });
+
+    const finish = document.createElement('button');
+    finish.type = 'button';
+    finish.className = 'day1-hotspot-finish';
+    finish.textContent = inspectedCount >= 3 ? 'LANJUTKAN KE SISTEM UDARA' : 'SELESAIKAN PEMERIKSAAN';
+    finish.disabled = inspectedCount === 0;
+    finish.addEventListener('click', () => onFinish?.());
+    layer.appendChild(finish);
+    this.dom.storyBox.appendChild(layer);
+  }
+
+  showDay1InspectionFeedback(text) {
+    if (!this.dom.dialogueText) return;
+    this.dom.dialogueText.textContent = text;
+    this.activeText = text;
+    this.isTyping = false;
+    this.updateBackButton();
+  }
+
+  renderExpeditionMap(locations, visited = [], remainingVisits = 0, onSelect) {
+    this.clearDay1Hotspots();
+    this.dom.choicesPanel.innerHTML = '';
+    this.dom.storyBox.classList.add('has-interactive-choices');
+    this.currentChoicesPayload = null;
+
+    const panel = document.createElement('div');
+    panel.className = 'expedition-map-panel';
+    panel.setAttribute('role', 'group');
+    panel.setAttribute('aria-label', 'Peta tujuan ekspedisi');
+    panel.innerHTML = `
+      <div class="expedition-map-header"><strong>PETA RUTE EKSPEDISI</strong><span>${remainingVisits} dari 2 kunjungan tersisa</span></div>
+      <div class="expedition-map-route" aria-hidden="true">
+        <span class="route-node route-north">POS KESEHATAN</span>
+        <div class="route-crossing"><span class="route-node">RUMAH TETANGGA</span><b>INTERSECTION</b><span class="route-node">MINIMARKET</span></div>
+        <i class="route-stem"></i>
+        <span class="route-node route-south">BUNKER 72</span>
+      </div>
+      <div class="expedition-map-locations"></div>
+    `;
+    const list = panel.querySelector('.expedition-map-locations');
+    locations.forEach((location) => {
+      const isVisited = visited.includes(location.id);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `expedition-location-card${isVisited ? ' is-visited' : ''}`;
+      button.disabled = isVisited || remainingVisits <= 0;
+      button.setAttribute('aria-label', `${location.label}${isVisited ? ' (sudah dikunjungi)' : ''}`);
+      button.innerHTML = `<span class="location-card-title">${location.label}</span><span class="location-card-risk">${location.risk}</span><span class="location-card-resource">${location.resourceHint}</span><span class="location-card-state">${isVisited ? '✓ SUDAH DIKUNJUNGI' : 'PILIH RUTE'}</span>`;
+      if (!isVisited && remainingVisits > 0) button.addEventListener('click', () => onSelect?.(location.id));
+      list.appendChild(button);
+    });
+    this.dom.choicesPanel.appendChild(panel);
+    this.updateBackButton();
+  }
+
   /**
    * Renders interactive choice buttons.
    * Receives all data as parameters — no internal story data or model access.
@@ -711,8 +791,8 @@ export class GameView {
    * @param {Function} onChoiceClick
    */
   renderChoices(choices, currentSceneId, flags, onChoiceClick) {
+    this.clearDay1Hotspots();
     this.dom.choicesPanel.innerHTML = '';
-    this.dom.choicesPanel.classList.remove('packing-grid');
     this.currentChoicesPayload = { choices, currentSceneId, flags, onChoiceClick };
     this.isReviewingNarrative = false;
     this.canReviewNarrative = choices?.length > 0 && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title';
@@ -731,11 +811,6 @@ export class GameView {
 
     if (!choices?.length) {
       this.dom.storyBox.classList.remove('has-interactive-choices');
-      return;
-    }
-
-    if (currentSceneId === 'prolog_packing') {
-      this.renderPackingChoices(choices, flags, onChoiceClick);
       return;
     }
 
@@ -764,12 +839,15 @@ export class GameView {
 
       const btn       = document.createElement('button');
       btn.type        = 'button';
+      btn.disabled    = choice.disabled === true;
       btn.className   = 'choice-btn choice-neutral';
       btn.innerHTML   = `
         <span class="choice-index">${String(renderedIndex).padStart(2, '0')}</span>
         <span class="choice-copy">${choice.text}</span>
         <span class="choice-arrow" aria-hidden="true">›</span>
       `;
+      if (choice.disabledReason) btn.setAttribute('aria-label', `${choice.text} — ${choice.disabledReason}`);
+      if (choice.disabledReason) btn.title = choice.disabledReason;
       renderedIndex++;
 
       if (choice.item) btn.dataset.item = choice.item;
@@ -809,31 +887,9 @@ export class GameView {
     const items = isPostGame ? history : history.slice(-5);
 
     this.dom.protocolLogList.innerHTML = items
-      .map(({ hour, text, effect, choiceId, fact }) => {
-        let badge = '';
-        let itemClass = '';
-
-        if (isPostGame && choiceId && CHOICE_QUALITY_MAP[choiceId]) {
-          const qual = CHOICE_QUALITY_MAP[choiceId];
-          if (qual === 'Optimal') {
-            badge = ' <span class="badge badge-opt">✓ Optimal</span>';
-            itemClass = 'log-good';
-          } else if (qual === 'Acceptable') {
-            badge = ' <span class="badge badge-acc">~ Acceptable</span>';
-            itemClass = 'log-neutral';
-          } else if (qual === 'Risky') {
-            badge = ' <span class="badge badge-risk">✗ Risky</span>';
-            itemClass = 'log-risk';
-          }
-        } else {
-          itemClass = effect > 0 ? 'log-good' : effect < 0 ? 'log-risk' : '';
-        }
-
-        let factHtml = '';
-        if (fact) {
-          factHtml = `<br><span class="log-fact" style="color: var(--warning-yellow-border); font-size: 0.82rem; padding-left: 10px; display: inline-block; font-style: italic;">[MITIGASI] ${fact}</span>`;
-        }
-        return `<p class="${itemClass}"><span>[${hour}]</span> <span>${text}</span>${badge}${factHtml}</p>`;
+      .map(({ hour, text, effect }) => {
+        const itemClass = effect > 0 ? 'log-good' : effect < 0 ? 'log-risk' : '';
+        return `<p class="${itemClass}"><span>[${hour}]</span> <span>${text}</span></p>`;
       })
       .join('');
   }
@@ -969,6 +1025,18 @@ export class GameView {
       return;
     }
 
+    if (p?.inspectionReady) {
+      p.inspectionReady();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
+    if (p?.expeditionMapReady) {
+      p.expeditionMapReady();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
     if (p) {
       this.renderChoices(p.choices, p.currentSceneId, p.flags, p.onChoiceClick);
     }
@@ -988,8 +1056,8 @@ export class GameView {
    * @param {object} flags            - Player state flags reconstructed from history.
    */
   renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null) {
-    const score = typeof modularData?.bnpbScore === 'number' ? modularData.bnpbScore : Math.min(100, Math.round((finalKnowledge / 15) * 100));
-    const grade = BNPB_EVALUATION.getGrade(score);
+    const score = typeof modularData?.preparednessScore === 'number' ? modularData.preparednessScore : Math.min(100, Math.round((finalKnowledge / 15) * 100));
+    const grade = PREPAREDNESS_EVALUATION.getGrade(score);
 
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
@@ -1010,11 +1078,6 @@ export class GameView {
         titleClass: 'ending-best',
         bgClass:    'ending-bg-best',
       },
-      ending_fatal: {
-        title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TRAGEDI DI PERUT BUMI)',
-        titleClass: 'ending-bad',
-        bgClass:    'ending-bg-fatal',
-      },
     };
 
     const cfg = ENDING_CONFIG[endingId] || ENDING_CONFIG.ending_normal;
@@ -1023,252 +1086,64 @@ export class GameView {
     this.dom.endingTitle.classList.add(cfg.titleClass);
     this.dom.endingView.classList.add(cfg.bgClass);
 
-    // Format Modular Epilogue
-    if (modularData && modularData.healthDesc) {
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+    }[character]));
+    const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
+
+    if (modules.length) {
       this.dom.endingDesc.innerHTML = `
         <div class="epilogue-modular-grid">
-          <div class="epilogue-card epilogue-medical">
-            <div class="epilogue-card-header">
-              <span class="epilogue-icon">🩺</span>
-              <h4 class="epilogue-card-title">KONDISI MEDIS KELUARGA</h4>
-            </div>
-            <p class="epilogue-card-body">${modularData.healthDesc}</p>
-          </div>
-          <div class="epilogue-card epilogue-bunker">
-            <div class="epilogue-card-header">
-              <span class="epilogue-icon">🛡️</span>
-              <h4 class="epilogue-card-title">INTEGRITAS BUNKER 72</h4>
-            </div>
-            <p class="epilogue-card-body">${modularData.bunkerDesc}</p>
-          </div>
-          <div class="epilogue-card epilogue-social">
-            <div class="epilogue-card-header">
-              <span class="epilogue-icon">🤝</span>
-              <h4 class="epilogue-card-title">SOLIDARITAS & KARMA SOSIAL</h4>
-            </div>
-            <p class="epilogue-card-body">${modularData.karmaDesc}</p>
-          </div>
-          <div class="epilogue-card epilogue-family">
-            <div class="epilogue-card-header">
-              <span class="epilogue-icon">🧸</span>
-              <h4 class="epilogue-card-title">IKATAN MORAL & MAYA</h4>
-            </div>
-            <p class="epilogue-card-body">${modularData.familyDesc}</p>
-          </div>
+          ${modules.map((module) => `
+            <section class="epilogue-card epilogue-${escapeHtml(module.tone || 'default')}">
+              <div class="epilogue-card-header">
+                <span class="epilogue-icon" aria-hidden="true">${escapeHtml(module.icon || '•')}</span>
+                <h4 class="epilogue-card-title">${escapeHtml(module.title)}</h4>
+              </div>
+              <p class="epilogue-card-body">${escapeHtml(module.body)}</p>
+            </section>
+          `).join('')}
         </div>
       `;
     } else {
       this.dom.endingDesc.textContent = endingText;
     }
 
-    // Single Long-Scroll: Telltale-style Major Choices Recap
-    let recapContainer = document.getElementById('telltale-recap-container');
-    if (!recapContainer) {
-      recapContainer = document.createElement('div');
-      recapContainer.id = 'telltale-recap-container';
-      recapContainer.className = 'telltale-recap-container';
-      this.dom.endingDesc.parentNode.insertBefore(recapContainer, this.dom.endingDesc.nextSibling);
-    }
-
-    // Build choice cards from history matching MAJOR_DECISIONS_META
-    const historyChoiceIds = new Set(history.map(h => h.choiceId).filter(Boolean));
-    const majorCardsHtml = MAJOR_DECISIONS_META.map((meta) => {
-      let chosenKey = null;
-      for (const [cId] of Object.entries(meta.choiceMap)) {
-        if (historyChoiceIds.has(cId)) {
-          chosenKey = cId;
-          break;
-        }
-      }
-      if (!chosenKey) return '';
-
-      const decision = meta.choiceMap[chosenKey];
-      const karmaBadgeClass = decision.karma === 'positive' ? 'badge-karma-pos' : (decision.karma === 'negative' ? 'badge-karma-neg' : 'badge-karma-neu');
-      const karmaText = decision.karma === 'positive' ? 'KARMA POSITIF' : (decision.karma === 'negative' ? 'BERISIKO' : 'NETRAL');
-
-      return `
-        <div class="recap-decision-card">
-          <div class="recap-card-top">
-            <span class="recap-decision-title">${meta.title}</span>
-            <span class="recap-karma-badge ${karmaBadgeClass}">${karmaText}</span>
-          </div>
-          <div class="recap-chosen-label">Pilihan Anda: <strong>${decision.label}</strong></div>
-          <div class="recap-chosen-outcome">${decision.outcome}</div>
-        </div>
-      `;
-    }).filter(Boolean).join('');
-
-    if (majorCardsHtml) {
-      recapContainer.innerHTML = `
-        <div class="telltale-recap-section">
-          <h3 class="recap-section-header">PILIHAN-PILIHAN KRUSIAL ANDA</h3>
-          <div class="recap-cards-grid">${majorCardsHtml}</div>
-        </div>
-      `;
-    } else {
-      recapContainer.innerHTML = '';
-    }
-
-    // Single Long-Scroll: BNPB Disaster Mitigation Scorecard
+    // Technical report only: no morality, relationship, or survival-stat points.
     const statsContainer = this.dom.endingStats || document.querySelector('.ending-stats');
     if (statsContainer) {
       statsContainer.innerHTML = `
-        <div class="bnpb-scorecard-box">
-          <div class="bnpb-scorecard-header">
-            <div class="bnpb-grade-pill grade-${grade.badge.split(' ')[1].toLowerCase()}">${grade.badge}</div>
-            <div class="bnpb-score-title-group">
-              <h3 class="bnpb-grade-label">${grade.label}</h3>
-              <div class="bnpb-score-val">Skor Mitigasi Bencana: <strong>${score}</strong> / 100</div>
+        <div class="preparedness-scorecard-box">
+          <div class="preparedness-scorecard-header">
+            <div class="preparedness-grade-pill grade-${grade.badge.split(' ')[1].toLowerCase()}">${escapeHtml(grade.badge)}</div>
+            <div class="preparedness-score-title-group">
+              <h3 class="preparedness-grade-label">${escapeHtml(grade.label)}</h3>
+              <div class="preparedness-score-val">Skor Kesiapsiagaan Teknis: <strong>${score}</strong> / 100</div>
             </div>
           </div>
-          <p class="bnpb-grade-explanation">${grade.desc}</p>
+          <p class="preparedness-grade-explanation">${escapeHtml(grade.desc)} Ini adalah ringkasan permainan, bukan penilaian resmi.</p>
         </div>
       `;
     }
+
+    if (this.dom.endingKnowledge) this.dom.endingKnowledge.textContent = score;
+    if (this.dom.endingGradeText) this.dom.endingGradeText.textContent = `Status kesiapsiagaan: ${grade.label}`;
+    if (this.dom.endingSummary) this.dom.endingSummary.textContent = modularData?.narrativeFull || endingSummary;
 
     // Dynamic debrief list generation based on flag history
     const debriefList = document.getElementById('debrief-list');
     const debriefBox = document.getElementById('debrief-box');
     if (debriefList && debriefBox) {
-      debriefList.innerHTML = '';
-      const bullets = [];
-
-      if (flags.air_uninspected === true) {
-        bullets.push("<strong>Mitigasi Katup Udara:</strong> Inspeksi segel karet katup ventilasi secara fisik sangat krusial pasca-bencana. Menyalakan filtrasi tanpa pengecekan katup bypass menyedot abu Krakatau dan gas belerang langsung dari luar.");
-      } else {
-        bullets.push("<strong>Optimal - Filtrasi Udara:</strong> Penggantian segel katup secara proaktif berhasil mengisolasi gas permukaan dari ruang utama bunker.");
-      }
-
-      if (flags.water_filtered === true && flags.water_ruined !== true) {
-        bullets.push("<strong>Optimal - Pemurnian Air:</strong> Penggunaan filter karbon aktif dan tablet klorin terbukti efektif mengurangi kontaminan abu, belerang, dan mineral halus dari tangki air pipa yang tercemar.");
-      } else {
-        bullets.push("<strong>Mitigasi Air Vulkanik:</strong> Merebus air keruh tidak menghilangkan mineral vulkanik terlarut; penguapan justru memusatkan kontaminannya. Selalu saring dengan karbon aktif.");
-      }
-
-      if (flags.radio_saved === true) {
-        bullets.push("<strong>Optimal - Manajemen Baterai:</strong> Penjadwalan transmisi radio (10 menit per 6 jam) sukses menghemat daya sel baterai kritis untuk menangkap sinyal evakuasi.");
-      } else {
-        bullets.push("<strong>Manajemen Daya Radio:</strong> Batasi operasional penerima VHF dengan jadwal transmisi ketat agar baterai tidak habis sebelum pesan koordinat Satgas BNPB diterima.");
-      }
-
-      if (flags.door_opened === true) {
-        bullets.push("<strong>Keamanan Sosial Darurat:</strong> Menjaga pintu keluar tetap tertutup rapat dari pihak tak dikenal mencegah penyusupan dan penjarahan logistik kritis keluarga.");
-      } else {
-        bullets.push("<strong>Optimal - Protokol Keamanan:</strong> Menolak membuka pintu untuk suara tak dikenal and memverifikasi sandi evakuasi resmi BNPB (GARUDA-72) menjamin pertahanan fisik keluarga.");
-      }
-
-      if (flags.structural_damage === true) {
-        bullets.push("<strong>Integritas Struktur:</strong> Saat gempa melanda, memicu hidrolik penopang atau berlindung di bawah ranjang baja melindungi tubuh. Panik berlari ke pintu keluar melemahkan struktur pintu.");
-      } else {
-        bullets.push("<strong>Optimal - Respon Gempa:</strong> Aktivasi hidrolik penopang struktural berhasil meredam getaran seismik and mencegah retakan fatal di dinding ventilasi.");
-      }
-
-      debriefList.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
+      const items = modularData?.preparedness?.debriefItems || [];
+      debriefList.innerHTML = items.map((item) => `
+        <li class="preparedness-debrief-item">
+          <strong>${escapeHtml(item.label)} — ${item.score}/${item.max}</strong>
+          <span>${escapeHtml(item.detail)}</span>
+        </li>
+      `).join('');
       debriefBox.classList.remove('hidden');
     }
 
-    this.renderEducationalDebrief(history);
-  }
-
-  /**
-   * Parses the 3 lowest-quality choices from the history and displays real-world safety facts.
-   * @param {Array} history
-   */
-  renderEducationalDebrief(history) {
-    const container = document.getElementById('educational-debrief-container');
-    if (!container) return;
-
-    if (!history || !history.length) {
-      container.innerHTML = '';
-      return;
-    }
-
-    const optimalChoices = [];
-    const riskyChoices = [];
-
-    history.forEach((item) => {
-      if (item.choiceId && CHOICE_QUALITY_MAP[item.choiceId]) {
-        const quality = CHOICE_QUALITY_MAP[item.choiceId];
-        const choiceData = {
-          id: item.choiceId,
-          text: item.text,
-          hour: item.hour,
-          fact: FACTS_MAP[item.choiceId] || '',
-        };
-        if (quality === 'Optimal') {
-          optimalChoices.push(choiceData);
-        } else if (quality === 'Risky') {
-          riskyChoices.push(choiceData);
-        }
-      }
-    });
-
-    const renderList = (items, emptyText, includeFact = false) => {
-      if (!items.length) return `<p class="empty-note">${emptyText}</p>`;
-      return `
-        <ul>
-          ${items.map((c) => {
-            const body = includeFact ? c.fact : c.text;
-            return `<li><strong>[${c.hour}]</strong> ${body}</li>`;
-          }).join('')}
-        </ul>
-      `;
-    };
-
-    const riskyFacts = riskyChoices.filter((c) => c.fact);
-    const html = `
-      <div class="educational-debrief-box">
-        <h3>EVALUASI DETAIL KEPUTUSAN & MITIGASI</h3>
-        <section>
-          <h4 class="debrief-good">KEPUTUSAN TEPAT</h4>
-          ${renderList(optimalChoices, 'Tidak ada keputusan optimal yang tercatat.')}
-        </section>
-        <section>
-          <h4 class="debrief-risk">KEPUTUSAN BERISIKO</h4>
-          ${renderList(riskyChoices, 'Tidak ada keputusan berisiko yang tercatat.')}
-        </section>
-        <section>
-          <h4 class="debrief-guide">PANDUAN PERBAIKAN MITIGASI</h4>
-          ${renderList(riskyFacts, 'Tidak ada panduan mitigasi khusus yang diperlukan.', true)}
-        </section>
-      </div>
-    `;
-
-    container.innerHTML = html;
-  }
-
-  renderPackingChoices(choices, flags, onChoiceClick) {
-    this.dom.choicesPanel.classList.add('packing-grid');
-
-    const packedCount = ['food_packed', 'drink_packed', 'kit_packed', 'battery_packed', 'snack_packed', 'toy_packed']
-      .filter((flag) => flags[flag] === true).length;
-
-    const hint = document.createElement('div');
-    hint.className = 'packing-hint';
-    hint.innerHTML = `
-      <strong>Pilih 5 barang untuk dibawa ke bunker</strong>
-      <span>${packedCount}/5 masuk tas</span>
-    `;
-    this.dom.choicesPanel.appendChild(hint);
-
-    choices.forEach((choice) => {
-      if (choice.forbiddenFlags?.some((f) => flags[f] === true)) return;
-
-      const item = PACKING_ITEMS[choice.item] || PACKING_ITEMS.food;
-      const btn = document.createElement('button');
-      btn.className = `packing-item packing-item-${choice.item}`;
-      btn.type = 'button';
-      btn.innerHTML = `
-        <img src="${item.image}" alt="${item.label}">
-        <span>${item.label}</span>
-      `;
-      btn.addEventListener('click', () => {
-        if (btn.classList.contains('packing-picked')) return;
-        btn.classList.add('packing-picked');
-        onChoiceClick(choice);
-      });
-      this.dom.choicesPanel.appendChild(btn);
-    });
   }
 
   captureNarrative(scene, text, sceneId, reviewable = false) {
@@ -1323,7 +1198,6 @@ export class GameView {
     this.renderSpeaker(previous);
     this.dom.dialogueText.textContent = previous.text;
     this.dom.choicesPanel.innerHTML = '';
-    this.dom.choicesPanel.classList.remove('packing-grid');
     this.isTyping = false;
     this._pendingChoicesPayload = null;
     this.updateBackButton();
@@ -1346,14 +1220,14 @@ export class GameView {
    * Starts the 2D Top-Down Scavenger Minigame for Prologue Packing.
    * @param {Function} onComplete - Callback receiving { collectedItems: string[] }
    */
-  startScavengerMinigame(onComplete) {
+  startScavengerMinigame(onComplete, config = null) {
     this.destroyScavengerMinigame();
     this.scavengerGame = new ScavengerMinigame(this.dom.storyBox, (result) => {
       this.scavengerGame = null;
       if (typeof onComplete === 'function') {
         onComplete(result);
       }
-    });
+    }, config);
     this.scavengerGame.start();
   }
 

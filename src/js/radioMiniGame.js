@@ -1,26 +1,21 @@
 /**
- * radioMiniGame.js — Diegetic Radio Signal Tuning Mini-Game
- *
- * Triggered when clicking the Radio inventory icon.
- * Players tune the frequency knob/slider to find and lock onto the emergency BNPB signal.
+ * Diegetic VHF receiver. Informational tuning stays repeatable, while the
+ * Day 3 rescue transmission is a single graded, fail-forward interaction.
  */
-
 export class RadioMiniGame {
-  /**
-   * @param {object} options
-   * @param {HTMLElement} options.modalEl
-   * @param {Function} options.onSuccess - Callback when signal is locked (+1 knowledge point)
-   * @param {object} options.audio - RetroAudio instance
-   */
-  constructor({ modalEl, onSuccess, audio }) {
+  constructor({ modalEl, audio, onFinalResult }) {
     this.modalEl = modalEl;
-    this.onSuccess = onSuccess;
     this.audio = audio;
-
-    this.targetFreq = 98.4; // Target emergency frequency (MHz)
+    this.onFinalResult = onFinalResult;
+    this.targetFreq = 98.4;
     this.currentFreq = 91.2;
     this.isLocked = false;
-    this.hasRewardedCurrentSession = false;
+    this.isFinalAttempt = false;
+    this.finalResultResolved = false;
+    this.sessionCompleted = false;
+    this.signalBonus = 0;
+    this.clearThreshold = 88;
+    this.completionTimer = null;
 
     this.dom = {
       closeBtn: modalEl.querySelector('#radio-modal-close-btn'),
@@ -39,203 +34,188 @@ export class RadioMiniGame {
   }
 
   _bindEvents() {
-    if (this.dom.closeBtn) {
-      this.dom.closeBtn.addEventListener('click', () => this.close());
-    }
-
-    if (this.dom.slider) {
-      this.dom.slider.addEventListener('input', (e) => {
-        this.currentFreq = parseFloat(e.target.value);
-        this.updateTuning();
-      });
-    }
+    this.dom.closeBtn?.addEventListener('click', () => this.close());
+    this.dom.slider?.addEventListener('input', (event) => {
+      this.currentFreq = parseFloat(event.target.value);
+      this.updateTuning();
+    });
 
     if (this.dom.rotaryKnob) {
       let isDragging = false;
-
-      const handleRotate = (clientX, clientY) => {
+      const rotate = (clientX, clientY) => {
         const rect = this.dom.rotaryKnob.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-
-        let rad = Math.atan2(clientY - centerY, clientX - centerX);
-        let deg = rad * (180 / Math.PI) + 90; // Adjust 0deg to top
-        if (deg > 180) deg -= 360;
-
-        // Clamp angle between -135deg and +135deg
-        deg = Math.max(-135, Math.min(135, deg));
-
-        // Map [-135, 135] to [88.0, 108.0]
-        const freqRatio = (deg + 135) / 270;
-        this.currentFreq = parseFloat((88.0 + freqRatio * 20.0).toFixed(1));
-
-        if (this.dom.slider) {
-          this.dom.slider.value = this.currentFreq;
-        }
+        let degrees = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 90;
+        if (degrees > 180) degrees -= 360;
+        degrees = Math.max(-135, Math.min(135, degrees));
+        this.currentFreq = parseFloat((88 + ((degrees + 135) / 270) * 20).toFixed(1));
+        if (this.dom.slider) this.dom.slider.value = this.currentFreq;
         this.updateTuning();
       };
-
-      const startDrag = (e) => {
+      const point = (event) => event.touches ? event.touches[0] : event;
+      const start = (event) => {
+        if (this.sessionCompleted) return;
         isDragging = true;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        handleRotate(clientX, clientY);
+        const input = point(event);
+        rotate(input.clientX, input.clientY);
       };
-
-      const moveDrag = (e) => {
+      const move = (event) => {
         if (!isDragging) return;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        handleRotate(clientX, clientY);
+        const input = point(event);
+        rotate(input.clientX, input.clientY);
       };
+      const stop = () => { isDragging = false; };
 
-      const stopDrag = () => { isDragging = false; };
-
-      this.dom.rotaryKnob.addEventListener('mousedown', startDrag);
-      window.addEventListener('mousemove', moveDrag);
-      window.addEventListener('mouseup', stopDrag);
-
-      this.dom.rotaryKnob.addEventListener('touchstart', startDrag, { passive: true });
-      window.addEventListener('touchmove', moveDrag, { passive: true });
-      window.addEventListener('touchend', stopDrag);
+      this.dom.rotaryKnob.addEventListener('mousedown', start);
+      window.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', stop);
+      this.dom.rotaryKnob.addEventListener('touchstart', start, { passive: true });
+      window.addEventListener('touchmove', move, { passive: true });
+      window.addEventListener('touchend', stop);
+      window.addEventListener('touchcancel', stop);
     }
 
-    if (this.dom.lockBtn) {
-      this.dom.lockBtn.addEventListener('click', () => {
-        this.attemptLockSignal();
-      });
-    }
+    this.dom.lockBtn?.addEventListener('click', () => this.attemptLockSignal());
   }
 
-  /**
-   * Opens the Radio Tuning mini-game modal with a random target frequency.
-   */
-  open() {
-    // Generate a target frequency between 94.0 and 106.0 MHz
+  /** Opens a repeatable informational receiver or one final SAR transmission. */
+  open(options = {}) {
+    const finalAttempt = options.finalAttempt === true;
+    if (finalAttempt && this.finalResultResolved) return false;
+
+    this.isFinalAttempt = finalAttempt;
+    this.sessionCompleted = false;
+    this.isLocked = false;
+    this.signalBonus = finalAttempt && options.extraBattery ? 10 : 0;
+    this.clearThreshold = finalAttempt && options.inspectedRadio ? 82 : 88;
+
     const possibleTargets = [94.8, 96.2, 98.4, 101.5, 103.8, 105.2];
     this.targetFreq = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-
-    // Start tuning slider at a offset
-    let startFreq = this.targetFreq + (Math.random() > 0.5 ? 4.5 : -4.5);
-    startFreq = Math.max(88.0, Math.min(108.0, parseFloat(startFreq.toFixed(1))));
-
-    this.currentFreq = startFreq;
-    this.isLocked = false;
-    this.hasRewardedCurrentSession = false;
-
-    if (this.dom.slider) {
-      this.dom.slider.value = this.currentFreq;
-    }
+    const startOffset = finalAttempt && options.inspectedRadio ? 3 : 4.5;
+    const startFreq = this.targetFreq + (Math.random() > 0.5 ? startOffset : -startOffset);
+    this.currentFreq = Math.max(88, Math.min(108, parseFloat(startFreq.toFixed(1))));
+    if (this.dom.slider) this.dom.slider.value = this.currentFreq;
 
     if (this.dom.lockBtn) {
-      this.dom.lockBtn.disabled = true;
-      this.dom.lockBtn.textContent = 'KUNCI SINYAL';
+      this.dom.lockBtn.disabled = false;
+      this.dom.lockBtn.textContent = finalAttempt ? 'KIRIM POSISI KE SAR' : 'KUNCI SIARAN';
     }
-
     if (this.dom.broadcastBox) {
-      this.dom.broadcastBox.textContent = 'Mencari sinyal radio darurat... Geser kenop frekuensi di bawah.';
+      this.dom.broadcastBox.textContent = finalAttempt
+        ? 'Panggilan akhir Basarnas/SAR. Putar kenop, lalu kirim saat Anda siap; mutu sinyal menentukan seberapa lengkap posisi bunker terbaca.'
+        : 'Mencari siaran darurat. Receiver VHF tetap bunker dapat dipakai untuk memantau informasi.';
       this.dom.broadcastBox.classList.remove('broadcast-active');
     }
 
     this.modalEl.classList.remove('hidden');
     this.modalEl.setAttribute('aria-hidden', 'false');
-
     this.audio?.playRadioSound();
     this.updateTuning();
+    return true;
   }
 
-  /**
-   * Closes the radio mini-game modal.
-   */
   close() {
     this.modalEl.classList.add('hidden');
     this.modalEl.setAttribute('aria-hidden', 'true');
+    this.audio?.stopRadioSound();
   }
 
-  /**
-   * Recalculates signal strength & updates meter UI.
-   */
-  updateTuning() {
-    if (this.dom.freqDisplay) {
-      this.dom.freqDisplay.textContent = `${this.currentFreq.toFixed(1)} MHz`;
+  resetFinalResult() {
+    if (this.completionTimer) {
+      clearTimeout(this.completionTimer);
+      this.completionTimer = null;
     }
+    this.finalResultResolved = false;
+    this.sessionCompleted = false;
+    this.isFinalAttempt = false;
+  }
 
-    // Rotate Knob Indicator Dot
+  _getSignalStrength() {
+    const diff = Math.abs(this.currentFreq - this.targetFreq);
+    const raw = Math.max(0, Math.min(100, Math.round((1 - diff / 3) * 100)));
+    return Math.min(100, raw + this.signalBonus);
+  }
+
+  _getFinalQuality(strength) {
+    if (strength >= this.clearThreshold) return 'clear';
+    if (strength >= 35) return 'weak';
+    return 'failed';
+  }
+
+  updateTuning() {
+    if (this.dom.freqDisplay) this.dom.freqDisplay.textContent = `${this.currentFreq.toFixed(1)} MHz`;
     if (this.dom.knobDot) {
-      const freqRatio = (this.currentFreq - 88.0) / 20.0;
-      const deg = -135 + freqRatio * 270;
-      this.dom.knobDot.style.transform = `rotate(${deg}deg)`;
+      const degrees = -135 + ((this.currentFreq - 88) / 20) * 270;
+      this.dom.knobDot.style.transform = `rotate(${degrees}deg)`;
     }
 
     const diff = Math.abs(this.currentFreq - this.targetFreq);
-    // Signal tolerance range = 3.0 MHz
-    const maxDiff = 3.0;
-    let strength = Math.max(0, Math.min(100, Math.round((1 - diff / maxDiff) * 100)));
-
-    if (diff < 0.15) {
-      strength = 100;
-    }
-
-    if (this.dom.signalMeterFill) {
-      this.dom.signalMeterFill.style.width = `${strength}%`;
-    }
-
-    const isNearLock = diff <= 0.2;
-
+    const strength = this._getSignalStrength();
+    const nearBroadcast = diff <= 0.2;
+    const finalQuality = this._getFinalQuality(strength);
+    if (this.dom.signalMeterFill) this.dom.signalMeterFill.style.width = `${strength}%`;
     if (this.dom.lockLed) {
-      this.dom.lockLed.classList.toggle('active-green', isNearLock);
-      this.dom.lockLed.classList.toggle('active-red', !isNearLock);
+      this.dom.lockLed.classList.toggle('active-green', this.isFinalAttempt ? finalQuality === 'clear' : nearBroadcast);
+      this.dom.lockLed.classList.toggle('active-red', this.isFinalAttempt ? finalQuality === 'failed' : !nearBroadcast);
     }
-
     if (this.dom.signalStatusText) {
-      if (isNearLock) {
-        this.dom.signalStatusText.textContent = 'SINYAL TERKUNCI (SIARAN BNPB DETEKSI)';
+      if (this.isFinalAttempt) {
+        const labels = { clear: 'SINYAL KUAT — POSISI TERBACA', weak: 'SINYAL LEMAH — PESAN TERPOTONG', failed: 'STATIK DOMINAN — PESAN TIDAK PASTI' };
+        this.dom.signalStatusText.textContent = labels[finalQuality];
+        this.dom.signalStatusText.style.color = finalQuality === 'clear' ? 'var(--accent-green-border)' : finalQuality === 'weak' ? 'var(--warning-yellow-border)' : '#a8b2ba';
+      } else if (nearBroadcast) {
+        this.dom.signalStatusText.textContent = 'SIARAN DARURAT TERDETEKSI';
         this.dom.signalStatusText.style.color = 'var(--accent-green-border)';
       } else if (strength > 40) {
-        this.dom.signalStatusText.textContent = 'GELOMBANG TERCETUS (STATIC SEDANG)';
+        this.dom.signalStatusText.textContent = 'GELOMBANG TERDETEKSI';
         this.dom.signalStatusText.style.color = 'var(--warning-yellow-border)';
       } else {
-        this.dom.signalStatusText.textContent = 'STATIC NOISE (TIDAK ADA SINYAL)';
+        this.dom.signalStatusText.textContent = 'STATIC — SINYAL BELUM JELAS';
         this.dom.signalStatusText.style.color = '#a8b2ba';
       }
     }
-
-    if (this.dom.lockBtn) {
-      this.dom.lockBtn.disabled = !isNearLock || this.isLocked;
-    }
+    if (this.dom.lockBtn) this.dom.lockBtn.disabled = this.sessionCompleted || (!this.isFinalAttempt && !nearBroadcast);
   }
 
-  /**
-   * Called when player taps the "KUNCI SINYAL" button when signal is locked.
-   */
   attemptLockSignal() {
+    if (this.sessionCompleted) return;
+    const strength = this._getSignalStrength();
     const diff = Math.abs(this.currentFreq - this.targetFreq);
-    if (diff > 0.2 || this.isLocked) return;
+    if (!this.isFinalAttempt && diff > 0.2) return;
 
+    this.sessionCompleted = true;
     this.isLocked = true;
     this.audio?.playClick();
-
     if (this.dom.lockBtn) {
       this.dom.lockBtn.disabled = true;
-      this.dom.lockBtn.textContent = '✓ TERKUNCI';
+      this.dom.lockBtn.textContent = this.isFinalAttempt ? '✓ TRANSMISI DIKIRIM' : '✓ SIARAN TERKUNCI';
     }
 
-    const broadcasts = [
-      `[SATGAS BNPB RAKATA ${this.targetFreq.toFixed(1)} MHz]: Status Krakatau Siaga I. Evakuasi jalur pesisir ditutup. Seluruh bunker darurat diperintahkan tetap menyegel filter udara sampai pemberitahuan lanjutan.`,
-      `[SIARAN FREKUENSI DARURAT ${this.targetFreq.toFixed(1)} MHz]: Posko 72 menerima laporan gempa susulan amplitudo sedang. Amankan struktur dan pasokan air bersih keluarga Anda.`,
-      `[SINYAL POSKO UTAMA RAKATA ${this.targetFreq.toFixed(1)} MHz]: Evakuasi helikopter BNPB dijadwalkan pasca 72 jam pertama. Pastikan kesiapsiagaan fisik dan suplai radio tetap terjaga.`,
-    ];
-
-    const message = broadcasts[Math.floor(Math.random() * broadcasts.length)];
+    if (this.isFinalAttempt) {
+      const quality = this._getFinalQuality(strength);
+      const messages = {
+        clear: `[BASARNAS / SAR ${this.targetFreq.toFixed(1)} MHz] Posisi Bunker 72 terbaca jelas. Tetap lindungi ventilasi; tim darat mengonfirmasi sektor Anda.`,
+        weak: `[BASARNAS / SAR ${this.targetFreq.toFixed(1)} MHz] ...Bunker... tujuh dua... koordinat sebagian diterima. Tetap di tempat; pencarian diperluas.`,
+        failed: `[STATIK] ...SAR... ulangi... [SINYAL PUTUS]. Pesan lokasi tidak dapat dipastikan, tetapi keluarga tetap menunggu jendela evakuasi.`,
+      };
+      if (this.dom.broadcastBox) {
+        this.dom.broadcastBox.textContent = messages[quality];
+        this.dom.broadcastBox.classList.add('broadcast-active');
+      }
+      this.finalResultResolved = true;
+      const result = { quality, frequency: this.currentFreq, strength };
+      this.completionTimer = window.setTimeout(() => {
+        this.completionTimer = null;
+        this.close();
+        this.onFinalResult?.(result);
+      }, 650);
+      return;
+    }
 
     if (this.dom.broadcastBox) {
-      this.dom.broadcastBox.textContent = message;
+      this.dom.broadcastBox.textContent = `[SIARAN DARURAT ${this.targetFreq.toFixed(1)} MHz] Tetap di dalam bunker dan hemat daya. Basarnas/SAR sedang menyisir sektor pesisir saat kondisi memungkinkan.`;
       this.dom.broadcastBox.classList.add('broadcast-active');
-    }
-
-    if (!this.hasRewardedCurrentSession && this.onSuccess) {
-      this.hasRewardedCurrentSession = true;
-      this.onSuccess(message);
     }
   }
 }

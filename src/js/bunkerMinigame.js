@@ -154,8 +154,9 @@ export class BunkerMinigame {
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
         const onCancel = this.activeOptions?.onCancel || this.activeOptions?.onFailure;
+        const stationId = this.currentStationId;
         this.close();
-        onCancel?.({ canceled: true, success: false, stationId: this.currentStationId });
+        onCancel?.({ canceled: true, success: false, stationId });
       });
     }
   }
