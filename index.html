@@ -247,13 +247,37 @@
     </section>
 
     <section id="ending-view" class="view-screen">
+      <div id="good-ending-cutscene" class="ending-cutscene good-ending-cutscene" aria-live="polite" aria-hidden="true">
+        <div class="good-ending-cutscene__topline">
+          <span>PROTOKOL EVAKUASI</span>
+          <span id="good-ending-step">01 / 04</span>
+        </div>
+        <div class="good-ending-dialogue">
+          <div class="good-ending-speaker" id="good-ending-speaker">AYAH</div>
+          <p id="good-ending-dialogue-text"></p>
+          <button id="good-ending-next" class="choice-btn" type="button">LANJUTKAN</button>
+        </div>
+      </div>
+
+      <div id="bad-ending-cutscene" class="ending-cutscene" aria-live="polite" aria-hidden="true">
+        <div class="good-ending-cutscene__topline">
+          <span>OPERASI PENYELAMATAN</span>
+          <span id="bad-ending-step">01 / 03</span>
+        </div>
+        <div class="good-ending-dialogue">
+          <div class="good-ending-speaker" id="bad-ending-speaker">NARATOR</div>
+          <p id="bad-ending-dialogue-text"></p>
+          <button id="bad-ending-next" class="choice-btn" type="button">LANJUTKAN</button>
+        </div>
+      </div>
+
       <div class="ending-header">
         <h1 class="ending-alert-title">SIMULASI BERAKHIR</h1>
         <h2 id="ending-title" class="ending-type">ENDING TYPE</h2>
       </div>
 
       <div class="ending-content-box">
-        <p id="ending-desc" class="ending-description">Deskripsi akhir kisah keluarga Anda di Bunker 72...</p>
+        <div id="ending-desc" class="ending-description">Deskripsi akhir kisah keluarga Anda di Bunker 72...</div>
       </div>
 
       <div class="ending-stats">
@@ -272,17 +296,57 @@
       </div>
     </section>
 
-    <section id="credits-view" class="view-screen">
+    <section id="credits-view" class="view-screen credits-screen">
       <div class="ending-header">
-        <h1 class="ending-alert-title">KREDIT</h1>
+        <div class="ending-alert-title">ARSIP KONTRIBUTOR // PROTOKOL 72</div>
+        <h2 class="ending-type credits-title">CREDIT</h2>
       </div>
-      <div class="ending-content-box ending-content-box--center">
-        <h3>TIM PENGEMBANG</h3>
-        <p><strong>Dimas Ramadhan</strong><br>Project Manager / Game Director</p>
-        <p><strong>Geraldy Febriansyah</strong><br>Programmer</p>
-        <p><strong>Kholifatunnisa Zenal</strong><br>Visual Artist / Asset Finder</p>
-        <br>
-        <p>Terima kasih telah bermain!</p>
+      <div class="ending-content-box credits-panel">
+        <div class="credits-panel__heading">
+          <span class="credits-panel__signal">● ONLINE</span>
+          <h3>TIM PENGEMBANG</h3>
+          <p>Orang-orang di balik Bunker 72</p>
+        </div>
+
+        <div class="credits-list">
+          <article class="credit-person">
+            <div class="credit-person__number">01</div>
+            <div class="credit-person__identity">
+              <strong>Dimas Ramadhan</strong>
+              <span>Game Tester</span>
+            </div>
+            <a class="credit-social" href="https://www.instagram.com/dimasrmdhannn_" target="_blank" rel="noreferrer" aria-label="Instagram Dimas Ramadhan">
+              <svg class="instagram-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>
+              <span class="credit-handle">@dimasrmdhannn_</span>
+            </a>
+          </article>
+
+          <article class="credit-person">
+            <div class="credit-person__number">02</div>
+            <div class="credit-person__identity">
+              <strong>Geraldy Febriansyah</strong>
+              <span>Programmer/Game Director</span>
+            </div>
+            <a class="credit-social" href="https://www.instagram.com/geraldyfeb19" target="_blank" rel="noreferrer" aria-label="Instagram Geraldy Febriansyah">
+              <svg class="instagram-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>
+              <span class="credit-handle">@geraldyfeb19</span>
+            </a>
+          </article>
+
+          <article class="credit-person">
+            <div class="credit-person__number">03</div>
+            <div class="credit-person__identity">
+              <strong>Kholifatunnisa Zaenal Abidin</strong>
+              <span>Visual Artist / Asset Finder</span>
+            </div>
+            <a class="credit-social" href="https://www.instagram.com/ollssaa" target="_blank" rel="noreferrer" aria-label="Instagram Kholifatunnisa Zenal">
+              <svg class="instagram-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>
+              <span class="credit-handle">@ollssaa</span>
+            </a>
+          </article>
+        </div>
+
+        <p class="credits-thanks">Terima kasih telah bermain.<br><span>— SIMULASI SELESAI —</span></p>
       </div>
       <div class="choices-panel">
         <button id="close-credits-btn" class="choice-btn text-center">KEMBALI KE MENU</button>

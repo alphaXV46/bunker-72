@@ -12,6 +12,19 @@
 import { clamp, parseHour, POWER_THRESHOLDS, getTimePhase, getKnowledgeLabel, PREPAREDNESS_EVALUATION } from './constants.js';
 import { ScavengerMinigame } from './scavengerMinigame.js';
 
+const GOOD_ENDING_BACKGROUNDS = {
+  opening: new URL('../assets/backgrounds/bg_good_end.webp', import.meta.url).href,
+  one: new URL('../assets/backgrounds/bg_good_end_1.webp', import.meta.url).href,
+  two: new URL('../assets/backgrounds/bg_good_end_2.webp', import.meta.url).href,
+  three: new URL('../assets/backgrounds/bg_good_end_3.webp', import.meta.url).href,
+};
+
+const BAD_ENDING_BACKGROUNDS = {
+  opening: new URL('../assets/backgrounds/bg_bad_end.webp', import.meta.url).href,
+  rescue: new URL('../assets/backgrounds/bg_bad_end_2.webp', import.meta.url).href,
+  final: new URL('../assets/backgrounds/bg_bad_end_3.webp', import.meta.url).href,
+};
+
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
   ayah:        new URL('../assets/avatars/ayah/ayah_serius.png', import.meta.url).href,
@@ -50,6 +63,8 @@ export class GameView {
     this.isReviewingNarrative = false;
     this.canReviewNarrative = false;
     this.backButton = null;
+    this.goodEndingCutsceneStep = 0;
+    this.badEndingCutsceneStep = 0;
   }
 
   /**
@@ -64,6 +79,150 @@ export class GameView {
     this._setupSettingsModal();
     this._setupFullscreenControls();
     this._setupCardAndDrawerListeners();
+    this._setupGoodEndingCutscene();
+    this._setupBadEndingCutscene();
+  }
+
+  _setupGoodEndingCutscene() {
+    const cutscene = document.getElementById('good-ending-cutscene');
+    const nextButton = document.getElementById('good-ending-next');
+    if (!cutscene || !nextButton) return;
+
+    nextButton.addEventListener('click', () => this._advanceGoodEndingCutscene());
+    cutscene.addEventListener('click', (event) => {
+      if (event.target === cutscene) this._advanceGoodEndingCutscene();
+    });
+  }
+
+  _setupBadEndingCutscene() {
+    const cutscene = document.getElementById('bad-ending-cutscene');
+    const nextButton = document.getElementById('bad-ending-next');
+    if (!cutscene || !nextButton) return;
+    nextButton.addEventListener('click', () => this._advanceBadEndingCutscene());
+    cutscene.addEventListener('click', (event) => {
+      if (event.target === cutscene) this._advanceBadEndingCutscene();
+    });
+  }
+
+  _renderBadEndingBeat() {
+    const cutscene = document.getElementById('bad-ending-cutscene');
+    const speaker = document.getElementById('bad-ending-speaker');
+    const dialogue = document.getElementById('bad-ending-dialogue-text');
+    const step = document.getElementById('bad-ending-step');
+    const nextButton = document.getElementById('bad-ending-next');
+    if (!cutscene || !speaker || !dialogue || !step || !nextButton) return;
+
+    const beats = [
+      {
+        background: 'opening', speaker: 'NARATOR',
+        text: 'Sirene terdengar di balik hujan. Bunker runtuh, tetapi sinyal darurat akhirnya tertangkap. Tim SAR menemukan pintu masuk yang masih bisa dibuka.',
+      },
+      {
+        background: 'rescue', speaker: 'PETUGAS SAR',
+        text: '“Tetap sadar. Oksigen sudah kami pasang.” Masker menutup wajah mereka satu per satu. “Kalian selamat, tapi tubuh kalian butuh pertolongan segera.”',
+      },
+      {
+        background: 'final', speaker: 'NARATOR',
+        text: 'Mereka berhasil dievakuasi, namun harus meninggalkan bunker dan sebagian besar persediaan. Selamat—tetapi dengan harga yang tidak kecil.',
+      },
+    ];
+    const beat = beats[this.badEndingCutsceneStep];
+    cutscene.classList.remove('ending-cutscene-bg-opening', 'ending-cutscene-bg-rescue', 'ending-cutscene-bg-final', 'is-changing');
+    void cutscene.offsetWidth;
+    cutscene.classList.add(`ending-cutscene-bg-${beat.background}`, 'is-changing');
+    cutscene.style.setProperty('--cutscene-bg', `url("${BAD_ENDING_BACKGROUNDS[beat.background]}")`);
+    speaker.textContent = beat.speaker;
+    dialogue.textContent = beat.text;
+    step.textContent = `0${this.badEndingCutsceneStep + 1} / 03`;
+    nextButton.textContent = this.badEndingCutsceneStep === 2 ? 'LIHAT HASIL AKHIR' : 'LANJUTKAN';
+  }
+
+  _startBadEndingCutscene() {
+    const cutscene = document.getElementById('bad-ending-cutscene');
+    if (!cutscene) return;
+    this.badEndingCutsceneStep = 0;
+    this.dom.endingView.classList.remove('ending-bg-fatal');
+    cutscene.classList.add('is-active');
+    cutscene.setAttribute('aria-hidden', 'false');
+    this._renderBadEndingBeat();
+  }
+
+  _advanceBadEndingCutscene() {
+    const cutscene = document.getElementById('bad-ending-cutscene');
+    if (!cutscene?.classList.contains('is-active')) return;
+    if (this.badEndingCutsceneStep < 2) {
+      this.badEndingCutsceneStep += 1;
+      this._renderBadEndingBeat();
+      return;
+    }
+    cutscene.classList.remove('is-active', 'ending-cutscene-bg-opening', 'ending-cutscene-bg-rescue', 'ending-cutscene-bg-final');
+    cutscene.setAttribute('aria-hidden', 'true');
+    this.dom.endingView.classList.add('ending-bg-fatal');
+  }
+
+  _renderGoodEndingBeat() {
+    const cutscene = document.getElementById('good-ending-cutscene');
+    const speaker = document.getElementById('good-ending-speaker');
+    const dialogue = document.getElementById('good-ending-dialogue-text');
+    const step = document.getElementById('good-ending-step');
+    const nextButton = document.getElementById('good-ending-next');
+    if (!cutscene || !speaker || !dialogue || !step || !nextButton) return;
+
+    const beats = [
+      {
+        background: 'opening',
+        speaker: 'IBU',
+        text: '“Lihat... langitnya sudah mulai terang.” Ibu menggenggam tangan mereka. “Kita benar-benar berhasil melewati malam ini. Terima kasih karena tidak pernah menyerah.”',
+      },
+      {
+        background: 'one',
+        speaker: 'AYAH',
+        text: '“Kita berhasil...” Ayah menarik napas panjang. “Terima kasih sudah tetap bersama. Sekarang kita bisa keluar dengan tenang—dan mulai lagi dari sana.”',
+      },
+      {
+        background: 'two',
+        speaker: 'MAYA',
+        text: '“Ayah... Ibu... terima kasih sudah melindungiku.” Maya memeluk mereka erat. “Aku takut, tapi karena kita bersama, aku tidak merasa sendirian.”',
+      },
+      {
+        background: 'three',
+        speaker: 'NARATOR',
+        text: 'Pintu bunker terbuka. Cahaya pagi menyambut keluarga itu—sebuah awal baru setelah 72 jam bertahan hidup.',
+      },
+    ];
+    const beat = beats[this.goodEndingCutsceneStep];
+    cutscene.classList.remove('ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three', 'is-changing');
+    void cutscene.offsetWidth;
+    cutscene.classList.add(`ending-cutscene-bg-${beat.background}`, 'is-changing');
+    cutscene.style.setProperty('--cutscene-bg', `url("${GOOD_ENDING_BACKGROUNDS[beat.background]}")`);
+    speaker.textContent = beat.speaker;
+    dialogue.textContent = beat.text;
+    step.textContent = `0${this.goodEndingCutsceneStep + 1} / 04`;
+    nextButton.textContent = this.goodEndingCutsceneStep === 3 ? 'LIHAT HASIL AKHIR' : 'LANJUTKAN';
+  }
+
+  _startGoodEndingCutscene() {
+    const cutscene = document.getElementById('good-ending-cutscene');
+    if (!cutscene) return;
+    this.goodEndingCutsceneStep = 0;
+    this.dom.endingView.classList.remove('ending-bg-best');
+    cutscene.classList.add('is-active');
+    cutscene.setAttribute('aria-hidden', 'false');
+    this._renderGoodEndingBeat();
+  }
+
+  _advanceGoodEndingCutscene() {
+    const cutscene = document.getElementById('good-ending-cutscene');
+    if (!cutscene?.classList.contains('is-active')) return;
+    if (this.goodEndingCutsceneStep < 3) {
+      this.goodEndingCutsceneStep += 1;
+      this._renderGoodEndingBeat();
+      return;
+    }
+
+    cutscene.classList.remove('is-active', 'ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three');
+    cutscene.setAttribute('aria-hidden', 'true');
+    this.dom.endingView.classList.add('ending-bg-best');
   }
 
   // ─── LISTENER SETUP (private) ─────────────────────────────────────────────
@@ -1140,11 +1299,22 @@ export class GameView {
    * @param {object} flags            - Player state flags reconstructed from history.
    */
   renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null) {
+    const cutscene = document.getElementById('good-ending-cutscene');
+    if (cutscene) {
+      cutscene.classList.remove('is-active', 'ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three');
+      cutscene.setAttribute('aria-hidden', 'true');
+    }
+    const badCutscene = document.getElementById('bad-ending-cutscene');
+    if (badCutscene) {
+      badCutscene.classList.remove('is-active', 'ending-cutscene-bg-opening', 'ending-cutscene-bg-rescue', 'ending-cutscene-bg-final');
+      badCutscene.setAttribute('aria-hidden', 'true');
+    }
     const score = typeof modularData?.preparednessScore === 'number' ? modularData.preparednessScore : Math.min(100, Math.round((finalKnowledge / 15) * 100));
     const grade = PREPAREDNESS_EVALUATION.getGrade(score);
 
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
+    this.dom.endingView.classList.remove('ending-single-card');
 
     const ENDING_CONFIG = {
       ending_bad: {
@@ -1169,13 +1339,30 @@ export class GameView {
     this.dom.endingTitle.textContent = cfg.title;
     this.dom.endingTitle.classList.add(cfg.titleClass);
     this.dom.endingView.classList.add(cfg.bgClass);
+    if (endingId === 'ending_good') this.dom.endingView.classList.add('ending-single-card');
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
     }[character]));
     const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
 
-    if (modules.length) {
+    if (endingId === 'ending_good' && modules.length) {
+      this.dom.endingDesc.innerHTML = `
+        <article class="good-ending-final-card">
+          <div class="good-ending-final-card__eyebrow">HASIL EVAKUASI // PROTOKOL 72</div>
+          <h3 class="good-ending-final-card__title">GOOD ENDING — BERTAHAN DENGAN STABIL</h3>
+          <div class="good-ending-final-card__body">
+            ${modules.map((module) => `<p><strong>${escapeHtml(module.title)}:</strong> ${escapeHtml(module.body)}</p>`).join('')}
+          </div>
+          <div class="good-ending-final-card__readiness">
+            <div class="good-ending-final-card__readiness-label">KESIAPSIAGAAN TEKNIS</div>
+            <strong>${score} / 100</strong>
+            <span>${escapeHtml(grade.label)}</span>
+          </div>
+          <div class="good-ending-final-card__score">${escapeHtml(grade.desc)} Ini adalah ringkasan permainan, bukan penilaian resmi.</div>
+        </article>
+      `;
+    } else if (modules.length) {
       this.dom.endingDesc.innerHTML = `
         <div class="epilogue-modular-grid">
           ${modules.map((module) => `
@@ -1227,6 +1414,9 @@ export class GameView {
       `).join('');
       debriefBox.classList.remove('hidden');
     }
+
+    if (endingId === 'ending_good') this._startGoodEndingCutscene();
+    if (endingId === 'ending_bad') this._startBadEndingCutscene();
 
   }
 

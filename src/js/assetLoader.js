@@ -19,6 +19,7 @@ import avatarPenjarah from '../assets/avatars/avatar_penjarah.png';
 import avatarSar from '../assets/avatars/avatar_sar.png';
 
 // Optimized WebP Backgrounds (85%+ smaller, instant GPU decode)
+import bgGoodEnd from '../assets/backgrounds/bg_good_end.webp';
 import bgMenu from '../assets/backgrounds/bg_menu.webp';
 import bgPrologPeaceful from '../assets/backgrounds/bg_prolog_peaceful.webp';
 import bgPrologWindow from '../assets/backgrounds/bg_prolog_window.webp';
@@ -29,8 +30,12 @@ import bgProlog4 from '../assets/backgrounds/bg_prolog4.webp';
 import bgDay1 from '../assets/backgrounds/bg_day1.webp';
 import bgDay2 from '../assets/backgrounds/bg_day2.webp';
 import bgDay3 from '../assets/backgrounds/bg_day3.webp';
-import bgGoodEnd from '../assets/backgrounds/bg_good_end.webp';
+import bgGoodEnd1 from '../assets/backgrounds/bg_good_end_1.webp';
+import bgGoodEnd2 from '../assets/backgrounds/bg_good_end_2.webp';
+import bgGoodEnd3 from '../assets/backgrounds/bg_good_end_3.webp';
 import bgBadEnd from '../assets/backgrounds/bg_bad_end.webp';
+import bgBadEnd2 from '../assets/backgrounds/bg_bad_end_2.webp';
+import bgBadEnd3 from '../assets/backgrounds/bg_bad_end_3.webp';
 import bgFatalEnd from '../assets/backgrounds/bg_fatal_end.webp';
 
 // Minigame maps & sprites
@@ -47,6 +52,7 @@ import radioIcon from '../assets/items/radio_icon.png';
 import snacks from '../assets/items/snacks.png';
 
 const ASSET_URLS = [
+  bgGoodEnd,
   bgMenu,
   bgPrologPeaceful,
   bgPrologWindow,
@@ -57,8 +63,12 @@ const ASSET_URLS = [
   bgDay1,
   bgDay2,
   bgDay3,
-  bgGoodEnd,
+  bgGoodEnd1,
+  bgGoodEnd2,
+  bgGoodEnd3,
   bgBadEnd,
+  bgBadEnd2,
+  bgBadEnd3,
   bgFatalEnd,
   scavengerMap,
   spritesheetFather,
