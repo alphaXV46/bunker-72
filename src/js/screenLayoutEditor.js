@@ -1,59 +1,18 @@
-const EDITOR_VERSION = 1;
+import {
+  EDITOR_LAYOUT_VERSION as EDITOR_VERSION,
+  clamp,
+  normalizeAngle,
+  profileForWidth,
+  normalizeBox,
+  normalizeLayout,
+} from './runtime/layoutSchema.js';
+
 const MIN_SIZE = 32;
 const HANDLE_SIZE = 10;
-
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 const clone = (value) => {
   if (value === undefined) return undefined;
   return JSON.parse(JSON.stringify(value));
-};
-
-const normalizeAngle = (value) => {
-  let angle = Number(value);
-  if (!Number.isFinite(angle)) angle = 0;
-  angle %= 360;
-  if (angle > 180) angle -= 360;
-  if (angle < -180) angle += 360;
-  return Math.round(angle * 10) / 10;
-};
-
-const profileForWidth = (width) => (Number(width) <= 768 ? 'mobile' : 'desktop');
-
-const normalizeBox = (value) => {
-  const source = value && typeof value === 'object' ? value : {};
-  const width = clamp(Number(source.w) || 0.4, 0.02, 1);
-  const height = clamp(Number(source.h) || 0.2, 0.02, 1);
-  return {
-    ...source,
-    frame: source.frame === 'card-body' ? 'card-body' : 'story-box',
-    x: clamp(Number(source.x) || 0, 0, Math.max(0, 1 - width)),
-    y: clamp(Number(source.y) || 0, 0, Math.max(0, 1 - height)),
-    w: width,
-    h: height,
-    angle: normalizeAngle(source.angle),
-  };
-};
-
-const normalizeProfile = (value) => {
-  const source = value && typeof value === 'object' ? value : {};
-  return Object.fromEntries(
-    Object.entries(source)
-      .filter(([, box]) => box && typeof box === 'object')
-      .map(([id, box]) => [id, normalizeBox(box)])
-  );
-};
-
-const normalizeLayout = (value) => {
-  const source = value && typeof value === 'object' ? value : {};
-  const profiles = source.profiles && typeof source.profiles === 'object' ? source.profiles : source;
-  return {
-    version: EDITOR_VERSION,
-    profiles: {
-      desktop: normalizeProfile(profiles.desktop),
-      mobile: normalizeProfile(profiles.mobile),
-    },
-  };
 };
 
 const setImportant = (element, property, value) => {
@@ -67,10 +26,11 @@ const setImportant = (element, property, value) => {
  * responsive game shell.
  */
 export class ScreenLayoutEditor {
-  constructor({ root = null, persistence = null, onStatus = () => {} } = {}) {
+  constructor({ root = null, persistence = null, onStatus = () => {}, onSave = () => {} } = {}) {
     this.root = null;
     this.persistence = persistence;
     this.onStatus = onStatus;
+    this.onSave = onSave;
     this.enabled = false;
     this.sceneKey = 'global';
     this.profile = 'desktop';
@@ -80,12 +40,15 @@ export class ScreenLayoutEditor {
     this.history = [];
     this.future = [];
     this.statusMessage = 'EDITOR UI OFF';
+    this.helpVisible = true;
     this._sceneToken = 0;
     this._boxes = new Map();
     this._overlay = null;
     this._toolbar = null;
+    this._info = null;
     this._managedElements = new Set();
     this._visibilityOverrides = new Set();
+    this._visualRefreshFrameId = null;
 
     this._handlePointerDown = (event) => this._onPointerDown(event);
     this._handlePointerMove = (event) => this._onPointerMove(event);
@@ -130,6 +93,10 @@ export class ScreenLayoutEditor {
       this.root.removeEventListener('wheel', this._handleWheel);
     }
     if (typeof window !== 'undefined') window.removeEventListener('resize', this._handleResize);
+    if (this._visualRefreshFrameId !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this._visualRefreshFrameId);
+      this._visualRefreshFrameId = null;
+    }
     this.root = null;
     this.drag = null;
   }
@@ -140,8 +107,10 @@ export class ScreenLayoutEditor {
     this.detach();
     this._overlay?.remove();
     this._toolbar?.remove();
+    this._info?.remove();
     this._overlay = null;
     this._toolbar = null;
+    this._info = null;
     this._boxes.clear();
   }
 
@@ -193,14 +162,17 @@ export class ScreenLayoutEditor {
       this._applyCurrentProfile(true);
       this._createOverlay();
       this._createToolbar();
+      this._createInfo();
       this.statusMessage = 'EDITOR UI AKTIF — PILIH ELEMEN';
       this.refresh();
     } else {
       this._setEditorVisibility(false);
       this._overlay?.remove();
       this._toolbar?.remove();
+      this._info?.remove();
       this._overlay = null;
       this._toolbar = null;
+      this._info = null;
       this._boxes.clear();
       this.statusMessage = 'EDITOR UI OFF';
     }
@@ -210,6 +182,17 @@ export class ScreenLayoutEditor {
 
   toggle() {
     return this.setEnabled(!this.enabled);
+  }
+
+  setHelpVisible(visible) {
+    this.helpVisible = Boolean(visible);
+    this._renderToolbar();
+    this._renderInfo();
+    return this.helpVisible;
+  }
+
+  toggleHelp() {
+    return this.setHelpVisible(!this.helpVisible);
   }
 
   getStatus() {
@@ -222,6 +205,7 @@ export class ScreenLayoutEditor {
       selectedId: this.selectedId,
       selectedBox: box ? { ...box } : null,
       statusMessage: this.statusMessage,
+      helpVisible: this.helpVisible,
     };
   }
 
@@ -292,14 +276,25 @@ export class ScreenLayoutEditor {
 
   async save() {
     const payload = clone(this.layout);
+    let result = null;
+    let success = true;
+    let error = null;
     try {
-      const result = await this.persistence?.save?.(this.sceneKey, payload);
+      result = await this.persistence?.save?.(this.sceneKey, payload);
       this.statusMessage = result?.fileSaved === false ? 'LAYOUT TERSIMPAN DI CACHE LOKAL' : 'FILE LAYOUT TERSIMPAN';
-    } catch (error) {
+    } catch (caughtError) {
+      success = false;
+      error = caughtError;
       this.statusMessage = 'LAYOUT LOKAL (FILE GAGAL)';
-      console.warn('[ScreenLayoutEditor] Tidak dapat menyimpan layout scene.', error);
+      console.warn('[ScreenLayoutEditor] Tidak dapat menyimpan layout scene.', caughtError);
     }
     this._renderToolbar();
+    this._notifySave({
+      success,
+      fileSaved: success && result?.fileSaved !== false,
+      message: this.statusMessage,
+      error,
+    });
     return payload;
   }
 
@@ -515,6 +510,25 @@ export class ScreenLayoutEditor {
     this.root.appendChild(this._toolbar);
   }
 
+  _createInfo() {
+    if (!this.root || this._info) return;
+    this._info = document.createElement('div');
+    this._info.className = 'screen-layout-editor-info';
+    this._info.setAttribute('role', 'note');
+    this._info.innerHTML = `
+      <strong>EDITOR UI AKTIF</strong>
+      <span><b>[F8]</b> SEMBUNYIKAN / TAMPILKAN BANTUAN EDITOR</span>
+      <span><b>[CTRL+S]</b> SIMPAN PERUBAHAN KE FILE</span>
+    `;
+    this.root.appendChild(this._info);
+    this._renderInfo();
+  }
+
+  _renderInfo() {
+    if (!this._info) return;
+    this._info.hidden = !this.helpVisible;
+  }
+
   _getOverlayRect(target) {
     const rootRect = this.root.getBoundingClientRect();
     const frame = this._getFrame(target);
@@ -578,6 +592,8 @@ export class ScreenLayoutEditor {
 
   _renderToolbar() {
     if (!this._toolbar) return;
+    this._toolbar.style.display = this.helpVisible ? '' : 'none';
+    if (!this.helpVisible) return;
     const status = this.getStatus();
     const selected = status.selectedBox;
     const selection = selected
@@ -588,6 +604,7 @@ export class ScreenLayoutEditor {
       selection,
       'DRAG geser • HANDLE resize • WHEEL rotasi • ARROW presisi',
       'CTRL+S file • CTRL+E export • CTRL+Z/Y undo • ALT+R reset',
+      'F8 sembunyikan/tampilkan bantuan editor',
       status.statusMessage,
     ].join('\n');
   }
@@ -597,6 +614,14 @@ export class ScreenLayoutEditor {
       this.onStatus(this.getStatus());
     } catch (error) {
       console.warn('[ScreenLayoutEditor] onStatus callback failed.', error);
+    }
+  }
+
+  _notifySave(result) {
+    try {
+      this.onSave({ editor: this, ...result });
+    } catch (error) {
+      console.warn('[ScreenLayoutEditor] onSave callback failed.', error);
     }
   }
 
@@ -611,9 +636,18 @@ export class ScreenLayoutEditor {
   _changed(message) {
     this.statusMessage = message;
     this._applyCurrentProfile(true);
-    this._renderOverlay();
-    this._renderToolbar();
-    this._notifyStatus();
+    this._scheduleVisualRefresh();
+  }
+
+  _scheduleVisualRefresh() {
+    if (this._visualRefreshFrameId !== null || typeof window === 'undefined') return;
+    this._visualRefreshFrameId = window.requestAnimationFrame(() => {
+      this._visualRefreshFrameId = null;
+      if (!this.enabled) return;
+      this._renderOverlay();
+      this._renderToolbar();
+      this._notifyStatus();
+    });
   }
 
   _getFramePoint(event, target) {

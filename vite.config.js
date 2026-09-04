@@ -23,6 +23,10 @@ const isValidEditorData = (value) => Boolean(
   && value.fog
   && typeof value.fog === 'object'
   && !Array.isArray(value.fog)
+  && (!value.items || (
+    typeof value.items === 'object'
+    && !Array.isArray(value.items)
+  ))
   && value.ui
   && typeof value.ui === 'object'
   && !Array.isArray(value.ui)
@@ -84,9 +88,13 @@ const editorDataPlugin = () => ({
   },
 });
 
-export default defineConfig({
-  plugins: [editorDataPlugin()],
+export default defineConfig(({ command }) => ({
+  // The editor persistence route exists only in the local Vite server. A
+  // production build has neither the route nor a plugin lifecycle hook.
+  plugins: command === 'serve' ? [editorDataPlugin()] : [],
   server: {
+    // Accept both localhost and 127.0.0.1, including the Codex in-app browser.
+    host: '0.0.0.0',
     port: 3000,
     open: false,
   },
@@ -96,4 +104,4 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
-});
+}));

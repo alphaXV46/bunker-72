@@ -11,7 +11,7 @@
       "colliders": [
         {
           "id": "WALL_OUTER_WEST",
-          "type": "wall",
+          "type": "solid",
           "x": 8,
           "y": 18,
           "w": 22,
@@ -19,7 +19,7 @@
         },
         {
           "id": "WALL_OUTER_EAST",
-          "type": "wall",
+          "type": "solid",
           "x": 1638,
           "y": 18,
           "w": 24,
@@ -27,7 +27,7 @@
         },
         {
           "id": "WALL_OUTER_SOUTH_01",
-          "type": "wall",
+          "type": "solid",
           "x": 8,
           "y": 824,
           "w": 640,
@@ -35,7 +35,7 @@
         },
         {
           "id": "WALL_OUTER_SOUTH_02",
-          "type": "wall",
+          "type": "solid",
           "x": 1140,
           "y": 824,
           "w": 522,
@@ -43,7 +43,7 @@
         },
         {
           "id": "WALL_MASTER_TOP",
-          "type": "wall",
+          "type": "solid",
           "x": 28,
           "y": 18,
           "w": 432,
@@ -51,7 +51,7 @@
         },
         {
           "id": "WALL_MASTER_LEFT",
-          "type": "wall",
+          "type": "solid",
           "x": 28,
           "y": 18,
           "w": 22,
@@ -59,15 +59,15 @@
         },
         {
           "id": "WALL_MASTER_BOTTOM",
-          "type": "wall",
-          "x": 8,
-          "y": 282,
+          "type": "solid",
+          "x": 33,
+          "y": 286,
           "w": 452,
           "h": 24
         },
         {
           "id": "WALL_MASTER_RIGHT",
-          "type": "wall",
+          "type": "solid",
           "x": 450,
           "y": 18,
           "w": 22,
@@ -75,7 +75,7 @@
         },
         {
           "id": "WALL_MASTER_ALCOVE_TOP",
-          "type": "wall",
+          "type": "solid",
           "x": 450,
           "y": 92,
           "w": 112,
@@ -83,47 +83,39 @@
         },
         {
           "id": "BED_MASTER",
-          "type": "furniture",
-          "x": 95,
-          "y": 90,
-          "w": 165,
-          "h": 155
+          "type": "solid",
+          "x": 136,
+          "y": 89,
+          "w": 124,
+          "h": 160
         },
         {
           "id": "NIGHTSTAND_MASTER_LEFT",
-          "type": "furniture",
-          "x": 68,
-          "y": 105,
-          "w": 24,
-          "h": 38
-        },
-        {
-          "id": "NIGHTSTAND_MASTER_RIGHT",
-          "type": "furniture",
-          "x": 263,
-          "y": 105,
+          "type": "solid",
+          "x": 107,
+          "y": 97,
           "w": 24,
           "h": 38
         },
         {
           "id": "DRESSER_MASTER",
-          "type": "furniture",
-          "x": 320,
-          "y": 55,
+          "type": "solid",
+          "x": 279,
+          "y": 58,
           "w": 65,
           "h": 75
         },
         {
           "id": "WARDROBE_MASTER",
-          "type": "furniture",
-          "x": 385,
-          "y": 55,
-          "w": 65,
-          "h": 150
+          "type": "solid",
+          "x": 347,
+          "y": 60,
+          "w": 91,
+          "h": 109
         },
         {
           "id": "PLANT_MASTER",
-          "type": "furniture",
+          "type": "solid",
           "x": 35,
           "y": 55,
           "w": 30,
@@ -131,7 +123,7 @@
         },
         {
           "id": "WALL_BUNKER_TOP",
-          "type": "wall",
+          "type": "solid",
           "x": 562,
           "y": 10,
           "w": 516,
@@ -139,7 +131,7 @@
         },
         {
           "id": "WALL_BUNKER_LEFT",
-          "type": "wall",
+          "type": "solid",
           "x": 562,
           "y": 10,
           "w": 22,
@@ -147,64 +139,55 @@
         },
         {
           "id": "WALL_BUNKER_RIGHT",
-          "type": "wall",
-          "x": 1089,
+          "type": "solid",
+          "x": 1091,
           "y": 13,
           "w": 22,
-          "h": 225,
-          "angle": 0
+          "h": 225
         },
         {
           "id": "WALL_BUNKER_FRONT_01",
-          "type": "wall",
-          "x": 566,
-          "y": 240,
-          "w": 170,
-          "h": 30
+          "type": "solid",
+          "x": 572,
+          "y": 213,
+          "w": 176,
+          "h": 58
         },
         {
           "id": "WALL_BUNKER_FRONT_02",
-          "type": "wall",
-          "x": 884,
-          "y": 236,
-          "w": 210,
-          "h": 30
+          "type": "solid",
+          "x": 883,
+          "y": 205,
+          "w": 230,
+          "h": 67
         },
         {
           "id": "SHELF_BUNKER",
-          "type": "furniture",
-          "x": 585,
-          "y": 48,
+          "type": "solid",
+          "x": 592,
+          "y": 43,
           "w": 100,
           "h": 165
         },
         {
           "id": "VAULT_DOOR_BUNKER",
-          "type": "furniture",
-          "x": 745,
-          "y": 35,
-          "w": 110,
-          "h": 125
-        },
-        {
-          "id": "POWER_PANEL_BUNKER",
-          "type": "furniture",
-          "x": 880,
-          "y": 38,
-          "w": 165,
-          "h": 75
+          "type": "solid",
+          "x": 672,
+          "y": 41,
+          "w": 422,
+          "h": 116
         },
         {
           "id": "GENERATOR_BUNKER",
-          "type": "furniture",
-          "x": 920,
-          "y": 125,
+          "type": "solid",
+          "x": 973,
+          "y": 119,
           "w": 115,
           "h": 85
         },
         {
           "id": "WALL_CHILD_TOP",
-          "type": "wall",
+          "type": "solid",
           "x": 1155,
           "y": 18,
           "w": 485,
@@ -212,39 +195,31 @@
         },
         {
           "id": "WALL_CHILD_RIGHT",
-          "type": "wall",
+          "type": "solid",
           "x": 1620,
           "y": 18,
           "w": 22,
           "h": 302
         },
         {
-          "id": "WALL_CHILD_BOTTOM",
-          "type": "wall",
-          "x": 1226,
-          "y": 319,
-          "w": 410,
-          "h": 18
-        },
-        {
           "id": "WALL_CHILD_LEFT",
-          "type": "wall",
-          "x": 1218,
-          "y": 27,
+          "type": "solid",
+          "x": 1213,
+          "y": 28,
           "w": 22,
           "h": 212
         },
         {
           "id": "WALL_CHILD_ALCOVE_TOP",
-          "type": "wall",
-          "x": 1078,
-          "y": 92,
+          "type": "solid",
+          "x": 1118,
+          "y": 164,
           "w": 98,
           "h": 22
         },
         {
           "id": "WARDROBE_CHILD",
-          "type": "furniture",
+          "type": "solid",
           "x": 1210,
           "y": 55,
           "w": 85,
@@ -252,7 +227,7 @@
         },
         {
           "id": "SHELF_CHILD",
-          "type": "furniture",
+          "type": "solid",
           "x": 1300,
           "y": 80,
           "w": 60,
@@ -260,23 +235,15 @@
         },
         {
           "id": "DESK_CHILD",
-          "type": "furniture",
+          "type": "solid",
           "x": 1370,
           "y": 78,
           "w": 105,
           "h": 75
         },
         {
-          "id": "CHAIR_CHILD",
-          "type": "furniture",
-          "x": 1400,
-          "y": 155,
-          "w": 45,
-          "h": 45
-        },
-        {
           "id": "BED_CHILD",
-          "type": "furniture",
+          "type": "solid",
           "x": 1490,
           "y": 85,
           "w": 95,
@@ -284,7 +251,7 @@
         },
         {
           "id": "DRAWER_CHILD",
-          "type": "furniture",
+          "type": "solid",
           "x": 1510,
           "y": 260,
           "w": 55,
@@ -292,7 +259,7 @@
         },
         {
           "id": "PLANT_CHILD",
-          "type": "furniture",
+          "type": "solid",
           "x": 1590,
           "y": 195,
           "w": 30,
@@ -300,135 +267,114 @@
         },
         {
           "id": "WALL_OFFICE_TOP",
-          "type": "wall",
-          "x": 1180,
-          "y": 355,
-          "w": 460,
-          "h": 22
+          "type": "solid",
+          "x": 1226,
+          "y": 336,
+          "w": 406,
+          "h": 21
         },
         {
           "id": "WALL_OFFICE_LEFT_01",
-          "type": "wall",
-          "x": 1180,
-          "y": 355,
-          "w": 22,
-          "h": 50
+          "type": "solid",
+          "x": 1231,
+          "y": 356,
+          "w": 34,
+          "h": 217,
+          "angle": 0
         },
         {
           "id": "WALL_OFFICE_LEFT_02",
-          "type": "wall",
-          "x": 1180,
-          "y": 465,
-          "w": 22,
-          "h": 343
+          "type": "solid",
+          "x": 1239,
+          "y": 623,
+          "w": 30,
+          "h": 201,
+          "angle": 0
         },
         {
           "id": "SHELF_OFFICE_TOP",
-          "type": "furniture",
-          "x": 1340,
-          "y": 445,
-          "w": 175,
-          "h": 65
+          "type": "solid",
+          "x": 1363,
+          "y": 396,
+          "w": 149,
+          "h": 66
         },
         {
           "id": "SHELF_OFFICE_RIGHT",
-          "type": "furniture",
-          "x": 1565,
-          "y": 440,
-          "w": 65,
-          "h": 325
-        },
-        {
-          "id": "DESK_OFFICE_LEFT",
-          "type": "furniture",
-          "x": 1290,
-          "y": 540,
-          "w": 65,
-          "h": 160
+          "type": "solid",
+          "x": 1584,
+          "y": 405,
+          "w": 41,
+          "h": 402,
+          "angle": -5
         },
         {
           "id": "DESK_OFFICE_BACK",
-          "type": "furniture",
-          "x": 1355,
-          "y": 565,
-          "w": 140,
-          "h": 75
-        },
-        {
-          "id": "CHAIR_OFFICE",
-          "type": "furniture",
-          "x": 1375,
-          "y": 640,
-          "w": 48,
-          "h": 48
-        },
-        {
-          "id": "PLANT_OFFICE",
-          "type": "furniture",
-          "x": 1195,
-          "y": 755,
-          "w": 40,
-          "h": 50
+          "type": "solid",
+          "x": 1361,
+          "y": 540,
+          "w": 206,
+          "h": 137
         },
         {
           "id": "WALL_KITCHEN_DIVIDER",
-          "type": "wall",
+          "type": "solid",
           "x": 488,
-          "y": 282,
+          "y": 286,
           "w": 22,
           "h": 158
         },
         {
           "id": "COUNTER_KITCHEN_TOP",
-          "type": "furniture",
-          "x": 30,
-          "y": 315,
+          "type": "solid",
+          "x": 47,
+          "y": 342,
           "w": 315,
           "h": 75
         },
         {
           "id": "COUNTER_KITCHEN_LEFT",
-          "type": "furniture",
+          "type": "solid",
           "x": 30,
           "y": 390,
-          "w": 65,
-          "h": 155
+          "w": 44,
+          "h": 228
         },
         {
           "id": "FRIDGE_KITCHEN",
-          "type": "furniture",
-          "x": 345,
-          "y": 320,
+          "type": "solid",
+          "x": 331,
+          "y": 326,
           "w": 75,
           "h": 95
         },
         {
           "id": "PANTRY_KITCHEN",
-          "type": "furniture",
-          "x": 445,
-          "y": 320,
+          "type": "solid",
+          "x": 444,
+          "y": 327,
           "w": 40,
           "h": 95
         },
         {
           "id": "ISLAND_KITCHEN",
-          "type": "furniture",
-          "x": 175,
-          "y": 448,
+          "type": "solid",
+          "x": 161,
+          "y": 467,
           "w": 190,
           "h": 85
         },
         {
           "id": "TABLE_DINING",
-          "type": "furniture",
-          "x": 85,
-          "y": 595,
-          "w": 185,
-          "h": 145
+          "type": "solid",
+          "x": 144,
+          "y": 620,
+          "w": 160,
+          "h": 106
         },
         {
           "id": "PLANT_DINING",
-          "type": "furniture",
+          "type": "solid",
           "x": 30,
           "y": 740,
           "w": 35,
@@ -436,151 +382,104 @@
         },
         {
           "id": "WALL_BATHROOM_TOP",
-          "type": "wall",
-          "x": 325,
-          "y": 540,
-          "w": 233,
+          "type": "solid",
+          "x": 372,
+          "y": 543,
+          "w": 188,
           "h": 22
         },
         {
           "id": "WALL_BATHROOM_LEFT",
-          "type": "wall",
-          "x": 325,
-          "y": 540,
+          "type": "solid",
+          "x": 368,
+          "y": 539,
           "w": 20,
           "h": 290
-        },
-        {
-          "id": "WALL_BATHROOM_BOTTOM",
-          "type": "wall",
-          "x": 325,
-          "y": 810,
-          "w": 233,
-          "h": 22
         },
         {
           "id": "WALL_BATHROOM_RIGHT",
-          "type": "wall",
-          "x": 538,
-          "y": 540,
+          "type": "solid",
+          "x": 544,
+          "y": 547,
           "w": 20,
           "h": 290
         },
         {
-          "id": "SHOWER_BATHROOM",
-          "type": "furniture",
-          "x": 335,
-          "y": 555,
-          "w": 55,
-          "h": 105
-        },
-        {
-          "id": "TOILET_BATHROOM",
-          "type": "furniture",
-          "x": 430,
-          "y": 605,
-          "w": 25,
-          "h": 40
-        },
-        {
-          "id": "VANITY_BATHROOM",
-          "type": "furniture",
-          "x": 455,
-          "y": 575,
-          "w": 35,
-          "h": 80
-        },
-        {
-          "id": "TUB_BATHROOM",
-          "type": "furniture",
-          "x": 335,
-          "y": 685,
-          "w": 75,
-          "h": 85
-        },
-        {
-          "id": "SHELF_BATHROOM_STORAGE",
-          "type": "furniture",
-          "x": 500,
-          "y": 690,
-          "w": 35,
-          "h": 90
-        },
-        {
           "id": "SOFA_LIVING_LEFT",
-          "type": "furniture",
-          "x": 675,
-          "y": 335,
-          "w": 55,
-          "h": 245
+          "type": "solid",
+          "x": 694,
+          "y": 327,
+          "w": 75,
+          "h": 281
         },
         {
           "id": "SOFA_LIVING_BOTTOM",
-          "type": "furniture",
+          "type": "solid",
           "x": 730,
           "y": 525,
-          "w": 130,
-          "h": 55
+          "w": 153,
+          "h": 84
         },
         {
           "id": "COFFEE_TABLE_LIVING",
-          "type": "furniture",
-          "x": 770,
-          "y": 400,
-          "w": 80,
-          "h": 90
+          "type": "solid",
+          "x": 802,
+          "y": 404,
+          "w": 87,
+          "h": 108
         },
         {
           "id": "ARMCHAIR_LIVING",
-          "type": "furniture",
-          "x": 875,
-          "y": 400,
+          "type": "solid",
+          "x": 923,
+          "y": 408,
           "w": 52,
-          "h": 52
+          "h": 52,
+          "angle": -45
         },
         {
           "id": "TV_CONSOLE_LIVING",
-          "type": "furniture",
-          "x": 1015,
-          "y": 345,
+          "type": "solid",
+          "x": 1066,
+          "y": 406,
           "w": 50,
           "h": 175
         },
         {
           "id": "PLANT_LIVING",
-          "type": "furniture",
-          "x": 668,
-          "y": 315,
-          "w": 35,
-          "h": 35
+          "type": "solid",
+          "x": 660,
+          "y": 347,
+          "w": 36,
+          "h": 58
         },
         {
           "id": "SIDE_TABLE_LIVING",
-          "type": "furniture",
-          "x": 868,
-          "y": 535,
-          "w": 38,
-          "h": 35
+          "type": "solid",
+          "x": 895,
+          "y": 559,
+          "w": 48,
+          "h": 47
         },
         {
           "id": "WALL_FOYER_TOP_LEFT",
-          "type": "wall",
-          "x": 648,
+          "type": "solid",
+          "x": 647,
           "y": 680,
-          "w": 147,
-          "h": 25
+          "w": 180,
+          "h": 112
         },
         {
           "id": "WALL_FOYER_TOP_RIGHT",
-          "type": "wall",
-          "x": 953,
-          "y": 680,
-          "w": 166,
-          "h": 25
+          "type": "solid",
+          "x": 917,
+          "y": 694,
+          "w": 194,
+          "h": 89
         },
         {
           "id": "WALL_FOYER_LEFT",
-          "type": "wall",
+          "type": "solid",
           "x": 648,
           "y": 680,
           "w": 22,
@@ -588,40 +487,109 @@
         },
         {
           "id": "WALL_FOYER_RIGHT",
-          "type": "wall",
+          "type": "solid",
           "x": 1118,
           "y": 680,
           "w": 22,
           "h": 250
         },
         {
-          "id": "CONSOLE_FOYER",
-          "type": "furniture",
-          "x": 668,
-          "y": 752,
-          "w": 92,
-          "h": 58
-        },
-        {
-          "id": "COAT_PLANT_FOYER",
-          "type": "furniture",
-          "x": 955,
-          "y": 750,
-          "w": 72,
-          "h": 80
-        },
-        {
           "id": "WALL_NEW_01",
-          "type": "wall",
-          "x": 1226,
-          "y": 268,
-          "w": 22,
-          "h": 60
+          "type": "solid",
+          "x": 1222,
+          "y": 272,
+          "w": 30,
+          "h": 86
         }
       ],
-      "exportedAt": "2026-09-04T10:07:56.143Z"
+      "exportedAt": "2026-09-04T12:52:20.152Z"
     }
   },
   "fog": {},
+  "items": {
+    "prologue_house": {
+      "version": 1,
+      "mapKey": "prologue_house",
+      "mapSize": {
+        "width": 1672,
+        "height": 941
+      },
+      "items": [
+        {
+          "uid": "food-0",
+          "type": "food",
+          "x": 315,
+          "y": 384,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "food-1",
+          "type": "food",
+          "x": 44,
+          "y": 552,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "drink-0",
+          "type": "drink",
+          "x": 116,
+          "y": 368,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "drink-1",
+          "type": "drink",
+          "x": 159,
+          "y": 646,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "kit-0",
+          "type": "kit",
+          "x": 314,
+          "y": 106,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "radio-0",
+          "type": "radio",
+          "x": 1541,
+          "y": 642,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "battery-0",
+          "type": "battery",
+          "x": 1108,
+          "y": 531,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "toy-0",
+          "type": "toy",
+          "x": 1591,
+          "y": 298,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        }
+      ],
+      "exportedAt": "2026-09-04T13:26:28.362Z"
+    }
+  },
   "ui": {}
 }

@@ -16,6 +16,10 @@ import { SAVE_KEY, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
 import { preloadAssets } from './assetLoader.js';
 import { RadioMiniGame } from './radioMiniGame.js';
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
+import {
+  DEV_TOOLS_ENABLED,
+  initializeDeveloperConsole,
+} from './dev/devRuntime.js';
 
 // ─── DOM REFERENCES ──────────────────────────────────────────────────────────
 const dom = {
@@ -212,6 +216,7 @@ function showScreen(screenKey) {
 // ─── INITIALISATION ──────────────────────────────────────────────────────────
 
 let storyEngine = null;
+const DEV_BOOTSTRAP_MODULE = '/src/js/dev/devBootstrap.js';
 
 async function initGame() {
   try {
@@ -241,6 +246,22 @@ async function initGame() {
     }, 450);
   }
   showScreen('menu');
+
+  // Load the real developer implementations before StoryEngine constructs
+  // GameView/ScavengerMinigame. The runtime gateway remains a no-op in
+  // release builds, so this branch and its dynamic module are tree-shaken.
+  if (DEV_TOOLS_ENABLED) {
+    try {
+      // Resolve this module directly from the Vite dev server. The
+      // vite-ignore marker keeps the production build from emitting a
+      // reachable developer chunk; the branch itself is compile-time false
+      // in a release build.
+      const { bootstrapDevTools } = await import(/* @vite-ignore */ DEV_BOOTSTRAP_MODULE);
+      bootstrapDevTools();
+    } catch (error) {
+      console.warn('[main] Developer tools unavailable; continuing normally.', error);
+    }
+  }
 
   storyEngine = new StoryEngine({
     storyData,
@@ -403,15 +424,7 @@ async function initGame() {
   });
 
   // ── Developer Console (Dev Mode Only) ──
-  if (import.meta.env.DEV) {
-    import('./debug/developerConsole.js')
-      .then(({ initDeveloperConsole }) => {
-        initDeveloperConsole({ storyEngine, dom });
-      })
-      .catch((err) => {
-        console.warn('[main] Could not initialize Developer Console:', err);
-      });
-  }
+  if (DEV_TOOLS_ENABLED) initializeDeveloperConsole({ storyEngine, dom });
 }
 
 if (document.readyState === 'loading') {

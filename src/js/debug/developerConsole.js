@@ -310,6 +310,7 @@ class DeveloperConsole {
             <button type="button" class="bdc-btn" id="bdc-toggle-godmode">God Mode: OFF</button>
             <button type="button" class="bdc-btn" id="bdc-toggle-nocollision">No Collision: OFF</button>
             <button type="button" class="bdc-btn" id="bdc-toggle-colliders">Colliders & Zones (F2): OFF</button>
+            <button type="button" class="bdc-btn" id="bdc-toggle-items">Item Positions (F9): OFF</button>
           </div>
 
           <!-- Fog of War Controls -->
@@ -497,6 +498,15 @@ class DeveloperConsole {
       sc.setDebugColliders(!sc.debugColliders);
       colBtn.textContent = `Colliders & Zones (F2): ${sc.debugColliders ? 'ON' : 'OFF'}`;
       colBtn.classList.toggle('active', sc.debugColliders);
+    });
+
+    const itemBtn = el('bdc-toggle-items');
+    itemBtn?.addEventListener('click', () => {
+      const sc = this.storyEngine.view?.scavengerGame;
+      if (!sc) return;
+      const enabled = sc.setItemEditor(!sc.itemEditor?.enabled);
+      itemBtn.textContent = `Item Positions (F9): ${enabled ? 'ON' : 'OFF'}`;
+      itemBtn.classList.toggle('active', enabled);
     });
 
     const fogBtn = el('bdc-toggle-fog');
@@ -714,6 +724,13 @@ class DeveloperConsole {
       if (timerDisplay) {
         timerDisplay.textContent = '--';
       }
+    }
+
+    const itemBtn = el('bdc-toggle-items');
+    if (itemBtn) {
+      const itemEditorActive = Boolean(sc?.isActive && sc.itemEditor?.enabled);
+      itemBtn.textContent = `Item Positions (F9): ${itemEditorActive ? 'ON' : 'OFF'}`;
+      itemBtn.classList.toggle('active', itemEditorActive);
     }
 
     // Stats Status

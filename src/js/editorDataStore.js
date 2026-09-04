@@ -13,6 +13,7 @@ const createEmptyDocument = () => ({
   version: EDITOR_DATA_VERSION,
   collision: {},
   fog: {},
+  items: {},
   ui: {},
 });
 
@@ -25,6 +26,9 @@ const normalizeDocument = (value) => {
       : {},
     fog: source.fog && typeof source.fog === 'object' && !Array.isArray(source.fog)
       ? source.fog
+      : {},
+    items: source.items && typeof source.items === 'object' && !Array.isArray(source.items)
+      ? source.items
       : {},
     ui: source.ui && typeof source.ui === 'object' && !Array.isArray(source.ui)
       ? source.ui
@@ -150,4 +154,3 @@ export class EditorDataStore {
 }
 
 export const editorDataStore = new EditorDataStore();
-

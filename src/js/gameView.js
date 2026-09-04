@@ -6,14 +6,15 @@
  *  - Accept all data as explicit parameters from the Controller.
  *  - Never navigate the controller's object graph (no this.controller.model.*).
  *
- * Dependencies: constants.js, scavenger minigame, and developer-only layout
- * persistence/editor modules.
+ * Dependencies: constants.js, scavenger minigame, runtime layout data, and a
+ * small developer-tools gateway. The gateway stays a no-op in release builds.
  */
 
 import { clamp, parseHour, POWER_THRESHOLDS, getTimePhase, getKnowledgeLabel, PREPAREDNESS_EVALUATION } from './constants.js';
 import { ScavengerMinigame } from './scavengerMinigame.js';
-import { ScreenLayoutEditor } from './screenLayoutEditor.js';
-import { editorDataStore } from './editorDataStore.js';
+import { createLayoutDevTools, DEV_TOOLS_ENABLED } from './dev/devRuntime.js';
+import { getRuntimeUILayout } from './runtime/editorLayoutRuntime.js';
+import { applyRuntimeUILayout } from './runtime/uiLayoutRuntime.js';
 
 const GOOD_ENDING_BACKGROUNDS = {
   opening: new URL('../assets/backgrounds/bg_good_end.webp', import.meta.url).href,
@@ -69,18 +70,14 @@ export class GameView {
     this.goodEndingCutsceneStep = 0;
     this.badEndingCutsceneStep = 0;
 
-    // Developer layout editor. It is intentionally attached to the existing
-    // story shell so dialogue/choice placement remains a data-only override
-    // and does not alter the normal narrative rendering contract.
-    this.layoutEditor = new ScreenLayoutEditor({
+    // The real editor is registered only by the development bootstrap. The
+    // release build receives a no-op adapter with the same small contract.
+    this.layoutEditor = createLayoutDevTools({
       root: this.dom.storyBox,
-      persistence: {
-        load: (sceneKey) => editorDataStore.read('ui', sceneKey),
-        save: (sceneKey, payload) => editorDataStore.write('ui', sceneKey, payload),
-        remove: (sceneKey) => editorDataStore.remove('ui', sceneKey),
-      },
+      canToggle: () => !this.scavengerGame,
     });
-    this.layoutEditorRequested = typeof window !== 'undefined'
+    this.layoutEditorRequested = DEV_TOOLS_ENABLED
+      && typeof window !== 'undefined'
       && new URLSearchParams(window.location.search).get('layoutEditor') === '1';
   }
 
@@ -347,14 +344,7 @@ export class GameView {
 
   _setupKeyboardShortcuts() {
     window.addEventListener('keydown', (event) => {
-      if (event.code === 'F6' && !event.repeat) {
-        if (this.scavengerGame) return;
-        event.preventDefault();
-        this.layoutEditor.toggle();
-        return;
-      }
-
-      if (this.layoutEditor?.enabled && this.layoutEditor.handleKeyDown(event)) {
+      if (this.layoutEditor?.handleKeyDown(event)) {
         event.preventDefault();
         return;
       }
@@ -806,7 +796,9 @@ export class GameView {
     } else if (this.layoutEditorRequested) {
       this.layoutEditor.setEnabled(true);
     }
-    void this.layoutEditor.setScene(sceneId || 'global');
+    const activeSceneKey = sceneId || 'global';
+    void this.layoutEditor.setScene(activeSceneKey);
+    applyRuntimeUILayout(this.dom.storyBox, getRuntimeUILayout(activeSceneKey));
 
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
     this.dom.storyBox.classList.add(`scene-id-${sceneId}`);

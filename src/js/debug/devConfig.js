@@ -4,7 +4,11 @@
  * Dedicated developer tools configuration. Stripped/unused in production builds.
  */
 
-export const IS_DEV = Boolean(import.meta.env?.DEV);
+import { DEV_TOOLS_ENABLED } from '../dev/devRuntime.js';
+
+// Keep the existing developer-console contract while sourcing the switch from
+// the shared runtime gateway. Older dev modules import `IS_DEV` from here.
+export const IS_DEV = DEV_TOOLS_ENABLED;
 
 /**
  * Safe teleport coordinates inside the prologue house map (1672x941).

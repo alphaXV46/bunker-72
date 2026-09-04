@@ -114,7 +114,21 @@ export class CollisionEditor {
    * @param {Object} [options.filePersistence] - Async load/save/remove adapter.
    * @param {Function} [options.onPan] - Receives free-camera world deltas.
    * @param {Function} [options.onResetCamera]
-   */
+   * @param {Function} [options.onInvalidate] - Requests a host render after an interaction.
+   * @param {Function} [options.onSave] - Receives the completed save result.
+   * @param {Function} [options.getCreateType] - Maps a create shortcut to a collider type.
+   * @param {Function} [options.createCollider] - Creates a typed collider with host metadata.
+   * @param {Function} [options.duplicateCollider] - Clones selected collider behavior.
+ * @param {Function} [options.getNewId] - Returns a host-specific unique collider id.
+ * @param {boolean} [options.showLabels] - Draws editor labels when true.
+ * @param {string} [options.accentColor] - Outline color for the selected/preview shape.
+ * @param {string} [options.accentFill] - Fill color for the selected/preview shape.
+ * @param {boolean} [options.allowResize] - Enables resize handles.
+ * @param {boolean} [options.allowRotate] - Enables wheel rotation.
+ * @param {boolean} [options.allowCreate] - Enables creating new rectangles.
+ * @param {boolean} [options.allowDelete] - Enables deleting rectangles.
+ * @param {boolean} [options.allowClipboard] - Enables copy/paste/duplicate.
+ */
   constructor({
     canvas = null,
     storageKey = 'default',
@@ -131,6 +145,20 @@ export class CollisionEditor {
     filePersistence = null,
     onPan = () => {},
     onResetCamera = () => {},
+    onInvalidate = () => {},
+    onSave = () => {},
+    getCreateType = null,
+    createCollider = null,
+    duplicateCollider = null,
+    getNewId = null,
+    showLabels = true,
+    accentColor = '#22d3ee',
+    accentFill = 'rgba(34, 211, 238, 0.12)',
+    allowResize = true,
+    allowRotate = true,
+    allowCreate = true,
+    allowDelete = true,
+    allowClipboard = true,
   }) {
     this.canvas = null;
     this.storageKey = safeStorageKey(storageKey);
@@ -147,14 +175,30 @@ export class CollisionEditor {
     this.filePersistence = filePersistence;
     this.onPan = onPan;
     this.onResetCamera = onResetCamera;
+    this.onInvalidate = onInvalidate;
+    this.onSave = onSave;
+    this.getCreateType = getCreateType;
+    this.createCollider = createCollider;
+    this.duplicateCollider = duplicateCollider;
+    this.getNewId = getNewId;
+    this.showLabels = Boolean(showLabels);
+    this.accentColor = accentColor;
+    this.accentFill = accentFill;
+    this.allowResize = Boolean(allowResize);
+    this.allowRotate = Boolean(allowRotate);
+    this.allowCreate = Boolean(allowCreate);
+    this.allowDelete = Boolean(allowDelete);
+    this.allowClipboard = Boolean(allowClipboard);
 
     this.enabled = false;
     this.selectedIndex = null;
     this.drag = null;
     this.createMode = null;
+    this.createSource = null;
     this.previewRect = null;
     this.history = [];
     this.future = [];
+    this.clipboard = null;
     this.statusMessage = 'BELUM ADA DRAFT';
     this.draftLoaded = false;
     this.localDraftLoaded = false;
@@ -177,7 +221,7 @@ export class CollisionEditor {
 
   attach(canvas) {
     if (this.canvas === canvas && this._boundCanvas) {
-      this.canvas.style.touchAction = this.enabled ? 'none' : '';
+      this.canvas.style.touchAction = (this.enabled || this.freeCamera) ? 'none' : '';
       return;
     }
 
@@ -192,7 +236,7 @@ export class CollisionEditor {
     this.canvas.addEventListener('wheel', this._handleWheel, { passive: false });
     this.canvas.addEventListener('contextmenu', this._handleContextMenu);
     this._boundCanvas = true;
-    this.canvas.style.touchAction = this.enabled ? 'none' : '';
+    this.canvas.style.touchAction = (this.enabled || this.freeCamera) ? 'none' : '';
   }
 
   detach() {
@@ -228,6 +272,7 @@ export class CollisionEditor {
     this.drag = null;
     this.previewRect = null;
     this.createMode = null;
+    this.createSource = null;
     this.history = [];
     this.future = [];
 
@@ -243,6 +288,8 @@ export class CollisionEditor {
     } else {
       this.statusMessage = 'EDITOR OFF';
     }
+
+    this._invalidate();
 
     return this.enabled;
   }
@@ -268,6 +315,7 @@ export class CollisionEditor {
       this.canvas.style.cursor = this.freeCamera ? 'grab' : (this.enabled ? 'crosshair' : '');
     }
     if (!this.freeCamera && this.drag?.mode === 'pan') this.drag = null;
+    this._invalidate();
     return this.freeCamera;
   }
 
@@ -289,7 +337,13 @@ export class CollisionEditor {
       draftLoaded: this.draftLoaded,
       colliderCount: this._getColliderList().length,
       freeCamera: this.freeCamera,
+      copiedLabel: this.clipboard ? this.getLabel(this.clipboard) : null,
+      canPaste: Boolean(this.clipboard),
     };
+  }
+
+  _getStatusLabel(collider) {
+    return this.showLabels ? this.getLabel(collider) : 'SOLID';
   }
 
   handleKeyDown(event) {
@@ -306,15 +360,33 @@ export class CollisionEditor {
       }[key];
       this.onPan({ dx: delta[0], dy: delta[1], source: 'keyboard' });
       this.statusMessage = `FREE CAM PAN ${Math.round(this._getCamera().x)},${Math.round(this._getCamera().y)}`;
+      this._invalidate();
       return true;
     }
     if (this.freeCamera && key === 'home' && !event.ctrlKey && !event.altKey) {
       this.onResetCamera();
       this.statusMessage = 'FREE CAM KEMBALI KE PLAYER';
+      this._invalidate();
       return true;
     }
 
     if (!this.enabled) return false;
+    if (event.ctrlKey && ['c', 'v', 'd'].includes(key) && !this.allowClipboard) {
+      event.preventDefault();
+      return true;
+    }
+    if (event.ctrlKey && key === 'c') {
+      this.copySelected();
+      return true;
+    }
+    if (event.ctrlKey && key === 'v') {
+      this.pasteCopied();
+      return true;
+    }
+    if (event.ctrlKey && key === 'd') {
+      this.duplicateSelected();
+      return true;
+    }
     if (event.ctrlKey && key === 's') {
       this.saveDraft();
       return true;
@@ -338,18 +410,46 @@ export class CollisionEditor {
     if (key === 'escape') {
       this.selectedIndex = null;
       this.createMode = null;
+      this.createSource = null;
       this.previewRect = null;
       this.drag = null;
       this._setCursor('crosshair');
       this.statusMessage = 'SELEKSI DIBATALKAN';
+      this._invalidate();
       return true;
     }
     if (key === 'delete' || key === 'backspace') {
+      if (!this.allowDelete) {
+        event.preventDefault();
+        return true;
+      }
       this.deleteSelected();
       return true;
     }
     if (key === 'n' && !event.ctrlKey && !event.altKey) {
-      this.createMode = event.shiftKey ? 'furniture' : 'wall';
+      if (!this.allowCreate) {
+        event.preventDefault();
+        return true;
+      }
+      const selected = this.getSelectedCollider();
+      // Collision editing has one solid obstacle type. Keep Shift+N as a
+      // backwards-compatible shortcut, but it intentionally creates the
+      // same geometry as N.
+      let createType = 'solid';
+      if (typeof this.getCreateType === 'function') {
+        try {
+          createType = this.getCreateType({
+            event,
+            selected,
+            colliders: this._getColliderList(),
+            editor: this,
+          }) || createType;
+        } catch (error) {
+          console.warn('[CollisionEditor] getCreateType callback failed.', error);
+        }
+      }
+      this.createMode = String(createType);
+      this.createSource = selected ? cloneCollider(selected) : null;
       this.selectedIndex = null;
       this.statusMessage = `TAMBAH ${this.createMode.toUpperCase()} — DRAG DI AREA KOSONG`;
       this._setCursor('crosshair');
@@ -386,9 +486,9 @@ export class CollisionEditor {
     const selected = this.getSelectedCollider();
     if (selected) {
       ctx.save();
-      ctx.fillStyle = 'rgba(34, 211, 238, 0.12)';
+      ctx.fillStyle = this.accentFill;
       this._fillRect(ctx, selected);
-      ctx.strokeStyle = '#22d3ee';
+      ctx.strokeStyle = this.accentColor;
       ctx.lineWidth = 3;
       ctx.setLineDash([7, 4]);
       this._strokeRect(ctx, selected);
@@ -396,42 +496,50 @@ export class CollisionEditor {
 
       const handleSize = HANDLE_RADIUS * 2;
       ctx.fillStyle = '#ecfeff';
-      ctx.strokeStyle = '#0891b2';
+      ctx.strokeStyle = this.accentColor;
       ctx.lineWidth = 1.5;
-      this._getHandlePoints(selected).forEach((point) => {
-        ctx.fillRect(point.x - HANDLE_RADIUS, point.y - HANDLE_RADIUS, handleSize, handleSize);
-        ctx.strokeRect(point.x - HANDLE_RADIUS, point.y - HANDLE_RADIUS, handleSize, handleSize);
-      });
+      if (this.allowResize) {
+        this._getHandlePoints(selected).forEach((point) => {
+          ctx.fillRect(point.x - HANDLE_RADIUS, point.y - HANDLE_RADIUS, handleSize, handleSize);
+          ctx.strokeRect(point.x - HANDLE_RADIUS, point.y - HANDLE_RADIUS, handleSize, handleSize);
+        });
+      }
 
-      ctx.font = 'bold 11px monospace';
-      ctx.fillStyle = '#cffafe';
-      const labelPoint = this._getHandlePoints(selected)[0];
-      ctx.fillText(`${this.getLabel(selected)}  [SELECTED]`, labelPoint.x + 4, Math.max(14, labelPoint.y - 8));
+      if (this.showLabels) {
+        ctx.font = '700 12px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = '#cffafe';
+        const labelPoint = this._getHandlePoints(selected)[0];
+        ctx.fillText(`${this.getLabel(selected)}  [SELECTED]`, labelPoint.x + 4, Math.max(14, labelPoint.y - 8));
+      }
       ctx.restore();
     }
 
     if (this.previewRect) {
       ctx.save();
-      ctx.fillStyle = 'rgba(34, 211, 238, 0.18)';
+      ctx.fillStyle = this.accentFill;
       ctx.fillRect(this.previewRect.x, this.previewRect.y, this.previewRect.w, this.previewRect.h);
-      ctx.strokeStyle = '#67e8f9';
+      ctx.strokeStyle = this.accentColor;
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 4]);
       ctx.strokeRect(this.previewRect.x, this.previewRect.y, this.previewRect.w, this.previewRect.h);
       ctx.setLineDash([]);
-      ctx.font = 'bold 10px monospace';
-      ctx.fillStyle = '#cffafe';
-      ctx.fillText(`NEW_${String(this.createMode || 'COLLIDER').toUpperCase()}`, this.previewRect.x + 4, this.previewRect.y + 14);
+      if (this.showLabels) {
+        ctx.font = '700 11px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = '#cffafe';
+        ctx.fillText(`NEW_${String(this.createMode || 'COLLIDER').toUpperCase()}`, this.previewRect.x + 4, this.previewRect.y + 14);
+      }
       ctx.restore();
     }
   }
 
   saveDraft() {
     const payload = this._buildPayload();
+    let localSaved = false;
     if (typeof window !== 'undefined') {
       try {
         window.localStorage?.setItem(this.storageKey, JSON.stringify(payload));
         this.draftLoaded = true;
+        localSaved = true;
         this.statusMessage = 'DRAFT TERSIMPAN';
       } catch (error) {
         this.statusMessage = 'GAGAL SIMPAN DRAFT';
@@ -440,15 +548,48 @@ export class CollisionEditor {
     }
 
     if (typeof this.filePersistence?.save === 'function') {
-      Promise.resolve(this.filePersistence.save(payload))
+      let fileSave;
+      try {
+        fileSave = this.filePersistence.save(payload);
+      } catch (error) {
+        this.statusMessage = 'DRAFT LOKAL (FILE GAGAL)';
+        console.warn('[CollisionEditor] Tidak dapat menyimpan file collision.', error);
+        this._notifySave({
+          success: false,
+          fileSaved: false,
+          message: this.statusMessage,
+          error,
+        });
+        return payload;
+      }
+
+      Promise.resolve(fileSave)
         .then((result) => {
           this.fileDraftLoaded = true;
-          this.statusMessage = result?.fileSaved === false ? 'DRAFT LOKAL (FILE TIDAK AKTIF)' : 'FILE COLLISION TERSIMPAN';
+          const fileSaved = result?.fileSaved !== false;
+          this.statusMessage = fileSaved ? 'FILE COLLISION TERSIMPAN' : 'DRAFT LOKAL (FILE TIDAK AKTIF)';
+          this._notifySave({
+            success: true,
+            fileSaved,
+            message: this.statusMessage,
+          });
         })
         .catch((error) => {
           this.statusMessage = 'DRAFT LOKAL (FILE GAGAL)';
           console.warn('[CollisionEditor] Tidak dapat menyimpan file collision.', error);
+          this._notifySave({
+            success: false,
+            fileSaved: false,
+            message: this.statusMessage,
+            error,
+          });
         });
+    } else {
+      this._notifySave({
+        success: localSaved,
+        fileSaved: false,
+        message: localSaved ? 'DRAFT LOKAL TERSIMPAN' : this.statusMessage,
+      });
     }
 
     return payload;
@@ -542,9 +683,83 @@ export class CollisionEditor {
     this._beginMutation();
     const deleted = colliders.splice(this.selectedIndex, 1)[0];
     this.selectedIndex = null;
-    this.statusMessage = `${this.getLabel(deleted)} DIHAPUS (Ctrl+Z UNTUK UNDO)`;
+    this.statusMessage = `${this._getStatusLabel(deleted)} DIHAPUS (Ctrl+Z UNTUK UNDO)`;
     this._changed('delete');
     return true;
+  }
+
+  copySelected() {
+    const selected = this.getSelectedCollider();
+    if (!selected) {
+      this.statusMessage = 'PILIH COLLIDER DULU UNTUK DISALIN';
+      this._invalidate();
+      return false;
+    }
+
+    this.clipboard = cloneCollider(selected);
+    this.statusMessage = `${this._getStatusLabel(selected)} DISALIN — CTRL+V TEMPEL / CTRL+D DUPLIKAT`;
+    this._invalidate();
+    return true;
+  }
+
+  pasteCopied() {
+    if (!this.clipboard) {
+      this.statusMessage = 'BELUM ADA COLLIDER YANG DISALIN';
+      this._invalidate();
+      return false;
+    }
+
+    const colliders = this._getColliderList();
+    const source = cloneCollider(this.clipboard);
+    const offset = 18;
+    const id = this._nextNewId(source.type);
+    const draft = {
+      ...source,
+      id,
+      x: source.x + offset,
+      y: source.y + offset,
+    };
+    let created = draft;
+    if (typeof this.duplicateCollider === 'function') {
+      try {
+        created = this.duplicateCollider({
+          source,
+          id,
+          x: draft.x,
+          y: draft.y,
+          offset: { x: offset, y: offset },
+          colliders,
+          editor: this,
+        }) || draft;
+      } catch (error) {
+        console.warn('[CollisionEditor] duplicateCollider callback failed.', error);
+        created = draft;
+      }
+    }
+
+    const pasted = normalizeRect({ ...draft, ...created }, this._getMapSize());
+    if (!pasted) {
+      this.statusMessage = 'SALINAN COLLIDER TIDAK VALID';
+      this._invalidate();
+      return false;
+    }
+
+    this._beginMutation();
+    colliders.push(pasted);
+    this.selectedIndex = colliders.length - 1;
+    this.statusMessage = `${this._getStatusLabel(pasted)} DITEMPEL — PERILAKU DISALIN`;
+    this._changed('duplicate');
+    return true;
+  }
+
+  duplicateSelected() {
+    if (!this.getSelectedCollider()) {
+      this.statusMessage = 'PILIH COLLIDER DULU UNTUK DUPLIKAT';
+      this._invalidate();
+      return false;
+    }
+    this.clipboard = cloneCollider(this.getSelectedCollider());
+    return this.pasteCopied();
   }
 
   _getColliderList() {
@@ -681,7 +896,12 @@ export class CollisionEditor {
   }
 
   _onWheel(event) {
-    if (!this.enabled || this.selectedIndex === null) return;
+    if (!this.enabled) return;
+    if (!this.allowRotate) {
+      event.preventDefault();
+      return;
+    }
+    if (this.selectedIndex === null) return;
     const selected = this.getSelectedCollider();
     if (!selected) return;
 
@@ -689,7 +909,7 @@ export class CollisionEditor {
     this._beginMutation();
     const increment = event.shiftKey ? 1 : 5;
     selected.angle = normalizeAngle(rectAngle(selected) + (event.deltaY < 0 ? increment : -increment));
-    this.statusMessage = `${this.getLabel(selected)} ROTASI ${selected.angle}°`;
+      this.statusMessage = `${this._getStatusLabel(selected)} ROTASI ${selected.angle}°`;
     this._changed('rotate');
   }
 
@@ -707,6 +927,7 @@ export class CollisionEditor {
       };
       this._setCursor('grabbing');
       this.canvas?.setPointerCapture?.(event.pointerId);
+      this._invalidate();
       return;
     }
 
@@ -717,7 +938,7 @@ export class CollisionEditor {
 
     const colliders = this._getColliderList();
     const selected = this.getSelectedCollider();
-    const selectedHandle = selected ? this._getHandleAt(point, selected) : null;
+    const selectedHandle = this.allowResize && selected ? this._getHandleAt(point, selected) : null;
 
     if (selectedHandle !== null) {
       this._beginMutation();
@@ -729,6 +950,7 @@ export class CollisionEditor {
         startRect: { ...selected },
       };
       this.canvas?.setPointerCapture?.(event.pointerId);
+      this._invalidate();
       return;
     }
 
@@ -746,15 +968,16 @@ export class CollisionEditor {
         offsetY: point.y - collider.y,
         startRect: { ...collider },
       };
-      this.statusMessage = `${this.getLabel(collider)} DIPILIH — DRAG / RESIZE HANDLE`;
+      this.statusMessage = `${this._getStatusLabel(collider)} DIPILIH — DRAG / RESIZE HANDLE`;
       this.canvas?.setPointerCapture?.(event.pointerId);
+      this._invalidate();
       return;
     }
 
-    if (this.createMode) {
+    if (this.createMode && this.allowCreate) {
       this._beginMutation();
       const defaultId = this._nextNewId(this.createMode);
-      const created = {
+      const draft = {
         id: defaultId,
         type: this.createMode,
         x: Math.round(point.x),
@@ -762,6 +985,21 @@ export class CollisionEditor {
         w: MIN_RECT_SIZE,
         h: MIN_RECT_SIZE,
       };
+      let created = draft;
+      if (typeof this.createCollider === 'function') {
+        try {
+          created = this.createCollider({
+            ...draft,
+            selected: this.createSource || selected,
+            colliders,
+            editor: this,
+          }) || draft;
+        } catch (error) {
+          console.warn('[CollisionEditor] createCollider callback failed.', error);
+          created = draft;
+        }
+      }
+      created = normalizeRect({ ...draft, ...created }, this._getMapSize()) || draft;
       colliders.push(created);
       this.selectedIndex = colliders.length - 1;
       this.drag = {
@@ -774,12 +1012,14 @@ export class CollisionEditor {
       };
       this.previewRect = { ...created };
       this.canvas?.setPointerCapture?.(event.pointerId);
+      this._invalidate();
       return;
     }
 
     this.selectedIndex = null;
     this.statusMessage = 'KLIK COLLIDER UNTUK MEMILIH';
     this._setCursor('crosshair');
+    this._invalidate();
   }
 
   _onPointerMove(event) {
@@ -794,6 +1034,7 @@ export class CollisionEditor {
       this.drag.clientY = event.clientY;
       this.onPan({ dx, dy, source: 'pointer' });
       this.statusMessage = `FREE CAM PAN ${Math.round(this._getCamera().x)},${Math.round(this._getCamera().y)}`;
+      this._invalidate();
       return;
     }
 
@@ -803,7 +1044,7 @@ export class CollisionEditor {
 
     if (!this.drag || this.drag.pointerId !== event.pointerId) {
       const selected = this.getSelectedCollider();
-      const handle = selected ? this._getHandleAt(point, selected) : null;
+      const handle = this.allowResize && selected ? this._getHandleAt(point, selected) : null;
       if (handle) {
         this._setCursor(handle === 'nw' || handle === 'se' ? 'nwse-resize' : 'nesw-resize');
       } else if (this._hitTest(point) !== null) {
@@ -822,7 +1063,7 @@ export class CollisionEditor {
       const mapSize = this._getMapSize();
       collider.x = clamp(Math.round(point.x - this.drag.offsetX), 0, Math.max(0, mapSize.width - collider.w));
       collider.y = clamp(Math.round(point.y - this.drag.offsetY), 0, Math.max(0, mapSize.height - collider.h));
-      this.statusMessage = `${this.getLabel(collider)} XY ${collider.x},${collider.y}`;
+      this.statusMessage = `${this._getStatusLabel(collider)} XY ${collider.x},${collider.y}`;
       this._changed('move');
       return;
     }
@@ -831,7 +1072,7 @@ export class CollisionEditor {
     const rect = this._resizeRect(this.drag.startRect, point, resizeHandle, this.drag.startX, this.drag.startY);
     Object.assign(collider, rect);
     this.previewRect = this.drag.mode === 'create' ? { ...rect } : null;
-    this.statusMessage = `${this.getLabel(collider)} ${collider.w}x${collider.h}`;
+    this.statusMessage = `${this._getStatusLabel(collider)} ${collider.w}x${collider.h}`;
     this._changed(this.drag.mode === 'create' ? 'create' : 'resize');
   }
 
@@ -853,10 +1094,12 @@ export class CollisionEditor {
     this.drag = null;
     this.previewRect = null;
     this.createMode = null;
+    this.createSource = null;
     this._setCursor('default');
     this.statusMessage = collider
-      ? `${this.getLabel(collider)} SIAP — Ctrl+S UNTUK SIMPAN`
+      ? `${this._getStatusLabel(collider)} SIAP — Ctrl+S UNTUK SIMPAN`
       : 'TIDAK ADA COLLIDER DIBUAT';
+    this._invalidate();
   }
 
   _onPointerCancel(event) {
@@ -873,6 +1116,7 @@ export class CollisionEditor {
     this.drag = null;
     this.previewRect = null;
     this.createMode = null;
+    this.createSource = null;
     this._setCursor('default');
     this.statusMessage = 'EDIT DIBATALKAN';
     this._changed('cancel');
@@ -927,7 +1171,19 @@ export class CollisionEditor {
   }
 
   _nextNewId(type) {
-    const prefix = type === 'furniture' ? 'FURNITURE_NEW' : 'WALL_NEW';
+    if (typeof this.getNewId === 'function') {
+      try {
+        const customId = this.getNewId({
+          type,
+          colliders: this._getColliderList(),
+          editor: this,
+        });
+        if (customId) return String(customId);
+      } catch (error) {
+        console.warn('[CollisionEditor] getNewId callback failed.', error);
+      }
+    }
+    const prefix = type === 'solid' ? 'SOLID_NEW' : 'COLLIDER_NEW';
     const existing = new Set(this._getColliderList().map((collider) => String(collider.id || '').toUpperCase()));
     let index = 1;
     let id = `${prefix}_${String(index).padStart(2, '0')}`;
@@ -953,12 +1209,31 @@ export class CollisionEditor {
     } catch (error) {
       console.warn('[CollisionEditor] onChange callback failed.', error);
     }
+    this._invalidate();
+  }
+
+  _invalidate() {
+    try {
+      this.onInvalidate();
+    } catch (error) {
+      console.warn('[CollisionEditor] onInvalidate callback failed.', error);
+    }
+  }
+
+  _notifySave(result) {
+    try {
+      this.onSave({ editor: this, ...result });
+    } catch (error) {
+      console.warn('[CollisionEditor] onSave callback failed.', error);
+    }
+    this._invalidate();
   }
 
   _replaceColliders(colliders) {
     const target = this._getColliderList();
     target.splice(0, target.length, ...normalizeColliderList(colliders, this._getMapSize()));
     if (this.selectedIndex !== null && this.selectedIndex >= target.length) this.selectedIndex = null;
+    this._invalidate();
   }
 
   _buildPayload() {

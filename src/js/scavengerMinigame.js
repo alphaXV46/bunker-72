@@ -7,8 +7,12 @@
  */
 
 import { retroAudio } from './retroAudio.js';
-import { CollisionEditor, normalizeCollisionLabel } from './collisionEditor.js';
-import { editorDataStore } from './editorDataStore.js';
+import { createScavengerDevTools } from './dev/devRuntime.js';
+import {
+  getRuntimeCollisionOverride,
+  getRuntimeFogOverride,
+  getRuntimeItemOverride,
+} from './runtime/editorLayoutRuntime.js';
 
 // Assets
 const SPRITESHEET_SRC = new URL('../assets/sprites/sheets/spritesheet_father.png', import.meta.url).href;
@@ -64,125 +68,135 @@ const PROLOGUE_PLAYABLE_BOUNDS = Object.freeze({
   h: 905,
 });
 
+// Every obstacle uses one solid foot-collision rule. The small shared inset
+// keeps contact forgiving without needing separate wall/furniture categories.
+const SOLID_COLLIDER_TYPE = 'solid';
+const SOLID_COLLIDER_INSET = 2;
+const normalizeSolidCollider = (collider) => ({
+  ...collider,
+  type: SOLID_COLLIDER_TYPE,
+});
+
 // Rectangular floor-footprint colliders, measured against the native map.
 // Decorative objects are intentionally omitted so the player can move close
 // to furniture without catching on its elevated/transparent artwork.
 const PROLOGUE_COLLIDERS = Object.freeze([
   // ── 1. Outer Perimeter & Exterior Shell ──
-  { id: 'WALL_OUTER_WEST',       type: 'wall',      x: 8,    y: 18,  w: 22,  h: 806 },
-  { id: 'WALL_OUTER_EAST',       type: 'wall',      x: 1638, y: 18,  w: 24,  h: 806 },
-  { id: 'WALL_OUTER_SOUTH_01',   type: 'wall',      x: 8,    y: 824, w: 640, h: 24 },
-  { id: 'WALL_OUTER_SOUTH_02',   type: 'wall',      x: 1140, y: 824, w: 522, h: 24 },
+  { id: 'WALL_OUTER_WEST',       type: 'solid',      x: 8,    y: 18,  w: 22,  h: 806 },
+  { id: 'WALL_OUTER_EAST',       type: 'solid',      x: 1638, y: 18,  w: 24,  h: 806 },
+  { id: 'WALL_OUTER_SOUTH_01',   type: 'solid',      x: 8,    y: 824, w: 640, h: 24 },
+  { id: 'WALL_OUTER_SOUTH_02',   type: 'solid',      x: 1140, y: 824, w: 522, h: 24 },
 
   // ── 2. Master Bedroom Shell & Entry ──
-  { id: 'WALL_MASTER_TOP',       type: 'wall',      x: 28,   y: 18,  w: 432, h: 22 },
-  { id: 'WALL_MASTER_LEFT',      type: 'wall',      x: 28,   y: 18,  w: 22,  h: 270 },
-  { id: 'WALL_MASTER_BOTTOM',    type: 'wall',      x: 8,    y: 282, w: 452, h: 24 },
+  { id: 'WALL_MASTER_TOP',       type: 'solid',      x: 28,   y: 18,  w: 432, h: 22 },
+  { id: 'WALL_MASTER_LEFT',      type: 'solid',      x: 28,   y: 18,  w: 22,  h: 270 },
+  { id: 'WALL_MASTER_BOTTOM',    type: 'solid',      x: 8,    y: 282, w: 452, h: 24 },
   // East wall: solid from y=18 to y=230, opening at y=230..282 for door to living corridor
-  { id: 'WALL_MASTER_RIGHT',     type: 'wall',      x: 450,  y: 18,  w: 22,  h: 212 },
+  { id: 'WALL_MASTER_RIGHT',     type: 'solid',      x: 450,  y: 18,  w: 22,  h: 212 },
   // North wall of master alcove corridor
-  { id: 'WALL_MASTER_ALCOVE_TOP', type: 'wall',     x: 450,  y: 92,  w: 112, h: 22 },
+  { id: 'WALL_MASTER_ALCOVE_TOP', type: 'solid',     x: 450,  y: 92,  w: 112, h: 22 },
 
   // Master Bedroom Furniture
-  { id: 'BED_MASTER',             type: 'furniture', x: 95,  y: 90,  w: 165, h: 155 },
-  { id: 'NIGHTSTAND_MASTER_LEFT', type: 'furniture', x: 68, y: 105, w: 24,  h: 38 },
-  { id: 'NIGHTSTAND_MASTER_RIGHT',type: 'furniture', x: 263,y: 105, w: 24,  h: 38 },
-  { id: 'DRESSER_MASTER',         type: 'furniture', x: 320, y: 55,  w: 65,  h: 75 },
-  { id: 'WARDROBE_MASTER',        type: 'furniture', x: 385, y: 55,  w: 65,  h: 150 },
-  { id: 'PLANT_MASTER',            type: 'furniture', x: 35,  y: 55,  w: 30,  h: 35 },
+  { id: 'BED_MASTER',             type: 'solid', x: 95,  y: 90,  w: 165, h: 155 },
+  { id: 'NIGHTSTAND_MASTER_LEFT', type: 'solid', x: 68, y: 105, w: 24,  h: 38 },
+  { id: 'NIGHTSTAND_MASTER_RIGHT',type: 'solid', x: 263,y: 105, w: 24,  h: 38 },
+  { id: 'DRESSER_MASTER',         type: 'solid', x: 320, y: 55,  w: 65,  h: 75 },
+  { id: 'WARDROBE_MASTER',        type: 'solid', x: 385, y: 55,  w: 65,  h: 150 },
+  { id: 'PLANT_MASTER',            type: 'solid', x: 35,  y: 55,  w: 30,  h: 35 },
 
   // ── 3. Bunker 72 Shelter Shell & Equipment ──
-  { id: 'WALL_BUNKER_TOP',       type: 'wall',      x: 562, y: 10,  w: 516, h: 26 },
-  { id: 'WALL_BUNKER_LEFT',      type: 'wall',      x: 562, y: 10,  w: 22,  h: 225 },
-  { id: 'WALL_BUNKER_RIGHT',     type: 'wall',      x: 1056,y: 10,  w: 22,  h: 225 },
-  { id: 'WALL_BUNKER_FRONT_01',  type: 'wall',      x: 562, y: 205, w: 170, h: 30 },
-  { id: 'WALL_BUNKER_FRONT_02',  type: 'wall',      x: 868, y: 205, w: 210, h: 30 },
+  { id: 'WALL_BUNKER_TOP',       type: 'solid',      x: 562, y: 10,  w: 516, h: 26 },
+  { id: 'WALL_BUNKER_LEFT',      type: 'solid',      x: 562, y: 10,  w: 22,  h: 225 },
+  { id: 'WALL_BUNKER_RIGHT',     type: 'solid',      x: 1056,y: 10,  w: 22,  h: 225 },
+  { id: 'WALL_BUNKER_FRONT_01',  type: 'solid',      x: 562, y: 205, w: 170, h: 30 },
+  { id: 'WALL_BUNKER_FRONT_02',  type: 'solid',      x: 868, y: 205, w: 210, h: 30 },
 
   // Bunker Equipment
-  { id: 'SHELF_BUNKER',          type: 'furniture', x: 585, y: 48,  w: 100, h: 165 },
-  { id: 'VAULT_DOOR_BUNKER',     type: 'furniture', x: 745, y: 35,  w: 110, h: 125 },
-  { id: 'POWER_PANEL_BUNKER',    type: 'furniture', x: 880, y: 38,  w: 165, h: 75 },
-  { id: 'GENERATOR_BUNKER',      type: 'furniture', x: 920, y: 125, w: 115, h: 85 },
+  { id: 'SHELF_BUNKER',          type: 'solid', x: 585, y: 48,  w: 100, h: 165 },
+  { id: 'VAULT_DOOR_BUNKER',     type: 'solid', x: 745, y: 35,  w: 110, h: 125 },
+  { id: 'POWER_PANEL_BUNKER',    type: 'solid', x: 880, y: 38,  w: 165, h: 75 },
+  { id: 'GENERATOR_BUNKER',      type: 'solid', x: 920, y: 125, w: 115, h: 85 },
 
   // ── 4. Child Bedroom Shell & Furniture ──
-  { id: 'WALL_CHILD_TOP',        type: 'wall',      x: 1155,y: 18,  w: 485, h: 22 },
-  { id: 'WALL_CHILD_RIGHT',      type: 'wall',      x: 1620,y: 18,  w: 22,  h: 302 },
-  { id: 'WALL_CHILD_BOTTOM',     type: 'wall',      x: 1155,y: 298, w: 485, h: 22 },
+  { id: 'WALL_CHILD_TOP',        type: 'solid',      x: 1155,y: 18,  w: 485, h: 22 },
+  { id: 'WALL_CHILD_RIGHT',      type: 'solid',      x: 1620,y: 18,  w: 22,  h: 302 },
+  { id: 'WALL_CHILD_BOTTOM',     type: 'solid',      x: 1155,y: 298, w: 485, h: 22 },
   // West wall: solid from y=18 to y=230, opening at y=230..285 for door to living corridor
-  { id: 'WALL_CHILD_LEFT',       type: 'wall',      x: 1155,y: 18,  w: 22,  h: 212 },
+  { id: 'WALL_CHILD_LEFT',       type: 'solid',      x: 1155,y: 18,  w: 22,  h: 212 },
   // North wall of child alcove corridor
-  { id: 'WALL_CHILD_ALCOVE_TOP', type: 'wall',      x: 1078,y: 92,  w: 98,  h: 22 },
+  { id: 'WALL_CHILD_ALCOVE_TOP', type: 'solid',      x: 1078,y: 92,  w: 98,  h: 22 },
 
   // Child Bedroom Furniture
-  { id: 'WARDROBE_CHILD',        type: 'furniture', x: 1210,y: 55,  w: 85,  h: 105 },
-  { id: 'SHELF_CHILD',           type: 'furniture', x: 1300,y: 80,  w: 60,  h: 78 },
-  { id: 'DESK_CHILD',            type: 'furniture', x: 1370,y: 78,  w: 105, h: 75 },
-  { id: 'CHAIR_CHILD',           type: 'furniture', x: 1400,y: 155, w: 45,  h: 45 },
-  { id: 'BED_CHILD',             type: 'furniture', x: 1490,y: 85,  w: 95,  h: 170 },
-  { id: 'DRAWER_CHILD',          type: 'furniture', x: 1510,y: 260, w: 55,  h: 38 },
-  { id: 'PLANT_CHILD',           type: 'furniture', x: 1590,y: 195, w: 30,  h: 45 },
+  { id: 'WARDROBE_CHILD',        type: 'solid', x: 1210,y: 55,  w: 85,  h: 105 },
+  { id: 'SHELF_CHILD',           type: 'solid', x: 1300,y: 80,  w: 60,  h: 78 },
+  { id: 'DESK_CHILD',            type: 'solid', x: 1370,y: 78,  w: 105, h: 75 },
+  { id: 'CHAIR_CHILD',           type: 'solid', x: 1400,y: 155, w: 45,  h: 45 },
+  { id: 'BED_CHILD',             type: 'solid', x: 1490,y: 85,  w: 95,  h: 170 },
+  { id: 'DRAWER_CHILD',          type: 'solid', x: 1510,y: 260, w: 55,  h: 38 },
+  { id: 'PLANT_CHILD',           type: 'solid', x: 1590,y: 195, w: 30,  h: 45 },
 
   // ── 5. Office / Studio Shell & Furniture ──
   // North wall is completely solid separating office from child bedroom
-  { id: 'WALL_OFFICE_TOP',       type: 'wall',      x: 1180,y: 355, w: 460, h: 22 },
+  { id: 'WALL_OFFICE_TOP',       type: 'solid',      x: 1180,y: 355, w: 460, h: 22 },
   // West wall: top segment above door (y=355..405), opening at y=405..465 (doorway), bottom segment (y=465..804)
-  { id: 'WALL_OFFICE_LEFT_01',   type: 'wall',      x: 1180,y: 355, w: 22,  h: 50 },
-  { id: 'WALL_OFFICE_LEFT_02',   type: 'wall',      x: 1180,y: 465, w: 22,  h: 343 },
+  { id: 'WALL_OFFICE_LEFT_01',   type: 'solid',      x: 1180,y: 355, w: 22,  h: 50 },
+  { id: 'WALL_OFFICE_LEFT_02',   type: 'solid',      x: 1180,y: 465, w: 22,  h: 343 },
 
   // Office Furniture
-  { id: 'SHELF_OFFICE_TOP',      type: 'furniture', x: 1340,y: 445, w: 175, h: 65 },
-  { id: 'SHELF_OFFICE_RIGHT',    type: 'furniture', x: 1565,y: 440, w: 65,  h: 325 },
-  { id: 'DESK_OFFICE_LEFT',      type: 'furniture', x: 1290,y: 540, w: 65,  h: 160 },
-  { id: 'DESK_OFFICE_BACK',      type: 'furniture', x: 1355,y: 565, w: 140, h: 75 },
-  { id: 'CHAIR_OFFICE',          type: 'furniture', x: 1375,y: 640, w: 48,  h: 48 },
-  { id: 'PLANT_OFFICE',          type: 'furniture', x: 1195,y: 755, w: 40,  h: 50 },
+  { id: 'SHELF_OFFICE_TOP',      type: 'solid', x: 1340,y: 445, w: 175, h: 65 },
+  { id: 'SHELF_OFFICE_RIGHT',    type: 'solid', x: 1565,y: 440, w: 65,  h: 325 },
+  { id: 'DESK_OFFICE_LEFT',      type: 'solid', x: 1290,y: 540, w: 65,  h: 160 },
+  { id: 'DESK_OFFICE_BACK',      type: 'solid', x: 1355,y: 565, w: 140, h: 75 },
+  { id: 'CHAIR_OFFICE',          type: 'solid', x: 1375,y: 640, w: 48,  h: 48 },
+  { id: 'PLANT_OFFICE',          type: 'solid', x: 1195,y: 755, w: 40,  h: 50 },
 
   // ── 6. Kitchen & Dining Shell & Furniture ──
-  { id: 'WALL_KITCHEN_DIVIDER',  type: 'wall',      x: 488, y: 282, w: 22,  h: 158 },
-  { id: 'COUNTER_KITCHEN_TOP',   type: 'furniture', x: 30,  y: 315, w: 315, h: 75 },
-  { id: 'COUNTER_KITCHEN_LEFT',  type: 'furniture', x: 30,  y: 390, w: 65,  h: 155 },
-  { id: 'FRIDGE_KITCHEN',        type: 'furniture', x: 345, y: 320, w: 75,  h: 95 },
-  { id: 'PANTRY_KITCHEN',        type: 'furniture', x: 445, y: 320, w: 40,  h: 95 },
-  { id: 'ISLAND_KITCHEN',        type: 'furniture', x: 175, y: 448, w: 190, h: 85 },
-  { id: 'TABLE_DINING',          type: 'furniture', x: 85,  y: 595, w: 185, h: 145 },
-  { id: 'PLANT_DINING',          type: 'furniture', x: 30,  y: 740, w: 35,  h: 45 },
+  { id: 'WALL_KITCHEN_DIVIDER',  type: 'solid',      x: 488, y: 282, w: 22,  h: 158 },
+  { id: 'COUNTER_KITCHEN_TOP',   type: 'solid', x: 30,  y: 315, w: 315, h: 75 },
+  { id: 'COUNTER_KITCHEN_LEFT',  type: 'solid', x: 30,  y: 390, w: 65,  h: 155 },
+  { id: 'FRIDGE_KITCHEN',        type: 'solid', x: 345, y: 320, w: 75,  h: 95 },
+  { id: 'PANTRY_KITCHEN',        type: 'solid', x: 445, y: 320, w: 40,  h: 95 },
+  { id: 'ISLAND_KITCHEN',        type: 'solid', x: 175, y: 448, w: 190, h: 85 },
+  { id: 'TABLE_DINING',          type: 'solid', x: 85,  y: 595, w: 185, h: 145 },
+  { id: 'PLANT_DINING',          type: 'solid', x: 30,  y: 740, w: 35,  h: 45 },
 
   // ── 7. Bathroom Shell & Fixtures ──
   // The latest map shows a fully enclosed bathroom. The old east-side opening
   // belonged to the previous map version and is intentionally not recreated.
-  { id: 'WALL_BATHROOM_TOP',     type: 'wall',      x: 325, y: 540, w: 233, h: 22 },
-  { id: 'WALL_BATHROOM_LEFT',    type: 'wall',      x: 325, y: 540, w: 20,  h: 290 },
-  { id: 'WALL_BATHROOM_BOTTOM',  type: 'wall',      x: 325, y: 810, w: 233, h: 22 },
-  { id: 'WALL_BATHROOM_RIGHT',   type: 'wall',      x: 538, y: 540, w: 20,  h: 290 },
+  { id: 'WALL_BATHROOM_TOP',     type: 'solid',      x: 325, y: 540, w: 233, h: 22 },
+  { id: 'WALL_BATHROOM_LEFT',    type: 'solid',      x: 325, y: 540, w: 20,  h: 290 },
+  { id: 'WALL_BATHROOM_BOTTOM',  type: 'solid',      x: 325, y: 810, w: 233, h: 22 },
+  { id: 'WALL_BATHROOM_RIGHT',   type: 'solid',      x: 538, y: 540, w: 20,  h: 290 },
 
   // Bathroom Fixtures
-  { id: 'SHOWER_BATHROOM',       type: 'furniture', x: 335, y: 555, w: 55,  h: 105 },
-  { id: 'TOILET_BATHROOM',       type: 'furniture', x: 430, y: 605, w: 25,  h: 40 },
-  { id: 'VANITY_BATHROOM',       type: 'furniture', x: 455, y: 575, w: 35,  h: 80 },
-  { id: 'TUB_BATHROOM',          type: 'furniture', x: 335, y: 685, w: 75,  h: 85 },
-  { id: 'SHELF_BATHROOM_STORAGE',type: 'furniture', x: 500, y: 690, w: 35,  h: 90 },
+  { id: 'SHOWER_BATHROOM',       type: 'solid', x: 335, y: 555, w: 55,  h: 105 },
+  { id: 'TOILET_BATHROOM',       type: 'solid', x: 430, y: 605, w: 25,  h: 40 },
+  { id: 'VANITY_BATHROOM',       type: 'solid', x: 455, y: 575, w: 35,  h: 80 },
+  { id: 'TUB_BATHROOM',          type: 'solid', x: 335, y: 685, w: 75,  h: 85 },
+  { id: 'SHELF_BATHROOM_STORAGE',type: 'solid', x: 500, y: 690, w: 35,  h: 90 },
 
   // ── 8. Living Room Furniture ──
-  { id: 'SOFA_LIVING_LEFT',      type: 'furniture', x: 675,  y: 335, w: 55,  h: 245 },
-  { id: 'SOFA_LIVING_BOTTOM',    type: 'furniture', x: 730,  y: 525, w: 130, h: 55 },
-  { id: 'COFFEE_TABLE_LIVING',   type: 'furniture', x: 770,  y: 400, w: 80,  h: 90 },
-  { id: 'ARMCHAIR_LIVING',       type: 'furniture', x: 875,  y: 400, w: 52,  h: 52 },
-  { id: 'TV_CONSOLE_LIVING',     type: 'furniture', x: 1015, y: 345,  w: 50,  h: 175 },
-  { id: 'PLANT_LIVING',          type: 'furniture', x: 668,  y: 315, w: 35,  h: 35 },
-  { id: 'SIDE_TABLE_LIVING',     type: 'furniture', x: 868,  y: 535, w: 38,  h: 35 },
+  { id: 'SOFA_LIVING_LEFT',      type: 'solid', x: 675,  y: 335, w: 55,  h: 245 },
+  { id: 'SOFA_LIVING_BOTTOM',    type: 'solid', x: 730,  y: 525, w: 130, h: 55 },
+  { id: 'COFFEE_TABLE_LIVING',   type: 'solid', x: 770,  y: 400, w: 80,  h: 90 },
+  { id: 'ARMCHAIR_LIVING',       type: 'solid', x: 875,  y: 400, w: 52,  h: 52 },
+  { id: 'TV_CONSOLE_LIVING',     type: 'solid', x: 1015, y: 345,  w: 50,  h: 175 },
+  { id: 'PLANT_LIVING',          type: 'solid', x: 668,  y: 315, w: 35,  h: 35 },
+  { id: 'SIDE_TABLE_LIVING',     type: 'solid', x: 868,  y: 535, w: 38,  h: 35 },
 
   // ── 9. Foyer / Main Entrance Shell & Furniture ──
-  { id: 'WALL_FOYER_TOP_LEFT',   type: 'wall',      x: 648,  y: 680, w: 147, h: 25 },
-  { id: 'WALL_FOYER_TOP_RIGHT',  type: 'wall',      x: 953,  y: 680, w: 166, h: 25 },
-  { id: 'WALL_FOYER_LEFT',       type: 'wall',      x: 648,  y: 680, w: 22,  h: 250 },
-  { id: 'WALL_FOYER_RIGHT',      type: 'wall',      x: 1118, y: 680, w: 22,  h: 250 },
+  { id: 'WALL_FOYER_TOP_LEFT',   type: 'solid',      x: 648,  y: 680, w: 147, h: 25 },
+  { id: 'WALL_FOYER_TOP_RIGHT',  type: 'solid',      x: 953,  y: 680, w: 166, h: 25 },
+  { id: 'WALL_FOYER_LEFT',       type: 'solid',      x: 648,  y: 680, w: 22,  h: 250 },
+  { id: 'WALL_FOYER_RIGHT',      type: 'solid',      x: 1118, y: 680, w: 22,  h: 250 },
 
   // Foyer Furniture
-  { id: 'CONSOLE_FOYER',         type: 'furniture', x: 668,  y: 752, w: 92,  h: 58 },
-  { id: 'COAT_PLANT_FOYER',      type: 'furniture', x: 955,  y: 750, w: 72,  h: 80 },
+  { id: 'CONSOLE_FOYER',         type: 'solid', x: 668,  y: 752, w: 92,  h: 58 },
+  { id: 'COAT_PLANT_FOYER',      type: 'solid', x: 955,  y: 750, w: 72,  h: 80 },
 ]);
 
-// Doorways & Walkable Openings (used for navigation, peeking and debug overlay)
+// Doorways & Walkable Openings metadata. The collision debug layer intentionally
+// does not draw these regions; gameplay/fog logic keeps its own doorway data.
 const PROLOGUE_WALKABLE_OPENINGS = Object.freeze([
   { id: 'DOOR_MAIN_ENTRANCE',    name: 'Pintu Utama / Foyer',       x: 795,  y: 680, w: 158, h: 25 },
   { id: 'DOOR_BUNKER_ENTRANCE',  name: 'Ambang Masuk Bunker',       x: 732,  y: 205, w: 136, h: 30 },
@@ -370,16 +384,6 @@ const addRectPath = (ctx, rect) => {
   ctx.closePath();
 };
 
-const getRotatedBounds = (rect) => {
-  const corners = getRectCorners(rect);
-  return {
-    x: Math.min(...corners.map((corner) => corner.x)),
-    y: Math.min(...corners.map((corner) => corner.y)),
-    w: Math.max(...corners.map((corner) => corner.x)) - Math.min(...corners.map((corner) => corner.x)),
-    h: Math.max(...corners.map((corner) => corner.y)) - Math.min(...corners.map((corner) => corner.y)),
-  };
-};
-
 const intersectsPlayerFootHitbox = (x, y, playerWidth, playerHeight, rect) => {
   const angle = getRectAngle(rect);
   const halfPlayer = { x: playerWidth / 2, y: playerHeight / 2 };
@@ -443,10 +447,101 @@ const createFogEditorShapes = (layout) => {
     id: `FOG_DOORWAY_${String(doorway.id).toUpperCase()}`,
     type: 'fog-doorway',
     doorwayId: doorway.id,
+    name: doorway.name,
+    rooms: Array.isArray(doorway.rooms) ? [...doorway.rooms] : undefined,
     radius: doorway.radius,
     ...doorway.rect,
   }));
   return [...roomShapes, ...doorwayShapes];
+};
+
+const getNextEditorId = (colliders, prefix) => {
+  const existing = new Set((colliders || [])
+    .flatMap((collider) => [collider.id, collider.doorwayId])
+    .map((value) => String(value || '').toUpperCase()));
+  let index = 1;
+  let id = `${prefix}_${String(index).padStart(2, '0')}`;
+  while (existing.has(id.toUpperCase())) {
+    index += 1;
+    id = `${prefix}_${String(index).padStart(2, '0')}`;
+  }
+  return id;
+};
+
+const getNextFogRoomRectIndex = (colliders, roomId) => {
+  const indexes = (colliders || [])
+    .filter((collider) => collider.type === 'fog-room' && String(collider.roomId) === String(roomId))
+    .map((collider) => Number(collider.rectIndex))
+    .filter((index) => Number.isFinite(index));
+  return indexes.length ? Math.max(...indexes) + 1 : 0;
+};
+
+const normalizeFogRoomPair = (rooms, fallback = ['living', 'foyer']) => {
+  const normalized = [...new Set((Array.isArray(rooms) ? rooms : fallback)
+    .map((roomId) => String(roomId || '').trim())
+    .filter(Boolean))];
+  return normalized.length >= 2 ? normalized.slice(0, 2) : [...fallback];
+};
+
+const createFogEditorCollider = ({ id, type, x, y, w, h, selected, colliders }) => {
+  if (type === 'fog-doorway') {
+    const sourceRooms = selected?.type === 'fog-doorway'
+      ? selected.rooms
+      : (selected?.type === 'fog-room' ? [selected.roomId, 'living'] : null);
+    const rooms = normalizeFogRoomPair(sourceRooms);
+    return {
+      id,
+      type,
+      doorwayId: getNextEditorId(colliders, 'd_custom'),
+      name: selected?.type === 'fog-doorway' ? selected.name : 'Custom Fog Doorway',
+      rooms,
+      radius: Number.isFinite(Number(selected?.radius)) ? Number(selected.radius) : 125,
+      x,
+      y,
+      w,
+      h,
+    };
+  }
+
+  const roomId = selected?.type === 'fog-room' && selected.roomId
+    ? String(selected.roomId)
+    : 'living';
+  return {
+    id,
+    type: 'fog-room',
+    roomId,
+    rectIndex: getNextFogRoomRectIndex(colliders, roomId),
+    x,
+    y,
+    w,
+    h,
+  };
+};
+
+const duplicateFogEditorCollider = ({ source, id, x, y, colliders }) => {
+  if (source.type === 'fog-doorway') {
+    return {
+      ...source,
+      id,
+      doorwayId: getNextEditorId(colliders, 'd_custom'),
+      rooms: normalizeFogRoomPair(source.rooms),
+      x,
+      y,
+    };
+  }
+
+  if (source.type === 'fog-room') {
+    return {
+      ...source,
+      id,
+      roomId: String(source.roomId || 'living'),
+      rectIndex: getNextFogRoomRectIndex(colliders, source.roomId || 'living'),
+      x,
+      y,
+    };
+  }
+
+  return { ...source, id, x, y };
 };
 
 const FOG_DARKNESS = Object.freeze({
@@ -457,6 +552,10 @@ const FOG_DARKNESS = Object.freeze({
   DISTANT_UNDISCOVERED: 0.82,// very dark silhouette (0.75-0.88), never pure black
   BASE_OUTER: 0.85
 });
+
+// Fog remains room/doorway based, but its final alpha buffer is softened so
+// rectangular map zones do not produce harsh square seams on screen.
+const FOG_EDGE_BLUR = 14;
 
 // Tension cues are expressed as a fraction of the configured time budget so
 // custom expedition-style durations do not silently inherit the prologue's
@@ -508,6 +607,7 @@ export class ScavengerMinigame {
     this.ctx = null;
     this.animId = null;
     this.isActive = false;
+    this.renderDirty = true;
 
     // Viewport and World Map Dimensions (native resolution of the house map)
     this.VIEW_W = 960;
@@ -559,13 +659,14 @@ export class ScavengerMinigame {
 
     this.basePlayerState = null;
     this.baseItems = null;
+    this.originalItems = null;
     this.baseColliders = null;
     this.originalColliders = null;
     this.runtimeColliderIds = new Set();
 
     // Solid obstacle colliders are cloned so expedition hazards can safely add
     // temporary blockers without mutating the reusable house layout.
-    this.colliders = PROLOGUE_COLLIDERS.map((collider) => ({ ...collider }));
+    this.colliders = PROLOGUE_COLLIDERS.map(normalizeSolidCollider);
 
     // Backpack & Items positioned on visible, reachable floor areas.
     this.maxCapacity = 5;
@@ -594,33 +695,26 @@ export class ScavengerMinigame {
     this.roomVisibilityStates = {};
     this.fogCanvas = null;
     this.fogCtx = null;
+    this.fogSoftCanvas = null;
+    this.fogSoftCtx = null;
     this.fogLayout = cloneFogLayout();
     this.fogOriginalShapes = createFogEditorShapes(this.fogLayout);
     this.fogEditorShapes = this.fogOriginalShapes.map((shape) => ({ ...shape }));
 
-    // Debug mode (Press F2 in-game to see colliders, player hitbox, and doorways)
-    const urlDebug = (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('debugColliders') === '1' || window.localStorage?.getItem('debugColliders') === '1'));
-    this.debugColliders = Boolean(config?.debugColliders ?? urlDebug);
-
-    const urlCollisionEditor = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('collisionEditor') === '1');
-    this.collisionEditorRequested = Boolean(config?.collisionEditor ?? urlCollisionEditor);
-    const urlFogEditor = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('fogEditor') === '1');
-    this.fogEditorRequested = Boolean(config?.fogEditor ?? urlFogEditor);
-    const urlFreeCamera = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('freeCam') === '1');
-    this.freeCameraRequested = Boolean(config?.freeCamera ?? urlFreeCamera);
+    // Developer state is supplied through a no-op gateway in release builds.
+    // Keep these public fields as compatibility mirrors for the existing
+    // console and HUD contracts; the dev adapter owns their mutations.
+    this.debugColliders = false;
+    this.collisionEditorRequested = false;
+    this.fogEditorRequested = false;
+    this.itemEditorRequested = false;
+    this.freeCameraRequested = false;
     this.collisionEditor = null;
     this.fogEditor = null;
-    this.collisionEditorPreviousPause = false;
-    this.collisionEditorPreviousDebug = this.debugColliders;
-    this.fogEditorPreviousPause = false;
-    this.fogEditorPreviousDebug = this.debugColliders;
+    this.itemEditor = null;
     this.freeCamera = false;
-    this.freeCameraPreviousPause = false;
-    this.freeCameraPreviousDebug = this.debugColliders;
-
-    if (typeof window !== 'undefined') {
-      window.__scavengerGame = this;
-    }
+    this._developerPauseSnapshot = null;
+    this.editorHelpHidden = false;
 
     // Developer Console & Debug States
     this.isPaused = false;
@@ -635,64 +729,41 @@ export class ScavengerMinigame {
     this._eventsBound = false;
     this._bindEvents();
     this._applyConfig(config);
+    this.collisionEditorKey = config?.collisionKey || config?.id || (this.mode === 'prologue' ? 'prologue_house' : 'scavenger_map');
+    this.normalizeSolidCollider = normalizeSolidCollider;
+    this.getNextEditorId = getNextEditorId;
+    this.createFogEditorCollider = createFogEditorCollider;
+    this.duplicateFogEditorCollider = duplicateFogEditorCollider;
+
+    // Saved layout data is part of the runtime contract. The editor and its
+    // file persistence are not: production only applies this normalized data.
+    const runtimeCollision = getRuntimeCollisionOverride(this.collisionEditorKey);
+    if (Array.isArray(runtimeCollision)) {
+      this.colliders = runtimeCollision.map(normalizeSolidCollider);
+    }
+    const runtimeFog = getRuntimeFogOverride(this.collisionEditorKey);
+    if (Array.isArray(runtimeFog)) {
+      this.fogEditorShapes = runtimeFog.map((shape) => ({ ...shape }));
+      this._applyFogEditorShapes();
+    }
+    const runtimeItems = getRuntimeItemOverride(this.collisionEditorKey);
+    if (Array.isArray(runtimeItems)) {
+      this._applyRuntimeItemOverride(runtimeItems);
+    }
+
     this._captureBaseRunState();
 
-    this.collisionEditorKey = config?.collisionKey || config?.id || (this.mode === 'prologue' ? 'prologue_house' : 'scavenger_map');
-    this.collisionEditor = new CollisionEditor({
-      storageKey: this.collisionEditorKey,
-      getColliders: () => this.colliders,
-      getDefaultColliders: () => this.originalColliders || this.baseColliders || [],
-      getMapSize: () => ({ width: this.MAP_W, height: this.MAP_H }),
-      getViewport: () => ({ width: this.VIEW_W, height: this.VIEW_H }),
-      getCamera: () => this.camera,
-      getRenderOffset: () => ({ x: this.screenShake, y: this.screenShake * 0.5 }),
-      getPersistedColliders: () => this.colliders
-        .filter((collider) => !this.runtimeColliderIds.has(String(collider.id))),
-      getLabel: normalizeCollisionLabel,
-      filePersistence: {
-        load: () => editorDataStore.read('collision', this.collisionEditorKey),
-        save: (payload) => editorDataStore.write('collision', this.collisionEditorKey, payload),
-        remove: () => editorDataStore.remove('collision', this.collisionEditorKey),
-      },
-      onPan: ({ dx, dy }) => this._panCameraBy(dx, dy),
-      onResetCamera: () => this._resetCameraToPlayer(),
-      onChange: () => {
-        // Edited geometry becomes the run's baseline, so Restart keeps the
-        // current tuning while the immutable original remains available to
-        // Alt+R in the editor.
-        this.baseColliders = this.colliders
-          .filter((collider) => !this.runtimeColliderIds.has(String(collider.id)))
-          .map((collider) => ({ ...collider }));
-      },
-      onReset: (colliders) => {
-        this.runtimeColliderIds.clear();
-        this.colliders = colliders.map((collider) => ({ ...collider }));
-        this.baseColliders = this.colliders.map((collider) => ({ ...collider }));
-      },
-    });
-
-    this.fogEditor = new CollisionEditor({
-      storageKey: `fog_${this.collisionEditorKey}`,
-      getColliders: () => this.fogEditorShapes,
-      getDefaultColliders: () => this.fogOriginalShapes,
-      getMapSize: () => ({ width: this.MAP_W, height: this.MAP_H }),
-      getViewport: () => ({ width: this.VIEW_W, height: this.VIEW_H }),
-      getCamera: () => this.camera,
-      getRenderOffset: () => ({ x: this.screenShake, y: this.screenShake * 0.5 }),
-      getLabel: normalizeCollisionLabel,
-      filePersistence: {
-        load: () => editorDataStore.read('fog', this.collisionEditorKey),
-        save: (payload) => editorDataStore.write('fog', this.collisionEditorKey, payload),
-        remove: () => editorDataStore.remove('fog', this.collisionEditorKey),
-      },
-      onChange: () => this._applyFogEditorShapes(),
-      onReset: (shapes) => {
-        this.fogEditorShapes = shapes.map((shape) => ({ ...shape }));
-        this._applyFogEditorShapes();
-      },
-      onPan: ({ dx, dy }) => this._panCameraBy(dx, dy),
-      onResetCamera: () => this._resetCameraToPlayer(),
-    });
+    this.devTools = createScavengerDevTools({ host: this });
+    this.collisionEditor = this.devTools.collisionEditor;
+    this.fogEditor = this.devTools.fogEditor;
+    this.itemEditor = this.devTools.itemEditor;
+    this.collisionEditorRequested = this.devTools.collisionEditorRequested;
+    this.fogEditorRequested = this.devTools.fogEditorRequested;
+    this.itemEditorRequested = this.devTools.itemEditorRequested;
+    this.freeCameraRequested = this.devTools.freeCameraRequested;
+    this.freeCamera = this.devTools.freeCamera;
+    this.debugColliders = this.devTools.debugColliders;
+    this.editorHelpHidden = this.devTools.editorHelpHidden;
   }
 
   _applyConfig(config) {
@@ -714,7 +785,7 @@ export class ScavengerMinigame {
     } else {
       this.playableBounds = { ...PROLOGUE_PLAYABLE_BOUNDS };
     }
-    if (Array.isArray(config.colliders)) this.colliders = config.colliders.map((collider) => ({ ...collider }));
+    if (Array.isArray(config.colliders)) this.colliders = config.colliders.map(normalizeSolidCollider);
     if (Array.isArray(config.items)) this.items = config.items.map((item, index) => ({ ...item, uid: item.uid || `${item.id}-${index}`, collected: false, revealed: false }));
     if (config.bunkerHatch) this.bunkerHatch = { ...this.bunkerHatch, ...config.bunkerHatch };
     if (config.spawnPosition) Object.assign(this.player, config.spawnPosition);
@@ -736,8 +807,58 @@ export class ScavengerMinigame {
       isMoving: false,
     };
     this.baseItems = this.items.map(({ collected, revealed, ...item }) => ({ ...item }));
+    this.originalItems = this.baseItems.map((item) => ({ ...item }));
     this.baseColliders = this.colliders.map((collider) => ({ ...collider }));
     this.originalColliders = this.colliders.map((collider) => ({ ...collider }));
+  }
+
+  _applyRuntimeItemOverride(overrides) {
+    const overrideByUid = new Map(
+      overrides
+        .filter((item) => item && (item.uid || item.id))
+        .map((item) => [String(item.uid || item.id), item])
+    );
+
+    this.items.forEach((item) => {
+      const override = overrideByUid.get(String(item.uid || item.id));
+      if (override) this._applyEditableItemPatch(item, override);
+    });
+  }
+
+  _applyEditableItemPatch(item, patch = {}) {
+    if (!item || !patch) return;
+
+    if (Number.isFinite(Number(patch.x))) item.x = Number(patch.x);
+    if (Number.isFinite(Number(patch.y))) item.y = Number(patch.y);
+    if (Number.isFinite(Number(patch.w))) item.w = Math.max(4, Number(patch.w));
+    if (Number.isFinite(Number(patch.h))) item.h = Math.max(4, Number(patch.h));
+    if (Number.isFinite(Number(patch.angle))) item.angle = Number(patch.angle);
+
+    if (this.mode === 'prologue') {
+      const roomId = this._getRoomAtPosition(item.x, item.y);
+      item.roomId = roomId || null;
+      const room = roomId ? this._getFogRooms().find((candidate) => candidate.id === roomId) : null;
+      if (room) item.room = room.name;
+    }
+  }
+
+  applyItemEditorItems(items = []) {
+    const patchByUid = new Map(
+      items
+        .filter((item) => item && (item.uid || item.id))
+        .map((item) => [String(item.uid || item.id), item])
+    );
+    const applyToList = (itemList) => {
+      if (!Array.isArray(itemList)) return;
+      itemList.forEach((item) => {
+        const patch = patchByUid.get(String(item.uid || item.id));
+        if (patch) this._applyEditableItemPatch(item, patch);
+      });
+    };
+
+    applyToList(this.baseItems);
+    applyToList(this.items);
+    this._requestRender();
   }
 
   _cloneBaseItems() {
@@ -750,7 +871,7 @@ export class ScavengerMinigame {
     this.emptyHatchConfirmUntil = null;
     this.items = this._cloneBaseItems();
     this.runtimeColliderIds.clear();
-    this.colliders = (this.baseColliders || this.colliders).map((collider) => ({ ...collider }));
+    this.colliders = (this.baseColliders || this.colliders).map(normalizeSolidCollider);
     this.timeLeft = this.duration;
     this.elapsedSeconds = 0;
     this.aftershockTriggered = false;
@@ -779,44 +900,14 @@ export class ScavengerMinigame {
       const oneShotKey = [' ', 'e', 'q'].includes(k);
       if (e.repeat && oneShotKey) return;
 
-      if (k === 'f4') {
-        if (e.repeat) return;
-        e.preventDefault();
-        this.setFreeCamera(!this.freeCamera);
-        return;
-      }
-
-      // F5 is kept as a compatibility shortcut, while F7 avoids the browser
-      // reload key on desktop browsers and is the recommended fog-editor key.
-      if (k === 'f5' || k === 'f7') {
-        if (e.repeat) return;
-        e.preventDefault();
-        this.setFogEditor(!this.fogEditor?.enabled);
-        return;
-      }
-
-      if (k === 'f3') {
-        if (e.repeat) return;
-        e.preventDefault();
-        this.setCollisionEditor(!this.collisionEditor?.enabled);
-        return;
-      }
-
-      if ((this.collisionEditor?.enabled || this.freeCamera)
-        && this.collisionEditor?.handleKeyDown(e)) {
-        e.preventDefault();
-        return;
-      }
-
-      if (this.fogEditor?.enabled && this.fogEditor.handleKeyDown(e)) {
+      // All developer shortcuts and editor interaction are owned by the
+      // adapter. The game keeps only movement/interact keys below.
+      if (this.devTools?.handleKeyDown(e)) {
         e.preventDefault();
         return;
       }
 
       this.keys[k] = true;
-      if (k === 'f2') {
-        this.setDebugColliders(!this.debugColliders);
-      }
       if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', ' ', 'e', 'q', '1', '2', '3', '4', '5'].includes(k)) {
         e.preventDefault();
       }
@@ -834,12 +925,24 @@ export class ScavengerMinigame {
 
     this._handleKeyUp = (e) => {
       if (!this.isActive) return;
+      if (this.devTools?.handleKeyUp(e)) {
+        e.preventDefault();
+        return;
+      }
       const k = e.key.toLowerCase();
       this.keys[k] = false;
     };
 
+    this._clearPressedKeys = () => {
+      Object.keys(this.keys).forEach((key) => { this.keys[key] = false; });
+      this.player.isMoving = false;
+      this.devTools?.clearPressedKeys();
+    };
+
     window.addEventListener('keydown', this._handleKeyDown);
     window.addEventListener('keyup', this._handleKeyUp);
+    window.addEventListener('blur', this._clearPressedKeys);
+    document.addEventListener('visibilitychange', this._clearPressedKeys);
     this._eventsBound = true;
   }
 
@@ -849,10 +952,10 @@ export class ScavengerMinigame {
     this._resetRunState();
     this.lastTime = performance.now();
     this._createDOM();
-    void this.collisionEditor.loadSavedDraft();
-    void this.fogEditor.loadSavedDraft();
-    if (this.freeCameraRequested) this.setFreeCamera(true);
-    if (this.fogEditorRequested) this.setFogEditor(true);
+    void this.devTools?.loadSavedDrafts();
+    if (this.devTools?.freeCameraRequested) this.setFreeCamera(true);
+    if (this.devTools?.fogEditorRequested) this.setFogEditor(true);
+    if (this.devTools?.itemEditorRequested) this.setItemEditor(true);
     this._updateTimerHUD();
     this.animId = requestAnimationFrame((t) => this._loop(t));
 
@@ -897,7 +1000,27 @@ export class ScavengerMinigame {
     this.canvas.width = this.VIEW_W;
     this.canvas.height = this.VIEW_H;
     this.ctx = this.canvas.getContext('2d');
-    this.collisionEditor?.attach(this.canvas);
+    this.devTools?.attach(this.canvas);
+
+    // Developer-only guidance/feedback is not even added to the release DOM.
+    // The adapter still owns the same host slots when Vite runs in dev mode.
+    if (this.devTools?.enabled) {
+      this.editorInfo = document.createElement('div');
+      this.editorInfo.className = 'scavenger-editor-info';
+      this.editorInfo.innerHTML = `
+        <strong>EDITOR DEV AKTIF</strong>
+        <span><b>[F8]</b> SEMBUNYIKAN / TAMPILKAN BANTUAN EDITOR</span>
+        <span><b>[F9]</b> EDITOR POSISI ITEM SCAVENGER</span>
+        <span><b>[CTRL+S]</b> SIMPAN PERUBAHAN KE FILE</span>
+      `;
+      this.editorInfo.hidden = true;
+
+      this.editorFeedback = document.createElement('div');
+      this.editorFeedback.className = 'scavenger-editor-feedback';
+      this.editorFeedback.setAttribute('role', 'status');
+      this.editorFeedback.setAttribute('aria-live', 'polite');
+      this.editorFeedback.hidden = true;
+    }
 
     // Desktop Tactical Controls Hint Overlay
     this.desktopHints = document.createElement('div');
@@ -910,8 +1033,12 @@ export class ScavengerMinigame {
       <span><span class="hint-key">1-5</span> Pilih Slot</span>
       <span>•</span>
       <span><span class="hint-key">Q</span> Drop / Buang Barang</span>
-      <span>•</span>
-      <span><span class="hint-key">F3/F4/F7</span> Editor Dev</span>
+      ${this.devTools?.enabled ? `
+        <span>•</span>
+        <span><span class="hint-key">F3/F4/F7/F9</span> Editor Dev</span>
+        <span>•</span>
+        <span><span class="hint-key">F8</span> Sembunyikan Bantuan Editor</span>
+      ` : ''}
     `;
 
     // Mobile / Touch D-Pad Overlay
@@ -935,14 +1062,17 @@ export class ScavengerMinigame {
     // Assemble
     this.wrapper.appendChild(this.hudHeader);
     this.wrapper.appendChild(this.canvas);
+    if (this.editorInfo) this.wrapper.appendChild(this.editorInfo);
+    if (this.editorFeedback) this.wrapper.appendChild(this.editorFeedback);
     this.wrapper.appendChild(this.desktopHints);
     this.wrapper.appendChild(this.touchControls);
     this.container.appendChild(this.wrapper);
 
     this._setupTouchEvents();
     this._updateHUD();
+    this.devTools?.updateEditorHelpVisibility();
 
-    if (this.collisionEditorRequested) {
+    if (this.devTools?.collisionEditorRequested) {
       this.setCollisionEditor(true);
     }
   }
@@ -1199,45 +1329,74 @@ export class ScavengerMinigame {
     if (!Array.isArray(this.fogEditorShapes)) return;
 
     const nextLayout = cloneFogLayout();
+    const roomShapesById = new Map();
+    this.fogEditorShapes
+      .filter((shape) => shape.type === 'fog-room' && shape.roomId)
+      .forEach((shape) => {
+        const roomId = String(shape.roomId);
+        const shapes = roomShapesById.get(roomId) || [];
+        shapes.push(shape);
+        roomShapesById.set(roomId, shapes);
+      });
+
+    const toFogRect = (shape, fallback = {}) => ({
+      ...fallback,
+      x: shape.x,
+      y: shape.y,
+      w: shape.w,
+      h: shape.h,
+      angle: shape.angle || 0,
+    });
+
+    const sortedRoomShapes = (roomId) => (roomShapesById.get(String(roomId)) || [])
+      .slice()
+      .sort((a, b) => (Number(a.rectIndex) || 0) - (Number(b.rectIndex) || 0));
+
     nextLayout.rooms = nextLayout.rooms.map((room) => ({
       ...room,
-      rects: room.rects
-        .map((rect, index) => {
-          const shape = this.fogEditorShapes.find((candidate) => (
-            candidate.type === 'fog-room'
-            && candidate.roomId === room.id
-            && Number(candidate.rectIndex) === index
-          ));
-          return shape ? { ...rect, x: shape.x, y: shape.y, w: shape.w, h: shape.h, angle: shape.angle || 0 } : null;
-        })
-        .filter(Boolean),
+      rects: sortedRoomShapes(room.id).map((shape) => toFogRect(shape)),
     }));
 
-    nextLayout.doorways = nextLayout.doorways
-      .map((doorway) => {
-        const shape = this.fogEditorShapes.find((candidate) => (
-          candidate.type === 'fog-doorway' && candidate.doorwayId === doorway.id
-        ));
-        if (!shape) return null;
-        const rect = {
-          ...doorway.rect,
-          x: shape.x,
-          y: shape.y,
-          w: shape.w,
-          h: shape.h,
-          angle: shape.angle || 0,
-        };
+    // A newly created room zone inherits an existing room's visibility state
+    // through its roomId. Keep custom room ids functional as well, so saved
+    // editor data never becomes a decorative rectangle that the runtime ignores.
+    const knownRoomIds = new Set(nextLayout.rooms.map((room) => String(room.id)));
+    roomShapesById.forEach((shapes, roomId) => {
+      if (knownRoomIds.has(roomId)) return;
+      const sourceRoom = nextLayout.rooms.find((room) => room.id === 'living') || {};
+      nextLayout.rooms.push({
+        id: roomId,
+        name: `FOG ${roomId.toUpperCase()}`,
+        adjacent: [...(sourceRoom.adjacent || ['living'])],
+        rects: shapes
+          .slice()
+          .sort((a, b) => (Number(a.rectIndex) || 0) - (Number(b.rectIndex) || 0))
+          .map((shape) => toFogRect(shape)),
+      });
+    });
+
+    const baseDoorways = cloneFogLayout().doorways;
+    nextLayout.doorways = this.fogEditorShapes
+      .filter((shape) => shape.type === 'fog-doorway' && shape.doorwayId)
+      .map((shape) => {
+        const source = baseDoorways.find((doorway) => doorway.id === shape.doorwayId);
+        const doorwayId = String(shape.doorwayId);
+        const rect = toFogRect(shape, source?.rect || {});
+        const rooms = normalizeFogRoomPair(shape.rooms, source?.rooms || ['living', 'foyer']);
         return {
-          ...doorway,
+          ...(source || {}),
+          id: doorwayId,
+          name: shape.name || source?.name || `Custom Fog Doorway ${doorwayId}`,
+          rooms,
           x: rect.x + rect.w / 2,
           y: rect.y + rect.h / 2,
-          radius: Number.isFinite(Number(shape.radius)) ? Number(shape.radius) : doorway.radius,
+          radius: Number.isFinite(Number(shape.radius)) ? Number(shape.radius) : (source?.radius || 125),
           rect,
         };
-      })
-      .filter(Boolean);
+      });
 
     this.fogLayout = nextLayout;
+    this._requestRender();
   }
 
   _panCameraBy(dx = 0, dy = 0) {
@@ -1245,6 +1404,7 @@ export class ScavengerMinigame {
     const maxY = Math.max(0, this.MAP_H - this.VIEW_H);
     this.camera.x = clamp(this.camera.x + (Number(dx) || 0), 0, maxX);
     this.camera.y = clamp(this.camera.y + (Number(dy) || 0), 0, maxY);
+    this._requestRender();
   }
 
   _resetCameraToPlayer() {
@@ -1252,6 +1412,11 @@ export class ScavengerMinigame {
     const maxY = Math.max(0, this.MAP_H - this.VIEW_H);
     this.camera.x = clamp(this.player.x - this.VIEW_W / 2, 0, maxX);
     this.camera.y = clamp(this.player.y - this.VIEW_H / 2, 0, maxY);
+    this._requestRender();
+  }
+
+  _requestRender() {
+    this.renderDirty = true;
   }
 
   _initFogOfWar() {
@@ -1270,6 +1435,10 @@ export class ScavengerMinigame {
       this.fogCanvas.width = this.VIEW_W;
       this.fogCanvas.height = this.VIEW_H;
       this.fogCtx = this.fogCanvas.getContext('2d');
+      this.fogSoftCanvas = document.createElement('canvas');
+      this.fogSoftCanvas.width = this.VIEW_W;
+      this.fogSoftCanvas.height = this.VIEW_H;
+      this.fogSoftCtx = this.fogSoftCanvas.getContext('2d');
     }
   }
 
@@ -1283,7 +1452,12 @@ export class ScavengerMinigame {
 
     // Doorway rectangles intentionally overlap the broad living-room
     // footprint. Specific rooms win first so item ownership stays stable.
-    const detectionOrder = ['bunker', 'master', 'child', 'bath', 'kitchen', 'office', 'foyer', 'living'];
+    const detectionOrder = [
+      'bunker', 'master', 'child', 'bath', 'kitchen', 'office', 'foyer', 'living',
+      ...this._getFogRooms()
+        .map((room) => room.id)
+        .filter((roomId) => !['bunker', 'master', 'child', 'bath', 'kitchen', 'office', 'foyer', 'living'].includes(roomId)),
+    ];
     for (const roomId of detectionOrder) {
       const room = this._getFogRooms().find((candidate) => candidate.id === roomId);
       if (room?.rects.some((rect) => {
@@ -1429,7 +1603,12 @@ export class ScavengerMinigame {
     // 2. Render each room's dynamic darkness overlay. Specific doorway rooms
     // are stamped after the broad living-room footprint so overlapping floor
     // zones resolve to the same room priority used by _getRoomAtPosition().
-    const fogRoomOrder = ['living', 'foyer', 'office', 'kitchen', 'bath', 'child', 'master', 'bunker'];
+    const fogRoomOrder = [
+      'living', 'foyer', 'office', 'kitchen', 'bath', 'child', 'master', 'bunker',
+      ...this._getFogRooms()
+        .map((room) => room.id)
+        .filter((roomId) => !['living', 'foyer', 'office', 'kitchen', 'bath', 'child', 'master', 'bunker'].includes(roomId)),
+    ];
     fogRoomOrder.forEach((roomId) => {
       const room = this._getFogRooms().find((candidate) => candidate.id === roomId);
       if (!room) return;
@@ -1463,10 +1642,24 @@ export class ScavengerMinigame {
 
     fctx.restore(); // Restore camera translation on fogCtx
 
+    // Blur only the completed fog buffer. The map and the editor outlines stay
+    // crisp, while the darkness transitions around room edges become soft.
+    let fogOutput = this.fogCanvas;
+    if (this.fogSoftCtx && this.fogSoftCanvas) {
+      this.fogSoftCtx.clearRect(0, 0, this.VIEW_W, this.VIEW_H);
+      this.fogSoftCtx.save();
+      this.fogSoftCtx.imageSmoothingEnabled = true;
+      this.fogSoftCtx.filter = `blur(${FOG_EDGE_BLUR}px)`;
+      this.fogSoftCtx.drawImage(this.fogCanvas, 0, 0);
+      this.fogSoftCtx.restore();
+      fogOutput = this.fogSoftCanvas;
+    }
+
     // 4. Stamp the rendered fog buffer over the world canvas in screen coordinates
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(this.fogCanvas, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(fogOutput, 0, 0);
     ctx.restore();
   }
 
@@ -1493,7 +1686,7 @@ export class ScavengerMinigame {
             : (isDiscovered ? 'rgba(56, 189, 248, 0.05)' : 'rgba(100, 116, 139, 0.04)');
           this._fillWorldRect(ctx, rect);
 
-          ctx.font = 'bold 10px monospace';
+          ctx.font = '700 11px "Segoe UI", Arial, sans-serif';
           ctx.fillStyle = isCurrent ? '#00ff88' : (isDiscovered ? '#38bdf8' : '#94a3b8');
           const statusTag = isCurrent ? '[CURRENT]' : (isDiscovered ? '[DISCOVERED]' : '[UNDISCOVERED]');
           ctx.fillText(`${room.name} (${room.id}) ${statusTag} α:${alpha}`, rect.x + 8, rect.y + 16);
@@ -1511,11 +1704,11 @@ export class ScavengerMinigame {
       ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
       ctx.stroke();
       ctx.fillStyle = '#f59e0b';
-      ctx.font = '9px monospace';
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
       ctx.fillText(`${d.id} (R:${d.radius})`, d.x - 30, d.y - 4);
     });
 
-    this.fogEditor?.render(ctx);
+    this.devTools?.fogEditor?.render(ctx);
 
     ctx.restore();
   }
@@ -1554,15 +1747,21 @@ export class ScavengerMinigame {
     const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
     this.lastTime = timestamp;
 
+    // Developer camera input must continue while editor mode pauses gameplay.
+    this.devTools?.update(dt);
     if (!this.isPaused) {
       this._update(dt * (this.timeScale || 1.0));
     }
-    this._render();
+    if (!this.isPaused || this.renderDirty) {
+      this._render();
+      this.renderDirty = false;
+    }
 
     this.animId = requestAnimationFrame((t) => this._loop(t));
   }
 
   _update(dt) {
+    this._requestRender();
     this.elapsedSeconds += dt;
     if (this.timerEnabled) {
       this.timeLeft -= dt;
@@ -1591,6 +1790,15 @@ export class ScavengerMinigame {
 
     // Screen shake is event-driven rather than a random continuous nuisance.
     this.screenShake *= Math.max(0, 1 - dt * 4.5);
+
+    if (this.freeCamera) {
+      this.player.isMoving = false;
+      this.player.frame = 0;
+      this.player.animTimer = 0;
+      this._updateRoomVisibility(dt);
+      this._updateHazards();
+      return;
+    }
 
     // Movement Input
     let vx = 0;
@@ -1688,7 +1896,7 @@ export class ScavengerMinigame {
       if (hazard.type === 'aftershock' && !this.aftershockTriggered && this.elapsedSeconds >= (hazard.aftershockAt || 0)) {
         this.aftershockTriggered = true;
         if (hazard.blocker) {
-          this.colliders.push({ ...hazard.blocker });
+          this.colliders.push(normalizeSolidCollider(hazard.blocker));
           this.runtimeColliderIds.add(String(hazard.blocker.id));
         }
         this.screenShake = 8;
@@ -1740,7 +1948,7 @@ export class ScavengerMinigame {
     // to slide naturally along a wall or furniture footprint.
     for (let i = 0; i < this.colliders.length; i++) {
       const box = this.colliders[i];
-      const inset = box.type === 'furniture' ? 2 : 0;
+      const inset = SOLID_COLLIDER_INSET;
       const collisionBox = inset > 0 && box.w > inset * 2 && box.h > inset * 2
         ? {
           ...box,
@@ -1796,12 +2004,18 @@ export class ScavengerMinigame {
     }
 
     // ── 3. DRAW COLLECTIBLE ITEMS ──
-    this._renderItems(ctx);
+    const itemEditorActive = Boolean(this.devTools?.itemEditor?.enabled);
+    if (!itemEditorActive) this._renderItems(ctx);
 
     // ── 4. DRAW FOG OF WAR / DYNAMIC ROOM VISIBILITY (PROLOGUE) ──
     if (this.mode === 'prologue') {
       this._renderFogOfWar(ctx);
     }
+
+    // Item authoring needs to remain visible even when the room is covered by
+    // gameplay fog. It is still rendered in world coordinates and the editor
+    // only exposes the collectible item layer.
+    if (itemEditorActive) this._renderItems(ctx, { editorPreview: true });
 
     // ── 5. DRAW PLAYER CHARACTER ──
     this._renderPlayer(ctx);
@@ -1810,14 +2024,10 @@ export class ScavengerMinigame {
     this._renderTooltips(ctx);
 
     // ── DEBUG COLLIDERS & FOG ZONES (F2) ──
-    if (this.debugColliders) {
-      if (this.mode === 'prologue') {
-        this._renderFogDebug(ctx);
-      }
-      // Keep collision outlines and labels in the foreground so room-zone
-      // diagnostics cannot obscure the collider identity being tuned.
-      this._renderDebugColliders(ctx);
-    }
+    // F8 hides instructional chrome, but the active editor geometry remains
+    // visible and interactive so the map can still be edited without the
+    // help card covering it.
+    this.devTools?.renderDebug(ctx);
 
     ctx.restore(); // Restore Camera World Coordinates
 
@@ -1831,6 +2041,7 @@ export class ScavengerMinigame {
   _renderDebugColliders(ctx) {
     ctx.save();
     ctx.textAlign = 'left';
+    const collisionEditorOnly = this._getActiveEditorMode() === 'collision';
 
     // 1. Playable Map Bounds
     const pw = this.player.w;
@@ -1841,159 +2052,62 @@ export class ScavengerMinigame {
     const minY = bounds.y + ph / 2;
     const maxY = bounds.y + bounds.h - ph / 2;
 
-    ctx.strokeStyle = '#00ffcc';
+    ctx.strokeStyle = '#ef4444';
     ctx.lineWidth = 2;
     ctx.setLineDash([6, 6]);
     ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
     ctx.setLineDash([]);
-    ctx.font = 'bold 11px "Share Tech Mono", monospace';
-    ctx.fillStyle = '#00ffcc';
+    ctx.font = '700 12px "Segoe UI", Arial, sans-serif';
+    ctx.fillStyle = '#fca5a5';
     ctx.fillText(`MAP_BOUNDS [${Math.round(bounds.x)},${Math.round(bounds.y)} ${Math.round(bounds.w)}x${Math.round(bounds.h)}]`, minX + 10, minY + 18);
 
-    // 2. Door & Walkable Openings (highlighted in emerald green)
-    const openings = (this.mode === 'prologue') ? PROLOGUE_WALKABLE_OPENINGS : (this.doorways || []);
-    const debugLabels = [];
-
-    const queueDebugLabel = (label, rect, color, includeBounds = false, preferOutside = false) => {
-      debugLabels.push({ label, rect, color, includeBounds, preferOutside });
-    };
-
-    openings.forEach((door) => {
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
-      ctx.strokeStyle = '#34d399';
-      ctx.lineWidth = 2;
-      this._fillWorldRect(ctx, door);
-      this._strokeWorldRect(ctx, door);
-
-      queueDebugLabel(door.id || door.name, door, '#a7f3d0', door.w >= 60 || door.h >= 45);
-    });
-
-    // 3. Solid obstacle colliders (Walls: Red | Furniture: Amber)
+    // 2. Solid obstacle colliders. IDs stay in the source/save payload, while
+    // the debug map remains uncluttered and uses one red visual treatment.
     ctx.lineWidth = 1;
-    this.colliders.forEach(c => {
-      const isWall = c.type === 'wall' || /(^|_)(WALL|OUTER)(_|$)/i.test(String(c.id));
-      ctx.fillStyle = isWall ? 'rgba(239, 68, 68, 0.32)' : 'rgba(245, 158, 11, 0.32)';
-      ctx.strokeStyle = isWall ? '#ef4444' : '#f59e0b';
+    this.colliders.forEach((c) => {
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.34)';
+      ctx.strokeStyle = '#ef4444';
       this._fillWorldRect(ctx, c);
       this._strokeWorldRect(ctx, c);
-      queueDebugLabel(c.id, c, isWall ? '#fca5a5' : '#fef08a', c.w >= 70 || c.h >= 70, isWall);
     });
 
-    // Labels are rendered in a second pass so a later collider cannot paint
-    // over an earlier label. Candidate positions keep long names near their
-    // shape while reducing overlap on dense furniture clusters.
-    const placedLabels = [];
-    const drawDebugLabel = ({ label, rect, color, includeBounds, preferOutside }) => {
-      const name = String(label || 'UNNAMED_COLLIDER')
-        .replace(/([a-z])([A-Z])/g, '$1_$2')
-        .replace(/[^a-zA-Z0-9]+/g, '_')
-        .toUpperCase();
-      const boundsText = `${Math.round(rect.x)},${Math.round(rect.y)} ${Math.round(rect.w)}x${Math.round(rect.h)}${getRectAngle(rect) ? ` ROT:${Math.round(getRectAngle(rect))}°` : ''}`;
-      const labelRect = getRotatedBounds(rect);
+    if (!collisionEditorOnly) {
+      // 3. Bunker Exit / Hatch Interaction Area & Radius
+      const exits = this.exits?.length ? this.exits : [this.bunkerHatch];
+      exits.forEach(exit => {
+        const cx = exit.x + exit.w / 2;
+        const cy = exit.y + exit.h / 2;
+        ctx.strokeStyle = '#00ff88';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(exit.x, exit.y, exit.w, exit.h);
 
-      ctx.font = 'bold 10px monospace';
-      const nameWidth = ctx.measureText(name).width;
-      ctx.font = '9px monospace';
-      const boundsWidth = ctx.measureText(boundsText).width;
-      const labelWidth = Math.ceil(Math.max(nameWidth, includeBounds ? boundsWidth : 0) + 8);
-      const labelHeight = includeBounds ? 24 : 15;
-      const inside = { x: labelRect.x + 3, y: labelRect.y + 3 };
-      const above = { x: labelRect.x + 3, y: labelRect.y - labelHeight - 3 };
-      const below = { x: labelRect.x + 3, y: labelRect.y + labelRect.h + 3 };
-      const right = { x: labelRect.x + labelRect.w + 4, y: labelRect.y + 3 };
-      const left = { x: labelRect.x - labelWidth - 4, y: labelRect.y + 3 };
-      const centered = {
-        x: labelRect.x + Math.max(3, (labelRect.w - labelWidth) / 2),
-        y: labelRect.y + Math.max(3, (labelRect.h - labelHeight) / 2),
-      };
-      const candidates = preferOutside
-        ? (labelRect.w >= labelRect.h ? [above, below, inside, right, left] : [right, left, inside, above, below])
-        : [inside, above, below, right, left, centered];
-      const clampCandidate = (candidate) => ({
-        x: Math.max(2, Math.min(this.MAP_W - labelWidth - 2, candidate.x)),
-        y: Math.max(2, Math.min(this.MAP_H - labelHeight - 2, candidate.y)),
-      });
-      const overlapArea = (a, b) => {
-        const overlapW = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
-        const overlapH = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
-        return overlapW * overlapH;
-      };
-
-      let best = clampCandidate(candidates[0]);
-      let bestScore = Infinity;
-      candidates.forEach((candidate) => {
-        const position = clampCandidate(candidate);
-        const box = { ...position, w: labelWidth, h: labelHeight };
-        const labelOverlapScore = placedLabels.reduce((total, placed) => total + overlapArea(box, placed), 0);
-        const otherShapeOverlapScore = debugLabels.reduce((total, other) => {
-          if (other.rect === rect) return total;
-          return total + overlapArea(box, getRotatedBounds(other.rect));
-        }, 0);
-        const distanceScore = Math.abs(position.x - rect.x) + Math.abs(position.y - rect.y);
-        const score = labelOverlapScore * 1000 + otherShapeOverlapScore * (preferOutside ? 12 : 1) + distanceScore;
-        if (score < bestScore) {
-          best = position;
-          bestScore = score;
-        }
-      });
-
-      const labelBox = { ...best, w: labelWidth, h: labelHeight };
-      placedLabels.push(labelBox);
-      ctx.fillStyle = 'rgba(3, 7, 12, 0.88)';
-      ctx.fillRect(labelBox.x, labelBox.y, labelBox.w, labelBox.h);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(labelBox.x, labelBox.y, labelBox.w, labelBox.h);
-      ctx.textAlign = 'left';
-      ctx.fillStyle = color;
-      ctx.font = 'bold 10px monospace';
-      ctx.fillText(name, labelBox.x + 4, labelBox.y + 9);
-      if (includeBounds) {
-        ctx.font = '9px monospace';
-        ctx.fillText(boundsText, labelBox.x + 4, labelBox.y + 18);
-      }
-    };
-
-    debugLabels.forEach(drawDebugLabel);
-
-    // Restore the normal left-aligned text state for the remaining debug data.
-    ctx.textAlign = 'left';
-
-    // 4. Bunker Exit / Hatch Interaction Area & Radius
-    const exits = this.exits?.length ? this.exits : [this.bunkerHatch];
-    exits.forEach(exit => {
-      const cx = exit.x + exit.w / 2;
-      const cy = exit.y + exit.h / 2;
-      ctx.strokeStyle = '#00ff88';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(exit.x, exit.y, exit.w, exit.h);
-
-      ctx.strokeStyle = 'rgba(0, 255, 136, 0.4)';
-      ctx.beginPath();
-      ctx.arc(cx, cy, 85, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = '#00ff88';
-      ctx.font = 'bold 10px monospace';
-      ctx.fillText(`EXIT ZONE (R:85)`, cx - 35, cy);
-    });
-
-    // 5. Collectible Items Interaction Radius Circles (70px)
-    this.items.forEach(it => {
-      if (!it.collected) {
-        ctx.strokeStyle = 'rgba(255, 209, 102, 0.5)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(0, 255, 136, 0.4)';
         ctx.beginPath();
-        ctx.arc(it.x, it.y, 70, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 85, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 9px monospace';
-        ctx.fillText(`${it.name} (R:70)`, it.x - 30, it.y - 22);
-      }
-    });
+        ctx.fillStyle = '#00ff88';
+        ctx.font = '700 11px "Segoe UI", Arial, sans-serif';
+        ctx.fillText(`EXIT ZONE (R:85)`, cx - 35, cy);
+      });
 
-    // 6. Player Collision Hitbox & Coordinate Display
+      // 4. Collectible Items Interaction Radius Circles (70px)
+      this.items.forEach(it => {
+        if (!it.collected) {
+          ctx.strokeStyle = 'rgba(255, 209, 102, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(it.x, it.y, 70, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffd166';
+          ctx.font = '10px "Segoe UI", Arial, sans-serif';
+          ctx.fillText(`${it.name} (R:70)`, it.x - 30, it.y - 22);
+        }
+      });
+    }
+
+    // 5. Player Collision Hitbox & Coordinate Display
     ctx.fillStyle = 'rgba(0, 255, 136, 0.85)';
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1.5;
@@ -2003,12 +2117,12 @@ export class ScavengerMinigame {
     ctx.strokeRect(pBoxX, pBoxY, this.player.w, this.player.h);
 
     ctx.fillStyle = '#ffff00';
-    ctx.font = 'bold 11px monospace';
+    ctx.font = '700 12px "Segoe UI", Arial, sans-serif';
     ctx.fillText(`PLAYER_FEET_HITBOX XY(${Math.round(this.player.x)},${Math.round(this.player.y)}) ${this.player.w}x${this.player.h}`, this.player.x - 75, this.player.y - 14);
 
     // The editor highlight and resize handles are drawn last so the selected
-    // collider remains obvious above all regular debug labels.
-    this.collisionEditor?.render(ctx);
+    // collider remains obvious above the regular red outlines.
+    this.devTools?.collisionEditor?.render(ctx);
 
     ctx.restore();
   }
@@ -2116,16 +2230,20 @@ export class ScavengerMinigame {
     return 0;
   }
 
-  _renderItems(ctx) {
-    const nearbyItem = this._getNearestInteractableItem();
-    this.items.forEach((it) => {
-      if (it.collected) return;
+  _renderItems(ctx, { editorPreview = false } = {}) {
+    const items = editorPreview ? (this.baseItems || this.items) : this.items;
+    const nearbyItem = editorPreview ? null : this._getNearestInteractableItem();
+    items.forEach((it) => {
+      if (!editorPreview && it.collected) return;
 
-      const itemAlpha = this._getItemFogAlpha(it);
+      const itemAlpha = editorPreview ? 1 : this._getItemFogAlpha(it);
       if (itemAlpha <= 0) return;
       const dist = this._getDist(this.player, it);
       const isNear = nearbyItem?.uid === it.uid;
       const isCurrentRoom = this.mode !== 'prologue' || this._getItemRoomId(it) === this.currentRoomId;
+      const width = Math.max(4, Number(it.w) || 36);
+      const height = Math.max(4, Number(it.h) || 36);
+      const angle = Number(it.angle) || 0;
 
       ctx.save();
       ctx.globalAlpha = itemAlpha;
@@ -2133,14 +2251,34 @@ export class ScavengerMinigame {
         ctx.shadowColor = '#ffd166';
         ctx.shadowBlur = 18;
       }
+      ctx.translate(it.x, it.y);
+      if (angle) ctx.rotate(angle * Math.PI / 180);
 
       const img = this.itemImages[it.type || it.id];
       if (img && img.complete) {
-        ctx.drawImage(img, it.x - 18, it.y - 18, 36, 36);
+        ctx.drawImage(img, -width / 2, -height / 2, width, height);
       } else {
         // Fallback marker
         ctx.fillStyle = '#ffd166';
-        ctx.fillRect(it.x - 14, it.y - 14, 28, 28);
+        ctx.fillRect(-width / 2, -height / 2, width, height);
+      }
+
+      if (editorPreview) {
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.82)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 3]);
+        ctx.strokeRect(-width / 2, -height / 2, width, height);
+        ctx.setLineDash([]);
+        ctx.font = '700 10px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = '#fef3c7';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(String(it.uid || it.id || 'ITEM').toUpperCase(), -width / 2, -height / 2 - 4);
+      }
+
+      if (editorPreview) {
+        ctx.restore();
+        return;
       }
 
       // Sparkle / Pulsing Ring - distance and room visibility attenuated
@@ -2275,112 +2413,61 @@ export class ScavengerMinigame {
     this._renderTacticalMinimap(ctx);
 
     // 3. Debug Mode Status Watermark
-    if (this.debugColliders) {
+    if (this.devTools?.debugColliders && !this.devTools.editorHelpHidden) {
+      const activeEditorMode = this._getActiveEditorMode();
+      const debugText = activeEditorMode === 'fog'
+        ? '[F7] FOG DEBUG: ON | HANYA AREA FOG'
+        : activeEditorMode === 'collision'
+          ? '[F3] COLLISION DEBUG: ON | HANYA COLLIDER'
+          : activeEditorMode === 'items'
+            ? '[F9] ITEM DEBUG: ON | HANYA ITEM SCAVENGER'
+          : '[F2] DEBUG: ON | FOG + COLLISION';
+      const debugColor = activeEditorMode === 'fog'
+        ? '#c4b5fd'
+        : activeEditorMode === 'items'
+          ? '#fbbf24'
+          : '#67e8f9';
       ctx.save();
-      ctx.font = 'bold 11px "Share Tech Mono", monospace';
+      ctx.font = '700 12px "Segoe UI", Arial, sans-serif';
+      const debugWidth = Math.min(this.VIEW_W - 32, Math.max(430, ctx.measureText(debugText).width + 18));
       ctx.fillStyle = 'rgba(10, 14, 20, 0.9)';
-      ctx.fillRect(16, 58, 430, 24);
-      ctx.strokeStyle = '#00ffcc';
+      ctx.fillRect(16, 58, debugWidth, 30);
+      ctx.strokeStyle = debugColor;
       ctx.lineWidth = 1.2;
-      ctx.strokeRect(16, 58, 430, 24);
+      ctx.strokeRect(16, 58, debugWidth, 30);
 
-      ctx.fillStyle = '#00ffcc';
-      ctx.fillText('[F2] COLLISION DEBUG: ON | RED:Tembok | AMB:Objek | IJO:Pintu', 24, 74);
+      ctx.fillStyle = debugColor;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(debugText, 24, 73);
       ctx.restore();
     }
 
-    if (this.collisionEditor?.enabled) {
-      this._renderCollisionEditorHUD(ctx);
-    }
-    if (this.fogEditor?.enabled) {
-      this._renderFogEditorHUD(ctx);
-    }
-    if (this.freeCamera && !this.collisionEditor?.enabled) {
-      this._renderFreeCameraHUD(ctx);
-    }
+    this.devTools?.renderHud(ctx);
   }
 
-  _renderCollisionEditorHUD(ctx) {
-    const status = this.collisionEditor.getStatus();
-    const selected = status.selectedRect;
+  _renderItemEditorHUD(ctx) {
+    const editor = this.devTools?.itemEditor;
+    if (!editor) return;
+    const status = editor.getStatus();
+    const selected = status.selectedItem;
     const selectedLine = selected
-      ? `PILIH: ${status.selectedLabel}  XY(${selected.x},${selected.y}) ${selected.w}x${selected.h} ROT:${Math.round(selected.angle || 0)}°`
-      : (status.createMode ? `TAMBAH: ${status.createMode.toUpperCase()} — DRAG DI AREA KOSONG` : 'PILIH COLLIDER: klik bentuk merah/amber');
+      ? `PILIH: ${String(selected.uid).toUpperCase()}  XY(${selected.x},${selected.y})`
+      : 'PILIH ITEM: klik ikon makanan / barang';
     const lines = [
-      `[F3] COLLISION EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.colliderCount} COLLIDERS`,
+      `[F9] ITEM EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.itemCount} ITEMS`,
       selectedLine,
-      'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi  •  N baru  •  SHIFT+N furniture',
-      'CTRL+S simpan draft  •  CTRL+E export JSON  •  CTRL+Z undo  •  ALT+R reset awal',
-      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player  •  F7 fog',
+      'DRAG pindah  •  ARROW nudge  •  CTRL+S simpan ke file  •  ALT+R reset awal',
+      '[F4] FREE CAM  •  W/A/S/D geser kamera  •  SHIFT lebih cepat  •  HOME kembali ke player',
+      '[F8] sembunyikan bantuan  •  item tidak bisa dibuat/dihapus agar jumlah tetap aman',
       status.statusMessage,
     ];
 
     ctx.save();
     const x = 16;
     const y = this.debugColliders ? 88 : 58;
-    const width = Math.min(this.VIEW_W - 32, 650);
-    const height = 18 + lines.length * 14;
-    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeStyle = '#22d3ee';
-    ctx.lineWidth = 1.2;
-    ctx.strokeRect(x, y, width, height);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    lines.forEach((line, index) => {
-      ctx.font = index === 0 ? 'bold 10px monospace' : '9px monospace';
-      ctx.fillStyle = index === 0 ? '#67e8f9' : (index === lines.length - 1 ? '#fde68a' : '#cffafe');
-      ctx.fillText(line, x + 8, y + 6 + index * 14);
-    });
-    ctx.restore();
-  }
-
-  _renderFogEditorHUD(ctx) {
-    const status = this.fogEditor.getStatus();
-    const selected = status.selectedRect;
-    const selectedLine = selected
-      ? `PILIH: ${status.selectedLabel}  XY(${selected.x},${selected.y}) ${selected.w}x${selected.h} ROT:${Math.round(selected.angle || 0)}°`
-      : (status.createMode ? `TAMBAH: ${status.createMode.toUpperCase()} — DRAG DI AREA KOSONG` : 'PILIH AREA RUANG / DOORWAY');
-    const lines = [
-      `[F7] FOG EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.colliderCount} AREA`,
-      selectedLine,
-      'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi  •  DELETE hapus area',
-      'CTRL+S simpan file  •  CTRL+E export JSON  •  CTRL+Z undo  •  ALT+R reset awal',
-      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player',
-      status.statusMessage,
-    ];
-
-    ctx.save();
-    const x = 16;
-    const y = this.debugColliders ? 88 : 58;
-    const width = Math.min(this.VIEW_W - 32, 650);
-    const height = 18 + lines.length * 14;
-    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeStyle = '#a78bfa';
-    ctx.lineWidth = 1.2;
-    ctx.strokeRect(x, y, width, height);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    lines.forEach((line, index) => {
-      ctx.font = index === 0 ? 'bold 10px monospace' : '9px monospace';
-      ctx.fillStyle = index === 0 ? '#c4b5fd' : (index === lines.length - 1 ? '#fde68a' : '#ede9fe');
-      ctx.fillText(line, x + 8, y + 6 + index * 14);
-    });
-    ctx.restore();
-  }
-
-  _renderFreeCameraHUD(ctx) {
-    const lines = [
-      '[F4] FREE CAMERA: ON',
-      `CAMERA XY(${Math.round(this.camera.x)},${Math.round(this.camera.y)})  •  I/J/K/L pan  •  MOUSE TENGAH-DRAG`,
-      'HOME kembali ke player  •  F2 debug  •  F3 collision editor  •  F7 fog editor',
-    ];
-    ctx.save();
-    const x = 16;
-    const y = this.debugColliders ? 88 : 58;
-    const width = Math.min(this.VIEW_W - 32, 650);
-    const height = 18 + lines.length * 14;
+    const width = Math.min(this.VIEW_W - 32, 900);
+    const lineHeight = 18;
+    const height = 18 + lines.length * lineHeight;
     ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
     ctx.fillRect(x, y, width, height);
     ctx.strokeStyle = '#fbbf24';
@@ -2389,9 +2476,123 @@ export class ScavengerMinigame {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     lines.forEach((line, index) => {
-      ctx.font = index === 0 ? 'bold 10px monospace' : '9px monospace';
+      ctx.font = index === 0
+        ? '700 12px "Segoe UI", Arial, sans-serif'
+        : '11px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = index === 0 ? '#fde68a' : (index === lines.length - 1 ? '#fde68a' : '#fef3c7');
+      ctx.fillText(line, x + 8, y + 5 + index * lineHeight);
+    });
+    ctx.restore();
+  }
+
+  _renderCollisionEditorHUD(ctx) {
+    const editor = this.devTools?.collisionEditor;
+    if (!editor) return;
+    const status = editor.getStatus();
+    const selected = status.selectedRect;
+    const selectedLine = selected
+      ? `PILIH: SOLID  XY(${selected.x},${selected.y}) ${selected.w}x${selected.h} ROT:${Math.round(selected.angle || 0)}°`
+      : (status.createMode ? `TAMBAH: SOLID — DRAG DI AREA KOSONG` : 'PILIH SOLID: klik bentuk merah');
+    const lines = [
+      `[F3] COLLISION EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.colliderCount} COLLIDERS`,
+      selectedLine,
+      'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi  •  N / SHIFT+N baru SOLID',
+      'CTRL+C/V salin-tempel  •  CTRL+D duplikat  •  CTRL+S simpan  •  CTRL+E export',
+      'CTRL+Z undo  •  ALT+R reset awal',
+      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player  •  F7 fog',
+      status.statusMessage,
+    ];
+
+    ctx.save();
+    const x = 16;
+    const y = this.debugColliders ? 88 : 58;
+    const width = Math.min(this.VIEW_W - 32, 900);
+    const lineHeight = 18;
+    const height = 18 + lines.length * lineHeight;
+    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#22d3ee';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, width, height);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    lines.forEach((line, index) => {
+      ctx.font = index === 0
+        ? '700 12px "Segoe UI", Arial, sans-serif'
+        : '11px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = index === 0 ? '#67e8f9' : (index === lines.length - 1 ? '#fde68a' : '#cffafe');
+      ctx.fillText(line, x + 8, y + 5 + index * lineHeight);
+    });
+    ctx.restore();
+  }
+
+  _renderFogEditorHUD(ctx) {
+    const editor = this.devTools?.fogEditor;
+    if (!editor) return;
+    const status = editor.getStatus();
+    const selected = status.selectedRect;
+    const selectedLine = selected
+      ? `PILIH: ${status.selectedLabel}  XY(${selected.x},${selected.y}) ${selected.w}x${selected.h} ROT:${Math.round(selected.angle || 0)}°`
+      : (status.createMode ? `TAMBAH: ${status.createMode.toUpperCase()} — DRAG DI AREA KOSONG` : 'PILIH AREA RUANG / DOORWAY');
+    const lines = [
+      `[F7] FOG EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.colliderCount} AREA`,
+      selectedLine,
+      'N buat FOG ROOM  •  SHIFT+N buat DOORWAY  •  DELETE hapus area',
+      'CTRL+C/V salin-tempel perilaku  •  CTRL+D duplikat fog  •  CTRL+S simpan',
+      'CTRL+E export  •  CTRL+Z undo  •  ALT+R reset awal',
+      'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi',
+      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player',
+      status.statusMessage,
+    ];
+
+    ctx.save();
+    const x = 16;
+    const y = this.debugColliders ? 88 : 58;
+    const width = Math.min(this.VIEW_W - 32, 900);
+    const lineHeight = 18;
+    const height = 18 + lines.length * lineHeight;
+    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#a78bfa';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, width, height);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    lines.forEach((line, index) => {
+      ctx.font = index === 0
+        ? '700 12px "Segoe UI", Arial, sans-serif'
+        : '11px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = index === 0 ? '#c4b5fd' : (index === lines.length - 1 ? '#fde68a' : '#ede9fe');
+      ctx.fillText(line, x + 8, y + 5 + index * lineHeight);
+    });
+    ctx.restore();
+  }
+
+  _renderFreeCameraHUD(ctx) {
+    const lines = [
+      '[F4] FREE CAMERA: ON',
+      `CAMERA XY(${Math.round(this.camera.x)},${Math.round(this.camera.y)})  •  W/A/S/D geser  •  SHIFT cepat  •  I/J/K/L legacy`,
+      'HOME kembali ke player  •  F2 debug  •  F3 collision  •  F7 fog  •  F9 item',
+    ];
+    ctx.save();
+    const x = 16;
+    const y = this.debugColliders ? 88 : 58;
+    const width = Math.min(this.VIEW_W - 32, 900);
+    const lineHeight = 18;
+    const height = 18 + lines.length * lineHeight;
+    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, width, height);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    lines.forEach((line, index) => {
+      ctx.font = index === 0
+        ? '700 12px "Segoe UI", Arial, sans-serif'
+        : '11px "Segoe UI", Arial, sans-serif';
       ctx.fillStyle = index === 0 ? '#fde68a' : '#fef3c7';
-      ctx.fillText(line, x + 8, y + 6 + index * 14);
+      ctx.fillText(line, x + 8, y + 5 + index * lineHeight);
     });
     ctx.restore();
   }
@@ -2534,7 +2735,7 @@ export class ScavengerMinigame {
     ctx.lineWidth = 1.5;
     ctx.strokeRect(720, 390, 300, 230);
 
-    // ── D. DRAW ALL SOLID WALL COLLIDERS ──
+    // ── D. DRAW ALL SOLID COLLIDERS ──
     ctx.fillStyle = '#0a0d14';
     ctx.strokeStyle = '#64748b';
     ctx.lineWidth = 1.5;
@@ -2542,19 +2743,6 @@ export class ScavengerMinigame {
     this.colliders.forEach(c => {
       ctx.fillRect(c.x, c.y, c.w, c.h);
       ctx.strokeRect(c.x, c.y, c.w, c.h);
-
-      // Furniture labels make the procedural fallback useful for tuning too.
-      if (c.type === 'furniture') {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.fillRect(c.x, c.y, c.w, c.h);
-
-        ctx.font = 'bold 9px "Share Tech Mono", monospace';
-        ctx.fillStyle = '#e2e8f0';
-        ctx.textAlign = 'center';
-        const label = c.id.replace(/_/g, ' ').toUpperCase();
-        ctx.fillText(label, c.x + c.w / 2, c.y + c.h / 2 + 3);
-        ctx.fillStyle = '#0a0d14';
-      }
     });
 
     // ── E. PINTU MASUK UTAMA / TERAS DEPAN (SPAWN POINT ILLUMINATED) ──
@@ -2653,43 +2841,41 @@ export class ScavengerMinigame {
 
     window.removeEventListener('keydown', this._handleKeyDown);
     window.removeEventListener('keyup', this._handleKeyUp);
+    window.removeEventListener('blur', this._clearPressedKeys);
+    document.removeEventListener('visibilitychange', this._clearPressedKeys);
     this._eventsBound = false;
 
     if (this.wrapper && this.wrapper.parentElement) {
       this.wrapper.parentElement.removeChild(this.wrapper);
     }
 
-    this.collisionEditor?.destroy();
-    this.fogEditor?.destroy();
+    this.devTools?.destroy();
+    this.editorInfo?.remove();
+    this.editorFeedback?.remove();
+    this._developerPauseSnapshot = null;
+    this.renderDirty = false;
 
     this.fogCanvas = null;
     this.fogCtx = null;
+    this.fogSoftCanvas = null;
+    this.fogSoftCtx = null;
     this.discoveredRooms?.clear();
     this.roomVisibilityStates = {};
 
-    if (typeof window !== 'undefined' && window.__scavengerGame === this) {
-      window.__scavengerGame = null;
-    }
-    if (typeof window !== 'undefined' && window.__scavengerCollisionEditor?.host === this) {
-      window.__scavengerCollisionEditor = null;
-    }
-    if (typeof window !== 'undefined' && window.__scavengerFogEditor?.host === this) {
-      window.__scavengerFogEditor = null;
-    }
   }
 
   // ─── DEVELOPER CONSOLE & DEBUG HOOKS ────────────────────────────────────
 
   pause() {
     this.isPaused = true;
+    this._requestRender();
   }
 
   resume() {
-    // Collision tuning needs a stable camera and timer. Finish the edit or
-    // toggle F3 off before resuming the normal minigame loop.
-    this.isPaused = Boolean(
-      this.collisionEditor?.enabled || this.fogEditor?.enabled || this.freeCamera
-    );
+    // Developer modes intentionally pause the player/timer, but a normal
+    // resume must always release a stale pause left by a previous editor.
+    this.isPaused = this._isDeveloperModeActive();
+    this._requestRender();
   }
 
   setTimeScale(scale = 1.0) {
@@ -2737,133 +2923,36 @@ export class ScavengerMinigame {
     this.noCollision = Boolean(enabled);
   }
 
+  _isDeveloperModeActive() {
+    return Boolean(this.devTools?.isDeveloperModeActive());
+  }
+
+  _getActiveEditorMode() {
+    return this.devTools?.getActiveEditorMode() || null;
+  }
+
   setCollisionEditor(enabled) {
-    if (!this.collisionEditor) return false;
-
-    const next = Boolean(enabled);
-    if (next === this.collisionEditor.enabled) return next;
-
-    if (next && this.fogEditor?.enabled) this.setFogEditor(false);
-
-    if (next) {
-      this.collisionEditorPreviousPause = this.isPaused;
-      this.collisionEditorPreviousDebug = this.debugColliders;
-      this.isPaused = true;
-      this.debugColliders = true;
-      this.collisionEditor.setFreeCamera(this.freeCamera);
-      this.collisionEditor.setEnabled(true);
-      if (typeof window !== 'undefined') {
-        window.__scavengerCollisionEditor = {
-          host: this,
-          editor: this.collisionEditor,
-          save: () => this.collisionEditor.saveDraft(),
-          export: () => this.collisionEditor.exportDraft(),
-          reset: () => this.collisionEditor.resetDraft(),
-        };
-      }
-    } else {
-      this.collisionEditor.setEnabled(false);
-      this.collisionEditor.setFreeCamera(this.freeCamera);
-      if (this.freeCamera || this.fogEditor?.enabled) {
-        this.isPaused = true;
-        this.debugColliders = true;
-      } else {
-        this.isPaused = this.collisionEditorPreviousPause;
-        this.debugColliders = this.collisionEditorPreviousDebug;
-      }
-      if (typeof window !== 'undefined' && window.__scavengerCollisionEditor?.host === this) {
-        window.__scavengerCollisionEditor = null;
-      }
-    }
-
-    return next;
+    return this.devTools?.setCollisionEditor(enabled) ?? false;
   }
 
   setFogEditor(enabled) {
-    if (!this.fogEditor || this.mode !== 'prologue') return false;
+    return this.devTools?.setFogEditor(enabled) ?? false;
+  }
 
-    const next = Boolean(enabled);
-    if (next === this.fogEditor.enabled) return next;
-
-    if (next) {
-      if (this.freeCamera) this.setFreeCamera(false);
-      if (this.collisionEditor?.enabled) this.setCollisionEditor(false);
-      this.fogEditorPreviousPause = this.isPaused;
-      this.fogEditorPreviousDebug = this.debugColliders;
-      this.isPaused = true;
-      this.debugColliders = true;
-      this.fogEditor.setEnabled(true);
-      if (typeof window !== 'undefined') {
-        window.__scavengerFogEditor = {
-          host: this,
-          editor: this.fogEditor,
-          save: () => this.fogEditor.saveDraft(),
-          export: () => this.fogEditor.exportDraft(),
-          reset: () => this.fogEditor.resetDraft(),
-        };
-      }
-    } else {
-      this.fogEditor.setEnabled(false);
-      if (this.collisionEditor?.enabled || this.freeCamera) {
-        this.isPaused = true;
-        this.debugColliders = true;
-      } else {
-        this.isPaused = this.fogEditorPreviousPause;
-        this.debugColliders = this.fogEditorPreviousDebug;
-      }
-      if (typeof window !== 'undefined' && window.__scavengerFogEditor?.host === this) {
-        window.__scavengerFogEditor = null;
-      }
-    }
-
-    return next;
+  setItemEditor(enabled) {
+    return this.devTools?.setItemEditor(enabled) ?? false;
   }
 
   setFreeCamera(enabled) {
-    const next = Boolean(enabled);
-    if (next === this.freeCamera) {
-      this.collisionEditor?.setFreeCamera(next);
-      return next;
-    }
+    return this.devTools?.setFreeCamera(enabled) ?? false;
+  }
 
-    if (next && this.fogEditor?.enabled) this.setFogEditor(false);
-
-    if (next) {
-      this.freeCameraPreviousPause = this.isPaused;
-      this.freeCameraPreviousDebug = this.debugColliders;
-      this.freeCamera = true;
-      this.isPaused = true;
-      this.debugColliders = true;
-      this.collisionEditor?.setFreeCamera(true);
-    } else {
-      this.freeCamera = false;
-      this.collisionEditor?.setFreeCamera(false);
-      if (this.collisionEditor?.enabled || this.fogEditor?.enabled) {
-        this.isPaused = true;
-        this.debugColliders = true;
-      } else {
-        this.isPaused = this.freeCameraPreviousPause;
-        this.debugColliders = this.freeCameraPreviousDebug;
-      }
-    }
-
-    return next;
+  setEditorHelpHidden(hidden) {
+    return this.devTools?.setEditorHelpHidden(hidden) ?? false;
   }
 
   setDebugColliders(enabled) {
-    this.debugColliders = Boolean(enabled)
-      || Boolean(this.collisionEditor?.enabled)
-      || Boolean(this.fogEditor?.enabled)
-      || Boolean(this.freeCamera);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        if (this.debugColliders) {
-          window.localStorage.setItem('debugColliders', '1');
-        } else {
-          window.localStorage.removeItem('debugColliders');
-        }
-      } catch (_) {}
-    }
+    return this.devTools?.setDebugColliders(enabled);
   }
 
   setFogDisabled(disabled) {
@@ -2912,10 +3001,8 @@ export class ScavengerMinigame {
     this.isActive = true;
     this._resetRunState();
     this.isPaused = false;
-    if (this.collisionEditor?.enabled || this.fogEditor?.enabled || this.freeCamera) {
-      this.isPaused = true;
-      this.debugColliders = true;
-    }
+    if (!this._isDeveloperModeActive()) this._developerPauseSnapshot = null;
+    this.devTools?.syncDeveloperModePause();
     this.lastTime = performance.now();
 
     if (!this.wrapper || !this.wrapper.parentElement) {
