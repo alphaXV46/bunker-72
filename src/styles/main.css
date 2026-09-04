@@ -4658,3 +4658,93 @@ body.disable-crt .crt-flicker { display: none !important; }
   .expedition-location-card { min-height: 78px; }
   .scavenger-expedition-objective { max-width: 55vw; font-size: 0.62rem; }
 }
+
+/* Developer-only F6 story UI layout editor. These nodes only exist while the
+   editor is enabled, so the normal dialogue/choice styling is unchanged. */
+.screen-layout-editor-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.screen-layout-editor-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px dashed #22d3ee;
+  background: rgba(34, 211, 238, 0.1);
+  pointer-events: auto;
+  cursor: move;
+  transform-origin: center center;
+  touch-action: none;
+}
+
+.screen-layout-editor-box.is-selected {
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.14);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.32), 0 0 18px rgba(251, 191, 36, 0.18);
+}
+
+.screen-layout-editor-label {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  max-width: calc(100% - 8px);
+  padding: 3px 5px;
+  overflow: hidden;
+  background: rgba(3, 7, 12, 0.88);
+  color: #cffafe;
+  font: 700 10px/1.15 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.screen-layout-editor-box.is-selected .screen-layout-editor-label {
+  color: #fef3c7;
+}
+
+.screen-layout-editor-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #082f49;
+  background: #ecfeff;
+  pointer-events: auto;
+}
+
+.screen-layout-editor-handle.handle-nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.screen-layout-editor-handle.handle-ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.screen-layout-editor-handle.handle-sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.screen-layout-editor-handle.handle-se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+
+.screen-layout-editor-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 210;
+  max-width: calc(100% - 24px);
+  padding: 8px 11px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(34, 211, 238, 0.8);
+  background: rgba(3, 7, 12, 0.94);
+  color: #cffafe;
+  font: 9px/1.5 'Share Tech Mono', monospace;
+  letter-spacing: 0.35px;
+  text-align: left;
+  white-space: pre;
+  pointer-events: none;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 768px) {
+  .screen-layout-editor-toolbar {
+    top: 6px;
+    max-width: calc(100% - 12px);
+    padding: 6px 8px;
+    font-size: 8px;
+  }
+
+  .screen-layout-editor-label { font-size: 8px; }
+}

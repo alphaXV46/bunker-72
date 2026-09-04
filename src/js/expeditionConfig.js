@@ -5,11 +5,11 @@
  */
 
 const OUTER_COLLIDERS = [
-  { id: 'outer_top', x: 100, y: 40, w: 1170, h: 20 },
-  { id: 'outer_left', x: 100, y: 40, w: 20, h: 680 },
-  { id: 'outer_right', x: 1250, y: 40, w: 20, h: 680 },
-  { id: 'outer_bottom_l', x: 100, y: 700, w: 480, h: 20 },
-  { id: 'outer_bottom_r', x: 800, y: 700, w: 470, h: 20 },
+  { id: 'WALL_OUTER_TOP',          type: 'wall', x: 100, y: 40,  w: 1170, h: 20 },
+  { id: 'WALL_OUTER_LEFT',         type: 'wall', x: 100, y: 40,  w: 20,   h: 680 },
+  { id: 'WALL_OUTER_RIGHT',        type: 'wall', x: 1250,y: 40,  w: 20,   h: 680 },
+  { id: 'WALL_OUTER_BOTTOM_LEFT',  type: 'wall', x: 100, y: 700, w: 480,  h: 20 },
+  { id: 'WALL_OUTER_BOTTOM_RIGHT', type: 'wall', x: 800, y: 700, w: 470,  h: 20 },
 ];
 
 const RETURN_EXIT = { id: 'return_safe', x: 640, y: 650, w: 120, h: 58, label: 'KEMBALI KE TITIK AMAN', reason: 'returned' };
@@ -48,16 +48,16 @@ export const EXPEDITION_CONFIGS = Object.freeze({
     ],
     colliders: [
       ...OUTER_COLLIDERS,
-      { id: 'neighbor_table', x: 410, y: 250, w: 150, h: 65 },
-      { id: 'neighbor_wall', x: 610, y: 120, w: 24, h: 260 },
-      { id: 'neighbor_rubble_initial', x: 570, y: 430, w: 250, h: 32 },
+      { id: 'TABLE_NEIGHBOR_LIVING',   type: 'furniture', x: 410, y: 250, w: 150, h: 65 },
+      { id: 'WALL_NEIGHBOR_DIVIDER',   type: 'wall',      x: 610, y: 120, w: 24,  h: 260 },
+      { id: 'RUBBLE_NEIGHBOR_INITIAL', type: 'wall',      x: 570, y: 430, w: 250, h: 32 },
     ],
     items: [
       { id: 'food', name: 'Makanan Kaleng', x: 300, y: 210, w: 36, h: 36, room: 'Ruang Tamu' },
       { id: 'drink', name: 'Air Bersih', x: 860, y: 220, w: 36, h: 36, room: 'Dapur' },
     ],
     hazards: [
-      { id: 'aftershock', type: 'aftershock', message: 'Aftershock! Tumpukan puing menutup jalur teras. Cari jalan memutar.', aftershockAt: 3, blocker: { id: 'neighbor_rubble_aftershock', x: 470, y: 430, w: 300, h: 34 } },
+      { id: 'aftershock', type: 'aftershock', message: 'Aftershock! Tumpukan puing menutup jalur teras. Cari jalan memutar.', aftershockAt: 3, blocker: { id: 'RUBBLE_NEIGHBOR_AFTERSHOCK', type: 'wall', x: 470, y: 430, w: 300, h: 34 } },
     ],
   }),
 
@@ -76,10 +76,10 @@ export const EXPEDITION_CONFIGS = Object.freeze({
     ],
     colliders: [
       ...OUTER_COLLIDERS,
-      { id: 'market_rubble', x: 500, y: 330, w: 360, h: 60 },
-      { id: 'market_shelves', x: 890, y: 250, w: 55, h: 220 },
-      { id: 'market_counter', x: 1010, y: 470, w: 120, h: 35 },
-      { id: 'market_cable', x: 420, y: 500, w: 300, h: 34 },
+      { id: 'RUBBLE_MARKET_CENTER', type: 'wall',      x: 500, y: 330, w: 360, h: 60 },
+      { id: 'SHELVES_MARKET_RIGHT', type: 'furniture', x: 890, y: 250, w: 55,  h: 220 },
+      { id: 'COUNTER_MARKET_FRONT',  type: 'furniture', x: 1010,y: 470, w: 120, h: 35 },
+      { id: 'CABLE_MARKET_FLOOR',    type: 'wall',      x: 420, y: 500, w: 300, h: 34 },
     ],
     items: [
       { id: 'food', name: 'Makanan Kaleng', x: 910, y: 190, w: 36, h: 36, room: 'Minimarket' },
@@ -109,9 +109,9 @@ export const EXPEDITION_CONFIGS = Object.freeze({
     ],
     colliders: [
       ...OUTER_COLLIDERS,
-      { id: 'clinic_wall_l', x: 430, y: 450, w: 26, h: 150 },
-      { id: 'clinic_wall_r', x: 920, y: 450, w: 26, h: 150 },
-      { id: 'clinic_debris', x: 180, y: 410, w: 250, h: 42 },
+      { id: 'WALL_CLINIC_LEFT',  type: 'wall', x: 430, y: 450, w: 26,  h: 150 },
+      { id: 'WALL_CLINIC_RIGHT', type: 'wall', x: 920, y: 450, w: 26,  h: 150 },
+      { id: 'DEBRIS_CLINIC_ENTRY', type: 'wall', x: 180, y: 410, w: 250, h: 42 },
     ],
     items: [
       { id: 'kit', name: 'Kotak P3K', x: 600, y: 510, w: 36, h: 36, room: 'Pos Kesehatan' },

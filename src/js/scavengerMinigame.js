@@ -7,6 +7,8 @@
  */
 
 import { retroAudio } from './retroAudio.js';
+import { CollisionEditor, normalizeCollisionLabel } from './collisionEditor.js';
+import { editorDataStore } from './editorDataStore.js';
 
 // Assets
 const SPRITESHEET_SRC = new URL('../assets/sprites/sheets/spritesheet_father.png', import.meta.url).href;
@@ -66,88 +68,130 @@ const PROLOGUE_PLAYABLE_BOUNDS = Object.freeze({
 // Decorative objects are intentionally omitted so the player can move close
 // to furniture without catching on its elevated/transparent artwork.
 const PROLOGUE_COLLIDERS = Object.freeze([
-  // ── Architecture / outer perimeter ──
-  { id: 'house_outer_left',       type: 'wall',      x: 0,    y: 18,  w: 28,  h: 792 },
-  { id: 'house_outer_right',      type: 'wall',      x: 1640, y: 18,  w: 32,  h: 792 },
-  { id: 'house_bottom_left',      type: 'wall',      x: 0,    y: 804, w: 650, h: 32 },
-  { id: 'house_bottom_right',     type: 'wall',      x: 1065, y: 804, w: 607, h: 32 },
+  // ── 1. Outer Perimeter & Exterior Shell ──
+  { id: 'WALL_OUTER_WEST',       type: 'wall',      x: 8,    y: 18,  w: 22,  h: 806 },
+  { id: 'WALL_OUTER_EAST',       type: 'wall',      x: 1638, y: 18,  w: 24,  h: 806 },
+  { id: 'WALL_OUTER_SOUTH_01',   type: 'wall',      x: 8,    y: 824, w: 640, h: 24 },
+  { id: 'WALL_OUTER_SOUTH_02',   type: 'wall',      x: 1140, y: 824, w: 522, h: 24 },
 
-  // ── Master bedroom shell and entry ──
-  { id: 'master_wall_top',        type: 'wall',      x: 33,   y: 24,  w: 449, h: 20 },
-  { id: 'master_wall_left',       type: 'wall',      x: 33,   y: 24,  w: 23,  h: 270 },
-  { id: 'master_wall_right_upper', type: 'wall',     x: 462,  y: 24,  w: 23,  h: 86 },
-  { id: 'master_wall_right_lower', type: 'wall',     x: 462,  y: 215, w: 23,  h: 79 },
-  { id: 'master_entry_wall_top',  type: 'wall',      x: 475,  y: 90,  w: 95,  h: 18 },
-  { id: 'master_entry_wall_right',type: 'wall',      x: 550,  y: 90,  w: 20,  h: 205 },
-  { id: 'master_kitchen_wall',    type: 'wall',      x: 0,    y: 285, w: 500, h: 28 },
-  { id: 'master_bed',             type: 'furniture', x: 120,  y: 100, w: 165, h: 160 },
-  { id: 'master_dresser',         type: 'furniture', x: 333,  y: 70,  w: 60,  h: 80 },
-  { id: 'master_wardrobe',        type: 'furniture', x: 392,  y: 55,  w: 68,  h: 105 },
+  // ── 2. Master Bedroom Shell & Entry ──
+  { id: 'WALL_MASTER_TOP',       type: 'wall',      x: 28,   y: 18,  w: 432, h: 22 },
+  { id: 'WALL_MASTER_LEFT',      type: 'wall',      x: 28,   y: 18,  w: 22,  h: 270 },
+  { id: 'WALL_MASTER_BOTTOM',    type: 'wall',      x: 8,    y: 282, w: 452, h: 24 },
+  // East wall: solid from y=18 to y=230, opening at y=230..282 for door to living corridor
+  { id: 'WALL_MASTER_RIGHT',     type: 'wall',      x: 450,  y: 18,  w: 22,  h: 212 },
+  // North wall of master alcove corridor
+  { id: 'WALL_MASTER_ALCOVE_TOP', type: 'wall',     x: 450,  y: 92,  w: 112, h: 22 },
 
-  // ── Bunker room shell and equipment ──
-  { id: 'bunker_wall_top',         type: 'wall',      x: 568,  y: 0,   w: 520, h: 29 },
-  { id: 'bunker_wall_left',        type: 'wall',      x: 568,  y: 0,   w: 23,  h: 208 },
-  { id: 'bunker_wall_right',       type: 'wall',      x: 1064, y: 0,   w: 25,  h: 208 },
-  { id: 'bunker_wall_bottom_left', type: 'wall',      x: 568,  y: 205, w: 175, h: 61 },
-  { id: 'bunker_wall_bottom_right',type: 'wall',      x: 875,  y: 205, w: 214, h: 61 },
-  { id: 'bunker_shelves',          type: 'furniture', x: 590,  y: 28,  w: 108, h: 180 },
-  { id: 'bunker_vault',            type: 'furniture', x: 660,  y: 48,  w: 180, h: 122 },
-  { id: 'bunker_equipment_east',   type: 'furniture', x: 1005, y: 35,  w: 60,  h: 100 },
-  { id: 'bunker_generator',        type: 'furniture', x: 930,  y: 90,  w: 115, h: 125 },
+  // Master Bedroom Furniture
+  { id: 'BED_MASTER',             type: 'furniture', x: 95,  y: 90,  w: 165, h: 155 },
+  { id: 'NIGHTSTAND_MASTER_LEFT', type: 'furniture', x: 68, y: 105, w: 24,  h: 38 },
+  { id: 'NIGHTSTAND_MASTER_RIGHT',type: 'furniture', x: 263,y: 105, w: 24,  h: 38 },
+  { id: 'DRESSER_MASTER',         type: 'furniture', x: 320, y: 55,  w: 65,  h: 75 },
+  { id: 'WARDROBE_MASTER',        type: 'furniture', x: 385, y: 55,  w: 65,  h: 150 },
+  { id: 'PLANT_MASTER',            type: 'furniture', x: 35,  y: 55,  w: 30,  h: 35 },
 
-  // ── Child bedroom shell and entry ──
-  { id: 'child_wall_top',          type: 'wall',      x: 1160, y: 24,  w: 480, h: 20 },
-  { id: 'child_wall_left_upper',   type: 'wall',      x: 1155, y: 24,  w: 25,  h: 92 },
-  { id: 'child_wall_left_lower',   type: 'wall',      x: 1155, y: 220, w: 25,  h: 94 },
-  { id: 'child_entry_wall_top',    type: 'wall',      x: 1090, y: 90,  w: 90,  h: 18 },
-  { id: 'child_wall_bottom',       type: 'wall',      x: 1260, y: 295, w: 385, h: 25 },
-  { id: 'child_wall_right',        type: 'wall',      x: 1620, y: 24,  w: 35,  h: 300 },
-  { id: 'child_wardrobe',          type: 'furniture', x: 1210, y: 70,  w: 90,  h: 105 },
-  { id: 'child_bookshelf',         type: 'furniture', x: 1300, y: 85,  w: 65,  h: 90 },
-  { id: 'child_desk',              type: 'furniture', x: 1365, y: 85,  w: 105, h: 75 },
-  { id: 'child_bed',               type: 'furniture', x: 1495, y: 105, w: 105, h: 175 },
+  // ── 3. Bunker 72 Shelter Shell & Equipment ──
+  { id: 'WALL_BUNKER_TOP',       type: 'wall',      x: 562, y: 10,  w: 516, h: 26 },
+  { id: 'WALL_BUNKER_LEFT',      type: 'wall',      x: 562, y: 10,  w: 22,  h: 225 },
+  { id: 'WALL_BUNKER_RIGHT',     type: 'wall',      x: 1056,y: 10,  w: 22,  h: 225 },
+  { id: 'WALL_BUNKER_FRONT_01',  type: 'wall',      x: 562, y: 205, w: 170, h: 30 },
+  { id: 'WALL_BUNKER_FRONT_02',  type: 'wall',      x: 868, y: 205, w: 210, h: 30 },
 
-  // ── Kitchen / dining and bathroom ──
-  { id: 'kitchen_wall_east',       type: 'wall',      x: 500,  y: 292, w: 24,  h: 145 },
-  { id: 'kitchen_counter_north',   type: 'furniture', x: 35,   y: 315, w: 275, h: 95 },
-  { id: 'kitchen_counter_left',    type: 'furniture', x: 28,   y: 315, w: 72,  h: 245 },
-  { id: 'kitchen_fridge',          type: 'furniture', x: 318,  y: 315, w: 78,  h: 115 },
-  { id: 'kitchen_pantry',          type: 'furniture', x: 442,  y: 315, w: 52,  h: 110 },
-  { id: 'kitchen_island',          type: 'furniture', x: 165,  y: 450, w: 200, h: 80 },
-  { id: 'dining_table',            type: 'furniture', x: 115,  y: 610, w: 190, h: 110 },
-  { id: 'bath_wall_left',          type: 'wall',      x: 325,  y: 545, w: 20,  h: 270 },
-  { id: 'bath_wall_right',         type: 'wall',      x: 495,  y: 545, w: 20,  h: 270 },
-  { id: 'bath_wall_top_left',      type: 'wall',      x: 325,  y: 545, w: 70,  h: 20 },
-  // The broad opening on the east side is the practical bathroom doorway and
-  // also keeps the living-room route from pinching against the sofa.
-  { id: 'bath_wall_top_right',     type: 'wall',      x: 500,  y: 545, w: 15,  h: 20 },
-  { id: 'bath_wall_bottom',        type: 'wall',      x: 325,  y: 790, w: 190, h: 25 },
+  // Bunker Equipment
+  { id: 'SHELF_BUNKER',          type: 'furniture', x: 585, y: 48,  w: 100, h: 165 },
+  { id: 'VAULT_DOOR_BUNKER',     type: 'furniture', x: 745, y: 35,  w: 110, h: 125 },
+  { id: 'POWER_PANEL_BUNKER',    type: 'furniture', x: 880, y: 38,  w: 165, h: 75 },
+  { id: 'GENERATOR_BUNKER',      type: 'furniture', x: 920, y: 125, w: 115, h: 85 },
 
-  // ── Living room ──
-  // The south sofa rectangle owns the lower corner; ending this box above it
-  // leaves a small floor lane instead of trapping the kitchen side of the map.
-  { id: 'living_sofa_west',        type: 'furniture', x: 395,  y: 330, w: 65,  h: 160 },
-  { id: 'living_sofa_south',      type: 'furniture', x: 440,  y: 510, w: 325, h: 62 },
-  { id: 'living_coffee_table',    type: 'furniture', x: 700,  y: 395, w: 110, h: 100 },
-  { id: 'living_media_unit',     type: 'furniture', x: 1030, y: 315, w: 65,  h: 270 },
+  // ── 4. Child Bedroom Shell & Furniture ──
+  { id: 'WALL_CHILD_TOP',        type: 'wall',      x: 1155,y: 18,  w: 485, h: 22 },
+  { id: 'WALL_CHILD_RIGHT',      type: 'wall',      x: 1620,y: 18,  w: 22,  h: 302 },
+  { id: 'WALL_CHILD_BOTTOM',     type: 'wall',      x: 1155,y: 298, w: 485, h: 22 },
+  // West wall: solid from y=18 to y=230, opening at y=230..285 for door to living corridor
+  { id: 'WALL_CHILD_LEFT',       type: 'wall',      x: 1155,y: 18,  w: 22,  h: 212 },
+  // North wall of child alcove corridor
+  { id: 'WALL_CHILD_ALCOVE_TOP', type: 'wall',      x: 1078,y: 92,  w: 98,  h: 22 },
 
-  // ── Office / studio ──
-  { id: 'office_wall_west_upper',  type: 'wall',      x: 1165, y: 300, w: 30,  h: 55 },
-  { id: 'office_wall_west_lower',  type: 'wall',      x: 1165, y: 380, w: 30,  h: 430 },
-  { id: 'office_wall_north',       type: 'wall',      x: 1280, y: 375, w: 365, h: 28 },
-  { id: 'office_shelves_north',    type: 'furniture', x: 1365, y: 405, w: 190, h: 95 },
-  { id: 'office_storage_east',     type: 'furniture', x: 1585, y: 410, w: 55,  h: 395 },
-  { id: 'office_desk_main',        type: 'furniture', x: 1325, y: 510, w: 125, h: 190 },
-  { id: 'office_desk_return',      type: 'furniture', x: 1440, y: 530, w: 140, h: 120 },
+  // Child Bedroom Furniture
+  { id: 'WARDROBE_CHILD',        type: 'furniture', x: 1210,y: 55,  w: 85,  h: 105 },
+  { id: 'SHELF_CHILD',           type: 'furniture', x: 1300,y: 80,  w: 60,  h: 78 },
+  { id: 'DESK_CHILD',            type: 'furniture', x: 1370,y: 78,  w: 105, h: 75 },
+  { id: 'CHAIR_CHILD',           type: 'furniture', x: 1400,y: 155, w: 45,  h: 45 },
+  { id: 'BED_CHILD',             type: 'furniture', x: 1490,y: 85,  w: 95,  h: 170 },
+  { id: 'DRAWER_CHILD',          type: 'furniture', x: 1510,y: 260, w: 55,  h: 38 },
+  { id: 'PLANT_CHILD',           type: 'furniture', x: 1590,y: 195, w: 30,  h: 45 },
 
-  // ── Entrance foyer ──
-  { id: 'foyer_wall_left',         type: 'wall',      x: 630,  y: 410, w: 25,  h: 505 },
-  { id: 'foyer_wall_right',        type: 'wall',      x: 1040, y: 410, w: 25,  h: 505 },
-  { id: 'foyer_wall_top_left',     type: 'wall',      x: 630,  y: 410, w: 150, h: 27 },
-  { id: 'foyer_wall_top_right',    type: 'wall',      x: 900,  y: 410, w: 165, h: 27 },
-  { id: 'foyer_bottom_wall',       type: 'wall',      x: 650,  y: 912, w: 400, h: 29 },
-  { id: 'foyer_console',           type: 'furniture', x: 660,  y: 735, w: 115, h: 75 },
-  { id: 'foyer_coat_plant',        type: 'furniture', x: 885,  y: 720, w: 155, h: 90 },
+  // ── 5. Office / Studio Shell & Furniture ──
+  // North wall is completely solid separating office from child bedroom
+  { id: 'WALL_OFFICE_TOP',       type: 'wall',      x: 1180,y: 355, w: 460, h: 22 },
+  // West wall: top segment above door (y=355..405), opening at y=405..465 (doorway), bottom segment (y=465..804)
+  { id: 'WALL_OFFICE_LEFT_01',   type: 'wall',      x: 1180,y: 355, w: 22,  h: 50 },
+  { id: 'WALL_OFFICE_LEFT_02',   type: 'wall',      x: 1180,y: 465, w: 22,  h: 343 },
+
+  // Office Furniture
+  { id: 'SHELF_OFFICE_TOP',      type: 'furniture', x: 1340,y: 445, w: 175, h: 65 },
+  { id: 'SHELF_OFFICE_RIGHT',    type: 'furniture', x: 1565,y: 440, w: 65,  h: 325 },
+  { id: 'DESK_OFFICE_LEFT',      type: 'furniture', x: 1290,y: 540, w: 65,  h: 160 },
+  { id: 'DESK_OFFICE_BACK',      type: 'furniture', x: 1355,y: 565, w: 140, h: 75 },
+  { id: 'CHAIR_OFFICE',          type: 'furniture', x: 1375,y: 640, w: 48,  h: 48 },
+  { id: 'PLANT_OFFICE',          type: 'furniture', x: 1195,y: 755, w: 40,  h: 50 },
+
+  // ── 6. Kitchen & Dining Shell & Furniture ──
+  { id: 'WALL_KITCHEN_DIVIDER',  type: 'wall',      x: 488, y: 282, w: 22,  h: 158 },
+  { id: 'COUNTER_KITCHEN_TOP',   type: 'furniture', x: 30,  y: 315, w: 315, h: 75 },
+  { id: 'COUNTER_KITCHEN_LEFT',  type: 'furniture', x: 30,  y: 390, w: 65,  h: 155 },
+  { id: 'FRIDGE_KITCHEN',        type: 'furniture', x: 345, y: 320, w: 75,  h: 95 },
+  { id: 'PANTRY_KITCHEN',        type: 'furniture', x: 445, y: 320, w: 40,  h: 95 },
+  { id: 'ISLAND_KITCHEN',        type: 'furniture', x: 175, y: 448, w: 190, h: 85 },
+  { id: 'TABLE_DINING',          type: 'furniture', x: 85,  y: 595, w: 185, h: 145 },
+  { id: 'PLANT_DINING',          type: 'furniture', x: 30,  y: 740, w: 35,  h: 45 },
+
+  // ── 7. Bathroom Shell & Fixtures ──
+  // The latest map shows a fully enclosed bathroom. The old east-side opening
+  // belonged to the previous map version and is intentionally not recreated.
+  { id: 'WALL_BATHROOM_TOP',     type: 'wall',      x: 325, y: 540, w: 233, h: 22 },
+  { id: 'WALL_BATHROOM_LEFT',    type: 'wall',      x: 325, y: 540, w: 20,  h: 290 },
+  { id: 'WALL_BATHROOM_BOTTOM',  type: 'wall',      x: 325, y: 810, w: 233, h: 22 },
+  { id: 'WALL_BATHROOM_RIGHT',   type: 'wall',      x: 538, y: 540, w: 20,  h: 290 },
+
+  // Bathroom Fixtures
+  { id: 'SHOWER_BATHROOM',       type: 'furniture', x: 335, y: 555, w: 55,  h: 105 },
+  { id: 'TOILET_BATHROOM',       type: 'furniture', x: 430, y: 605, w: 25,  h: 40 },
+  { id: 'VANITY_BATHROOM',       type: 'furniture', x: 455, y: 575, w: 35,  h: 80 },
+  { id: 'TUB_BATHROOM',          type: 'furniture', x: 335, y: 685, w: 75,  h: 85 },
+  { id: 'SHELF_BATHROOM_STORAGE',type: 'furniture', x: 500, y: 690, w: 35,  h: 90 },
+
+  // ── 8. Living Room Furniture ──
+  { id: 'SOFA_LIVING_LEFT',      type: 'furniture', x: 675,  y: 335, w: 55,  h: 245 },
+  { id: 'SOFA_LIVING_BOTTOM',    type: 'furniture', x: 730,  y: 525, w: 130, h: 55 },
+  { id: 'COFFEE_TABLE_LIVING',   type: 'furniture', x: 770,  y: 400, w: 80,  h: 90 },
+  { id: 'ARMCHAIR_LIVING',       type: 'furniture', x: 875,  y: 400, w: 52,  h: 52 },
+  { id: 'TV_CONSOLE_LIVING',     type: 'furniture', x: 1015, y: 345,  w: 50,  h: 175 },
+  { id: 'PLANT_LIVING',          type: 'furniture', x: 668,  y: 315, w: 35,  h: 35 },
+  { id: 'SIDE_TABLE_LIVING',     type: 'furniture', x: 868,  y: 535, w: 38,  h: 35 },
+
+  // ── 9. Foyer / Main Entrance Shell & Furniture ──
+  { id: 'WALL_FOYER_TOP_LEFT',   type: 'wall',      x: 648,  y: 680, w: 147, h: 25 },
+  { id: 'WALL_FOYER_TOP_RIGHT',  type: 'wall',      x: 953,  y: 680, w: 166, h: 25 },
+  { id: 'WALL_FOYER_LEFT',       type: 'wall',      x: 648,  y: 680, w: 22,  h: 250 },
+  { id: 'WALL_FOYER_RIGHT',      type: 'wall',      x: 1118, y: 680, w: 22,  h: 250 },
+
+  // Foyer Furniture
+  { id: 'CONSOLE_FOYER',         type: 'furniture', x: 668,  y: 752, w: 92,  h: 58 },
+  { id: 'COAT_PLANT_FOYER',      type: 'furniture', x: 955,  y: 750, w: 72,  h: 80 },
+]);
+
+// Doorways & Walkable Openings (used for navigation, peeking and debug overlay)
+const PROLOGUE_WALKABLE_OPENINGS = Object.freeze([
+  { id: 'DOOR_MAIN_ENTRANCE',    name: 'Pintu Utama / Foyer',       x: 795,  y: 680, w: 158, h: 25 },
+  { id: 'DOOR_BUNKER_ENTRANCE',  name: 'Ambang Masuk Bunker',       x: 732,  y: 205, w: 136, h: 30 },
+  { id: 'DOOR_MASTER',            name: 'Pintu Kamar Utama',         x: 450,  y: 230, w: 22,  h: 52 },
+  { id: 'DOOR_CHILD',             name: 'Pintu Kamar Anak',          x: 1155, y: 230, w: 22,  h: 55 },
+  { id: 'DOOR_OFFICE',            name: 'Pintu Studio / Kantor',     x: 1180, y: 405, w: 22,  h: 60 },
+  { id: 'OPENING_MASTER_ALCOVE',  name: 'Akses Masuk Kamar Utama',   x: 450,  y: 92,  w: 112, h: 138 },
+  { id: 'OPENING_CHILD_ALCOVE',   name: 'Akses Masuk Kamar Anak',    x: 1078, y: 92,  w: 98,  h: 138 },
+  { id: 'OPENING_KITCHEN_LIVING', name: 'Akses Dapur & Pantry',      x: 470,  y: 440, w: 50,  h: 80 },
 ]);
 
 const PROLOGUE_ROOMS = Object.freeze([
@@ -156,17 +200,17 @@ const PROLOGUE_ROOMS = Object.freeze([
     name: 'TERAS DEPAN & PINTU UTAMA',
     adjacent: ['living'],
     rects: [
-      { x: 630, y: 690, w: 425, h: 230 }
+      { x: 630, y: 680, w: 425, h: 240 }
     ]
   },
   {
     id: 'living',
     name: 'RUANG KELUARGA & TV',
-    adjacent: ['foyer', 'bunker', 'master', 'child', 'kitchen', 'office'],
+    adjacent: ['foyer', 'bunker', 'master', 'child', 'kitchen', 'office', 'bath'],
     rects: [
-      { x: 490, y: 265, w: 685, h: 480 },
-      { x: 1055, y: 410, w: 120, h: 400 },
-      { x: 740, y: 390, w: 200, h: 40 }
+      { x: 488, y: 240, w: 690, h: 440 },
+      { x: 940, y: 240, w: 240, h: 440 },
+      { x: 630, y: 600, w: 425, h: 80 }
     ]
   },
   {
@@ -174,7 +218,7 @@ const PROLOGUE_ROOMS = Object.freeze([
     name: 'RUANG PALKA BUNKER 72 (DARURAT)',
     adjacent: ['living'],
     rects: [
-      { x: 568, y: 15, w: 520, h: 255 }
+      { x: 562, y: 10, w: 516, h: 240 }
     ]
   },
   {
@@ -182,8 +226,7 @@ const PROLOGUE_ROOMS = Object.freeze([
     name: 'KAMAR TIDUR UTAMA',
     adjacent: ['living'],
     rects: [
-      { x: 28, y: 18, w: 450, h: 275 },
-      { x: 465, y: 95, w: 95, h: 125 }
+      { x: 28, y: 18, w: 432, h: 270 }
     ]
   },
   {
@@ -191,26 +234,23 @@ const PROLOGUE_ROOMS = Object.freeze([
     name: 'KAMAR TIDUR ANAK',
     adjacent: ['living'],
     rects: [
-      { x: 1165, y: 18, w: 480, h: 290 },
-      { x: 1090, y: 95, w: 90, h: 125 }
+      { x: 1155, y: 18, w: 485, h: 280 }
     ]
   },
   {
     id: 'kitchen',
     name: 'DAPUR & RUANG MAKAN',
-    adjacent: ['living', 'bath'],
+    adjacent: ['living'],
     rects: [
-      { x: 25, y: 290, w: 310, h: 520 },
-      { x: 335, y: 290, w: 185, h: 260 },
-      { x: 495, y: 430, w: 35, h: 290 }
+      { x: 28, y: 282, w: 460, h: 522 }
     ]
   },
   {
     id: 'bath',
     name: 'KAMAR MANDI & GUDANG OBAT',
-    adjacent: ['kitchen'],
+    adjacent: ['living'],
     rects: [
-      { x: 335, y: 550, w: 170, h: 250 }
+      { x: 325, y: 545, w: 183, h: 260 }
     ]
   },
   {
@@ -218,7 +258,7 @@ const PROLOGUE_ROOMS = Object.freeze([
     name: 'RUANG KERJA / STUDIO',
     adjacent: ['living'],
     rects: [
-      { x: 1170, y: 300, w: 475, h: 515 }
+      { x: 1180, y: 350, w: 460, h: 460 }
     ]
   }
 ]);
@@ -226,61 +266,188 @@ const PROLOGUE_ROOMS = Object.freeze([
 const PROLOGUE_DOORWAYS = Object.freeze([
   {
     id: 'd_foyer_living',
+    name: 'Pintu Utama / Foyer',
     rooms: ['foyer', 'living'],
-    x: 840,
-    y: 690,
+    x: 835,
+    y: 692,
     radius: 125,
-    rect: { x: 775, y: 660, w: 130, h: 60 }
+    rect: { x: 795, y: 680, w: 80, h: 25 }
   },
   {
     id: 'd_living_bunker',
+    name: 'Ambang Masuk Bunker',
     rooms: ['living', 'bunker'],
-    x: 810,
-    y: 235,
-    radius: 125,
-    rect: { x: 740, y: 205, w: 140, h: 65 }
+    x: 800,
+    y: 220,
+    radius: 130,
+    rect: { x: 732, y: 205, w: 136, h: 30 }
   },
   {
     id: 'd_living_master',
+    name: 'Pintu Kamar Utama',
     rooms: ['living', 'master'],
-    x: 505,
-    y: 160,
+    x: 461,
+    y: 256,
     radius: 115,
-    rect: { x: 460, y: 100, w: 100, h: 120 }
+    rect: { x: 450, y: 230, w: 22, h: 52 }
   },
   {
     id: 'd_living_child',
+    name: 'Pintu Kamar Anak',
     rooms: ['living', 'child'],
-    x: 1135,
-    y: 165,
+    x: 1166,
+    y: 256,
     radius: 115,
-    rect: { x: 1080, y: 100, w: 100, h: 120 }
-  },
-  {
-    id: 'd_living_kitchen',
-    rooms: ['living', 'kitchen'],
-    x: 510,
-    y: 530,
-    radius: 135,
-    rect: { x: 480, y: 430, w: 60, h: 220 }
-  },
-  {
-    id: 'd_kitchen_bath',
-    rooms: ['kitchen', 'bath'],
-    x: 440,
-    y: 555,
-    radius: 90,
-    rect: { x: 395, y: 535, w: 90, h: 40 }
+    rect: { x: 1155, y: 230, w: 22, h: 55 }
   },
   {
     id: 'd_living_office',
+    name: 'Pintu Studio / Kantor',
     rooms: ['living', 'office'],
-    x: 1170,
-    y: 365,
+    x: 1190,
+    y: 435,
+    radius: 115,
+    rect: { x: 1180, y: 405, w: 22, h: 60 }
+  },
+  {
+    id: 'd_living_bath',
+    name: 'Pintu Kamar Mandi',
+    rooms: ['living', 'bath'],
+    x: 498,
+    y: 745,
     radius: 105,
-    rect: { x: 1145, y: 340, w: 55, h: 55 }
+    rect: { x: 488, y: 715, w: 20, h: 60 }
+  },
+  {
+    id: 'd_living_kitchen',
+    name: 'Akses Dapur & Pantry',
+    rooms: ['living', 'kitchen'],
+    x: 495,
+    y: 480,
+    radius: 135,
+    rect: { x: 470, y: 440, w: 50, h: 80 }
   }
 ]);
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const getRectCenter = (rect) => ({
+  x: rect.x + rect.w / 2,
+  y: rect.y + rect.h / 2,
+});
+
+const getRectAngle = (rect) => Number(rect?.angle) || 0;
+
+const rotatePoint = (point, center, degrees) => {
+  const radians = (Number(degrees) || 0) * Math.PI / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const dx = point.x - center.x;
+  const dy = point.y - center.y;
+  return {
+    x: center.x + dx * cos - dy * sin,
+    y: center.y + dx * sin + dy * cos,
+  };
+};
+
+const getRectCorners = (rect) => {
+  const corners = [
+    { x: rect.x, y: rect.y },
+    { x: rect.x + rect.w, y: rect.y },
+    { x: rect.x + rect.w, y: rect.y + rect.h },
+    { x: rect.x, y: rect.y + rect.h },
+  ];
+  const angle = getRectAngle(rect);
+  if (!angle) return corners;
+  const center = getRectCenter(rect);
+  return corners.map((corner) => rotatePoint(corner, center, angle));
+};
+
+const addRectPath = (ctx, rect) => {
+  const corners = getRectCorners(rect);
+  ctx.moveTo(corners[0].x, corners[0].y);
+  corners.slice(1).forEach((corner) => ctx.lineTo(corner.x, corner.y));
+  ctx.closePath();
+};
+
+const getRotatedBounds = (rect) => {
+  const corners = getRectCorners(rect);
+  return {
+    x: Math.min(...corners.map((corner) => corner.x)),
+    y: Math.min(...corners.map((corner) => corner.y)),
+    w: Math.max(...corners.map((corner) => corner.x)) - Math.min(...corners.map((corner) => corner.x)),
+    h: Math.max(...corners.map((corner) => corner.y)) - Math.min(...corners.map((corner) => corner.y)),
+  };
+};
+
+const intersectsPlayerFootHitbox = (x, y, playerWidth, playerHeight, rect) => {
+  const angle = getRectAngle(rect);
+  const halfPlayer = { x: playerWidth / 2, y: playerHeight / 2 };
+  const rectCenter = getRectCenter(rect);
+  const playerCenter = { x, y };
+
+  // AABB fast path covers the vast majority of current map colliders and
+  // preserves the original strict-edge contact behavior.
+  if (!angle) {
+    return x - halfPlayer.x < rect.x + rect.w
+      && x + halfPlayer.x > rect.x
+      && y - halfPlayer.y < rect.y + rect.h
+      && y + halfPlayer.y > rect.y;
+  }
+
+  // Separating Axis Test: player feet remain an axis-aligned lower-body box,
+  // while an editor-rotated collider is treated as an oriented rectangle.
+  const radians = angle * Math.PI / 180;
+  const boxAxes = [
+    { x: Math.cos(radians), y: Math.sin(radians) },
+    { x: -Math.sin(radians), y: Math.cos(radians) },
+  ];
+  const axes = [{ x: 1, y: 0 }, { x: 0, y: 1 }, ...boxAxes];
+  const centerDelta = {
+    x: playerCenter.x - rectCenter.x,
+    y: playerCenter.y - rectCenter.y,
+  };
+  const halfBox = { x: rect.w / 2, y: rect.h / 2 };
+
+  return !axes.some((axis) => {
+    const distance = Math.abs(centerDelta.x * axis.x + centerDelta.y * axis.y);
+    const playerRadius = halfPlayer.x * Math.abs(axis.x) + halfPlayer.y * Math.abs(axis.y);
+    const boxRadius = halfBox.x * Math.abs(axis.x * boxAxes[0].x + axis.y * boxAxes[0].y)
+      + halfBox.y * Math.abs(axis.x * boxAxes[1].x + axis.y * boxAxes[1].y);
+    return distance >= playerRadius + boxRadius;
+  });
+};
+
+const cloneFogLayout = () => ({
+  rooms: PROLOGUE_ROOMS.map((room) => ({
+    ...room,
+    adjacent: [...room.adjacent],
+    rects: room.rects.map((rect) => ({ ...rect })),
+  })),
+  doorways: PROLOGUE_DOORWAYS.map((doorway) => ({
+    ...doorway,
+    rooms: [...doorway.rooms],
+    rect: { ...doorway.rect },
+  })),
+});
+
+const createFogEditorShapes = (layout) => {
+  const roomShapes = (layout?.rooms || []).flatMap((room) => room.rects.map((rect, index) => ({
+    id: `FOG_ROOM_${String(room.id).toUpperCase()}_${String(index + 1).padStart(2, '0')}`,
+    type: 'fog-room',
+    roomId: room.id,
+    rectIndex: index,
+    ...rect,
+  })));
+  const doorwayShapes = (layout?.doorways || []).map((doorway) => ({
+    id: `FOG_DOORWAY_${String(doorway.id).toUpperCase()}`,
+    type: 'fog-doorway',
+    doorwayId: doorway.id,
+    radius: doorway.radius,
+    ...doorway.rect,
+  }));
+  return [...roomShapes, ...doorwayShapes];
+};
 
 const FOG_DARKNESS = Object.freeze({
   CURRENT: 0.08,             // 100% or near 100% visible (0.05-0.15)
@@ -393,6 +560,8 @@ export class ScavengerMinigame {
     this.basePlayerState = null;
     this.baseItems = null;
     this.baseColliders = null;
+    this.originalColliders = null;
+    this.runtimeColliderIds = new Set();
 
     // Solid obstacle colliders are cloned so expedition hazards can safely add
     // temporary blockers without mutating the reusable house layout.
@@ -425,9 +594,33 @@ export class ScavengerMinigame {
     this.roomVisibilityStates = {};
     this.fogCanvas = null;
     this.fogCtx = null;
+    this.fogLayout = cloneFogLayout();
+    this.fogOriginalShapes = createFogEditorShapes(this.fogLayout);
+    this.fogEditorShapes = this.fogOriginalShapes.map((shape) => ({ ...shape }));
 
-    // Debug mode (Press F2 in-game to see colliders and fog zones)
-    this.debugColliders = false;
+    // Debug mode (Press F2 in-game to see colliders, player hitbox, and doorways)
+    const urlDebug = (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('debugColliders') === '1' || window.localStorage?.getItem('debugColliders') === '1'));
+    this.debugColliders = Boolean(config?.debugColliders ?? urlDebug);
+
+    const urlCollisionEditor = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('collisionEditor') === '1');
+    this.collisionEditorRequested = Boolean(config?.collisionEditor ?? urlCollisionEditor);
+    const urlFogEditor = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('fogEditor') === '1');
+    this.fogEditorRequested = Boolean(config?.fogEditor ?? urlFogEditor);
+    const urlFreeCamera = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('freeCam') === '1');
+    this.freeCameraRequested = Boolean(config?.freeCamera ?? urlFreeCamera);
+    this.collisionEditor = null;
+    this.fogEditor = null;
+    this.collisionEditorPreviousPause = false;
+    this.collisionEditorPreviousDebug = this.debugColliders;
+    this.fogEditorPreviousPause = false;
+    this.fogEditorPreviousDebug = this.debugColliders;
+    this.freeCamera = false;
+    this.freeCameraPreviousPause = false;
+    this.freeCameraPreviousDebug = this.debugColliders;
+
+    if (typeof window !== 'undefined') {
+      window.__scavengerGame = this;
+    }
 
     // Developer Console & Debug States
     this.isPaused = false;
@@ -443,6 +636,63 @@ export class ScavengerMinigame {
     this._bindEvents();
     this._applyConfig(config);
     this._captureBaseRunState();
+
+    this.collisionEditorKey = config?.collisionKey || config?.id || (this.mode === 'prologue' ? 'prologue_house' : 'scavenger_map');
+    this.collisionEditor = new CollisionEditor({
+      storageKey: this.collisionEditorKey,
+      getColliders: () => this.colliders,
+      getDefaultColliders: () => this.originalColliders || this.baseColliders || [],
+      getMapSize: () => ({ width: this.MAP_W, height: this.MAP_H }),
+      getViewport: () => ({ width: this.VIEW_W, height: this.VIEW_H }),
+      getCamera: () => this.camera,
+      getRenderOffset: () => ({ x: this.screenShake, y: this.screenShake * 0.5 }),
+      getPersistedColliders: () => this.colliders
+        .filter((collider) => !this.runtimeColliderIds.has(String(collider.id))),
+      getLabel: normalizeCollisionLabel,
+      filePersistence: {
+        load: () => editorDataStore.read('collision', this.collisionEditorKey),
+        save: (payload) => editorDataStore.write('collision', this.collisionEditorKey, payload),
+        remove: () => editorDataStore.remove('collision', this.collisionEditorKey),
+      },
+      onPan: ({ dx, dy }) => this._panCameraBy(dx, dy),
+      onResetCamera: () => this._resetCameraToPlayer(),
+      onChange: () => {
+        // Edited geometry becomes the run's baseline, so Restart keeps the
+        // current tuning while the immutable original remains available to
+        // Alt+R in the editor.
+        this.baseColliders = this.colliders
+          .filter((collider) => !this.runtimeColliderIds.has(String(collider.id)))
+          .map((collider) => ({ ...collider }));
+      },
+      onReset: (colliders) => {
+        this.runtimeColliderIds.clear();
+        this.colliders = colliders.map((collider) => ({ ...collider }));
+        this.baseColliders = this.colliders.map((collider) => ({ ...collider }));
+      },
+    });
+
+    this.fogEditor = new CollisionEditor({
+      storageKey: `fog_${this.collisionEditorKey}`,
+      getColliders: () => this.fogEditorShapes,
+      getDefaultColliders: () => this.fogOriginalShapes,
+      getMapSize: () => ({ width: this.MAP_W, height: this.MAP_H }),
+      getViewport: () => ({ width: this.VIEW_W, height: this.VIEW_H }),
+      getCamera: () => this.camera,
+      getRenderOffset: () => ({ x: this.screenShake, y: this.screenShake * 0.5 }),
+      getLabel: normalizeCollisionLabel,
+      filePersistence: {
+        load: () => editorDataStore.read('fog', this.collisionEditorKey),
+        save: (payload) => editorDataStore.write('fog', this.collisionEditorKey, payload),
+        remove: () => editorDataStore.remove('fog', this.collisionEditorKey),
+      },
+      onChange: () => this._applyFogEditorShapes(),
+      onReset: (shapes) => {
+        this.fogEditorShapes = shapes.map((shape) => ({ ...shape }));
+        this._applyFogEditorShapes();
+      },
+      onPan: ({ dx, dy }) => this._panCameraBy(dx, dy),
+      onResetCamera: () => this._resetCameraToPlayer(),
+    });
   }
 
   _applyConfig(config) {
@@ -473,6 +723,7 @@ export class ScavengerMinigame {
   }
 
   _captureBaseRunState() {
+    this.runtimeColliderIds.clear();
     this.basePlayerState = {
       x: this.player.x,
       y: this.player.y,
@@ -486,6 +737,7 @@ export class ScavengerMinigame {
     };
     this.baseItems = this.items.map(({ collected, revealed, ...item }) => ({ ...item }));
     this.baseColliders = this.colliders.map((collider) => ({ ...collider }));
+    this.originalColliders = this.colliders.map((collider) => ({ ...collider }));
   }
 
   _cloneBaseItems() {
@@ -497,6 +749,7 @@ export class ScavengerMinigame {
     this.selectedInventoryIndex = 0;
     this.emptyHatchConfirmUntil = null;
     this.items = this._cloneBaseItems();
+    this.runtimeColliderIds.clear();
     this.colliders = (this.baseColliders || this.colliders).map((collider) => ({ ...collider }));
     this.timeLeft = this.duration;
     this.elapsedSeconds = 0;
@@ -514,8 +767,7 @@ export class ScavengerMinigame {
     });
     Object.keys(this.keys).forEach((key) => { this.keys[key] = false; });
 
-    this.camera.x = Math.max(0, Math.min(this.MAP_W - this.VIEW_W, this.player.x - this.VIEW_W / 2));
-    this.camera.y = Math.max(0, Math.min(this.MAP_H - this.VIEW_H, this.player.y - this.VIEW_H / 2));
+    this._resetCameraToPlayer();
     this._initFogOfWar();
   }
 
@@ -526,9 +778,44 @@ export class ScavengerMinigame {
       const k = e.key.toLowerCase();
       const oneShotKey = [' ', 'e', 'q'].includes(k);
       if (e.repeat && oneShotKey) return;
+
+      if (k === 'f4') {
+        if (e.repeat) return;
+        e.preventDefault();
+        this.setFreeCamera(!this.freeCamera);
+        return;
+      }
+
+      // F5 is kept as a compatibility shortcut, while F7 avoids the browser
+      // reload key on desktop browsers and is the recommended fog-editor key.
+      if (k === 'f5' || k === 'f7') {
+        if (e.repeat) return;
+        e.preventDefault();
+        this.setFogEditor(!this.fogEditor?.enabled);
+        return;
+      }
+
+      if (k === 'f3') {
+        if (e.repeat) return;
+        e.preventDefault();
+        this.setCollisionEditor(!this.collisionEditor?.enabled);
+        return;
+      }
+
+      if ((this.collisionEditor?.enabled || this.freeCamera)
+        && this.collisionEditor?.handleKeyDown(e)) {
+        e.preventDefault();
+        return;
+      }
+
+      if (this.fogEditor?.enabled && this.fogEditor.handleKeyDown(e)) {
+        e.preventDefault();
+        return;
+      }
+
       this.keys[k] = true;
       if (k === 'f2') {
-        this.debugColliders = !this.debugColliders;
+        this.setDebugColliders(!this.debugColliders);
       }
       if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', ' ', 'e', 'q', '1', '2', '3', '4', '5'].includes(k)) {
         e.preventDefault();
@@ -562,6 +849,10 @@ export class ScavengerMinigame {
     this._resetRunState();
     this.lastTime = performance.now();
     this._createDOM();
+    void this.collisionEditor.loadSavedDraft();
+    void this.fogEditor.loadSavedDraft();
+    if (this.freeCameraRequested) this.setFreeCamera(true);
+    if (this.fogEditorRequested) this.setFogEditor(true);
     this._updateTimerHUD();
     this.animId = requestAnimationFrame((t) => this._loop(t));
 
@@ -606,6 +897,7 @@ export class ScavengerMinigame {
     this.canvas.width = this.VIEW_W;
     this.canvas.height = this.VIEW_H;
     this.ctx = this.canvas.getContext('2d');
+    this.collisionEditor?.attach(this.canvas);
 
     // Desktop Tactical Controls Hint Overlay
     this.desktopHints = document.createElement('div');
@@ -618,6 +910,8 @@ export class ScavengerMinigame {
       <span><span class="hint-key">1-5</span> Pilih Slot</span>
       <span>•</span>
       <span><span class="hint-key">Q</span> Drop / Buang Barang</span>
+      <span>•</span>
+      <span><span class="hint-key">F3/F4/F7</span> Editor Dev</span>
     `;
 
     // Mobile / Touch D-Pad Overlay
@@ -647,6 +941,10 @@ export class ScavengerMinigame {
 
     this._setupTouchEvents();
     this._updateHUD();
+
+    if (this.collisionEditorRequested) {
+      this.setCollisionEditor(true);
+    }
   }
 
   _setupTouchEvents() {
@@ -889,6 +1187,73 @@ export class ScavengerMinigame {
     return Math.hypot(dx, dy);
   }
 
+  _getFogRooms() {
+    return this.fogLayout?.rooms || PROLOGUE_ROOMS;
+  }
+
+  _getFogDoorways() {
+    return this.fogLayout?.doorways || PROLOGUE_DOORWAYS;
+  }
+
+  _applyFogEditorShapes() {
+    if (!Array.isArray(this.fogEditorShapes)) return;
+
+    const nextLayout = cloneFogLayout();
+    nextLayout.rooms = nextLayout.rooms.map((room) => ({
+      ...room,
+      rects: room.rects
+        .map((rect, index) => {
+          const shape = this.fogEditorShapes.find((candidate) => (
+            candidate.type === 'fog-room'
+            && candidate.roomId === room.id
+            && Number(candidate.rectIndex) === index
+          ));
+          return shape ? { ...rect, x: shape.x, y: shape.y, w: shape.w, h: shape.h, angle: shape.angle || 0 } : null;
+        })
+        .filter(Boolean),
+    }));
+
+    nextLayout.doorways = nextLayout.doorways
+      .map((doorway) => {
+        const shape = this.fogEditorShapes.find((candidate) => (
+          candidate.type === 'fog-doorway' && candidate.doorwayId === doorway.id
+        ));
+        if (!shape) return null;
+        const rect = {
+          ...doorway.rect,
+          x: shape.x,
+          y: shape.y,
+          w: shape.w,
+          h: shape.h,
+          angle: shape.angle || 0,
+        };
+        return {
+          ...doorway,
+          x: rect.x + rect.w / 2,
+          y: rect.y + rect.h / 2,
+          radius: Number.isFinite(Number(shape.radius)) ? Number(shape.radius) : doorway.radius,
+          rect,
+        };
+      })
+      .filter(Boolean);
+
+    this.fogLayout = nextLayout;
+  }
+
+  _panCameraBy(dx = 0, dy = 0) {
+    const maxX = Math.max(0, this.MAP_W - this.VIEW_W);
+    const maxY = Math.max(0, this.MAP_H - this.VIEW_H);
+    this.camera.x = clamp(this.camera.x + (Number(dx) || 0), 0, maxX);
+    this.camera.y = clamp(this.camera.y + (Number(dy) || 0), 0, maxY);
+  }
+
+  _resetCameraToPlayer() {
+    const maxX = Math.max(0, this.MAP_W - this.VIEW_W);
+    const maxY = Math.max(0, this.MAP_H - this.VIEW_H);
+    this.camera.x = clamp(this.player.x - this.VIEW_W / 2, 0, maxX);
+    this.camera.y = clamp(this.player.y - this.VIEW_H / 2, 0, maxY);
+  }
+
   _initFogOfWar() {
     if (this.mode !== 'prologue') return;
     this.discoveredRooms = new Set();
@@ -896,7 +1261,7 @@ export class ScavengerMinigame {
     this.discoveredRooms.add('foyer');
     if (this.currentRoomId) this.discoveredRooms.add(this.currentRoomId);
     this.roomVisibilityStates = {};
-    PROLOGUE_ROOMS.forEach((r) => {
+    this._getFogRooms().forEach((r) => {
       this.roomVisibilityStates[r.id] = (r.id === this.currentRoomId) ? FOG_DARKNESS.CURRENT : FOG_DARKNESS.DISTANT_UNDISCOVERED;
     });
 
@@ -920,8 +1285,14 @@ export class ScavengerMinigame {
     // footprint. Specific rooms win first so item ownership stays stable.
     const detectionOrder = ['bunker', 'master', 'child', 'bath', 'kitchen', 'office', 'foyer', 'living'];
     for (const roomId of detectionOrder) {
-      const room = PROLOGUE_ROOMS.find((candidate) => candidate.id === roomId);
-      if (room?.rects.some((rect) => x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h)) {
+      const room = this._getFogRooms().find((candidate) => candidate.id === roomId);
+      if (room?.rects.some((rect) => {
+        const localPoint = getRectAngle(rect)
+          ? rotatePoint({ x, y }, getRectCenter(rect), -getRectAngle(rect))
+          : { x, y };
+        return localPoint.x >= rect.x && localPoint.x <= rect.x + rect.w
+          && localPoint.y >= rect.y && localPoint.y <= rect.y + rect.h;
+      })) {
         return roomId;
       }
     }
@@ -944,7 +1315,7 @@ export class ScavengerMinigame {
       return zone?.name || this.config?.label || 'RUTE EKSPEDISI';
     }
     const roomId = this._getCurrentVisibilityRoom();
-    const room = PROLOGUE_ROOMS.find((r) => r.id === roomId);
+    const room = this._getFogRooms().find((r) => r.id === roomId);
     return room ? room.name : 'KORIDOR RUMAH';
   }
 
@@ -952,7 +1323,7 @@ export class ScavengerMinigame {
     if (this.mode !== 'prologue') return;
 
     if (this.revealAllRooms) {
-      PROLOGUE_ROOMS.forEach((r) => {
+      this._getFogRooms().forEach((r) => {
         this.discoveredRooms.add(r.id);
         this.roomVisibilityStates[r.id] = FOG_DARKNESS.CURRENT;
       });
@@ -972,12 +1343,12 @@ export class ScavengerMinigame {
       if (!it.revealed && this.discoveredRooms.has(this._getItemRoomId(it))) it.revealed = true;
     });
 
-    const currentRoom = PROLOGUE_ROOMS.find((r) => r.id === this.currentRoomId);
+    const currentRoom = this._getFogRooms().find((r) => r.id === this.currentRoomId);
     const adjacentRoomIds = currentRoom ? currentRoom.adjacent : [];
 
     // Calculate doorway peeking proximity
     const doorwayPeeks = {};
-    PROLOGUE_DOORWAYS.forEach((d) => {
+    this._getFogDoorways().forEach((d) => {
       if (!d.rooms.includes(this.currentRoomId)) return;
       const dist = Math.hypot(this.player.x - d.x, this.player.y - d.y);
       if (dist < d.radius) {
@@ -988,7 +1359,7 @@ export class ScavengerMinigame {
     });
 
     // Determine target darkness for each room
-    PROLOGUE_ROOMS.forEach((room) => {
+    this._getFogRooms().forEach((room) => {
       let targetAlpha;
       if (room.id === this.currentRoomId) {
         targetAlpha = FOG_DARKNESS.CURRENT;
@@ -1060,12 +1431,12 @@ export class ScavengerMinigame {
     // zones resolve to the same room priority used by _getRoomAtPosition().
     const fogRoomOrder = ['living', 'foyer', 'office', 'kitchen', 'bath', 'child', 'master', 'bunker'];
     fogRoomOrder.forEach((roomId) => {
-      const room = PROLOGUE_ROOMS.find((candidate) => candidate.id === roomId);
+      const room = this._getFogRooms().find((candidate) => candidate.id === roomId);
       if (!room) return;
       const alpha = this.roomVisibilityStates[room.id] ?? baseDarkness;
       fctx.save();
       fctx.beginPath();
-      room.rects.forEach((r) => fctx.rect(r.x, r.y, r.w, r.h));
+      room.rects.forEach((rect) => addRectPath(fctx, rect));
       fctx.clip();
       fctx.clearRect(bounds.x, bounds.y, bounds.w, bounds.h);
       fctx.fillStyle = `rgba(7, 9, 14, ${alpha})`;
@@ -1106,7 +1477,7 @@ export class ScavengerMinigame {
     // Room zones and status; this debug layer deliberately shows room state,
     // not a misleading player-centered flashlight radius.
     const currentRoomId = this.currentRoomId || this._getCurrentVisibilityRoom();
-    PROLOGUE_ROOMS.forEach((room) => {
+    this._getFogRooms().forEach((room) => {
       const isCurrent = room.id === currentRoomId;
       const isDiscovered = this.discoveredRooms.has(room.id);
       const alpha = (this.roomVisibilityStates[room.id] ?? 0.82).toFixed(2);
@@ -1114,13 +1485,13 @@ export class ScavengerMinigame {
       room.rects.forEach((rect, idx) => {
         ctx.strokeStyle = isCurrent ? '#00ff88' : (isDiscovered ? '#38bdf8' : '#64748b');
         ctx.lineWidth = isCurrent ? 2 : 1;
-        ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+        this._strokeWorldRect(ctx, rect);
 
         if (idx === 0) {
           ctx.fillStyle = isCurrent
             ? 'rgba(0, 255, 136, 0.12)'
             : (isDiscovered ? 'rgba(56, 189, 248, 0.05)' : 'rgba(100, 116, 139, 0.04)');
-          ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+          this._fillWorldRect(ctx, rect);
 
           ctx.font = 'bold 10px monospace';
           ctx.fillStyle = isCurrent ? '#00ff88' : (isDiscovered ? '#38bdf8' : '#94a3b8');
@@ -1131,10 +1502,10 @@ export class ScavengerMinigame {
     });
 
     // Doorways
-    PROLOGUE_DOORWAYS.forEach((d) => {
+    this._getFogDoorways().forEach((d) => {
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 1;
-      ctx.strokeRect(d.rect.x, d.rect.y, d.rect.w, d.rect.h);
+      this._strokeWorldRect(ctx, d.rect);
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
@@ -1144,6 +1515,36 @@ export class ScavengerMinigame {
       ctx.fillText(`${d.id} (R:${d.radius})`, d.x - 30, d.y - 4);
     });
 
+    this.fogEditor?.render(ctx);
+
+    ctx.restore();
+  }
+
+  _fillWorldRect(ctx, rect) {
+    const angle = getRectAngle(rect);
+    if (!angle) {
+      ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+      return;
+    }
+    const center = getRectCenter(rect);
+    ctx.save();
+    ctx.translate(center.x, center.y);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.fillRect(-rect.w / 2, -rect.h / 2, rect.w, rect.h);
+    ctx.restore();
+  }
+
+  _strokeWorldRect(ctx, rect) {
+    const angle = getRectAngle(rect);
+    if (!angle) {
+      ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+      return;
+    }
+    const center = getRectCenter(rect);
+    ctx.save();
+    ctx.translate(center.x, center.y);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.strokeRect(-rect.w / 2, -rect.h / 2, rect.w, rect.h);
     ctx.restore();
   }
 
@@ -1210,16 +1611,55 @@ export class ScavengerMinigame {
 
       // Diagonal Normalization
       if (vx !== 0 && vy !== 0) {
-        vx *= 0.7071;
-        vy *= 0.7071;
+        vx *= 0.70710678;
+        vy *= 0.70710678;
       }
 
-      const nextX = this.player.x + vx * this.player.speed * dt;
-      const nextY = this.player.y + vy * this.player.speed * dt;
+      // Sub-stepped movement resolution guarantees no tunneling or corner clipping
+      const totalDist = Math.hypot(vx * this.player.speed * dt, vy * this.player.speed * dt);
+      const maxStep = 4.0;
+      const numSteps = Math.max(1, Math.ceil(totalDist / maxStep));
+      const stepX = (vx * this.player.speed * dt) / numSteps;
+      const stepY = (vy * this.player.speed * dt) / numSteps;
 
-      // Map bounds & Wall collisions
-      if (this._canMoveTo(nextX, this.player.y)) this.player.x = nextX;
-      if (this._canMoveTo(this.player.x, nextY)) this.player.y = nextY;
+      for (let s = 0; s < numSteps; s++) {
+        const nextX = this.player.x + stepX;
+        const nextY = this.player.y + stepY;
+
+        // Try full move first
+        if (this._canMoveTo(nextX, nextY)) {
+          this.player.x = nextX;
+          this.player.y = nextY;
+        } else {
+          // Slide along wall: check dominant axis first
+          let movedX = false;
+          let movedY = false;
+
+          if (Math.abs(stepX) >= Math.abs(stepY)) {
+            if (this._canMoveTo(nextX, this.player.y)) {
+              this.player.x = nextX;
+              movedX = true;
+            }
+            if (this._canMoveTo(this.player.x, nextY)) {
+              this.player.y = nextY;
+              movedY = true;
+            }
+          } else {
+            if (this._canMoveTo(this.player.x, nextY)) {
+              this.player.y = nextY;
+              movedY = true;
+            }
+            if (this._canMoveTo(nextX, this.player.y)) {
+              this.player.x = nextX;
+              movedX = true;
+            }
+          }
+
+          if (!movedX && !movedY) {
+            break;
+          }
+        }
+      }
 
       // Animate 4-step walk cycle ([1, 0, 1, 2] -> Idle -> Left -> Idle -> Right)
       this.player.animTimer += dt;
@@ -1247,7 +1687,10 @@ export class ScavengerMinigame {
     this.hazards.forEach((hazard) => {
       if (hazard.type === 'aftershock' && !this.aftershockTriggered && this.elapsedSeconds >= (hazard.aftershockAt || 0)) {
         this.aftershockTriggered = true;
-        if (hazard.blocker) this.colliders.push({ ...hazard.blocker });
+        if (hazard.blocker) {
+          this.colliders.push({ ...hazard.blocker });
+          this.runtimeColliderIds.add(String(hazard.blocker.id));
+        }
         this.screenShake = 8;
         this._showNotification(hazard.message || 'Aftershock mengubah jalur. Cari rute lain.');
         retroAudio.playForeshadowTremor?.();
@@ -1297,12 +1740,17 @@ export class ScavengerMinigame {
     // to slide naturally along a wall or furniture footprint.
     for (let i = 0; i < this.colliders.length; i++) {
       const box = this.colliders[i];
-      if (
-        x - pw / 2 < box.x + box.w &&
-        x + pw / 2 > box.x &&
-        y - ph / 2 < box.y + box.h &&
-        y + ph / 2 > box.y
-      ) {
+      const inset = box.type === 'furniture' ? 2 : 0;
+      const collisionBox = inset > 0 && box.w > inset * 2 && box.h > inset * 2
+        ? {
+          ...box,
+          x: box.x + inset,
+          y: box.y + inset,
+          w: box.w - inset * 2,
+          h: box.h - inset * 2,
+        }
+        : box;
+      if (intersectsPlayerFootHitbox(x, y, pw, ph, collisionBox)) {
         return false;
       }
     }
@@ -1363,10 +1811,12 @@ export class ScavengerMinigame {
 
     // ── DEBUG COLLIDERS & FOG ZONES (F2) ──
     if (this.debugColliders) {
-      this._renderDebugColliders(ctx);
       if (this.mode === 'prologue') {
         this._renderFogDebug(ctx);
       }
+      // Keep collision outlines and labels in the foreground so room-zone
+      // diagnostics cannot obscure the collider identity being tuned.
+      this._renderDebugColliders(ctx);
     }
 
     ctx.restore(); // Restore Camera World Coordinates
@@ -1380,6 +1830,7 @@ export class ScavengerMinigame {
 
   _renderDebugColliders(ctx) {
     ctx.save();
+    ctx.textAlign = 'left';
 
     // 1. Playable Map Bounds
     const pw = this.player.w;
@@ -1397,23 +1848,118 @@ export class ScavengerMinigame {
     ctx.setLineDash([]);
     ctx.font = 'bold 11px "Share Tech Mono", monospace';
     ctx.fillStyle = '#00ffcc';
-    ctx.fillText('[ MAP BOUNDS ]', minX + 10, minY + 18);
+    ctx.fillText(`MAP_BOUNDS [${Math.round(bounds.x)},${Math.round(bounds.y)} ${Math.round(bounds.w)}x${Math.round(bounds.h)}]`, minX + 10, minY + 18);
 
-    // 2. Solid obstacle colliders. Walls and furniture use separate colors so
-    // F2 can be used for quick visual tuning against the background.
-    ctx.lineWidth = 1;
-    this.colliders.forEach(c => {
-      const isWall = c.type === 'wall' || c.id.includes('wall') || c.id.includes('outer');
-      ctx.fillStyle = isWall ? 'rgba(255, 40, 40, 0.28)' : 'rgba(255, 166, 0, 0.28)';
-      ctx.strokeStyle = isWall ? '#ff3333' : '#ffad33';
-      ctx.fillRect(c.x, c.y, c.w, c.h);
-      ctx.strokeRect(c.x, c.y, c.w, c.h);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.font = '9px monospace';
-      ctx.fillText(c.id, c.x + 3, c.y + 11);
+    // 2. Door & Walkable Openings (highlighted in emerald green)
+    const openings = (this.mode === 'prologue') ? PROLOGUE_WALKABLE_OPENINGS : (this.doorways || []);
+    const debugLabels = [];
+
+    const queueDebugLabel = (label, rect, color, includeBounds = false, preferOutside = false) => {
+      debugLabels.push({ label, rect, color, includeBounds, preferOutside });
+    };
+
+    openings.forEach((door) => {
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 2;
+      this._fillWorldRect(ctx, door);
+      this._strokeWorldRect(ctx, door);
+
+      queueDebugLabel(door.id || door.name, door, '#a7f3d0', door.w >= 60 || door.h >= 45);
     });
 
-    // 3. Bunker Exit / Hatch Interaction Area & Radius
+    // 3. Solid obstacle colliders (Walls: Red | Furniture: Amber)
+    ctx.lineWidth = 1;
+    this.colliders.forEach(c => {
+      const isWall = c.type === 'wall' || /(^|_)(WALL|OUTER)(_|$)/i.test(String(c.id));
+      ctx.fillStyle = isWall ? 'rgba(239, 68, 68, 0.32)' : 'rgba(245, 158, 11, 0.32)';
+      ctx.strokeStyle = isWall ? '#ef4444' : '#f59e0b';
+      this._fillWorldRect(ctx, c);
+      this._strokeWorldRect(ctx, c);
+      queueDebugLabel(c.id, c, isWall ? '#fca5a5' : '#fef08a', c.w >= 70 || c.h >= 70, isWall);
+    });
+
+    // Labels are rendered in a second pass so a later collider cannot paint
+    // over an earlier label. Candidate positions keep long names near their
+    // shape while reducing overlap on dense furniture clusters.
+    const placedLabels = [];
+    const drawDebugLabel = ({ label, rect, color, includeBounds, preferOutside }) => {
+      const name = String(label || 'UNNAMED_COLLIDER')
+        .replace(/([a-z])([A-Z])/g, '$1_$2')
+        .replace(/[^a-zA-Z0-9]+/g, '_')
+        .toUpperCase();
+      const boundsText = `${Math.round(rect.x)},${Math.round(rect.y)} ${Math.round(rect.w)}x${Math.round(rect.h)}${getRectAngle(rect) ? ` ROT:${Math.round(getRectAngle(rect))}°` : ''}`;
+      const labelRect = getRotatedBounds(rect);
+
+      ctx.font = 'bold 10px monospace';
+      const nameWidth = ctx.measureText(name).width;
+      ctx.font = '9px monospace';
+      const boundsWidth = ctx.measureText(boundsText).width;
+      const labelWidth = Math.ceil(Math.max(nameWidth, includeBounds ? boundsWidth : 0) + 8);
+      const labelHeight = includeBounds ? 24 : 15;
+      const inside = { x: labelRect.x + 3, y: labelRect.y + 3 };
+      const above = { x: labelRect.x + 3, y: labelRect.y - labelHeight - 3 };
+      const below = { x: labelRect.x + 3, y: labelRect.y + labelRect.h + 3 };
+      const right = { x: labelRect.x + labelRect.w + 4, y: labelRect.y + 3 };
+      const left = { x: labelRect.x - labelWidth - 4, y: labelRect.y + 3 };
+      const centered = {
+        x: labelRect.x + Math.max(3, (labelRect.w - labelWidth) / 2),
+        y: labelRect.y + Math.max(3, (labelRect.h - labelHeight) / 2),
+      };
+      const candidates = preferOutside
+        ? (labelRect.w >= labelRect.h ? [above, below, inside, right, left] : [right, left, inside, above, below])
+        : [inside, above, below, right, left, centered];
+      const clampCandidate = (candidate) => ({
+        x: Math.max(2, Math.min(this.MAP_W - labelWidth - 2, candidate.x)),
+        y: Math.max(2, Math.min(this.MAP_H - labelHeight - 2, candidate.y)),
+      });
+      const overlapArea = (a, b) => {
+        const overlapW = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+        const overlapH = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+        return overlapW * overlapH;
+      };
+
+      let best = clampCandidate(candidates[0]);
+      let bestScore = Infinity;
+      candidates.forEach((candidate) => {
+        const position = clampCandidate(candidate);
+        const box = { ...position, w: labelWidth, h: labelHeight };
+        const labelOverlapScore = placedLabels.reduce((total, placed) => total + overlapArea(box, placed), 0);
+        const otherShapeOverlapScore = debugLabels.reduce((total, other) => {
+          if (other.rect === rect) return total;
+          return total + overlapArea(box, getRotatedBounds(other.rect));
+        }, 0);
+        const distanceScore = Math.abs(position.x - rect.x) + Math.abs(position.y - rect.y);
+        const score = labelOverlapScore * 1000 + otherShapeOverlapScore * (preferOutside ? 12 : 1) + distanceScore;
+        if (score < bestScore) {
+          best = position;
+          bestScore = score;
+        }
+      });
+
+      const labelBox = { ...best, w: labelWidth, h: labelHeight };
+      placedLabels.push(labelBox);
+      ctx.fillStyle = 'rgba(3, 7, 12, 0.88)';
+      ctx.fillRect(labelBox.x, labelBox.y, labelBox.w, labelBox.h);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(labelBox.x, labelBox.y, labelBox.w, labelBox.h);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = color;
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText(name, labelBox.x + 4, labelBox.y + 9);
+      if (includeBounds) {
+        ctx.font = '9px monospace';
+        ctx.fillText(boundsText, labelBox.x + 4, labelBox.y + 18);
+      }
+    };
+
+    debugLabels.forEach(drawDebugLabel);
+
+    // Restore the normal left-aligned text state for the remaining debug data.
+    ctx.textAlign = 'left';
+
+    // 4. Bunker Exit / Hatch Interaction Area & Radius
     const exits = this.exits?.length ? this.exits : [this.bunkerHatch];
     exits.forEach(exit => {
       const cx = exit.x + exit.w / 2;
@@ -1432,7 +1978,7 @@ export class ScavengerMinigame {
       ctx.fillText(`EXIT ZONE (R:85)`, cx - 35, cy);
     });
 
-    // 4. Collectible Items Interaction Radius Circles (70px)
+    // 5. Collectible Items Interaction Radius Circles (70px)
     this.items.forEach(it => {
       if (!it.collected) {
         ctx.strokeStyle = 'rgba(255, 209, 102, 0.5)';
@@ -1447,7 +1993,7 @@ export class ScavengerMinigame {
       }
     });
 
-    // 5. Player Feet Collision Box & Coordinate Display
+    // 6. Player Collision Hitbox & Coordinate Display
     ctx.fillStyle = 'rgba(0, 255, 136, 0.85)';
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1.5;
@@ -1458,7 +2004,11 @@ export class ScavengerMinigame {
 
     ctx.fillStyle = '#ffff00';
     ctx.font = 'bold 11px monospace';
-    ctx.fillText(`P: (${Math.round(this.player.x)}, ${Math.round(this.player.y)})`, this.player.x - 35, this.player.y - 14);
+    ctx.fillText(`PLAYER_FEET_HITBOX XY(${Math.round(this.player.x)},${Math.round(this.player.y)}) ${this.player.w}x${this.player.h}`, this.player.x - 75, this.player.y - 14);
+
+    // The editor highlight and resize handles are drawn last so the selected
+    // collider remains obvious above all regular debug labels.
+    this.collisionEditor?.render(ctx);
 
     ctx.restore();
   }
@@ -1485,10 +2035,11 @@ export class ScavengerMinigame {
     });
 
     this.colliders.forEach((collider) => {
-      ctx.fillStyle = collider.id.includes('rubble') || collider.id.includes('cable') ? 'rgba(104, 78, 67, 0.92)' : 'rgba(7, 12, 17, 0.78)';
-      ctx.fillRect(collider.x, collider.y, collider.w, collider.h);
-      ctx.strokeStyle = collider.id.includes('cable') ? '#e36a5d' : 'rgba(168, 183, 191, 0.6)';
-      ctx.strokeRect(collider.x, collider.y, collider.w, collider.h);
+      const colliderId = String(collider.id || '').toLowerCase();
+      ctx.fillStyle = colliderId.includes('rubble') || colliderId.includes('cable') || colliderId.includes('debris') ? 'rgba(104, 78, 67, 0.92)' : 'rgba(7, 12, 17, 0.78)';
+      this._fillWorldRect(ctx, collider);
+      ctx.strokeStyle = colliderId.includes('cable') ? '#e36a5d' : 'rgba(168, 183, 191, 0.6)';
+      this._strokeWorldRect(ctx, collider);
     });
 
     this.hazards.filter((hazard) => hazard.type !== 'aftershock').forEach((hazard) => {
@@ -1558,7 +2109,7 @@ export class ScavengerMinigame {
     if (this.mode !== 'prologue') return 1;
     if (this.fogDisabled || this.revealAllRooms) return 1;
     const roomId = this._getItemRoomId(item);
-    const currentRoom = PROLOGUE_ROOMS.find((room) => room.id === this.currentRoomId);
+    const currentRoom = this._getFogRooms().find((room) => room.id === this.currentRoomId);
     if (roomId === this.currentRoomId) return 1;
     if (currentRoom?.adjacent.includes(roomId)) return 0.72;
     if (this.discoveredRooms.has(roomId) || item.revealed) return 0.32;
@@ -1722,6 +2273,127 @@ export class ScavengerMinigame {
 
     // 2. Tactical Radar Minimap (Top-Right Screen Corner)
     this._renderTacticalMinimap(ctx);
+
+    // 3. Debug Mode Status Watermark
+    if (this.debugColliders) {
+      ctx.save();
+      ctx.font = 'bold 11px "Share Tech Mono", monospace';
+      ctx.fillStyle = 'rgba(10, 14, 20, 0.9)';
+      ctx.fillRect(16, 58, 430, 24);
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(16, 58, 430, 24);
+
+      ctx.fillStyle = '#00ffcc';
+      ctx.fillText('[F2] COLLISION DEBUG: ON | RED:Tembok | AMB:Objek | IJO:Pintu', 24, 74);
+      ctx.restore();
+    }
+
+    if (this.collisionEditor?.enabled) {
+      this._renderCollisionEditorHUD(ctx);
+    }
+    if (this.fogEditor?.enabled) {
+      this._renderFogEditorHUD(ctx);
+    }
+    if (this.freeCamera && !this.collisionEditor?.enabled) {
+      this._renderFreeCameraHUD(ctx);
+    }
+  }
+
+  _renderCollisionEditorHUD(ctx) {
+    const status = this.collisionEditor.getStatus();
+    const selected = status.selectedRect;
+    const selectedLine = selected
+      ? `PILIH: ${status.selectedLabel}  XY(${selected.x},${selected.y}) ${selected.w}x${selected.h} ROT:${Math.round(selected.angle || 0)}°`
+      : (status.createMode ? `TAMBAH: ${status.createMode.toUpperCase()} — DRAG DI AREA KOSONG` : 'PILIH COLLIDER: klik bentuk merah/amber');
+    const lines = [
+      `[F3] COLLISION EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.colliderCount} COLLIDERS`,
+      selectedLine,
+      'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi  •  N baru  •  SHIFT+N furniture',
+      'CTRL+S simpan draft  •  CTRL+E export JSON  •  CTRL+Z undo  •  ALT+R reset awal',
+      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player  •  F7 fog',
+      status.statusMessage,
+    ];
+
+    ctx.save();
+    const x = 16;
+    const y = this.debugColliders ? 88 : 58;
+    const width = Math.min(this.VIEW_W - 32, 650);
+    const height = 18 + lines.length * 14;
+    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#22d3ee';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, width, height);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    lines.forEach((line, index) => {
+      ctx.font = index === 0 ? 'bold 10px monospace' : '9px monospace';
+      ctx.fillStyle = index === 0 ? '#67e8f9' : (index === lines.length - 1 ? '#fde68a' : '#cffafe');
+      ctx.fillText(line, x + 8, y + 6 + index * 14);
+    });
+    ctx.restore();
+  }
+
+  _renderFogEditorHUD(ctx) {
+    const status = this.fogEditor.getStatus();
+    const selected = status.selectedRect;
+    const selectedLine = selected
+      ? `PILIH: ${status.selectedLabel}  XY(${selected.x},${selected.y}) ${selected.w}x${selected.h} ROT:${Math.round(selected.angle || 0)}°`
+      : (status.createMode ? `TAMBAH: ${status.createMode.toUpperCase()} — DRAG DI AREA KOSONG` : 'PILIH AREA RUANG / DOORWAY');
+    const lines = [
+      `[F7] FOG EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.colliderCount} AREA`,
+      selectedLine,
+      'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi  •  DELETE hapus area',
+      'CTRL+S simpan file  •  CTRL+E export JSON  •  CTRL+Z undo  •  ALT+R reset awal',
+      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player',
+      status.statusMessage,
+    ];
+
+    ctx.save();
+    const x = 16;
+    const y = this.debugColliders ? 88 : 58;
+    const width = Math.min(this.VIEW_W - 32, 650);
+    const height = 18 + lines.length * 14;
+    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#a78bfa';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, width, height);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    lines.forEach((line, index) => {
+      ctx.font = index === 0 ? 'bold 10px monospace' : '9px monospace';
+      ctx.fillStyle = index === 0 ? '#c4b5fd' : (index === lines.length - 1 ? '#fde68a' : '#ede9fe');
+      ctx.fillText(line, x + 8, y + 6 + index * 14);
+    });
+    ctx.restore();
+  }
+
+  _renderFreeCameraHUD(ctx) {
+    const lines = [
+      '[F4] FREE CAMERA: ON',
+      `CAMERA XY(${Math.round(this.camera.x)},${Math.round(this.camera.y)})  •  I/J/K/L pan  •  MOUSE TENGAH-DRAG`,
+      'HOME kembali ke player  •  F2 debug  •  F3 collision editor  •  F7 fog editor',
+    ];
+    ctx.save();
+    const x = 16;
+    const y = this.debugColliders ? 88 : 58;
+    const width = Math.min(this.VIEW_W - 32, 650);
+    const height = 18 + lines.length * 14;
+    ctx.fillStyle = 'rgba(3, 7, 12, 0.94)';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, width, height);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    lines.forEach((line, index) => {
+      ctx.font = index === 0 ? 'bold 10px monospace' : '9px monospace';
+      ctx.fillStyle = index === 0 ? '#fde68a' : '#fef3c7';
+      ctx.fillText(line, x + 8, y + 6 + index * 14);
+    });
+    ctx.restore();
   }
 
   _renderTacticalMinimap(ctx) {
@@ -1820,14 +2492,14 @@ export class ScavengerMinigame {
 
     // ── B. ROOM FLOOR ZONES (Color Coded & Labeled) ──
     const rooms = [
-      { id: 'mb',   name: 'KAMAR TIDUR UTAMA',             color: '#1b2230', border: '#3b82f6', x: 45,   y: 60,  w: 440, h: 250 },
-      { id: 'kb',   name: 'KAMAR TIDUR ANAK',              color: '#182836', border: '#38bdf8', x: 1180, y: 60,  w: 435, h: 255 },
-      { id: 'bv',   name: 'RUANG PALKA BUNKER 72 (VAULT)', color: '#241a20', border: '#ef4444', x: 570,  y: 40,  w: 520, h: 255 },
-      { id: 'kit',  name: 'DAPUR & RUANG MAKAN',           color: '#212938', border: '#10b981', x: 45,   y: 310, w: 465, h: 540 },
-      { id: 'lr',   name: 'RUANG KELUARGA & TV',           color: '#1e2633', border: '#f59e0b', x: 520,  y: 295, w: 660, h: 430 },
-      { id: 'bath', name: 'KAMAR MANDI & GUDANG OBAT',     color: '#15222b', border: '#06b6d4', x: 325,  y: 575, w: 190, h: 290 },
-      { id: 'st',   name: 'RUANG KERJA / STUDIO',          color: '#25201c', border: '#f97316', x: 1185, y: 335, w: 430, h: 515 },
-      { id: 'hall', name: 'TERAS DEPAN & PINTU UTAMA',     color: '#1c222c', border: '#ffd166', x: 640,  y: 735, w: 420, h: 180 }
+      { id: 'mb',   name: 'KAMAR TIDUR UTAMA',             color: '#1b2230', border: '#3b82f6', x: 28,   y: 18,  w: 432, h: 270 },
+      { id: 'kb',   name: 'KAMAR TIDUR ANAK',              color: '#182836', border: '#38bdf8', x: 1155, y: 18,  w: 485, h: 280 },
+      { id: 'bv',   name: 'RUANG PALKA BUNKER 72 (VAULT)', color: '#241a20', border: '#ef4444', x: 562,  y: 10,  w: 516, h: 240 },
+      { id: 'kit',  name: 'DAPUR & RUANG MAKAN',           color: '#212938', border: '#10b981', x: 28,   y: 282, w: 460, h: 522 },
+      { id: 'lr',   name: 'RUANG KELUARGA & TV',           color: '#1e2633', border: '#f59e0b', x: 488,  y: 240, w: 690, h: 440 },
+      { id: 'bath', name: 'KAMAR MANDI & GUDANG OBAT',     color: '#15222b', border: '#06b6d4', x: 325,  y: 545, w: 183, h: 260 },
+      { id: 'st',   name: 'RUANG KERJA / STUDIO',          color: '#25201c', border: '#f97316', x: 1180, y: 355, w: 460, h: 450 },
+      { id: 'hall', name: 'TERAS DEPAN & PINTU UTAMA',     color: '#1c222c', border: '#ffd166', x: 630,  y: 680, w: 425, h: 240 }
     ];
 
     rooms.forEach(r => {
@@ -1987,10 +2659,23 @@ export class ScavengerMinigame {
       this.wrapper.parentElement.removeChild(this.wrapper);
     }
 
+    this.collisionEditor?.destroy();
+    this.fogEditor?.destroy();
+
     this.fogCanvas = null;
     this.fogCtx = null;
     this.discoveredRooms?.clear();
     this.roomVisibilityStates = {};
+
+    if (typeof window !== 'undefined' && window.__scavengerGame === this) {
+      window.__scavengerGame = null;
+    }
+    if (typeof window !== 'undefined' && window.__scavengerCollisionEditor?.host === this) {
+      window.__scavengerCollisionEditor = null;
+    }
+    if (typeof window !== 'undefined' && window.__scavengerFogEditor?.host === this) {
+      window.__scavengerFogEditor = null;
+    }
   }
 
   // ─── DEVELOPER CONSOLE & DEBUG HOOKS ────────────────────────────────────
@@ -2000,7 +2685,11 @@ export class ScavengerMinigame {
   }
 
   resume() {
-    this.isPaused = false;
+    // Collision tuning needs a stable camera and timer. Finish the edit or
+    // toggle F3 off before resuming the normal minigame loop.
+    this.isPaused = Boolean(
+      this.collisionEditor?.enabled || this.fogEditor?.enabled || this.freeCamera
+    );
   }
 
   setTimeScale(scale = 1.0) {
@@ -2048,8 +2737,133 @@ export class ScavengerMinigame {
     this.noCollision = Boolean(enabled);
   }
 
+  setCollisionEditor(enabled) {
+    if (!this.collisionEditor) return false;
+
+    const next = Boolean(enabled);
+    if (next === this.collisionEditor.enabled) return next;
+
+    if (next && this.fogEditor?.enabled) this.setFogEditor(false);
+
+    if (next) {
+      this.collisionEditorPreviousPause = this.isPaused;
+      this.collisionEditorPreviousDebug = this.debugColliders;
+      this.isPaused = true;
+      this.debugColliders = true;
+      this.collisionEditor.setFreeCamera(this.freeCamera);
+      this.collisionEditor.setEnabled(true);
+      if (typeof window !== 'undefined') {
+        window.__scavengerCollisionEditor = {
+          host: this,
+          editor: this.collisionEditor,
+          save: () => this.collisionEditor.saveDraft(),
+          export: () => this.collisionEditor.exportDraft(),
+          reset: () => this.collisionEditor.resetDraft(),
+        };
+      }
+    } else {
+      this.collisionEditor.setEnabled(false);
+      this.collisionEditor.setFreeCamera(this.freeCamera);
+      if (this.freeCamera || this.fogEditor?.enabled) {
+        this.isPaused = true;
+        this.debugColliders = true;
+      } else {
+        this.isPaused = this.collisionEditorPreviousPause;
+        this.debugColliders = this.collisionEditorPreviousDebug;
+      }
+      if (typeof window !== 'undefined' && window.__scavengerCollisionEditor?.host === this) {
+        window.__scavengerCollisionEditor = null;
+      }
+    }
+
+    return next;
+  }
+
+  setFogEditor(enabled) {
+    if (!this.fogEditor || this.mode !== 'prologue') return false;
+
+    const next = Boolean(enabled);
+    if (next === this.fogEditor.enabled) return next;
+
+    if (next) {
+      if (this.freeCamera) this.setFreeCamera(false);
+      if (this.collisionEditor?.enabled) this.setCollisionEditor(false);
+      this.fogEditorPreviousPause = this.isPaused;
+      this.fogEditorPreviousDebug = this.debugColliders;
+      this.isPaused = true;
+      this.debugColliders = true;
+      this.fogEditor.setEnabled(true);
+      if (typeof window !== 'undefined') {
+        window.__scavengerFogEditor = {
+          host: this,
+          editor: this.fogEditor,
+          save: () => this.fogEditor.saveDraft(),
+          export: () => this.fogEditor.exportDraft(),
+          reset: () => this.fogEditor.resetDraft(),
+        };
+      }
+    } else {
+      this.fogEditor.setEnabled(false);
+      if (this.collisionEditor?.enabled || this.freeCamera) {
+        this.isPaused = true;
+        this.debugColliders = true;
+      } else {
+        this.isPaused = this.fogEditorPreviousPause;
+        this.debugColliders = this.fogEditorPreviousDebug;
+      }
+      if (typeof window !== 'undefined' && window.__scavengerFogEditor?.host === this) {
+        window.__scavengerFogEditor = null;
+      }
+    }
+
+    return next;
+  }
+
+  setFreeCamera(enabled) {
+    const next = Boolean(enabled);
+    if (next === this.freeCamera) {
+      this.collisionEditor?.setFreeCamera(next);
+      return next;
+    }
+
+    if (next && this.fogEditor?.enabled) this.setFogEditor(false);
+
+    if (next) {
+      this.freeCameraPreviousPause = this.isPaused;
+      this.freeCameraPreviousDebug = this.debugColliders;
+      this.freeCamera = true;
+      this.isPaused = true;
+      this.debugColliders = true;
+      this.collisionEditor?.setFreeCamera(true);
+    } else {
+      this.freeCamera = false;
+      this.collisionEditor?.setFreeCamera(false);
+      if (this.collisionEditor?.enabled || this.fogEditor?.enabled) {
+        this.isPaused = true;
+        this.debugColliders = true;
+      } else {
+        this.isPaused = this.freeCameraPreviousPause;
+        this.debugColliders = this.freeCameraPreviousDebug;
+      }
+    }
+
+    return next;
+  }
+
   setDebugColliders(enabled) {
-    this.debugColliders = Boolean(enabled);
+    this.debugColliders = Boolean(enabled)
+      || Boolean(this.collisionEditor?.enabled)
+      || Boolean(this.fogEditor?.enabled)
+      || Boolean(this.freeCamera);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        if (this.debugColliders) {
+          window.localStorage.setItem('debugColliders', '1');
+        } else {
+          window.localStorage.removeItem('debugColliders');
+        }
+      } catch (_) {}
+    }
   }
 
   setFogDisabled(disabled) {
@@ -2058,7 +2872,7 @@ export class ScavengerMinigame {
 
   revealEntireMap() {
     this.revealAllRooms = true;
-    PROLOGUE_ROOMS.forEach((r) => {
+    this._getFogRooms().forEach((r) => {
       this.discoveredRooms.add(r.id);
       this.roomVisibilityStates[r.id] = FOG_DARKNESS.CURRENT;
     });
@@ -2070,8 +2884,7 @@ export class ScavengerMinigame {
   teleportTo(x, y) {
     this.player.x = x;
     this.player.y = y;
-    this.camera.x = Math.max(0, Math.min(this.MAP_W - this.VIEW_W, this.player.x - this.VIEW_W / 2));
-    this.camera.y = Math.max(0, Math.min(this.MAP_H - this.VIEW_H, this.player.y - this.VIEW_H / 2));
+    this._resetCameraToPlayer();
     if (this.mode === 'prologue') {
       this.currentRoomId = this._getCurrentVisibilityRoom();
       if (this.currentRoomId) this.discoveredRooms.add(this.currentRoomId);
@@ -2099,6 +2912,10 @@ export class ScavengerMinigame {
     this.isActive = true;
     this._resetRunState();
     this.isPaused = false;
+    if (this.collisionEditor?.enabled || this.fogEditor?.enabled || this.freeCamera) {
+      this.isPaused = true;
+      this.debugColliders = true;
+    }
     this.lastTime = performance.now();
 
     if (!this.wrapper || !this.wrapper.parentElement) {

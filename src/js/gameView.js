@@ -6,11 +6,14 @@
  *  - Accept all data as explicit parameters from the Controller.
  *  - Never navigate the controller's object graph (no this.controller.model.*).
  *
- * Dependencies: constants.js only (for POWER_THRESHOLDS and parseHour/clamp).
+ * Dependencies: constants.js, scavenger minigame, and developer-only layout
+ * persistence/editor modules.
  */
 
 import { clamp, parseHour, POWER_THRESHOLDS, getTimePhase, getKnowledgeLabel, PREPAREDNESS_EVALUATION } from './constants.js';
 import { ScavengerMinigame } from './scavengerMinigame.js';
+import { ScreenLayoutEditor } from './screenLayoutEditor.js';
+import { editorDataStore } from './editorDataStore.js';
 
 const GOOD_ENDING_BACKGROUNDS = {
   opening: new URL('../assets/backgrounds/bg_good_end.webp', import.meta.url).href,
@@ -65,6 +68,20 @@ export class GameView {
     this.backButton = null;
     this.goodEndingCutsceneStep = 0;
     this.badEndingCutsceneStep = 0;
+
+    // Developer layout editor. It is intentionally attached to the existing
+    // story shell so dialogue/choice placement remains a data-only override
+    // and does not alter the normal narrative rendering contract.
+    this.layoutEditor = new ScreenLayoutEditor({
+      root: this.dom.storyBox,
+      persistence: {
+        load: (sceneKey) => editorDataStore.read('ui', sceneKey),
+        save: (sceneKey, payload) => editorDataStore.write('ui', sceneKey, payload),
+        remove: (sceneKey) => editorDataStore.remove('ui', sceneKey),
+      },
+    });
+    this.layoutEditorRequested = typeof window !== 'undefined'
+      && new URLSearchParams(window.location.search).get('layoutEditor') === '1';
   }
 
   /**
@@ -81,6 +98,7 @@ export class GameView {
     this._setupCardAndDrawerListeners();
     this._setupGoodEndingCutscene();
     this._setupBadEndingCutscene();
+    if (this.layoutEditorRequested) this.layoutEditor.setEnabled(true);
   }
 
   _setupGoodEndingCutscene() {
@@ -329,6 +347,18 @@ export class GameView {
 
   _setupKeyboardShortcuts() {
     window.addEventListener('keydown', (event) => {
+      if (event.code === 'F6' && !event.repeat) {
+        if (this.scavengerGame) return;
+        event.preventDefault();
+        this.layoutEditor.toggle();
+        return;
+      }
+
+      if (this.layoutEditor?.enabled && this.layoutEditor.handleKeyDown(event)) {
+        event.preventDefault();
+        return;
+      }
+
       if (event.code === 'Space' && !event.repeat) {
         const minigameOpen = this.dom.bunkerMinigame && !this.dom.bunkerMinigame.hidden;
         const gameScreenActive = this.dom.storyBox
@@ -768,6 +798,16 @@ export class GameView {
       this.destroyScavengerMinigame();
     }
 
+    // F6 edits the persistent layout for the current narrative scene. The
+    // packing scene belongs to the canvas minigame, so its DOM editor is
+    // hidden while that minigame owns the interaction surface.
+    if (isPacking) {
+      this.layoutEditor.setEnabled(false);
+    } else if (this.layoutEditorRequested) {
+      this.layoutEditor.setEnabled(true);
+    }
+    void this.layoutEditor.setScene(sceneId || 'global');
+
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
     this.dom.storyBox.classList.add(`scene-id-${sceneId}`);
     if (scene.alert) this.dom.storyBox.classList.add('scene-alert');
@@ -821,6 +861,7 @@ export class GameView {
     } else {
       this.dom.avatarContainer.style.display = 'none';
     }
+    this.layoutEditor?.refresh();
   }
 
   /**
@@ -1054,6 +1095,7 @@ export class GameView {
 
     if (!choices?.length) {
       this.dom.storyBox.classList.remove('has-interactive-choices');
+      this.layoutEditor?.refresh();
       return;
     }
 
@@ -1064,6 +1106,7 @@ export class GameView {
       btn.textContent = choices[0].text;
       btn.addEventListener('click', () => onChoiceClick(choices[0]));
       this.dom.choicesPanel.appendChild(btn);
+      this.layoutEditor?.refresh();
       return;
     }
 
@@ -1110,6 +1153,7 @@ export class GameView {
 
       this.dom.choicesPanel.appendChild(btn);
     });
+    this.layoutEditor?.refresh();
   }
 
   /**
@@ -1495,6 +1539,7 @@ export class GameView {
    * @param {Function} onComplete - Callback receiving { collectedItems: string[] }
    */
   startScavengerMinigame(onComplete, config = null) {
+    this.layoutEditor.setEnabled(false);
     this.destroyScavengerMinigame();
     this.scavengerGame = new ScavengerMinigame(this.dom.storyBox, (result) => {
       this.scavengerGame = null;
