@@ -546,11 +546,11 @@ const duplicateFogEditorCollider = ({ source, id, x, y, colliders }) => {
 
 const FOG_DARKNESS = Object.freeze({
   CURRENT: 0.08,             // 100% or near 100% visible (0.05-0.15)
-  ADJACENT_DISCOVERED: 0.46, // ~50% visible (0.40-0.50)
-  ADJACENT_UNDISCOVERED: 0.56,
-  DISTANT_DISCOVERED: 0.66,  // readable silhouette (0.55-0.70)
-  DISTANT_UNDISCOVERED: 0.82,// very dark silhouette (0.75-0.88), never pure black
-  BASE_OUTER: 0.85
+  ADJACENT_DISCOVERED: 0.50, // ~50% visible (0.40-0.50)
+  ADJACENT_UNDISCOVERED: 0.60,
+  DISTANT_DISCOVERED: 0.70,  // readable silhouette (0.55-0.70)
+  DISTANT_UNDISCOVERED: 0.86,// very dark silhouette (0.75-0.88), never pure black
+  BASE_OUTER: 0.88
 });
 
 // Fog remains room/doorway based, but its final alpha buffer is softened so
@@ -1592,7 +1592,7 @@ export class ScavengerMinigame {
 
     const bounds = this._getPlayableBounds();
     const baseDarkness = Math.min(
-      0.88,
+      0.91,
       FOG_DARKNESS.BASE_OUTER + (this.timerEnabled && this.timeLeft <= 15 ? (15 - this.timeLeft) * 0.003 : 0)
     );
 
@@ -2457,7 +2457,7 @@ export class ScavengerMinigame {
       `[F9] ITEM EDITOR: ON  |  ${this.collisionEditorKey.toUpperCase()}  |  ${status.itemCount} ITEMS`,
       selectedLine,
       'DRAG pindah  •  ARROW nudge  •  CTRL+S simpan ke file  •  ALT+R reset awal',
-      '[F4] FREE CAM  •  W/A/S/D geser kamera  •  SHIFT lebih cepat  •  HOME kembali ke player',
+      'FREE CAM OTOMATIS  •  W/A/S/D geser kamera  •  SHIFT lebih cepat  •  HOME kembali ke player',
       '[F8] sembunyikan bantuan  •  item tidak bisa dibuat/dihapus agar jumlah tetap aman',
       status.statusMessage,
     ];
@@ -2499,7 +2499,7 @@ export class ScavengerMinigame {
       'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi  •  N / SHIFT+N baru SOLID',
       'CTRL+C/V salin-tempel  •  CTRL+D duplikat  •  CTRL+S simpan  •  CTRL+E export',
       'CTRL+Z undo  •  ALT+R reset awal',
-      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player  •  F7 fog',
+      'FREE CAM OTOMATIS  •  W/A/S/D geser  •  I/J/K/L legacy  •  HOME kembali ke player  •  F7 fog',
       status.statusMessage,
     ];
 
@@ -2541,7 +2541,7 @@ export class ScavengerMinigame {
       'CTRL+C/V salin-tempel perilaku  •  CTRL+D duplikat fog  •  CTRL+S simpan',
       'CTRL+E export  •  CTRL+Z undo  •  ALT+R reset awal',
       'DRAG pindah  •  HANDLE resize  •  WHEEL rotasi',
-      '[F4] FREE CAM  •  I/J/K/L pan  •  HOME kembali ke player',
+      'FREE CAM OTOMATIS  •  W/A/S/D geser  •  I/J/K/L legacy  •  HOME kembali ke player',
       status.statusMessage,
     ];
 

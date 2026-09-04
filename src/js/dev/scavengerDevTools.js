@@ -56,6 +56,10 @@ export class ScavengerDevTools {
     this.freeCameraRequested = readBooleanOption(host.config?.freeCamera, 'freeCam');
     this.editorHelpHidden = false;
     this.developerPauseSnapshot = null;
+    // Editor sessions automatically own the camera. Keep the previous
+    // free-camera state so closing the last editor can restore it exactly.
+    this.editorFreeCameraSnapshot = null;
+    this.editorTransitionDepth = 0;
     this.editorFeedbackTimeoutId = null;
 
     this._createEditors();
@@ -199,7 +203,14 @@ export class ScavengerDevTools {
     if (key === 'f4') {
       if (event.repeat) return true;
       event.preventDefault();
-      this.setFreeCamera(!this.freeCamera);
+      if (this._hasActiveEditor()) {
+        // Editors always use free camera. F4 remains a manual toggle when no
+        // editor is open, but cannot accidentally strand an editor in player
+        // follow mode.
+        this._ensureEditorFreeCamera();
+      } else {
+        this.setFreeCamera(!this.freeCamera);
+      }
       return true;
     }
 
@@ -313,6 +324,45 @@ export class ScavengerDevTools {
     this.host._panCameraBy(dx * speed * Math.max(0, Number(dt) || 0), dy * speed * Math.max(0, Number(dt) || 0));
   }
 
+  _hasActiveEditor() {
+    return Boolean(
+      this.itemEditor?.enabled
+      || this.collisionEditor?.enabled
+      || this.fogEditor?.enabled
+    );
+  }
+
+  _beginEditorCameraSession() {
+    if (this.editorFreeCameraSnapshot === null) {
+      this.editorFreeCameraSnapshot = Boolean(this.freeCamera);
+    }
+  }
+
+  _ensureEditorFreeCamera() {
+    this._beginEditorCameraSession();
+    if (!this.freeCamera) this.setFreeCamera(true);
+  }
+
+  _restoreEditorCameraIfIdle() {
+    if (this.editorTransitionDepth > 0 || this._hasActiveEditor()) return;
+    if (this.editorFreeCameraSnapshot === null) return;
+
+    const previousFreeCamera = this.editorFreeCameraSnapshot;
+    this.editorFreeCameraSnapshot = null;
+    if (this.freeCamera !== previousFreeCamera) {
+      this.setFreeCamera(previousFreeCamera);
+    }
+  }
+
+  _beginEditorTransition() {
+    this.editorTransitionDepth += 1;
+  }
+
+  _endEditorTransition() {
+    this.editorTransitionDepth = Math.max(0, this.editorTransitionDepth - 1);
+    this._restoreEditorCameraIfIdle();
+  }
+
   isDeveloperModeActive() {
     return Boolean(this.itemEditor?.enabled || this.collisionEditor?.enabled || this.fogEditor?.enabled || this.freeCamera);
   }
@@ -329,13 +379,21 @@ export class ScavengerDevTools {
     if (!this.collisionEditor) return false;
 
     const next = Boolean(enabled);
-    if (next === this.collisionEditor.enabled) return next;
+    if (next === this.collisionEditor.enabled) {
+      if (next) this._ensureEditorFreeCamera();
+      else this._restoreEditorCameraIfIdle();
+      return next;
+    }
 
-    if (next && this.fogEditor?.enabled) this.setFogEditor(false);
-    if (next && this.itemEditor?.enabled) this.setItemEditor(false);
+    if (next) {
+      this._beginEditorCameraSession();
+      this._beginEditorTransition();
+      if (this.fogEditor?.enabled) this.setFogEditor(false);
+      if (this.itemEditor?.enabled) this.setItemEditor(false);
+    }
 
-    this.collisionEditor.setFreeCamera(this.freeCamera);
     this.collisionEditor.setEnabled(next);
+    if (next) this._ensureEditorFreeCamera();
     this._updateDebugGlobal(next);
 
     if (typeof window !== 'undefined') {
@@ -353,6 +411,8 @@ export class ScavengerDevTools {
     }
 
     this._syncDeveloperModePause();
+    if (next) this._endEditorTransition();
+    this._restoreEditorCameraIfIdle();
     return next;
   }
 
@@ -360,15 +420,21 @@ export class ScavengerDevTools {
     if (!this.fogEditor || this.host.mode !== 'prologue') return false;
 
     const next = Boolean(enabled);
-    if (next === this.fogEditor.enabled) return next;
+    if (next === this.fogEditor.enabled) {
+      if (next) this._ensureEditorFreeCamera();
+      else this._restoreEditorCameraIfIdle();
+      return next;
+    }
 
     if (next) {
-      if (this.freeCamera) this.setFreeCamera(false);
+      this._beginEditorCameraSession();
+      this._beginEditorTransition();
       if (this.collisionEditor?.enabled) this.setCollisionEditor(false);
       if (this.itemEditor?.enabled) this.setItemEditor(false);
     }
 
     this.fogEditor.setEnabled(next);
+    if (next) this._ensureEditorFreeCamera();
     this._updateDebugGlobal(next);
 
     if (typeof window !== 'undefined') {
@@ -386,6 +452,8 @@ export class ScavengerDevTools {
     }
 
     this._syncDeveloperModePause();
+    if (next) this._endEditorTransition();
+    this._restoreEditorCameraIfIdle();
     return next;
   }
 
@@ -393,14 +461,21 @@ export class ScavengerDevTools {
     if (!this.itemEditor) return false;
 
     const next = Boolean(enabled);
-    if (next === this.itemEditor.enabled) return next;
+    if (next === this.itemEditor.enabled) {
+      if (next) this._ensureEditorFreeCamera();
+      else this._restoreEditorCameraIfIdle();
+      return next;
+    }
 
     if (next) {
+      this._beginEditorCameraSession();
+      this._beginEditorTransition();
       if (this.fogEditor?.enabled) this.setFogEditor(false);
       if (this.collisionEditor?.enabled) this.setCollisionEditor(false);
     }
 
     this.itemEditor.setEnabled(next);
+    if (next) this._ensureEditorFreeCamera();
     this._updateDebugGlobal(next);
 
     if (typeof window !== 'undefined') {
@@ -418,12 +493,14 @@ export class ScavengerDevTools {
     }
 
     this._syncDeveloperModePause();
+    if (next) this._endEditorTransition();
+    this._restoreEditorCameraIfIdle();
     return next;
   }
 
   setFreeCamera(enabled) {
     const next = Boolean(enabled);
-    if (next && this.fogEditor?.enabled) this.setFogEditor(false);
+    if (!next && this._hasActiveEditor()) return true;
 
     Object.keys(this.host.keys || {}).forEach((key) => { this.host.keys[key] = false; });
     if (this.host.player) this.host.player.isMoving = false;
@@ -563,11 +640,11 @@ export class ScavengerDevTools {
         ? 'COLLISION EDITOR AKTIF'
         : 'FREE CAMERA AKTIF';
     const modeHint = activeMode === 'items'
-      ? '<span><b>[F9]</b> PINDAH ITEM SCAVENGER • <b>DRAG</b> posisi barang</span><span><b>W/A/S/D</b> geser free cam • <b>SHIFT</b> lebih cepat</span>'
+      ? '<span><b>[F9]</b> PINDAH ITEM SCAVENGER • <b>DRAG</b> posisi barang</span><span><b>FREE CAM</b> otomatis • <b>W/A/S/D</b> geser • <b>SHIFT</b> lebih cepat</span>'
       : activeMode === 'fog'
-      ? '<span><b>[N]</b> BUAT FOG ROOM • <b>[SHIFT+N]</b> BUAT DOORWAY</span><span><b>[CTRL+C/V]</b> SALIN PERILAKU FOG TERPILIH</span>'
+      ? '<span><b>[N]</b> BUAT FOG ROOM • <b>[SHIFT+N]</b> BUAT DOORWAY</span><span><b>FREE CAM</b> otomatis • <b>W/A/S/D</b> geser kamera</span>'
       : activeMode === 'collision'
-        ? '<span><b>[F3]</b> HANYA AREA COLLISION YANG DITAMPILKAN</span><span><b>[CTRL+C/V]</b> SALIN COLLIDER TERPILIH</span>'
+        ? '<span><b>[F3]</b> HANYA AREA COLLISION YANG DITAMPILKAN</span><span><b>FREE CAM</b> otomatis • <b>W/A/S/D</b> geser kamera</span>'
         : '<span><b>[F4]</b> GESER CAMERA TANPA MENGUBAH COLLIDER</span>';
     this.host.editorInfo.innerHTML = `
       <strong>${modeTitle}</strong>
