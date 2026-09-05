@@ -45,7 +45,44 @@ export const POWER_THRESHOLDS = Object.freeze({
 });
 
 export const SAVE_KEY = 'bunker72_save_v1';
-export const SAVE_SCHEMA_VERSION = 2;
+export const SAVE_SCHEMA_VERSION = 3;
+
+/** Fresh runs always begin in the pre-disaster narrative. Existing saves retain their scene. */
+export const NEW_GAME_START_SCENE_ID = 'backstory_return';
+
+/** Stable Sarah decision IDs allow history-only saves to recover the canonical enum. */
+export const SARAH_WARNING_RESPONSE_BY_CHOICE_ID = Object.freeze({
+  c_sarah_warning_escalate: 'escalate',
+  c_sarah_warning_verify: 'verify',
+  c_sarah_warning_maintain: 'maintain',
+});
+
+export const SARAH_WARNING_RESPONSES = Object.freeze([
+  'escalate',
+  'verify',
+  'maintain',
+]);
+
+/** Reserved for the office interaction phase; saved values are validated now. */
+export const SARAH_OFFICE_DOCUMENT_IDS = Object.freeze([
+  'earthquake_preparedness',
+  'tsunami_evacuation',
+  'volcanic_ash_protection',
+  'emergency_kit',
+  'survival_handbook',
+  'sarah_work_notes',
+]);
+
+export function normalizeSarahWarningResponse(value) {
+  return SARAH_WARNING_RESPONSES.includes(value) ? value : null;
+}
+
+export function normalizeSarahOfficeReadIds(value) {
+  const validIds = new Set(SARAH_OFFICE_DOCUMENT_IDS);
+  return Array.isArray(value)
+    ? [...new Set(value.filter((id) => typeof id === 'string' && validIds.has(id)))]
+    : [];
+}
 
 export function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));

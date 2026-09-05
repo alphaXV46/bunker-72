@@ -13,7 +13,7 @@ import { GameModel  } from './gameModel.js';
 import { GameView   } from './gameView.js';
 import { RetroAudio } from './retroAudio.js';
 import { BunkerMinigame } from './bunkerMinigame.js';
-import { ENDING_IDS, parseHour } from './constants.js';
+import { ENDING_IDS, parseHour, SARAH_WARNING_RESPONSE_BY_CHOICE_ID } from './constants.js';
 import { getExpeditionConfig, EXPEDITION_CONFIGS } from './expeditionConfig.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
@@ -129,13 +129,16 @@ export class StoryEngine {
     const elapsed    = currHour - prevHour;
     const isEnding   = ENDING_IDS.includes(sceneId);
 
-    if (elapsed > 0 && !isEnding) {
+    if (elapsed > 0 && !isEnding && scene.phase !== 'backstory') {
       this.model.updateSurvivalStats(elapsed);
       if (this._checkFatalCondition(sceneId)) return;
     }
 
     // Commit new scene to model.
     this.model.currentSceneId = sceneId;
+    if (scene.setFlags?.length) {
+      scene.setFlags.forEach((flag) => this.model.setFlag(flag));
+    }
 
     // ── Audio ──
     const isDomestic = ['prolog_home', 'prolog_with_ibu', 'prolog_with_anak'].includes(sceneId);
@@ -250,7 +253,8 @@ export class StoryEngine {
 
     if (scene.autoNextSceneId) {
       const isClickToContinueProlog = sceneId.startsWith('prolog_') && sceneId !== 'prolog_title';
-      if (isClickToContinueProlog) {
+      const isClickToContinue = isClickToContinueProlog || scene.advanceMode === 'click';
+      if (isClickToContinue) {
         this.view.typeText(modifiedText, () => {
           this.pendingClickNextSceneId = scene.autoNextSceneId;
         }, {
@@ -478,6 +482,12 @@ export class StoryEngine {
     }
 
     if (choice.disabled) return;
+
+    const sarahWarningResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[choice.id];
+    if (sarahWarningResponse && !this.model.setSarahWarningResponse(sarahWarningResponse)) {
+      this.renderScene('backstory_sarah_response');
+      return;
+    }
 
     if (choice.id === 'c_day2_hendra_help' && this.model.inventory.drink <= 0 && this.model.inventory.food <= 0) {
       this.view.showTelltaleToast('AIR & MAKANAN HABIS: Aris tidak bisa membagi persediaan.');
@@ -798,7 +808,10 @@ export class StoryEngine {
     if (scene) {
       if (Array.isArray(scene.conditionalText)) {
         scene.conditionalText.forEach((cond) => {
-          if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === true) {
+          const requiredValue = Object.prototype.hasOwnProperty.call(cond, 'requiredValue')
+            ? cond.requiredValue
+            : true;
+          if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === requiredValue) {
             if (cond.position === 'prepend') {
               processedText = cond.text + processedText;
             } else {

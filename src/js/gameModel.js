@@ -8,11 +8,24 @@
  * Dependencies: constants.js only.
  */
 
-import { clamp, ENDING_IDS, ENDING_RULES, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
+import {
+  clamp,
+  ENDING_IDS,
+  ENDING_RULES,
+  NEW_GAME_START_SCENE_ID,
+  normalizeSarahOfficeReadIds,
+  normalizeSarahWarningResponse,
+  SARAH_WARNING_RESPONSE_BY_CHOICE_ID,
+  SAVE_SCHEMA_VERSION,
+  SURVIVAL,
+} from './constants.js';
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
 
-const INITIAL_SCENE_ID = 'prolog_home';
 const DEFAULT_FLAGS = Object.freeze({
+  sarah_warning_response: null,
+  sarah_office_read_ids: [],
+  sarah_baseline_reviewed: false,
+  sarah_update_reviewed: false,
   promised_maya: false,
   radio_reward_claimed: false,
   radio_quality: null,
@@ -84,7 +97,7 @@ const FLAG_CHOICE_MAP = Object.freeze({
 
 export class GameModel {
   constructor() {
-    this.currentSceneId = INITIAL_SCENE_ID;
+    this.currentSceneId = NEW_GAME_START_SCENE_ID;
     this.knowledge     = SURVIVAL.DEFAULTS.knowledge;
     this.hunger        = SURVIVAL.DEFAULTS.hunger;
     this.thirst        = SURVIVAL.DEFAULTS.thirst;
@@ -173,6 +186,14 @@ export class GameModel {
     return true;
   }
 
+  /** Commits Sarah's one canonical professional response. */
+  setSarahWarningResponse(response) {
+    const normalized = normalizeSarahWarningResponse(response);
+    if (!normalized || this.flags.sarah_warning_response !== null) return false;
+    this.flags.sarah_warning_response = normalized;
+    return true;
+  }
+
   /**
    * Initializes or re-initializes model state.
    * Used for both new games and loading a save.
@@ -187,7 +208,7 @@ export class GameModel {
    * @param {number}   health
    */
   init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
-    this.currentSceneId = sceneId || INITIAL_SCENE_ID;
+    this.currentSceneId = sceneId || NEW_GAME_START_SCENE_ID;
     this.history        = Array.isArray(history) ? history : [];
     const validExpeditionIds = new Set(Object.keys(EXPEDITION_CONFIGS));
     this.expeditionVisitedLocations = Array.isArray(expeditionVisitedLocations)
@@ -200,6 +221,10 @@ export class GameModel {
       ...this._reconstructFlagsFromHistory(this.history),
       ...restoredFlags,
     };
+    this.flags.sarah_warning_response = normalizeSarahWarningResponse(this.flags.sarah_warning_response);
+    this.flags.sarah_office_read_ids = normalizeSarahOfficeReadIds(this.flags.sarah_office_read_ids);
+    this.flags.sarah_baseline_reviewed = this.flags.sarah_baseline_reviewed === true;
+    this.flags.sarah_update_reviewed = this.flags.sarah_update_reviewed === true;
 
     // Keep the Hendra decision as one mutually-exclusive outcome even when a
     // legacy save contains more than one stale social flag.
@@ -265,6 +290,8 @@ export class GameModel {
       if (entry.choiceId && FLAG_CHOICE_MAP[entry.choiceId]) {
         flags[FLAG_CHOICE_MAP[entry.choiceId]] = true;
       }
+      const sarahResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[entry?.choiceId];
+      if (sarahResponse) flags.sarah_warning_response = sarahResponse;
     });
     if (flags.air_remedied) {
       delete flags.air_uninspected;

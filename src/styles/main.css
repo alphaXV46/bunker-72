@@ -839,6 +839,14 @@ input[type="range"] {
 .story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.webp'); }
 .story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.webp'); }
 .story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.webp'); }
+.story-box.bg-backstory-airport { background-image: url('../assets/backgrounds/bg_backstory_airport.webp'); }
+.story-box.bg-backstory-house { background-image: url('../assets/backgrounds/bg_backstory_house.webp'); }
+.story-box.bg-backstory-aris-company { background-image: url('../assets/backgrounds/bg_backstory_aris_company.webp'); }
+.story-box.bg-backstory-sarah-office { background-image: url('../assets/backgrounds/bg_backstory_sarah_office.webp'); }
+.story-box.bg-backstory-sarah-office-alert { background-image: url('../assets/backgrounds/bg_backstory_sarah_office_alert.webp'); }
+.story-box.bg-backstory-bunker-plan { background-image: url('../assets/backgrounds/bg_backstory_bunker_plan.webp'); }
+.story-box.bg-backstory-bunker-build { background-image: url('../assets/backgrounds/bg_backstory_bunker_build.webp'); }
+.story-box.bg-backstory-bunker-complete { background-image: url('../assets/backgrounds/bg_backstory_bunker_complete.webp'); }
 .story-box.bg-titlecard {
   background-image:
     radial-gradient(circle at 50% 42%, rgba(91,192,190,0.12), transparent 30%),

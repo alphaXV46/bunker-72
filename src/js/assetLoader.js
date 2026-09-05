@@ -37,6 +37,14 @@ import bgBadEnd from '../assets/backgrounds/bg_bad_end.webp';
 import bgBadEnd2 from '../assets/backgrounds/bg_bad_end_2.webp';
 import bgBadEnd3 from '../assets/backgrounds/bg_bad_end_3.webp';
 import bgFatalEnd from '../assets/backgrounds/bg_fatal_end.webp';
+import bgBackstoryAirport from '../assets/backgrounds/bg_backstory_airport.webp';
+import bgBackstoryHouse from '../assets/backgrounds/bg_backstory_house.webp';
+import bgBackstoryArisCompany from '../assets/backgrounds/bg_backstory_aris_company.webp';
+import bgBackstorySarahOffice from '../assets/backgrounds/bg_backstory_sarah_office.webp';
+import bgBackstorySarahOfficeAlert from '../assets/backgrounds/bg_backstory_sarah_office_alert.webp';
+import bgBackstoryBunkerPlan from '../assets/backgrounds/bg_backstory_bunker_plan.webp';
+import bgBackstoryBunkerBuild from '../assets/backgrounds/bg_backstory_bunker_build.webp';
+import bgBackstoryBunkerComplete from '../assets/backgrounds/bg_backstory_bunker_complete.webp';
 
 // Minigame maps & sprites
 import scavengerMap from '../assets/backgrounds/scavenger_house_map.webp';
@@ -70,6 +78,14 @@ const ASSET_URLS = [
   bgBadEnd2,
   bgBadEnd3,
   bgFatalEnd,
+  bgBackstoryAirport,
+  bgBackstoryHouse,
+  bgBackstoryArisCompany,
+  bgBackstorySarahOffice,
+  bgBackstorySarahOfficeAlert,
+  bgBackstoryBunkerPlan,
+  bgBackstoryBunkerBuild,
+  bgBackstoryBunkerComplete,
   scavengerMap,
   spritesheetFather,
   spritesheetMother,

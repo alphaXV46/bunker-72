@@ -4,13 +4,16 @@
 
 The playable story ends at hour 72:
 
-`Prologue scavenger → Day 1 inspection → Day 2 two-location expedition → Hendra encounter → Day 3 water/power pressure → one final SAR radio attempt → 72-hour evaluation → Bad / Normal / Good → modular epilogue and technical debrief.`
+`Pre-disaster backstory → Prologue scavenger → Day 1 inspection → Day 2 two-location expedition → Hendra encounter → Day 3 water/power pressure → one final SAR radio attempt → 72-hour evaluation → Bad / Normal / Good → modular epilogue and technical debrief.`
+
+The pre-disaster backstory is a separate narrative phase. It uses no survival elapsed time, never changes survival statistics or Preparedness, and joins the existing prologue before the scavenger sequence. Sarah's professional warning response is stored as one validated narrative enum; it is outside the main ending evaluator.
 
 There is no active Day 4, 96-hour continuation, secret ending, looter branch, or second-stranger plot.
 
 ## Canonical state
 
 - `radio_quality` is the sole active radio result: `clear`, `weak`, or `failed`.
+- `sarah_warning_response` is `null`, `escalate`, `verify`, or `maintain`; office progress uses validated document IDs plus two review booleans.
 - Day 1 inspections are capped at three; expedition locations are valid, unique IDs and each can be visited only once per run.
 - Hendra has one mutually exclusive narrative outcome. It affects epilogue copy, never Preparedness or the main ending.
 - Maya, the toy, promises, and other family flags are narrative only.
@@ -33,7 +36,9 @@ Good requires Preparedness of at least 60 plus stable vital conditions and healt
 
 ## Save compatibility
 
-The current save schema is version 2. Current scenes, finite inventory values, survival values, flags, and expedition locations are normalized before restoring a run. `radio_saved` is accepted only as a legacy input and is migrated to `radio_quality: "weak"`; it is not written again.
+The current save schema is version 3. Current scenes, finite inventory values, survival values, flags, and expedition locations are normalized before restoring a run. Existing v2 survival saves remain at their saved scene and receive neutral Sarah state. `radio_saved` is accepted only as a legacy input and is migrated to `radio_quality: "weak"`; it is not written again.
+
+Internally, the evaluator still calls a health-zero condition `fatalCondition`. Its player-facing Bad ending meaning remains critical rescue and survival-system collapse, with the family found and evacuated for emergency treatment; a later targeted cleanup may rename that internal term without changing the three-ending contract.
 
 Removed Day 2, Day 3, and Day 4 scene IDs remain as small ID-only migration lists in `src/js/main.js`. They redirect safely to the current Day 2 setup, Day 3 start, or final evaluation. No removed scene content is retained.
 

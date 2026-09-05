@@ -754,6 +754,14 @@ export class GameView {
       prolog2: 'bg-prolog-2',
       prolog3: 'bg-prolog-3',
       prolog4: 'bg-prolog-4',
+      backstory_airport: 'bg-backstory-airport',
+      backstory_house: 'bg-backstory-house',
+      backstory_aris_company: 'bg-backstory-aris-company',
+      backstory_sarah_office: 'bg-backstory-sarah-office',
+      backstory_sarah_office_alert: 'bg-backstory-sarah-office-alert',
+      backstory_bunker_plan: 'bg-backstory-bunker-plan',
+      backstory_bunker_build: 'bg-backstory-bunker-build',
+      backstory_bunker_complete: 'bg-backstory-bunker-complete',
       titlecard: 'bg-titlecard',
       hari1: 'bg-day1',
       normal: gameplayDayBg,
@@ -768,19 +776,26 @@ export class GameView {
     this.dom.storyBox.classList.remove(
       'bg-prolog-peaceful', 'bg-prolog-window',
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
+      'bg-backstory-airport', 'bg-backstory-house', 'bg-backstory-aris-company',
+      'bg-backstory-sarah-office', 'bg-backstory-sarah-office-alert',
+      'bg-backstory-bunker-plan', 'bg-backstory-bunker-build', 'bg-backstory-bunker-complete',
       'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-day2', 'bg-day3', 'bg-normal', 'bg-rusak', 'scene-alert',
       'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'has-interactive-choices',
       ...ENV_CLASSES
     );
 
     const isProlog = String(scene.background || '').startsWith('prolog');
+    const isBackstory = scene.phase === 'backstory';
+    const isCinematic = isProlog || isBackstory;
     const isPacking = sceneId === 'prolog_packing';
     const isTitleCard = scene.background === 'titlecard';
     const gameView = this.dom.storyBox.closest('#game-view');
-    gameView?.classList.toggle('prolog-mode', isProlog);
+    gameView?.classList.toggle('prolog-mode', isCinematic);
+    gameView?.classList.toggle('backstory-mode', isBackstory);
     gameView?.classList.toggle('packing-mode', isPacking);
     gameView?.classList.toggle('title-card-mode', isTitleCard);
-    document.body.classList.toggle('prolog-active', isProlog);
+    document.body.classList.toggle('prolog-active', isCinematic);
+    document.body.classList.toggle('backstory-active', isBackstory);
     document.body.classList.toggle('packing-active', isPacking);
     document.body.classList.toggle('title-card-active', isTitleCard);
 
@@ -806,7 +821,7 @@ export class GameView {
 
     // ── Environmental visual filters based on active flags ──────────────────
     // Only apply during non-prolog gameplay scenes
-    const isGameplay = !isProlog && !isPacking && !isTitleCard;
+    const isGameplay = !isCinematic && !isPacking && !isTitleCard;
     if (isGameplay) {
       // Dusty/sepia tint — unfiltered air contaminates the environment
       if (flags.air_uninspected && !flags.air_remedied) {

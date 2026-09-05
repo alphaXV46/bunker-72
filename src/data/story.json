@@ -1,5 +1,256 @@
 {
   "scenes": {
+    "backstory_return": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Setelah beberapa tahun tinggal di luar negeri, Aris, Sarah, dan Maya pulang ke Indonesia. Mereka membawa koper, foto lama, dan harapan untuk memulai bab baru lebih dekat dengan keluarga.",
+      "background": "backstory_airport",
+      "phase": "backstory",
+      "narrativeTime": "Beberapa tahun sebelum bencana",
+      "hour": "0 Jam",
+      "objective": "Mulai kembali kehidupan keluarga di Indonesia.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_airport",
+      "choices": []
+    },
+    "backstory_airport": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "\"Rasanya berbeda sekali pulang dengan Maya di sini, ya. Aku rindu suara bahasa Indonesia di bandara.\" Maya menarik tangan mereka, tak sabar melihat rumah baru yang selama ini hanya ia lihat lewat panggilan video.",
+      "background": "backstory_airport",
+      "phase": "backstory",
+      "narrativeTime": "Hari kepulangan",
+      "hour": "0 Jam",
+      "objective": "Tiba bersama di Indonesia.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_house",
+      "choices": []
+    },
+    "backstory_house": {
+      "speaker": "Aris",
+      "avatar": "ayah",
+      "text": "Rumah di Rakata Selatan masih berbau cat baru. Aris membuka jendela lebar-lebar, sementara Sarah membantu Maya memilih sudut untuk mobil-mobilan merahnya. Rumah ini menjadi awal yang mereka pilih bersama.",
+      "background": "backstory_house",
+      "phase": "backstory",
+      "narrativeTime": "Minggu pertama di rumah baru",
+      "hour": "0 Jam",
+      "objective": "Menetap di rumah baru keluarga.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_aris_company",
+      "choices": []
+    },
+    "backstory_aris_company": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Aris kembali memimpin perusahaan rintisan yang membangun hunian dan sistem bangunan cerdas. Rapatnya membahas struktur, ventilasi, cadangan listrik, dan cara membuat rumah lebih siap menghadapi keadaan darurat.",
+      "background": "backstory_aris_company",
+      "phase": "backstory",
+      "narrativeTime": "Beberapa bulan setelah kepulangan",
+      "hour": "0 Jam",
+      "objective": "Aris kembali mengelola pekerjaannya.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_sarah_work",
+      "choices": []
+    },
+    "backstory_sarah_work": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "Di BMKG, Sarah kembali ke pekerjaan riset dan analisis yang ia sukai. Ia mengolah informasi meteorologi dan geofisika, lalu menyusun catatan risiko agar tim dapat membahas kesiapsiagaan dengan bahasa yang jelas.",
+      "background": "backstory_sarah_office",
+      "phase": "backstory",
+      "narrativeTime": "Masa penyesuaian kerja",
+      "hour": "0 Jam",
+      "objective": "Ikuti awal pekerjaan Sarah di Indonesia.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_sarah_office",
+      "choices": []
+    },
+    "backstory_sarah_office": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Meja Sarah dipenuhi berkas kesiapsiagaan, peta risiko, dan catatan rapat. Ia merapikan bahan-bahan itu sebelum memilih mana yang perlu dibaca lebih dahulu, lalu membuka satu ringkasan di layar kerjanya.",
+      "background": "backstory_sarah_office",
+      "phase": "backstory",
+      "narrativeTime": "Penelitian kesiapsiagaan jangka panjang",
+      "hour": "0 Jam",
+      "objective": "Temukan arah awal penelitian Sarah.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_sarah_baseline",
+      "choices": []
+    },
+    "backstory_sarah_baseline": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "Sarah menandai satu kesimpulan sederhana: kesiapsiagaan keluarga tidak dimulai saat sirene berbunyi. Ia ingin rumah mereka memiliki persediaan, rencana komunikasi, dan ruang perlindungan yang dipikirkan jauh sebelum keadaan darurat.",
+      "background": "backstory_sarah_office",
+      "phase": "backstory",
+      "narrativeTime": "Penelitian kesiapsiagaan jangka panjang",
+      "hour": "0 Jam",
+      "setFlags": [
+        "sarah_baseline_reviewed"
+      ],
+      "objective": "Susun dasar kesiapsiagaan keluarga.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_family_preparedness",
+      "choices": []
+    },
+    "backstory_family_preparedness": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "Malam itu Sarah membagikan catatannya kepada Aris. \"Aku tidak ingin kita hidup dalam rasa takut. Aku hanya ingin rumah ini punya pilihan saat keadaan berubah.\" Aris mengangguk, lalu bertanya berapa besar perlindungan yang benar-benar mereka perlukan.",
+      "background": "backstory_house",
+      "phase": "backstory",
+      "narrativeTime": "Beberapa minggu kemudian",
+      "hour": "0 Jam",
+      "objective": "Bicarakan kesiapsiagaan bersama keluarga.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_bunker_plan",
+      "choices": []
+    },
+    "backstory_bunker_plan": {
+      "speaker": "Aris",
+      "avatar": "ayah",
+      "text": "Aris menerjemahkan kekhawatiran Sarah menjadi rencana yang bisa dibangun: ruang perlindungan, sirkulasi udara, panel daya darurat, penyimpanan air, dan akses keluar yang jelas. \"Kita buat secukupnya, tapi jangan setengah-setengah,\" katanya.",
+      "background": "backstory_bunker_plan",
+      "phase": "backstory",
+      "narrativeTime": "Perencanaan Bunker 72",
+      "hour": "0 Jam",
+      "objective": "Rancang perlindungan keluarga secara bertanggung jawab.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_bunker_build",
+      "choices": []
+    },
+    "backstory_bunker_build": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Pembangunan berlangsung bertahap selama berbulan-bulan. Aris memeriksa struktur dan instalasi, Sarah menata kebutuhan dasar, dan Maya datang membawa gambar keluarga untuk ditempel di dinding yang masih kosong.",
+      "background": "backstory_bunker_build",
+      "phase": "backstory",
+      "narrativeTime": "Bulan-bulan pembangunan",
+      "hour": "0 Jam",
+      "objective": "Saksikan pembangunan Bunker 72.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_bunker_complete",
+      "choices": []
+    },
+    "backstory_bunker_complete": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "Saat Bunker 72 selesai, mereka tidak menganggapnya jaminan atas segala hal. Bagi Sarah, tempat itu adalah bagian dari rencana keluarga: tetap mengikuti informasi resmi, menyiapkan evakuasi, dan saling menjaga bila rumah tidak lagi aman.",
+      "background": "backstory_bunker_complete",
+      "phase": "backstory",
+      "narrativeTime": "Bunker 72 selesai dibangun",
+      "hour": "0 Jam",
+      "objective": "Selesaikan fondasi kesiapsiagaan keluarga.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_time_passes",
+      "choices": []
+    },
+    "backstory_time_passes": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Waktu berlalu. Bunker menjadi bagian tenang dari rumah, sementara rutinitas keluarga kembali berjalan: pekerjaan Aris, catatan Sarah, sekolah Maya, dan makan malam yang selalu mereka usahakan bersama.",
+      "background": "backstory_bunker_complete",
+      "phase": "backstory",
+      "narrativeTime": "Beberapa waktu kemudian",
+      "hour": "0 Jam",
+      "objective": "Lanjutkan menuju hari-hari sebelum bencana.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_sarah_update",
+      "choices": []
+    },
+    "backstory_sarah_update": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "Menjelang senja, Sarah menerima pembaruan baru. Informasi aktivitas gunung api berasal dari pemantauan resmi PVMBG/Badan Geologi; data lain menunjukkan kondisi yang perlu dicermati, tetapi belum memberi kepastian sempurna tentang apa yang akan terjadi.",
+      "background": "backstory_sarah_office_alert",
+      "phase": "backstory",
+      "narrativeTime": "Menjelang bencana",
+      "hour": "0 Jam",
+      "setFlags": [
+        "sarah_update_reviewed"
+      ],
+      "objective": "Tinjau pembaruan risiko melalui jalur resmi.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_sarah_decision",
+      "choices": []
+    },
+    "backstory_sarah_decision": {
+      "speaker": "Sarah",
+      "avatar": "ibu",
+      "text": "Sarah menatap rangkaian data dan catatan koordinasi. Ia tidak menetapkan status gunung api, tetapi ia dapat menentukan rekomendasi profesional yang akan ia ajukan melalui jalur resmi.",
+      "background": "backstory_sarah_office_alert",
+      "phase": "backstory",
+      "narrativeTime": "Menjelang bencana",
+      "hour": "0 Jam",
+      "objective": "Tentukan tindak lanjut profesional Sarah.",
+      "choices": [
+        {
+          "id": "c_sarah_warning_escalate",
+          "text": "Ajukan percepatan koordinasi dan penyampaian informasi kesiapsiagaan melalui jalur resmi.",
+          "nextSceneId": "backstory_sarah_response",
+          "knowledgeEffect": 0,
+          "log": "Sarah mengajukan percepatan koordinasi kesiapsiagaan melalui jalur resmi."
+        },
+        {
+          "id": "c_sarah_warning_verify",
+          "text": "Minta verifikasi lintas instansi sebelum mendukung penyampaian informasi yang lebih luas.",
+          "nextSceneId": "backstory_sarah_response",
+          "knowledgeEffect": 0,
+          "log": "Sarah meminta verifikasi lintas instansi atas informasi yang berkembang."
+        },
+        {
+          "id": "c_sarah_warning_maintain",
+          "text": "Pertahankan respons saat ini sambil melanjutkan pemantauan dan evaluasi berikutnya.",
+          "nextSceneId": "backstory_sarah_response",
+          "knowledgeEffect": 0,
+          "log": "Sarah mempertahankan respons saat ini sambil melanjutkan pemantauan."
+        }
+      ]
+    },
+    "backstory_sarah_response": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Sarah mengirim catatan tindak lanjutnya dan menutup laptop setelah memastikan usulnya tercatat. Di rumah, ia tahu keluarga tetap perlu mengikuti pembaruan resmi seperti semua warga lainnya.",
+      "conditionalText": [
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "escalate",
+          "text": " Usul percepatan koordinasinya diteruskan untuk ditinjau."
+        },
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "verify",
+          "text": " Permintaan verifikasi lintas instansinya diteruskan untuk ditinjau."
+        },
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "maintain",
+          "text": " Catatan pemantauan berkelanjutannya diteruskan untuk ditinjau."
+        }
+      ],
+      "background": "backstory_sarah_office_alert",
+      "phase": "backstory",
+      "narrativeTime": "Menjelang bencana",
+      "hour": "0 Jam",
+      "objective": "Akhiri tindak lanjut profesional Sarah.",
+      "advanceMode": "click",
+      "autoNextSceneId": "backstory_home_bridge",
+      "choices": []
+    },
+    "backstory_home_bridge": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Sore berikutnya, rumah kembali terasa biasa: aroma masakan, suara Maya bermain, dan radio yang menyala pelan di ruang tengah. Tidak ada yang tahu bahwa malam itu akan menguji semua persiapan yang pernah mereka bicarakan.",
+      "background": "backstory_house",
+      "phase": "backstory",
+      "narrativeTime": "Sore sebelum bencana",
+      "hour": "0 Jam",
+      "objective": "Kembali ke rumah bersama keluarga.",
+      "advanceMode": "click",
+      "autoNextSceneId": "prolog_home",
+      "choices": []
+    },
     "prolog_home": {
       "speaker": "Narator",
       "avatar": null,
@@ -48,7 +299,7 @@
       "choices": [
         {
           "id": "c_prolog_ibu_comfort",
-          "text": "️ \"Masakanmu selalu yang terbaik, Rin. Malam ini kita santap bersama ya.\"",
+          "text": "️ \"Masakanmu selalu yang terbaik, Sarah. Malam ini kita santap bersama ya.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 0,
           "log": "Menikmati kehangatan obrolan keluarga di dapur."
@@ -144,7 +395,7 @@
     "prolog_question": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Ayah: \"Rin, matikan kompor sekarang juga! Peluk Anak dan bawa ke lorong belakang! Palka bunker bawah tanah sudah kubuka. Kita harus masuk sebelum hujan abu panas menutupi rumah!\"\n\nIbu: \"Apa saja barang paling krusial yang harus kita bawa di ransel, Mas?\"",
+      "text": "Ayah: \"Sarah, matikan kompor sekarang juga! Peluk Anak dan bawa ke lorong belakang! Palka bunker bawah tanah sudah kubuka. Kita harus masuk sebelum hujan abu panas menutupi rumah!\"\n\nIbu: \"Apa saja barang paling krusial yang harus kita bawa di ransel, Mas?\"",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Pilih perbekalan hidup untuk ransel bunker.",

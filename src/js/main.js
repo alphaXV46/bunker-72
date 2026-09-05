@@ -12,7 +12,14 @@
 
 import storyData from '../data/story.json';
 import { StoryEngine } from './storyEngine.js';
-import { SAVE_KEY, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
+import {
+  NEW_GAME_START_SCENE_ID,
+  normalizeSarahOfficeReadIds,
+  normalizeSarahWarningResponse,
+  SAVE_KEY,
+  SAVE_SCHEMA_VERSION,
+  SURVIVAL,
+} from './constants.js';
 import { preloadAssets } from './assetLoader.js';
 import { RadioMiniGame } from './radioMiniGame.js';
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
@@ -83,7 +90,6 @@ const dom = {
 
 // ─── SAVE HELPERS ────────────────────────────────────────────────────────────
 
-const INITIAL_SCENE_ID = 'prolog_home';
 const SUPPORTED_RUNTIME_SCENES = new Set([
   'ending_eval',
   'trigger_ending_eval',
@@ -122,10 +128,21 @@ function normalizeExpeditionLocations(value) {
     : [];
 }
 
+function normalizeSarahFlags(value) {
+  if (!isPlainObject(value)) return null;
+  return {
+    ...value,
+    sarah_warning_response: normalizeSarahWarningResponse(value.sarah_warning_response),
+    sarah_office_read_ids: normalizeSarahOfficeReadIds(value.sarah_office_read_ids),
+    sarah_baseline_reviewed: value.sarah_baseline_reviewed === true,
+    sarah_update_reviewed: value.sarah_update_reviewed === true,
+  };
+}
+
 function createFreshSave(loadNotice) {
   return {
     version: SAVE_SCHEMA_VERSION,
-    sceneId: INITIAL_SCENE_ID,
+    sceneId: NEW_GAME_START_SCENE_ID,
     knowledge: SURVIVAL.DEFAULTS.knowledge,
     history: [],
     flags: {},
@@ -147,7 +164,7 @@ function normalizeSaveData(save) {
   const isLegacyDay3 = LEGACY_DAY3_CONSEQUENCE_SCENES.has(storedSceneId);
   const isValidScene = Boolean(storyData.scenes[storedSceneId]) || SUPPORTED_RUNTIME_SCENES.has(storedSceneId);
 
-  if (!isValidScene && !isLegacyDay4) {
+  if (!isValidScene && !isLegacyDay4 && !isLegacyDay2 && !isLegacyDay3) {
     return createFreshSave('Save lama menunjuk adegan yang sudah tidak tersedia. Permainan dimulai kembali dengan aman.');
   }
 
@@ -156,7 +173,7 @@ function normalizeSaveData(save) {
     sceneId: isLegacyDay4 ? 'ending_eval' : isLegacyDay2 ? 'day2_expedition_setup' : isLegacyDay3 ? 'day3_start' : storedSceneId,
     knowledge: typeof save.knowledge === 'number' ? save.knowledge : SURVIVAL.DEFAULTS.knowledge,
     history: Array.isArray(save.history) ? save.history : [],
-    flags: isPlainObject(save.flags) ? save.flags : null,
+    flags: normalizeSarahFlags(save.flags),
     inventory: isPlainObject(save.inventory) ? save.inventory : {},
     hunger: save.hunger,
     thirst: save.thirst,
@@ -355,7 +372,7 @@ async function initGame() {
     showScreen('game');
     storyEngine.audio.playBGM();
     const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
-    storyEngine.start('prolog_home', knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health, []);
+    storyEngine.start(NEW_GAME_START_SCENE_ID, knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health, []);
   });
 
   dom.continueBtn.addEventListener('click', () => {
