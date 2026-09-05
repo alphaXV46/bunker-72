@@ -4530,6 +4530,7 @@ body.disable-crt .crt-flicker { display: none !important; }
 .epilogue-social  { border-left-color: #69f0ae; }
 .epilogue-family  { border-left-color: #40c4ff; }
 .epilogue-rescue { border-left-color: #00e5ff; }
+.epilogue-sarah { border-left-color: var(--cyan); }
 .epilogue-maya { border-left-color: #ce93d8; }
 .epilogue-hendra { border-left-color: #69f0ae; }
 .epilogue-preparedness { border-left-color: #ffb74d; }

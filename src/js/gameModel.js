@@ -95,6 +95,12 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_prolog_anak_promise': 'promised_maya',
 });
 
+const SARAH_PUBLIC_IMPACT_BODIES = Object.freeze({
+  escalate: 'Karena Sarah mendorong koordinasi lebih awal, beberapa wilayah memperoleh waktu tambahan untuk mengaktifkan titik kumpul dan memeriksa jalur evakuasi. Setelah keadaan mulai stabil, pesan dari sejumlah keluarga mencatat bahwa waktu itu membantu mereka bergerak lebih cepat. Sarah tahu hasil tersebut lahir dari kerja banyak pihak, tetapi lega rekomendasinya ikut membuka ruang untuk bersiap.',
+  verify: 'Keputusan Sarah untuk menunggu verifikasi menghasilkan informasi lintas instansi yang lebih lengkap sebelum tindak lanjut diperluas. Namun, waktu persiapan menjadi lebih sempit dan beberapa jalur sudah padat ketika warga mulai bergerak. Sebagian keluarga sempat terpisah sebelum akhirnya dipertemukan kembali di posko; bagi Sarah, hasil itu tetap menyimpan lega sekaligus beban.',
+  maintain: 'Karena respons saat itu dipertahankan sambil menunggu evaluasi berikutnya, sebagian wilayah hanya memiliki waktu persiapan yang pendek ketika kondisi memburuk. Beberapa akses sudah sulit dilalui, sementara posko masih mencatat warga yang belum kembali atau belum ditemukan. Pencarian terus dilakukan, dan Sarah menyimpan catatan itu sebagai pengingat tentang beratnya keputusan di tengah ketidakpastian.',
+});
+
 export class GameModel {
   constructor() {
     this.currentSceneId = NEW_GAME_START_SCENE_ID;
@@ -522,7 +528,7 @@ export class GameModel {
     return this.getEndingResult().endingId;
   }
 
-  /** Constructs 4–6 deterministic, state-driven epilogue cards. */
+  /** Constructs deterministic, state-driven epilogue cards. */
   evaluateModularEnding() {
     const result = this.getEndingResult();
     const { endingId, preparedness } = result;
@@ -537,10 +543,15 @@ export class GameModel {
       : hendraOutcome === 'guided'
         ? ' Petunjuk yang pernah Aris berikan membantu Hendra mencapai perlindungan lain.'
         : '';
+    const sarahPublicImpactBody = SARAH_PUBLIC_IMPACT_BODIES[this.flags.sarah_warning_response] || null;
+    const sarahPublicImpactModule = sarahPublicImpactBody
+      ? { id: 'sarah_public_impact', icon: '◎', title: 'DAMPAK PUBLIK — SARAH', tone: 'sarah', body: sarahPublicImpactBody }
+      : null;
 
     if (isFatal) {
+      modules.push({ id: 'rescue', icon: '◈', title: 'PENUTUPAN KRISIS', tone: 'rescue', body: 'Tim pencari akhirnya menjangkau Bunker 72 setelah kondisi di dalam tidak lagi dapat dipulihkan. Tidak ada perayaan—hanya catatan tentang perlindungan yang habis terlalu cepat.' });
+      if (sarahPublicImpactModule) modules.push(sarahPublicImpactModule);
       modules.push(
-        { id: 'rescue', icon: '◈', title: 'PENUTUPAN KRISIS', tone: 'rescue', body: 'Tim pencari akhirnya menjangkau Bunker 72 setelah kondisi di dalam tidak lagi dapat dipulihkan. Tidak ada perayaan—hanya catatan tentang perlindungan yang habis terlalu cepat.' },
         { id: 'bunker', icon: '◫', title: 'KONDISI BUNKER', tone: 'bunker', body: 'Kegagalan kondisi vital menutup pilihan keluarga sebelum jendela penyelamatan selesai.' },
         { id: 'preparedness', icon: '⌁', title: 'CATATAN KESIAPSIAGAAN', tone: 'preparedness', body: 'Laporan ini menyoroti perlindungan teknis yang perlu diprioritaskan lebih awal pada situasi serupa.' },
       );
@@ -551,6 +562,7 @@ export class GameModel {
         failed: `Panggilan radio tidak dapat dipastikan. Bunker akhirnya ditemukan melalui penyisiran sektor dan pencatatan shelter, bukan karena transmisi yang sempurna.${hendraRescueNote}`,
       };
       modules.push({ id: 'rescue', icon: '⌁', title: 'OPERASI PENYELAMATAN', tone: 'rescue', body: rescueBodies[preparedness.radioQuality] });
+      if (sarahPublicImpactModule) modules.push(sarahPublicImpactModule);
 
       const familyBody = this.flags.sarah_comforted_maya
         ? 'Sarah menjaga Maya tetap tenang ketika Aris menyelesaikan tugas teknis. Di luar bunker, mereka kembali membagi tanggung jawab yang sama.'
