@@ -209,6 +209,13 @@ export class GameModel {
     return true;
   }
 
+  /** Commits the later cross-agency data review exactly once. */
+  completeSarahUpdateReview() {
+    if (this.flags.sarah_update_reviewed === true) return false;
+    this.flags.sarah_update_reviewed = true;
+    return true;
+  }
+
   /**
    * Initializes or re-initializes model state.
    * Used for both new games and loading a save.

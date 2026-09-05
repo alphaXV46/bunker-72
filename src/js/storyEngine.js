@@ -21,6 +21,7 @@ import {
   SARAH_OFFICE_HOTSPOTS,
   SARAH_OFFICE_IMAGE,
 } from './sarahOfficeConfig.js';
+import { SARAH_ANALYSIS_SECTIONS, SARAH_ANALYSIS_SECTION_IDS } from './sarahAnalysisConfig.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
@@ -57,6 +58,8 @@ export class StoryEngine {
     this.pendingMinigameChoice = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds = new Set();
+    this.sarahAnalysisIndex = 0;
+    this.sarahAnalysisReviewedIds = new Set();
 
     this.bunkerMinigame = new BunkerMinigame({
       root: this.dom.bunkerMinigame,
@@ -82,6 +85,8 @@ export class StoryEngine {
     this.pendingMinigameChoice = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds?.clear();
+    this.sarahAnalysisIndex = 0;
+    this.sarahAnalysisReviewedIds.clear();
     this.bunkerMinigame?.close();
     this.radioMiniGame?.resetFinalResult();
 
@@ -113,6 +118,24 @@ export class StoryEngine {
     // Resolve logic-trigger pseudo-scenes before doing anything else.
     if (sceneId === 'ending_eval' || sceneId === 'trigger_ending_eval') {
       this.renderScene(this.model.evaluateEnding());
+      return;
+    }
+    if (sceneId === 'backstory_sarah_update' && this.model.flags.sarah_update_reviewed === true) {
+      this.renderScene('backstory_sarah_decision');
+      return;
+    }
+    if (sceneId === 'backstory_sarah_decision') {
+      if (this.model.flags.sarah_update_reviewed !== true) {
+        this.renderScene('backstory_sarah_update');
+        return;
+      }
+      if (this.model.flags.sarah_warning_response) {
+        this.renderScene('backstory_sarah_response');
+        return;
+      }
+    }
+    if (sceneId === 'backstory_sarah_response' && !this.model.flags.sarah_warning_response) {
+      this.renderScene('backstory_sarah_decision');
       return;
     }
     const scene = this.storyData.scenes[sceneId];
@@ -250,6 +273,12 @@ export class StoryEngine {
     if (sceneId === 'backstory_sarah_office') {
       const showOffice = () => this.renderSarahOfficeHotspots();
       this.view.typeText(modifiedText, showOffice, { ...choicesPayload, choices: [], interactiveReady: showOffice });
+      return;
+    }
+
+    if (sceneId === 'backstory_sarah_update') {
+      const showAnalysis = () => this.beginSarahAnalysis();
+      this.view.typeText(modifiedText, showAnalysis, { ...choicesPayload, choices: [], interactiveReady: showAnalysis });
       return;
     }
 
@@ -472,6 +501,38 @@ export class StoryEngine {
     });
   }
 
+  beginSarahAnalysis() {
+    this.sarahAnalysisIndex = 0;
+    this.sarahAnalysisReviewedIds = new Set([SARAH_ANALYSIS_SECTIONS[0].id]);
+    this.renderSarahAnalysis();
+  }
+
+  renderSarahAnalysis() {
+    this.view.renderSarahAnalysis({
+      sections: SARAH_ANALYSIS_SECTIONS,
+      activeIndex: this.sarahAnalysisIndex,
+      reviewedIds: [...this.sarahAnalysisReviewedIds],
+      onNavigate: (index) => this.handleSarahAnalysisNavigate(index),
+      onComplete: () => this.completeSarahAnalysis(),
+    });
+  }
+
+  handleSarahAnalysisNavigate(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= SARAH_ANALYSIS_SECTIONS.length) return;
+    this.sarahAnalysisIndex = index;
+    this.sarahAnalysisReviewedIds.add(SARAH_ANALYSIS_SECTIONS[index].id);
+    this.renderSarahAnalysis();
+  }
+
+  completeSarahAnalysis() {
+    const allReviewed = SARAH_ANALYSIS_SECTION_IDS.every((id) => this.sarahAnalysisReviewedIds.has(id));
+    if (!allReviewed) return;
+    if (this.model.completeSarahUpdateReview()) {
+      this.onSave?.(this.model.toSaveData());
+    }
+    this.renderScene('backstory_sarah_decision');
+  }
+
   startExpedition(locationId) {
     const config = getExpeditionConfig(locationId);
     if (!config || this.model.expeditionVisitedLocations.includes(locationId) || this.model.expeditionVisitedLocations.length >= 2) return;
@@ -564,8 +625,8 @@ export class StoryEngine {
     }
 
     const sarahWarningResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[choice.id];
-    if (sarahWarningResponse && !this.model.setSarahWarningResponse(sarahWarningResponse)) {
-      this.renderScene('backstory_sarah_response');
+    if (sarahWarningResponse) {
+      this.commitSarahWarningDecision(choice, sarahWarningResponse);
       return;
     }
 
@@ -732,6 +793,28 @@ export class StoryEngine {
     }
 
     this.renderScene(choice.nextSceneId);
+  }
+
+  commitSarahWarningDecision(choice, response) {
+    if (this.model.flags.sarah_update_reviewed !== true) {
+      this.renderScene('backstory_sarah_update');
+      return;
+    }
+    if (!this.model.setSarahWarningResponse(response)) {
+      this.renderScene('backstory_sarah_response');
+      return;
+    }
+
+    this.model.history.push({
+      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
+      text: choice.log || choice.text,
+      choiceId: choice.id,
+      effect: 0,
+    });
+    this.view.renderProtocolLog(this.model.history);
+    this.audio.playClick();
+    this.onSave?.(this.model.toSaveData());
+    this.renderScene('backstory_sarah_response');
   }
 
   /** Continue the story choice after a minigame station is complete. */

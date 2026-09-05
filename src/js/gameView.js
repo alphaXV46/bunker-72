@@ -992,10 +992,137 @@ export class GameView {
 
   clearSceneHotspots() {
     this.closeInformationPanel();
+    this.clearSarahAnalysis();
     this.sceneHotspotResizeObserver?.disconnect();
     this.sceneHotspotResizeObserver = null;
     this.dom.storyBox?.querySelector('.scene-hotspot-layer')?.remove();
     this.dom.storyBox?.classList.remove('scene-hotspot-active', 'sarah-office-active');
+  }
+
+  clearSarahAnalysis() {
+    this.dom.storyBox?.querySelector('.sarah-analysis-layer')?.remove();
+    this.dom.storyBox?.classList.remove('sarah-analysis-active');
+  }
+
+  /** Renders the later multi-source review without owning its progression state. */
+  renderSarahAnalysis({ sections = [], activeIndex = 0, reviewedIds = [], onNavigate, onComplete } = {}) {
+    this.clearSarahAnalysis();
+    const section = sections[activeIndex];
+    if (!section) return;
+
+    const reviewed = new Set(reviewedIds);
+    const allReviewed = sections.every((item) => reviewed.has(item.id));
+    const isLast = activeIndex === sections.length - 1;
+    const layer = document.createElement('section');
+    layer.className = 'sarah-analysis-layer';
+    layer.setAttribute('aria-label', 'Analisis pembaruan data Sarah');
+
+    const shell = document.createElement('div');
+    shell.className = 'sarah-analysis-shell';
+    const header = document.createElement('header');
+    header.className = 'sarah-analysis-header';
+    const eyebrow = document.createElement('span');
+    eyebrow.textContent = 'RINGKASAN PEMANTAUAN // MULTI-SUMBER';
+    const progress = document.createElement('span');
+    progress.textContent = `${reviewed.size}/${sections.length} BAGIAN DITINJAU`;
+    header.append(eyebrow, progress);
+
+    const tabList = document.createElement('div');
+    tabList.className = 'sarah-analysis-tabs';
+    tabList.setAttribute('role', 'tablist');
+    tabList.setAttribute('aria-label', 'Bagian data pemantauan');
+    let activeTab = null;
+    sections.forEach((item, index) => {
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = `sarah-analysis-tab${index === activeIndex ? ' is-active' : ''}${reviewed.has(item.id) ? ' is-reviewed' : ''}`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-selected', String(index === activeIndex));
+      tab.setAttribute('aria-controls', 'sarah-analysis-content');
+      tab.setAttribute('aria-label', `${item.number} ${item.tabLabel}${reviewed.has(item.id) ? ', sudah ditinjau' : ''}`);
+      tab.textContent = `${item.number} ${item.tabLabel}`;
+      tab.addEventListener('click', () => onNavigate?.(index));
+      if (index === activeIndex) activeTab = tab;
+      tabList.appendChild(tab);
+    });
+
+    const content = document.createElement('article');
+    content.id = 'sarah-analysis-content';
+    content.className = 'sarah-analysis-content';
+    content.setAttribute('role', 'tabpanel');
+    content.setAttribute('tabindex', '0');
+    const titleRow = document.createElement('div');
+    titleRow.className = 'sarah-analysis-title-row';
+    const titleGroup = document.createElement('div');
+    const step = document.createElement('span');
+    step.className = 'sarah-analysis-step';
+    step.textContent = `DATA ${section.number}`;
+    const title = document.createElement('h2');
+    title.textContent = section.title;
+    const source = document.createElement('p');
+    source.className = 'sarah-analysis-source';
+    source.textContent = section.sourceLabel;
+    titleGroup.append(step, title, source);
+    const status = document.createElement('strong');
+    status.className = 'sarah-analysis-status';
+    status.textContent = section.status;
+    titleRow.append(titleGroup, status);
+
+    const dataGrid = document.createElement('div');
+    dataGrid.className = 'sarah-analysis-data-grid';
+    const chart = document.createElement('div');
+    chart.className = 'sarah-analysis-chart';
+    chart.setAttribute('role', 'img');
+    chart.setAttribute('aria-label', `Grafik sederhana untuk ${section.title}: ${section.status}`);
+    section.bars.forEach((height) => {
+      const bar = document.createElement('i');
+      bar.style.setProperty('--signal-height', `${height}%`);
+      chart.appendChild(bar);
+    });
+    const summary = document.createElement('p');
+    summary.className = 'sarah-analysis-summary';
+    summary.textContent = section.summary;
+    dataGrid.append(chart, summary);
+
+    const interpretation = document.createElement('div');
+    interpretation.className = 'sarah-analysis-interpretation';
+    const urgency = document.createElement('div');
+    const urgencyTitle = document.createElement('strong');
+    urgencyTitle.textContent = 'PERLU DICERMATI';
+    const urgencyText = document.createElement('p');
+    urgencyText.textContent = section.urgency;
+    urgency.append(urgencyTitle, urgencyText);
+    const uncertainty = document.createElement('div');
+    const uncertaintyTitle = document.createElement('strong');
+    uncertaintyTitle.textContent = 'BELUM PASTI';
+    const uncertaintyText = document.createElement('p');
+    uncertaintyText.textContent = section.uncertainty;
+    uncertainty.append(uncertaintyTitle, uncertaintyText);
+    interpretation.append(urgency, uncertainty);
+    content.append(titleRow, dataGrid, interpretation);
+
+    const footer = document.createElement('footer');
+    footer.className = 'sarah-analysis-footer';
+    const previous = document.createElement('button');
+    previous.type = 'button';
+    previous.className = 'sarah-analysis-nav';
+    previous.textContent = 'DATA SEBELUMNYA';
+    previous.disabled = activeIndex === 0;
+    previous.addEventListener('click', () => onNavigate?.(activeIndex - 1));
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'sarah-analysis-nav is-primary';
+    next.textContent = isLast
+      ? allReviewed ? 'SELESAI MENINJAU DATA' : 'TINJAU BAGIAN YANG TERSISA'
+      : 'DATA BERIKUTNYA';
+    next.disabled = isLast && !allReviewed;
+    next.addEventListener('click', () => isLast ? onComplete?.() : onNavigate?.(activeIndex + 1));
+    footer.append(previous, next);
+    shell.append(header, tabList, content, footer);
+    layer.appendChild(shell);
+    this.dom.storyBox.appendChild(layer);
+    this.dom.storyBox.classList.add('sarah-analysis-active');
+    requestAnimationFrame(() => activeTab?.focus());
   }
 
   /** Backwards-compatible lifecycle alias for existing Day 1 call sites. */

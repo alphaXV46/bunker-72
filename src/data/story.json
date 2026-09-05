@@ -167,12 +167,7 @@
       "phase": "backstory",
       "narrativeTime": "Menjelang bencana",
       "hour": "0 Jam",
-      "setFlags": [
-        "sarah_update_reviewed"
-      ],
       "objective": "Tinjau pembaruan risiko melalui jalur resmi.",
-      "advanceMode": "click",
-      "autoNextSceneId": "backstory_sarah_decision",
       "choices": []
     },
     "backstory_sarah_decision": {
@@ -211,22 +206,22 @@
     "backstory_sarah_response": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sarah mengirim catatan tindak lanjutnya dan menutup laptop setelah memastikan usulnya tercatat. Di rumah, ia tahu keluarga tetap perlu mengikuti pembaruan resmi seperti semua warga lainnya.",
+      "text": "Sarah mengirim tindak lanjut melalui kanal resmi. Hasil akhirnya belum dapat diketahui malam itu; proses berikutnya tetap bergantung pada koordinasi dan pembaruan lembaga yang berwenang.",
       "conditionalText": [
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "escalate",
-          "text": " Usul percepatan koordinasinya diteruskan untuk ditinjau."
+          "text": " Rekomendasi percepatan koordinasinya diteruskan, dan tim terkait mulai menyiapkan pembahasan lebih cepat."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "verify",
-          "text": " Permintaan verifikasi lintas instansinya diteruskan untuk ditinjau."
+          "text": " Permintaan konfirmasi lintas instansinya dikirim segera agar data yang belum selaras dapat diperiksa kembali."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "maintain",
-          "text": " Catatan pemantauan berkelanjutannya diteruskan untuk ditinjau."
+          "text": " Respons yang berjalan dipertahankan, sementara Sarah menyiapkan evaluasi berikutnya sesuai jadwal pemantauan."
         }
       ],
       "background": "backstory_sarah_office_alert",
