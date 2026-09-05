@@ -339,6 +339,23 @@
       "speaker": "Radio Rakata",
       "avatar": null,
       "text": "[RADIO SUARA RAKATA 94.2 FM] Alunan petikan gitar akustik mengalun lembut dari corong radio tua. Penyiar bersuara hangat: \"...Selamat petang pendengar setia. Menjelang senja di pesisir barat, hembusan angin laut terpantau tenang... meski BMKG mencatat tremor mikro di kedalaman laut, seluruh aktivitas warga tetap kondusif...\"",
+      "conditionalText": [
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "escalate",
+          "text": " Sebelum musik kembali, penyiar menambahkan: \"Sejumlah wilayah pesisir mulai memperkuat kesiapsiagaan setelah koordinasi antarinstansi diperbarui. Warga diminta memeriksa jalur evakuasi dan mengikuti informasi resmi.\" Sarah berhenti sejenak; rekomendasinya telah bergerak melalui jalur yang semestinya."
+        },
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "verify",
+          "text": " Penyiar melanjutkan: \"Verifikasi lintas instansi atas perkembangan terbaru masih berlangsung. Warga diminta mengikuti pembaruan resmi dan menyiapkan kebutuhan dasar.\" Sarah menyimak tanpa komentar; informasi yang lebih lengkap sedang dihimpun."
+        },
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "maintain",
+          "text": " Penyiar melanjutkan: \"Pemantauan kondisi wilayah terus dilakukan. Belum ada perubahan besar pada imbauan saat ini, tetapi masyarakat diminta tetap mengikuti informasi resmi.\" Sarah mengenali bahwa evaluasi rutin masih menjadi dasar respons."
+        }
+      ],
       "background": "prolog_peaceful",
       "hour": "0 Jam",
       "objective": "Simak siaran radio senja di ruang tamu.",
@@ -899,6 +916,21 @@
       "avatar": "ibu",
       "text": "Kamu pulang... itu saja sudah cukup membuatku bernapas lagi. Letakkan semuanya di meja—kita lihat apa yang bisa menyelamatkan kita sampai bantuan datang.",
       "conditionalText": [
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "escalate",
+          "text": " Dari radio posko terdengar pembaruan: beberapa titik kumpul sudah aktif ketika kondisi memburuk, meski gangguan akses masih menyulitkan petugas. Sarah terdiam sejenak; koordinasi yang dimulai lebih awal telah memberi sebagian warga tambahan waktu."
+        },
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "verify",
+          "text": " Dari radio posko terdengar bahwa konfirmasi lintas instansi akhirnya diteruskan menjadi penguatan kesiapsiagaan. Informasinya lebih lengkap, tetapi jalan menuju beberapa titik kumpul telah padat dan waktu bergerak semakin sempit."
+        },
+        {
+          "requiredFlag": "sarah_warning_response",
+          "requiredValue": "maintain",
+          "text": " Dari radio posko terdengar laporan tentang rute yang padat dan beberapa keluarga yang belum kembali ke titik kumpul; pencarian masih berlangsung di area yang sulit dijangkau. Sarah merapatkan genggamannya pada radio, sadar bahwa ruang persiapan kini jauh lebih sempit."
+        },
         {
           "requiredFlag": "medical_mask_ready",
           "text": " Masker dari pos kesehatan membuat wajah Sarah sedikit lebih tenang.",
