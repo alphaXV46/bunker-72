@@ -226,6 +226,7 @@ function showScreen(screenKey) {
   if (target) target.classList.add('active');
 
   if (screenKey !== 'game') {
+    storyEngine?.view.clearSceneHotspots();
     storyEngine?.audio.stopAll();
   }
 }

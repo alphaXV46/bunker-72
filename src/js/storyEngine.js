@@ -15,6 +15,12 @@ import { RetroAudio } from './retroAudio.js';
 import { BunkerMinigame } from './bunkerMinigame.js';
 import { ENDING_IDS, parseHour, SARAH_WARNING_RESPONSE_BY_CHOICE_ID } from './constants.js';
 import { getExpeditionConfig, EXPEDITION_CONFIGS } from './expeditionConfig.js';
+import {
+  getSarahOfficeHotspot,
+  SARAH_OFFICE_DOCUMENTS,
+  SARAH_OFFICE_HOTSPOTS,
+  SARAH_OFFICE_IMAGE,
+} from './sarahOfficeConfig.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
@@ -69,6 +75,7 @@ export class StoryEngine {
    * Called for both new games and save-file loads.
    */
   start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
+    this.view.clearSceneHotspots();
     this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health, expeditionVisitedLocations);
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
@@ -240,6 +247,12 @@ export class StoryEngine {
       return;
     }
 
+    if (sceneId === 'backstory_sarah_office') {
+      const showOffice = () => this.renderSarahOfficeHotspots();
+      this.view.typeText(modifiedText, showOffice, { ...choicesPayload, choices: [], interactiveReady: showOffice });
+      return;
+    }
+
     if (sceneId === 'day2_expedition_map') {
       const showMap = () => this.view.renderExpeditionMap(
         EXPEDITION_LOCATIONS,
@@ -396,6 +409,69 @@ export class StoryEngine {
     this.onSave?.(this.model.toSaveData());
   }
 
+  getSarahOfficeHotspotState(spot) {
+    const readIds = this.model.flags.sarah_office_read_ids;
+    const isRead = spot.type === 'document' && readIds.includes(spot.id);
+    const isLocked = spot.type === 'progression' && !readIds.includes(spot.requiresReadId);
+    return {
+      read: isRead,
+      disabled: isLocked,
+      marker: isLocked ? '⌁' : isRead ? '✓' : '+',
+      displayLabel: isRead ? `${spot.label} · dibaca` : spot.label,
+      ariaLabel: `${spot.label}${isRead ? ' (sudah dibaca)' : isLocked ? ' (terkunci)' : ''}`,
+      hint: isLocked ? spot.lockedHint : '',
+    };
+  }
+
+  getSarahOfficeStatusText() {
+    const readCount = SARAH_OFFICE_DOCUMENTS.filter((document) =>
+      this.model.flags.sarah_office_read_ids.includes(document.id)
+    ).length;
+    const laptopState = this.model.flags.sarah_office_read_ids.includes('work_notes')
+      ? 'Laptop siap dibuka'
+      : 'Catatan kerja membuka laptop';
+    return `${readCount}/6 dibaca · ${laptopState}`;
+  }
+
+  renderSarahOfficeHotspots() {
+    this.view.renderSceneHotspots({
+      hotspots: SARAH_OFFICE_HOTSPOTS,
+      ariaLabel: 'Meja kerja interaktif Sarah',
+      layerClass: 'sarah-office-hotspot-layer',
+      hotspotClass: 'sarah-office-hotspot',
+      statusTitle: 'MEJA KERJA SARAH',
+      statusText: this.getSarahOfficeStatusText(),
+      image: SARAH_OFFICE_IMAGE,
+      getState: (spot) => this.getSarahOfficeHotspotState(spot),
+      onActivate: (hotspotId, button) => this.handleSarahOfficeHotspot(hotspotId, button),
+    });
+  }
+
+  handleSarahOfficeHotspot(hotspotId, returnFocus) {
+    const hotspot = getSarahOfficeHotspot(hotspotId);
+    if (!hotspot) return;
+    if (hotspot.type === 'progression') {
+      if (!this.model.flags.sarah_office_read_ids.includes(hotspot.requiresReadId)) return;
+      this.renderScene('backstory_sarah_baseline');
+      return;
+    }
+
+    if (this.model.markSarahOfficeDocumentRead(hotspot.id)) {
+      this.onSave?.(this.model.toSaveData());
+      this.view.refreshSceneHotspotStates(
+        SARAH_OFFICE_HOTSPOTS,
+        (spot) => this.getSarahOfficeHotspotState(spot),
+        this.getSarahOfficeStatusText()
+      );
+    }
+    this.view.showInformationPanel({
+      title: hotspot.title,
+      sourceLabel: hotspot.sourceLabel,
+      content: hotspot.content,
+      returnFocus,
+    });
+  }
+
   startExpedition(locationId) {
     const config = getExpeditionConfig(locationId);
     if (!config || this.model.expeditionVisitedLocations.includes(locationId) || this.model.expeditionVisitedLocations.length >= 2) return;
@@ -482,6 +558,10 @@ export class StoryEngine {
     }
 
     if (choice.disabled) return;
+
+    if (choice.id === 'c_sarah_baseline_complete' && this.model.completeSarahBaselineReview()) {
+      this.onSave?.(this.model.toSaveData());
+    }
 
     const sarahWarningResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[choice.id];
     if (sarahWarningResponse && !this.model.setSarahWarningResponse(sarahWarningResponse)) {

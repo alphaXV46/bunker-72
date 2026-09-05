@@ -41,6 +41,7 @@ import bgBackstoryAirport from '../assets/backgrounds/bg_backstory_airport.webp'
 import bgBackstoryHouse from '../assets/backgrounds/bg_backstory_house.webp';
 import bgBackstoryArisCompany from '../assets/backgrounds/bg_backstory_aris_company.webp';
 import bgBackstorySarahOffice from '../assets/backgrounds/bg_backstory_sarah_office.webp';
+import bgBackstorySarahOfficeInteractive from '../assets/backgrounds/bg_backstory_sarah_office_interactive.webp';
 import bgBackstorySarahOfficeAlert from '../assets/backgrounds/bg_backstory_sarah_office_alert.webp';
 import bgBackstoryBunkerPlan from '../assets/backgrounds/bg_backstory_bunker_plan.webp';
 import bgBackstoryBunkerBuild from '../assets/backgrounds/bg_backstory_bunker_build.webp';
@@ -82,6 +83,7 @@ const ASSET_URLS = [
   bgBackstoryHouse,
   bgBackstoryArisCompany,
   bgBackstorySarahOffice,
+  bgBackstorySarahOfficeInteractive,
   bgBackstorySarahOfficeAlert,
   bgBackstoryBunkerPlan,
   bgBackstoryBunkerBuild,

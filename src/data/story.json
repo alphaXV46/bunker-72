@@ -69,13 +69,11 @@
       "speaker": "Narator",
       "avatar": null,
       "text": "Meja Sarah dipenuhi berkas kesiapsiagaan, peta risiko, dan catatan rapat. Ia merapikan bahan-bahan itu sebelum memilih mana yang perlu dibaca lebih dahulu, lalu membuka satu ringkasan di layar kerjanya.",
-      "background": "backstory_sarah_office",
+      "background": "backstory_sarah_office_interactive",
       "phase": "backstory",
       "narrativeTime": "Penelitian kesiapsiagaan jangka panjang",
       "hour": "0 Jam",
       "objective": "Temukan arah awal penelitian Sarah.",
-      "advanceMode": "click",
-      "autoNextSceneId": "backstory_sarah_baseline",
       "choices": []
     },
     "backstory_sarah_baseline": {
@@ -86,13 +84,15 @@
       "phase": "backstory",
       "narrativeTime": "Penelitian kesiapsiagaan jangka panjang",
       "hour": "0 Jam",
-      "setFlags": [
-        "sarah_baseline_reviewed"
-      ],
       "objective": "Susun dasar kesiapsiagaan keluarga.",
-      "advanceMode": "click",
-      "autoNextSceneId": "backstory_family_preparedness",
-      "choices": []
+      "choices": [
+        {
+          "id": "c_sarah_baseline_complete",
+          "text": "Simpan ringkasan dan bicarakan rencana dengan Aris.",
+          "nextSceneId": "backstory_family_preparedness",
+          "effect": 0
+        }
+      ]
     },
     "backstory_family_preparedness": {
       "speaker": "Sarah",

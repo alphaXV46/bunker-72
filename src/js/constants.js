@@ -65,13 +65,20 @@ export const SARAH_WARNING_RESPONSES = Object.freeze([
 
 /** Reserved for the office interaction phase; saved values are validated now. */
 export const SARAH_OFFICE_DOCUMENT_IDS = Object.freeze([
-  'earthquake_preparedness',
-  'tsunami_evacuation',
-  'volcanic_ash_protection',
+  'earthquake_guide',
+  'tsunami_route',
+  'volcanic_ash_guide',
   'emergency_kit',
   'survival_handbook',
-  'sarah_work_notes',
+  'work_notes',
 ]);
+
+const LEGACY_SARAH_OFFICE_DOCUMENT_IDS = Object.freeze({
+  earthquake_preparedness: 'earthquake_guide',
+  tsunami_evacuation: 'tsunami_route',
+  volcanic_ash_protection: 'volcanic_ash_guide',
+  sarah_work_notes: 'work_notes',
+});
 
 export function normalizeSarahWarningResponse(value) {
   return SARAH_WARNING_RESPONSES.includes(value) ? value : null;
@@ -80,7 +87,10 @@ export function normalizeSarahWarningResponse(value) {
 export function normalizeSarahOfficeReadIds(value) {
   const validIds = new Set(SARAH_OFFICE_DOCUMENT_IDS);
   return Array.isArray(value)
-    ? [...new Set(value.filter((id) => typeof id === 'string' && validIds.has(id)))]
+    ? [...new Set(value
+      .filter((id) => typeof id === 'string')
+      .map((id) => LEGACY_SARAH_OFFICE_DOCUMENT_IDS[id] || id)
+      .filter((id) => validIds.has(id)))]
     : [];
 }
 

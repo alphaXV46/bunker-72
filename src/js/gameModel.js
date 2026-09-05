@@ -194,6 +194,21 @@ export class GameModel {
     return true;
   }
 
+  /** Records one validated Sarah office document without duplicates. */
+  markSarahOfficeDocumentRead(documentId) {
+    const previous = normalizeSarahOfficeReadIds(this.flags.sarah_office_read_ids);
+    const next = normalizeSarahOfficeReadIds([...previous, documentId]);
+    this.flags.sarah_office_read_ids = next;
+    return next.length > previous.length;
+  }
+
+  /** Commits completion only at the end of Sarah's baseline review. */
+  completeSarahBaselineReview() {
+    if (this.flags.sarah_baseline_reviewed === true) return false;
+    this.flags.sarah_baseline_reviewed = true;
+    return true;
+  }
+
   /**
    * Initializes or re-initializes model state.
    * Used for both new games and loading a save.

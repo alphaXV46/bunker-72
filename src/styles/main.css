@@ -843,6 +843,7 @@ input[type="range"] {
 .story-box.bg-backstory-house { background-image: url('../assets/backgrounds/bg_backstory_house.webp'); }
 .story-box.bg-backstory-aris-company { background-image: url('../assets/backgrounds/bg_backstory_aris_company.webp'); }
 .story-box.bg-backstory-sarah-office { background-image: url('../assets/backgrounds/bg_backstory_sarah_office.webp'); }
+.story-box.bg-backstory-sarah-office-interactive { background-image: url('../assets/backgrounds/bg_backstory_sarah_office_interactive.webp'); }
 .story-box.bg-backstory-sarah-office-alert { background-image: url('../assets/backgrounds/bg_backstory_sarah_office_alert.webp'); }
 .story-box.bg-backstory-bunker-plan { background-image: url('../assets/backgrounds/bg_backstory_bunker_plan.webp'); }
 .story-box.bg-backstory-bunker-build { background-image: url('../assets/backgrounds/bg_backstory_bunker_build.webp'); }
@@ -4622,12 +4623,29 @@ body.disable-crt .crt-flicker { display: none !important; }
 .speaker-penjarah  .speaker-name { color: #ff8a80 !important; }
 .speaker-sar       .speaker-name { color: #ffb74d !important; }
 
-/* Day 1 bunker inspection overlay */
+/* Shared image hotspot overlay; domain rules remain in each controller. */
+.scene-hotspot-layer,
 .day1-hotspot-layer {
   position: absolute;
   inset: 0;
   z-index: 5;
   pointer-events: none;
+}
+
+.scene-hotspot-stage {
+  position: absolute;
+  overflow: visible;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.scene-hotspot-stage.fills-layer { inset: 0; }
+
+.scene-hotspot {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
 }
 
 .preparedness-debrief-item {
@@ -4643,6 +4661,7 @@ body.disable-crt .crt-flicker { display: none !important; }
 .day1-hotspot-layer ~ .dialogue-overlay,
 .dialogue-overlay { z-index: 12; }
 
+.scene-hotspot-status,
 .day1-hotspot-status {
   position: absolute;
   top: 4%;
@@ -4658,8 +4677,10 @@ body.disable-crt .crt-flicker { display: none !important; }
   font: 0.78rem/1.2 'Share Tech Mono', monospace;
   letter-spacing: 0.7px;
   pointer-events: auto;
+  z-index: 4;
 }
 
+.scene-hotspot-status strong,
 .day1-hotspot-status strong { color: #fbc02d; font-size: 0.68rem; letter-spacing: 1.3px; }
 
 .day1-hotspot {
@@ -4705,9 +4726,140 @@ body.disable-crt .crt-flicker { display: none !important; }
 .day1-hotspot-finish:disabled { border-color: rgba(144, 164, 174, 0.35); color: #78909c; cursor: not-allowed; opacity: 0.7; }
 
 @media (max-width: 768px) {
+  .scene-hotspot-status,
   .day1-hotspot-status { top: 2%; left: 2%; min-width: 155px; padding: 7px 9px; }
   .day1-hotspot-finish { right: 2%; bottom: 4%; font-size: 0.68rem; }
   .hotspot-label { max-width: 92px; font-size: 0.58rem; }
+}
+
+/* Sarah office uses the exact 1672x941 image as a contained interaction stage. */
+.sarah-office-hotspot-layer {
+  z-index: 15;
+  overflow: hidden;
+  background: #070b0e;
+}
+
+.sarah-office-active .dialogue-overlay,
+.sarah-office-active .command-deck { visibility: hidden; pointer-events: none; }
+
+.sarah-office-hotspot-layer .scene-hotspot-status {
+  top: 2.5%;
+  left: 2.5%;
+  border-color: rgba(91, 192, 190, 0.55);
+  border-left-color: var(--cyan, #5bc0be);
+  background: rgba(8, 14, 17, 0.9);
+}
+
+.sarah-office-hotspot-layer .scene-hotspot-status strong { color: var(--cyan, #5bc0be); }
+
+.sarah-office-hotspot {
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 2px;
+  border: 2px solid rgba(126, 207, 210, 0.78);
+  border-radius: 5px;
+  background: rgba(7, 19, 23, 0.22);
+  color: #d6f3f3;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 140ms ease, border-color 140ms ease, opacity 140ms ease;
+}
+
+.sarah-office-hotspot:hover:not(:disabled),
+.sarah-office-hotspot:focus-visible:not(:disabled) {
+  border-color: #e5ffff;
+  background: rgba(91, 192, 190, 0.22);
+  outline: 3px solid rgba(91, 192, 190, 0.38);
+  outline-offset: 2px;
+}
+
+.sarah-office-hotspot.is-read {
+  border-color: rgba(176, 190, 197, 0.68);
+  background: rgba(17, 24, 28, 0.42);
+  color: #cfd8dc;
+}
+
+.sarah-office-hotspot.is-disabled {
+  border-color: rgba(144, 164, 174, 0.42);
+  color: #90a4ae;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.sarah-office-hotspot .hotspot-label {
+  max-width: 145px;
+  text-align: center;
+  white-space: normal;
+}
+
+.scene-information-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 36px);
+  background: rgba(3, 7, 9, 0.78);
+}
+
+.scene-information-panel {
+  width: min(620px, 92%);
+  max-height: min(78vh, 520px);
+  overflow-y: auto;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1px solid rgba(91, 192, 190, 0.75);
+  border-left: 4px solid var(--cyan, #5bc0be);
+  background: rgba(11, 18, 22, 0.98);
+  color: #e8edf0;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.42);
+}
+
+.scene-information-panel h2 {
+  margin: 0 0 6px;
+  color: #e5ffff;
+  font: 1.15rem/1.25 'Share Tech Mono', monospace;
+}
+
+.scene-information-source {
+  margin: 0 0 18px;
+  color: var(--cyan, #5bc0be);
+  font: 0.72rem/1.35 'Share Tech Mono', monospace;
+  letter-spacing: 0.7px;
+}
+
+.scene-information-body {
+  margin: 0 0 22px;
+  color: #d7e0e4;
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  line-height: 1.65;
+}
+
+.scene-information-close {
+  min-height: 46px;
+  padding: 10px 15px;
+  border: 1px solid var(--cyan, #5bc0be);
+  background: rgba(91, 192, 190, 0.12);
+  color: #e5ffff;
+  font: 0.76rem 'Share Tech Mono', monospace;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+}
+
+.scene-information-close:hover,
+.scene-information-close:focus-visible {
+  background: rgba(91, 192, 190, 0.25);
+  outline: 3px solid rgba(91, 192, 190, 0.35);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .sarah-office-hotspot { min-width: 44px; min-height: 44px; }
+  .sarah-office-hotspot .hotspot-label { max-width: 88px; font-size: 0.52rem; }
+  .sarah-office-hotspot-layer .scene-hotspot-status { max-width: 54%; min-width: 0; font-size: 0.58rem; }
+  .scene-information-overlay { padding: 10px; }
+  .scene-information-panel { width: 96%; max-height: 84%; }
 }
 
 /* Day 2 expedition map and route HUD */

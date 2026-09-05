@@ -69,6 +69,9 @@ export class GameView {
     this.backButton = null;
     this.goodEndingCutsceneStep = 0;
     this.badEndingCutsceneStep = 0;
+    this.sceneHotspotResizeObserver = null;
+    this.informationPanelEscapeHandler = null;
+    this.informationPanelReturnFocus = null;
 
     // The real editor is registered only by the development bootstrap. The
     // release build receives a no-op adapter with the same small contract.
@@ -348,6 +351,8 @@ export class GameView {
         event.preventDefault();
         return;
       }
+
+      if (event.code === 'Space' && event.target?.closest?.('button')) return;
 
       if (event.code === 'Space' && !event.repeat) {
         const minigameOpen = this.dom.bunkerMinigame && !this.dom.bunkerMinigame.hidden;
@@ -739,7 +744,7 @@ export class GameView {
    * @param {object} scene
    */
   renderSceneArt(scene, flags = {}, sceneId = '') {
-    if (sceneId !== 'day1_inspection') this.clearDay1Hotspots();
+    if (!['day1_inspection', 'backstory_sarah_office'].includes(sceneId)) this.clearSceneHotspots();
     const hour = parseHour(scene.hour);
     const gameplayDayBg = hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
     const damagedBg = hour >= 48 ? 'bg-day3' : 'bg-rusak';
@@ -758,6 +763,7 @@ export class GameView {
       backstory_house: 'bg-backstory-house',
       backstory_aris_company: 'bg-backstory-aris-company',
       backstory_sarah_office: 'bg-backstory-sarah-office',
+      backstory_sarah_office_interactive: 'bg-backstory-sarah-office-interactive',
       backstory_sarah_office_alert: 'bg-backstory-sarah-office-alert',
       backstory_bunker_plan: 'bg-backstory-bunker-plan',
       backstory_bunker_build: 'bg-backstory-bunker-build',
@@ -777,7 +783,7 @@ export class GameView {
       'bg-prolog-peaceful', 'bg-prolog-window',
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
       'bg-backstory-airport', 'bg-backstory-house', 'bg-backstory-aris-company',
-      'bg-backstory-sarah-office', 'bg-backstory-sarah-office-alert',
+      'bg-backstory-sarah-office', 'bg-backstory-sarah-office-interactive', 'bg-backstory-sarah-office-alert',
       'bg-backstory-bunker-plan', 'bg-backstory-bunker-build', 'bg-backstory-bunker-complete',
       'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-day2', 'bg-day3', 'bg-normal', 'bg-rusak', 'scene-alert',
       'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'has-interactive-choices',
@@ -984,48 +990,204 @@ export class GameView {
     }, 4800);
   }
 
-  clearDay1Hotspots() {
-    this.dom.storyBox?.querySelector('.day1-hotspot-layer')?.remove();
+  clearSceneHotspots() {
+    this.closeInformationPanel();
+    this.sceneHotspotResizeObserver?.disconnect();
+    this.sceneHotspotResizeObserver = null;
+    this.dom.storyBox?.querySelector('.scene-hotspot-layer')?.remove();
+    this.dom.storyBox?.classList.remove('scene-hotspot-active', 'sarah-office-active');
   }
 
-  renderDay1Hotspots(hotspots, flags = {}, onInspect, onFinish) {
-    this.clearDay1Hotspots();
-    const layer = document.createElement('div');
-    layer.className = 'day1-hotspot-layer';
-    layer.setAttribute('role', 'group');
-    layer.setAttribute('aria-label', 'Titik inspeksi bunker');
+  /** Backwards-compatible lifecycle alias for existing Day 1 call sites. */
+  clearDay1Hotspots() {
+    this.clearSceneHotspots();
+  }
 
-    const inspectedCount = hotspots.filter((spot) => flags[spot.flag]).length;
+  /**
+   * Shared visual hotspot renderer. Gameplay rules and state stay with the
+   * controller that supplies this configuration.
+   */
+  renderSceneHotspots({
+    hotspots = [], ariaLabel = 'Titik interaksi', layerClass = '', hotspotClass = '',
+    statusTitle = '', statusText = '', image = null, getState = () => ({}),
+    onActivate, progression = null,
+  } = {}) {
+    this.clearSceneHotspots();
+    const layer = document.createElement('div');
+    layer.className = `scene-hotspot-layer ${layerClass}`.trim();
+    layer.setAttribute('role', 'group');
+    layer.setAttribute('aria-label', ariaLabel);
+
     const status = document.createElement('div');
-    status.className = 'day1-hotspot-status';
+    status.className = 'scene-hotspot-status';
     status.setAttribute('aria-live', 'polite');
-    status.innerHTML = `<strong>INSPEKSI BUNKER</strong><span>${inspectedCount}/3 titik diperiksa</span>`;
+    const statusHeading = document.createElement('strong');
+    statusHeading.textContent = statusTitle;
+    const statusDetail = document.createElement('span');
+    statusDetail.textContent = statusText;
+    status.append(statusHeading, statusDetail);
     layer.appendChild(status);
 
+    const stage = document.createElement('div');
+    stage.className = 'scene-hotspot-stage';
+    if (image?.url) {
+      stage.style.backgroundImage = `url("${image.url}")`;
+      const updateStageBounds = () => {
+        const layerWidth = layer.clientWidth;
+        const layerHeight = layer.clientHeight;
+        if (!layerWidth || !layerHeight || !image.width || !image.height) return;
+        const scale = Math.min(layerWidth / image.width, layerHeight / image.height);
+        const renderedWidth = image.width * scale;
+        const renderedHeight = image.height * scale;
+        stage.style.width = `${renderedWidth}px`;
+        stage.style.height = `${renderedHeight}px`;
+        stage.style.left = `${(layerWidth - renderedWidth) / 2}px`;
+        stage.style.top = `${(layerHeight - renderedHeight) / 2}px`;
+      };
+      this.sceneHotspotResizeObserver = new ResizeObserver(updateStageBounds);
+      this.sceneHotspotResizeObserver.observe(layer);
+      requestAnimationFrame(updateStageBounds);
+    } else {
+      stage.classList.add('fills-layer');
+    }
+
     hotspots.forEach((spot) => {
-      const inspected = flags[spot.flag] === true;
+      const state = getState(spot) || {};
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = `day1-hotspot${inspected ? ' is-inspected' : ''}`;
+      button.dataset.hotspotId = spot.id;
+      button.className = `scene-hotspot ${hotspotClass}${state.read ? ' is-read is-inspected' : ''}${state.disabled ? ' is-disabled' : ''}`.trim();
       button.style.left = `${spot.x}%`;
       button.style.top = `${spot.y}%`;
       button.style.width = `${spot.w || 8}%`;
       button.style.height = `${spot.h || 8}%`;
-      button.disabled = inspected;
-      button.setAttribute('aria-label', `${spot.label}${inspected ? ' (sudah diperiksa)' : ''}`);
-      button.innerHTML = `<span class="hotspot-marker" aria-hidden="true">${inspected ? '✓' : '+'}</span><span class="hotspot-label">${spot.label}</span>`;
-      if (!inspected) button.addEventListener('click', () => onInspect?.(spot.id));
-      layer.appendChild(button);
+      button.disabled = state.disabled === true;
+      button.setAttribute('aria-label', state.ariaLabel || spot.label);
+      if (state.hint) button.title = state.hint;
+      const marker = document.createElement('span');
+      marker.className = 'hotspot-marker';
+      marker.setAttribute('aria-hidden', 'true');
+      marker.textContent = state.marker || (state.read ? '✓' : '+');
+      const label = document.createElement('span');
+      label.className = 'hotspot-label';
+      label.textContent = state.displayLabel || spot.label;
+      button.append(marker, label);
+      button.addEventListener('click', () => onActivate?.(spot.id, button));
+      stage.appendChild(button);
     });
+    layer.appendChild(stage);
 
-    const finish = document.createElement('button');
-    finish.type = 'button';
-    finish.className = 'day1-hotspot-finish';
-    finish.textContent = inspectedCount >= 3 ? 'LANJUTKAN KE SISTEM UDARA' : 'SELESAIKAN PEMERIKSAAN';
-    finish.disabled = inspectedCount === 0;
-    finish.addEventListener('click', () => onFinish?.());
-    layer.appendChild(finish);
+    if (progression) {
+      const finish = document.createElement('button');
+      finish.type = 'button';
+      finish.className = `scene-hotspot-progression ${progression.className || ''}`.trim();
+      finish.textContent = progression.label;
+      finish.disabled = progression.disabled === true;
+      finish.setAttribute('aria-label', progression.ariaLabel || progression.label);
+      finish.addEventListener('click', () => progression.onActivate?.());
+      layer.appendChild(finish);
+    }
     this.dom.storyBox.appendChild(layer);
+    this.dom.storyBox.classList.add('scene-hotspot-active');
+    if (layerClass.includes('sarah-office-hotspot-layer')) this.dom.storyBox.classList.add('sarah-office-active');
+    return layer;
+  }
+
+  refreshSceneHotspotStates(hotspots, getState, statusText = '') {
+    const layer = this.dom.storyBox?.querySelector('.scene-hotspot-layer');
+    if (!layer) return;
+    const statusDetail = layer.querySelector('.scene-hotspot-status span');
+    if (statusDetail) statusDetail.textContent = statusText;
+    hotspots.forEach((spot) => {
+      const button = layer.querySelector(`[data-hotspot-id="${spot.id}"]`);
+      if (!button) return;
+      const state = getState(spot) || {};
+      button.disabled = state.disabled === true;
+      button.classList.toggle('is-read', state.read === true);
+      button.classList.toggle('is-inspected', state.read === true);
+      button.classList.toggle('is-disabled', state.disabled === true);
+      button.setAttribute('aria-label', state.ariaLabel || spot.label);
+      button.title = state.hint || '';
+      const marker = button.querySelector('.hotspot-marker');
+      const label = button.querySelector('.hotspot-label');
+      if (marker) marker.textContent = state.marker || (state.read ? '✓' : '+');
+      if (label) label.textContent = state.displayLabel || spot.label;
+    });
+  }
+
+  renderDay1Hotspots(hotspots, flags = {}, onInspect, onFinish) {
+    const inspectedCount = hotspots.filter((spot) => flags[spot.flag]).length;
+    this.renderSceneHotspots({
+      hotspots,
+      ariaLabel: 'Titik inspeksi bunker',
+      layerClass: 'day1-hotspot-layer',
+      hotspotClass: 'day1-hotspot',
+      statusTitle: 'INSPEKSI BUNKER',
+      statusText: `${inspectedCount}/3 titik diperiksa`,
+      getState: (spot) => {
+        const inspected = flags[spot.flag] === true;
+        return {
+          read: inspected,
+          disabled: inspected,
+          ariaLabel: `${spot.label}${inspected ? ' (sudah diperiksa)' : ''}`,
+        };
+      },
+      onActivate: onInspect,
+      progression: {
+        className: 'day1-hotspot-finish',
+        label: inspectedCount >= 3 ? 'LANJUTKAN KE SISTEM UDARA' : 'SELESAIKAN PEMERIKSAAN',
+        disabled: inspectedCount === 0,
+        onActivate: onFinish,
+      },
+    });
+  }
+
+  showInformationPanel({ title, sourceLabel = '', content, returnFocus = null } = {}) {
+    this.closeInformationPanel();
+    this.informationPanelReturnFocus = returnFocus;
+    const overlay = document.createElement('div');
+    overlay.className = 'scene-information-overlay';
+    overlay.setAttribute('role', 'presentation');
+    const panel = document.createElement('section');
+    panel.className = 'scene-information-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-labelledby', 'scene-information-title');
+    const heading = document.createElement('h2');
+    heading.id = 'scene-information-title';
+    heading.textContent = title;
+    const source = document.createElement('p');
+    source.className = 'scene-information-source';
+    source.textContent = sourceLabel;
+    source.hidden = !sourceLabel;
+    const body = document.createElement('p');
+    body.className = 'scene-information-body';
+    body.textContent = content;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'scene-information-close';
+    close.textContent = 'KEMBALI KE MEJA';
+    close.setAttribute('aria-label', `Tutup ${title}`);
+    close.addEventListener('click', () => this.closeInformationPanel());
+    panel.append(heading, source, body, close);
+    overlay.appendChild(panel);
+    this.dom.storyBox.appendChild(overlay);
+    this.informationPanelEscapeHandler = (event) => {
+      if (event.key === 'Escape') this.closeInformationPanel();
+    };
+    document.addEventListener('keydown', this.informationPanelEscapeHandler);
+    close.focus();
+  }
+
+  closeInformationPanel() {
+    this.dom.storyBox?.querySelector('.scene-information-overlay')?.remove();
+    if (this.informationPanelEscapeHandler) {
+      document.removeEventListener('keydown', this.informationPanelEscapeHandler);
+      this.informationPanelEscapeHandler = null;
+    }
+    const returnFocus = this.informationPanelReturnFocus;
+    this.informationPanelReturnFocus = null;
+    if (returnFocus?.isConnected) returnFocus.focus();
   }
 
   showDay1InspectionFeedback(text) {
@@ -1327,6 +1489,12 @@ export class GameView {
 
     if (p?.expeditionMapReady) {
       p.expeditionMapReady();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
+    if (p?.interactiveReady) {
+      p.interactiveReady();
       this._pendingChoicesPayload = null;
       return;
     }
