@@ -3210,6 +3210,7 @@ body.title-card-active #settings-btn { display: none !important; }
    SECTION 22: GLOBAL UTILITIES
    ============================================================ */
 
+body.disable-crt #game-container::before,
 body.disable-crt .crt-overlay,
 body.disable-crt .crt-flicker { display: none !important; }
 

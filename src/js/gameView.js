@@ -414,11 +414,11 @@ export class GameView {
     settingsBtn.addEventListener('click',      () => settingsModal.classList.remove('hidden'));
     settingsCloseBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
 
-    // Restore persisted CRT preference
-    if (localStorage.getItem('bunker72_crt_disabled') === 'true') {
-      crtToggle.checked = false;
-      document.body.classList.add('disable-crt');
-    }
+    // CRT is off by default; preserve an explicit preference from Settings.
+    const persistedCrtDisabled = localStorage.getItem('bunker72_crt_disabled');
+    const crtEnabled = persistedCrtDisabled === 'false';
+    crtToggle.checked = crtEnabled;
+    document.body.classList.toggle('disable-crt', !crtEnabled);
 
     crtToggle.addEventListener('change', () => {
       const disabled = !crtToggle.checked;

@@ -16,8 +16,15 @@ try {
  for(const [name,width,height,touch] of profiles){
   const context=await browser.newContext({viewport:{width,height},hasTouch:touch,isMobile:touch});
   const page=await context.newPage();page.on('pageerror',e=>errors.push(`${name}: ${e.message}`));
-  await page.goto('http://127.0.0.1:3000/');
-  await page.locator('#new-game-btn').waitFor({state:'visible'});
+   await page.goto('http://127.0.0.1:3000/');
+   await page.locator('#new-game-btn').waitFor({state:'visible'});
+   await page.waitForFunction(()=>document.body.classList.contains('disable-crt'));
+   const defaultCrt=await page.evaluate(()=>({disabled:document.body.classList.contains('disable-crt'),checked:document.querySelector('#crt-toggle')?.checked,scanlines:getComputedStyle(document.querySelector('#game-container'),'::before').display}));
+   assert.deepEqual(defaultCrt,{disabled:true,checked:false,scanlines:'none'},`${name}: CRT is not off by default`);
+   await page.evaluate(()=>localStorage.setItem('bunker72_crt_disabled','false'));await page.reload();await page.locator('#new-game-btn').waitFor({state:'visible'});await page.waitForFunction(()=>document.querySelector('#crt-toggle')?.checked===true);
+   const enabledCrt=await page.evaluate(()=>({disabled:document.body.classList.contains('disable-crt'),checked:document.querySelector('#crt-toggle')?.checked}));
+   assert.deepEqual(enabledCrt,{disabled:false,checked:true},`${name}: persisted CRT preference was not restored`);
+   await page.evaluate(()=>localStorage.removeItem('bunker72_crt_disabled'));await page.reload();await page.locator('#new-game-btn').waitFor({state:'visible'});await page.waitForFunction(()=>document.body.classList.contains('disable-crt'));
   async function resume(sceneId,extra={},health=100){
     await page.evaluate(({sceneId,extra,health})=>localStorage.setItem('bunker72_save_v1',JSON.stringify({
       version:3,sceneId,knowledge:8,history:[],flags:extra,inventory:{food:3,drink:3,kit:2},health,hunger:90,thirst:90,
