@@ -32,7 +32,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 89.3, y: 1.2, w: 9.8, h: 24.2,
     title: 'Perlindungan Abu Vulkanik',
     sourceLabel: 'PVMBG / Badan Geologi · Mitigasi gunung api',
-    content: 'Pantau status dan rekomendasi resmi PVMBG. Saat abu turun, tetap di dalam bila memungkinkan, tutup pintu dan jendela, serta lindungi hidung, mulut, dan mata ketika harus keluar. Hindari mengemudi dalam abu tebal. Bersihkan endapan secara hati-hati karena abu dapat berat dan mengganggu pernapasan.',
+    content: 'Ikuti status PVMBG dan arahan evakuasi petugas. Bila tetap di dalam masih aman, tutup pintu dan jendela saat abu turun. Jika harus keluar, gunakan pelindung mata dan masker partikulat yang pas; masker tidak melindungi dari gas atau kekurangan oksigen. Hindari perjalanan dalam abu tebal. Anak perlu didampingi orang dewasa, termasuk saat membersihkan abu.',
   }),
   Object.freeze({
     id: 'emergency_kit',
@@ -50,7 +50,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 77.2, y: 55, w: 22.3, h: 20.5,
     title: 'Panduan Kesiapsiagaan Keluarga',
     sourceLabel: 'Ringkasan perencanaan keluarga',
-    content: 'Rencana sederhana lebih mudah dijalankan saat panik. Tentukan dua tempat bertemu, satu kontak keluarga di luar daerah, dan pembagian tugas yang jelas. Latih cara mematikan listrik atau gas bila aman, hafalkan nomor darurat, dan pastikan setiap anggota keluarga memahami kapan harus berlindung atau melakukan evakuasi.',
+    content: 'Tentukan tempat bertemu, satu kontak di luar daerah, dan pembagian tugas keluarga. Anak mengikuti pendamping; pemeriksaan listrik, gas, dan struktur dilakukan orang dewasa yang mampu atau petugas. Jangan menjalankan generator berbahan bakar di dalam shelter. Kenali kapan harus berlindung dan kapan harus evakuasi mengikuti arahan setempat.',
   }),
   Object.freeze({
     id: 'work_notes',

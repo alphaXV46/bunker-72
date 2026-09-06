@@ -510,18 +510,18 @@ export class GameModel {
   /** The one authoritative ending decision. No social or emotional flag is read here. */
   getEndingResult() {
     const preparedness = this.calculatePreparednessReport();
-    const fatalCondition = this.health <= 0;
+    const criticalRescueCondition = this.health <= 0;
     const criticalSurvivalStable = this.health >= ENDING_RULES.GOOD_HEALTH_MIN
       && this.flags.air_uninspected !== true
       && this.flags.smoke_poisoned !== true
       && this.flags.water_poisoned !== true
       && this.flags.water_ruined !== true;
-    const endingId = fatalCondition
+    const endingId = criticalRescueCondition
       ? 'ending_bad'
       : criticalSurvivalStable && preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN
         ? 'ending_good'
         : 'ending_normal';
-    return { endingId, preparedness, fatalCondition, criticalSurvivalStable };
+    return { endingId, preparedness, criticalRescueCondition, criticalSurvivalStable };
   }
 
   evaluateEnding() {
@@ -532,7 +532,7 @@ export class GameModel {
   evaluateModularEnding() {
     const result = this.getEndingResult();
     const { endingId, preparedness } = result;
-    const isFatal = endingId === 'ending_bad';
+    const isCriticalRescue = endingId === 'ending_bad';
     const modules = [];
     const hendraOutcome = this.flags.helped_stranger ? 'helped'
       : this.flags.stranger_guided ? 'guided'
@@ -548,11 +548,11 @@ export class GameModel {
       ? { id: 'sarah_public_impact', icon: '◎', title: 'DAMPAK PUBLIK — SARAH', tone: 'sarah', body: sarahPublicImpactBody }
       : null;
 
-    if (isFatal) {
-      modules.push({ id: 'rescue', icon: '◈', title: 'PENUTUPAN KRISIS', tone: 'rescue', body: 'Tim pencari akhirnya menjangkau Bunker 72 setelah kondisi di dalam tidak lagi dapat dipulihkan. Tidak ada perayaan—hanya catatan tentang perlindungan yang habis terlalu cepat.' });
+    if (isCriticalRescue) {
+      modules.push({ id: 'rescue', icon: '◈', title: 'PENYELAMATAN KRITIS', tone: 'rescue', body: 'Tim SAR menjangkau shelter dan mengevakuasi Aris, Sarah, dan Maya dalam kondisi sangat lemah. Ketiganya selamat dan segera mendapat penanganan medis; pemulihan mereka membutuhkan waktu.' });
       if (sarahPublicImpactModule) modules.push(sarahPublicImpactModule);
       modules.push(
-        { id: 'bunker', icon: '◫', title: 'KONDISI BUNKER', tone: 'bunker', body: 'Kegagalan kondisi vital menutup pilihan keluarga sebelum jendela penyelamatan selesai.' },
+        { id: 'bunker', icon: '◫', title: 'KONDISI BUNKER', tone: 'bunker', body: 'Beberapa sistem perlindungan gagal bertahan. Keluarga harus meninggalkan perlengkapan saat dievakuasi; bunker perlu diperiksa petugas sebelum dapat digunakan kembali.' },
         { id: 'preparedness', icon: '⌁', title: 'CATATAN KESIAPSIAGAAN', tone: 'preparedness', body: 'Laporan ini menyoroti perlindungan teknis yang perlu diprioritaskan lebih awal pada situasi serupa.' },
       );
     } else {
@@ -596,7 +596,7 @@ export class GameModel {
       else bunkerParts.push('Struktur Bunker 72 menahan tekanan terburuk hingga tim tiba.');
       if (this.flags.battery_committed) bunkerParts.push('Baterai ekstra benar-benar menjaga radio dan ventilasi hidup bersama pada jam-jam terakhir.');
       else if (this.flags.power_saved || this.flags.power_routed) bunkerParts.push('Pengaturan sirkuit memberi daya cukup untuk fungsi yang paling penting.');
-      if (this.flags.medical_mask_used) bunkerParts.push('Masker medis tetap siap sebagai perlindungan singkat saat blower melemah.');
+      if (this.flags.medical_mask_used) bunkerParts.push('Masker disiapkan untuk mengurangi paparan debu; masker tidak menyediakan oksigen atau menggantikan ventilasi.');
       modules.push({ id: 'bunker', icon: '▣', title: 'BUNKER 72', tone: 'bunker', body: bunkerParts.join(' ') });
 
       const preparationBody = preparedness.score >= 75
@@ -611,11 +611,11 @@ export class GameModel {
       ? 'GOOD ENDING — BERTAHAN DENGAN STABIL'
       : endingId === 'ending_normal'
         ? 'NORMAL ENDING — SELAMAT DENGAN KONSEKUENSI'
-        : 'BAD ENDING — KRISIS TIDAK TERATASI';
+        : 'BAD ENDING — PENYELAMATAN KRITIS';
     return {
       ...result,
       rescueTitle,
-      rescueBadge: isFatal ? 'STATUS: KRISIS FATAL' : `RESCUE: RADIO ${preparedness.radioQuality.toUpperCase()}`,
+      rescueBadge: isCriticalRescue ? 'STATUS: EVAKUASI & PERAWATAN MEDIS' : `RESCUE: RADIO ${preparedness.radioQuality.toUpperCase()}`,
       modules,
       narrativeFull: modules.map((module) => module.body).join(' '),
       preparednessScore: preparedness.score,

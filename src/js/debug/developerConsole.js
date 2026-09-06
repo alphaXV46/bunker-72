@@ -600,7 +600,7 @@ class DeveloperConsole {
           <div style="font-weight:bold; color:${res.endingId === 'ending_good' ? '#00ff88' : res.endingId === 'ending_bad' ? '#ef4444' : '#ffd166'}; margin-bottom:4px;">
             RESULT: ${res.endingId.toUpperCase()} (Skor BNPB: ${res.preparedness?.score}/${res.preparedness?.maxScore})
           </div>
-          <div>Kondisi Fatal (HP <= 0): <b>${res.fatalCondition ? 'YA' : 'TIDAK'}</b></div>
+          <div>Penyelamatan Kritis (HP <= 0): <b>${res.criticalRescueCondition ? 'YA' : 'TIDAK'}</b></div>
           <div>Kebutuhan Kritis Stabil: <b>${res.criticalSurvivalStable ? 'YA' : 'TIDAK'}</b></div>
           <div>Radio VHF: <b>${res.preparedness?.radioQuality?.toUpperCase()}</b></div>
           <div style="margin-top:4px; border-top:1px dashed #334155; padding-top:4px;">

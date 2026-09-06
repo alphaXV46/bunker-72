@@ -2756,6 +2756,13 @@ body.title-card-active #settings-btn { display: none !important; }
   flex-shrink: 0;
 }
 
+#ending-view #restart-btn {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  text-align: center;
+}
+
 /* ============================================================
    SECTION 18: KEYFRAME ANIMATIONS
    ============================================================ */
@@ -3250,7 +3257,37 @@ body.disable-crt .crt-flicker { display: none !important; }
 }
 
 #ending-view .debrief-box {
-  display: none;
+  flex-shrink: 0;
+  grid-column: 2;
+  grid-row: 4;
+  max-height: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#ending-view .debrief-box summary {
+  cursor: pointer;
+  color: var(--cyan);
+  min-height: 44px;
+  align-content: center;
+}
+
+#ending-view.ending-single-card .debrief-box {
+  grid-column: 1;
+}
+
+#ending-view.active > * {
+  flex-shrink: 0;
+}
+
+@media (max-width: 920px) {
+  #ending-view .ending-description {
+    max-height: none;
+    overflow: visible;
+  }
+  #ending-view .epilogue-modular-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Scrollbar styling for debrief-box */
@@ -4756,8 +4793,8 @@ body.disable-crt .crt-flicker { display: none !important; }
 .sarah-office-hotspot {
   display: grid;
   place-items: center;
-  min-width: 38px;
-  min-height: 38px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 2px;
   border: 2px solid rgba(126, 207, 210, 0.78);
   border-radius: 5px;

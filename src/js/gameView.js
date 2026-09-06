@@ -133,15 +133,15 @@ export class GameView {
     const beats = [
       {
         background: 'opening', speaker: 'NARATOR',
-        text: 'Sirene terdengar di balik hujan. Bunker runtuh, tetapi sinyal darurat akhirnya tertangkap. Tim SAR menemukan pintu masuk yang masih bisa dibuka.',
+        text: 'Lampu darurat meredup dan beberapa sistem bunker berhenti bekerja. Tim SAR akhirnya menjangkau shelter. Palka berhasil dibuka; cahaya lampu penyelamat masuk ke ruang yang pengap.',
       },
       {
         background: 'rescue', speaker: 'PETUGAS SAR',
-        text: '“Tetap sadar. Oksigen sudah kami pasang.” Masker menutup wajah mereka satu per satu. “Kalian selamat, tapi tubuh kalian butuh pertolongan segera.”',
+        text: '“Kami akan membantu kalian keluar.” Aris, Sarah, dan Maya dievakuasi satu per satu. Tim medis segera memeriksa ketiganya dan memberikan pertolongan yang mereka butuhkan.',
       },
       {
         background: 'final', speaker: 'NARATOR',
-        text: 'Mereka berhasil dievakuasi, namun harus meninggalkan bunker dan sebagian besar persediaan. Selamat—tetapi dengan harga yang tidak kecil.',
+        text: 'Ketiganya selamat, tetapi kelelahan berat dan kegagalan sistem bunker membuat mereka memerlukan perawatan segera. Sebagian perlengkapan tertinggal. Pemulihan akan berlangsung perlahan, bersama dukungan petugas dan keluarga.',
       },
     ];
     const beat = beats[this.badEndingCutsceneStep];
@@ -351,6 +351,8 @@ export class GameView {
         event.preventDefault();
         return;
       }
+
+      if (event.target?.closest?.('.scene-information-overlay, .sarah-analysis-layer')) return;
 
       if (event.code === 'Space' && event.target?.closest?.('button')) return;
 
@@ -1037,6 +1039,7 @@ export class GameView {
       tab.type = 'button';
       tab.className = `sarah-analysis-tab${index === activeIndex ? ' is-active' : ''}${reviewed.has(item.id) ? ' is-reviewed' : ''}`;
       tab.setAttribute('role', 'tab');
+      tab.id = `sarah-analysis-tab-${item.id}`;
       tab.setAttribute('aria-selected', String(index === activeIndex));
       tab.setAttribute('aria-controls', 'sarah-analysis-content');
       tab.setAttribute('aria-label', `${item.number} ${item.tabLabel}${reviewed.has(item.id) ? ', sudah ditinjau' : ''}`);
@@ -1050,6 +1053,7 @@ export class GameView {
     content.id = 'sarah-analysis-content';
     content.className = 'sarah-analysis-content';
     content.setAttribute('role', 'tabpanel');
+    content.setAttribute('aria-labelledby', `sarah-analysis-tab-${section.id}`);
     content.setAttribute('tabindex', '0');
     const titleRow = document.createElement('div');
     titleRow.className = 'sarah-analysis-title-row';
@@ -1184,8 +1188,10 @@ export class GameView {
       button.type = 'button';
       button.dataset.hotspotId = spot.id;
       button.className = `scene-hotspot ${hotspotClass}${state.read ? ' is-read is-inspected' : ''}${state.disabled ? ' is-disabled' : ''}`.trim();
-      button.style.left = `${spot.x}%`;
-      button.style.top = `${spot.y}%`;
+      // Keep the calibrated percentage position while reserving enough room for
+      // the minimum touch target at the stage edges on narrow screens.
+      button.style.left = `min(${spot.x}%, calc(100% - 44px))`;
+      button.style.top = `min(${spot.y}%, calc(100% - 44px))`;
       button.style.width = `${spot.w || 8}%`;
       button.style.height = `${spot.h || 8}%`;
       button.disabled = state.disabled === true;
@@ -1300,7 +1306,14 @@ export class GameView {
     overlay.appendChild(panel);
     this.dom.storyBox.appendChild(overlay);
     this.informationPanelEscapeHandler = (event) => {
-      if (event.key === 'Escape') this.closeInformationPanel();
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.closeInformationPanel();
+      } else if (event.key === 'Tab') {
+        // This read-only dialog has one actionable control.
+        event.preventDefault();
+        close.focus();
+      }
     };
     document.addEventListener('keydown', this.informationPanelEscapeHandler);
     close.focus();
@@ -1330,6 +1343,14 @@ export class GameView {
     this.dom.choicesPanel.innerHTML = '';
     this.dom.storyBox.classList.add('has-interactive-choices');
     this.currentChoicesPayload = null;
+
+    const card = document.getElementById('floating-interactive-card');
+    const toggleLabel = document.getElementById('toggle-btn-label');
+    if (card && toggleLabel) {
+      card.classList.remove('show-dialogue');
+      card.classList.add('show-choices');
+      toggleLabel.textContent = 'BACA CERITA';
+    }
 
     const panel = document.createElement('div');
     panel.className = 'expedition-map-panel';
@@ -1664,7 +1685,7 @@ export class GameView {
 
     const ENDING_CONFIG = {
       ending_bad: {
-        title:      modularData?.rescueTitle || 'ENDING: MAKAM BUNKER 72 (TRAGEDI DI PERUT BUMI)',
+        title:      modularData?.rescueTitle || 'BAD ENDING — PENYELAMATAN KRITIS',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
       },
@@ -1754,7 +1775,7 @@ export class GameView {
       const items = modularData?.preparedness?.debriefItems || [];
       debriefList.innerHTML = items.map((item) => `
         <li class="preparedness-debrief-item">
-          <strong>${escapeHtml(item.label)} — ${item.score}/${item.max}</strong>
+            <strong>${escapeHtml(item.label)} — ${item.score}/${item.max}: ${item.positive ? 'SUDAH MENDUKUNG' : 'PERLU DIPERSIAPKAN'}</strong>
           <span>${escapeHtml(item.detail)}</span>
         </li>
       `).join('');

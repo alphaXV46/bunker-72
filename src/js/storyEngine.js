@@ -112,8 +112,8 @@ export class StoryEngine {
    * @param {string} sceneId
    */
   renderScene(sceneId) {
-    // Check health-zero fatal condition first, regardless of incoming scene.
-    if (this._checkFatalCondition(sceneId)) return;
+    // Health zero represents critical rescue, not family death.
+    if (this._checkCriticalRescueCondition(sceneId)) return;
 
     // Resolve logic-trigger pseudo-scenes before doing anything else.
     if (sceneId === 'ending_eval' || sceneId === 'trigger_ending_eval') {
@@ -161,7 +161,7 @@ export class StoryEngine {
 
     if (elapsed > 0 && !isEnding && scene.phase !== 'backstory') {
       this.model.updateSurvivalStats(elapsed);
-      if (this._checkFatalCondition(sceneId)) return;
+      if (this._checkCriticalRescueCondition(sceneId)) return;
     }
 
     // Commit new scene to model.
@@ -864,7 +864,7 @@ export class StoryEngine {
     this.audio.playClick();
     this.view.renderProtocolLog(this.model.history);
 
-    if (this._checkFatalCondition(this.model.currentSceneId)) return;
+    if (this._checkCriticalRescueCondition(this.model.currentSceneId)) return;
 
     const isDisabledScene = this.model.isInventoryDisabledScene(this.model.currentSceneId);
     if (scene) {
@@ -919,12 +919,12 @@ export class StoryEngine {
   // ─── PRIVATE HELPERS ──────────────────────────────────────────────────────
 
   /**
-   * If health has reached zero, redirect to the fatal ending immediately.
+   * If health has reached zero, redirect to critical rescue immediately.
    * @param {string} sceneId
    * @returns {boolean} true if a redirect was triggered.
    * @private
    */
-  _checkFatalCondition(sceneId) {
+  _checkCriticalRescueCondition(sceneId) {
     if (this.model.health <= 0 && sceneId !== 'ending_bad') {
       this.model.health = 0;
       this.renderScene('ending_bad');
