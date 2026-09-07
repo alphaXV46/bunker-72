@@ -309,6 +309,7 @@ async function initGame() {
       endingKnowledge:   dom.endingKnowledge,
       endingGradeText:   dom.endingGradeText,
       endingSummary:     dom.endingSummary,
+      endingStats:       dom.endingStats,
       endingView:        dom.endingView,
     },
 

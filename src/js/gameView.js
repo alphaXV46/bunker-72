@@ -1681,7 +1681,8 @@ export class GameView {
 
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
-    this.dom.endingView.classList.remove('ending-single-card');
+    this.dom.endingView.classList.remove('ending-single-card', 'ending-normal-single-card');
+    if (this.dom.endingStats) this.dom.endingStats.classList.remove('hidden');
 
     const ENDING_CONFIG = {
       ending_bad: {
@@ -1707,19 +1708,25 @@ export class GameView {
     this.dom.endingTitle.classList.add(cfg.titleClass);
     this.dom.endingView.classList.add(cfg.bgClass);
     if (endingId === 'ending_good') this.dom.endingView.classList.add('ending-single-card');
+    if (endingId === 'ending_normal') this.dom.endingView.classList.add('ending-normal-single-card');
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
     }[character]));
     const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
+    const reportModules = endingId === 'ending_normal'
+      ? modules.filter((module) => module.id === 'rescue' || module.id === 'family')
+      : modules;
 
-    if (endingId === 'ending_good' && modules.length) {
+    if ((endingId === 'ending_good' || endingId === 'ending_normal') && reportModules.length) {
+      const reportClass = endingId === 'ending_normal' ? 'normal-ending-final-card' : 'good-ending-final-card';
+      const reportEyebrow = endingId === 'ending_normal' ? 'HASIL EVAKUASI // RINGKASAN AKHIR' : 'HASIL EVAKUASI // PROTOKOL 72';
       this.dom.endingDesc.innerHTML = `
-        <article class="good-ending-final-card">
-          <div class="good-ending-final-card__eyebrow">HASIL EVAKUASI // PROTOKOL 72</div>
-          <h3 class="good-ending-final-card__title">GOOD ENDING — BERTAHAN DENGAN STABIL</h3>
+        <article class="${reportClass}">
+          <div class="good-ending-final-card__eyebrow">${reportEyebrow}</div>
+          <h3 class="good-ending-final-card__title">${endingId === 'ending_normal' ? 'NORMAL ENDING — SELAMAT DENGAN KONSEKUENSI' : 'GOOD ENDING — BERTAHAN DENGAN STABIL'}</h3>
           <div class="good-ending-final-card__body">
-            ${modules.map((module) => `<p><strong>${escapeHtml(module.title)}:</strong> ${escapeHtml(module.body)}</p>`).join('')}
+            ${reportModules.map((module) => `<p><strong>${escapeHtml(module.title)}:</strong> ${escapeHtml(module.body)}</p>`).join('')}
           </div>
           <div class="good-ending-final-card__readiness">
             <div class="good-ending-final-card__readiness-label">KESIAPSIAGAAN TEKNIS</div>
@@ -1729,6 +1736,9 @@ export class GameView {
           <div class="good-ending-final-card__score">${escapeHtml(grade.desc)} Ini adalah ringkasan permainan, bukan penilaian resmi.</div>
         </article>
       `;
+      if (endingId === 'ending_normal' && this.dom.endingStats) {
+        this.dom.endingStats.classList.add('hidden');
+      }
     } else if (modules.length) {
       this.dom.endingDesc.innerHTML = `
         <div class="epilogue-modular-grid">
