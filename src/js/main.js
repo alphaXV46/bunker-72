@@ -105,6 +105,7 @@ const LEGACY_DAY4_IDS = new Set([
   'ending_near_miss',
 ]);
 const LEGACY_DAY2_EXPEDITION_SCENES = new Set([
+  'day2_expedition_setup',
   'day2_damage_check', 'day2_panic_exit', 'day2_calm_check', 'day2_find_leak',
   'day2_leak_poor_fix', 'day2_remedy_air', 'day2_remedy_air_success', 'day2_seal_leak',
   'day2_stranger_knock', 'day2_stranger_resolved', 'day2_radio_setup', 'day2_radio_save',
@@ -170,7 +171,7 @@ function normalizeSaveData(save) {
 
   return {
     version: SAVE_SCHEMA_VERSION,
-    sceneId: isLegacyDay4 ? 'ending_eval' : isLegacyDay2 ? 'day2_expedition_setup' : isLegacyDay3 ? 'day3_start' : storedSceneId,
+    sceneId: isLegacyDay4 ? 'ending_eval' : isLegacyDay2 ? 'day2_expedition_map' : isLegacyDay3 ? 'day3_start' : storedSceneId,
     knowledge: typeof save.knowledge === 'number' ? save.knowledge : SURVIVAL.DEFAULTS.knowledge,
     history: Array.isArray(save.history) ? save.history : [],
     flags: normalizeSarahFlags(save.flags),
@@ -182,7 +183,7 @@ function normalizeSaveData(save) {
     loadNotice: isLegacyDay4
       ? 'Save Day 4 lama dipindahkan ke evaluasi akhir jam ke-72.'
       : isLegacyDay2
-        ? 'Save Day 2 lama dipindahkan ke titik persiapan ekspedisi baru.'
+        ? 'Save Day 2 lama dipindahkan ke peta rute ekspedisi.'
         : isLegacyDay3
           ? 'Save Day 3 lama dipindahkan ke awal rangkaian konsekuensi baru.'
         : null,

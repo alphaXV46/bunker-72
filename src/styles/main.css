@@ -832,13 +832,13 @@ input[type="range"] {
 }
 
 /* Scene background classes */
-.story-box.bg-prolog-peaceful { background-image: url('../assets/backgrounds/bg_prolog_peaceful.webp'); }
+.story-box.bg-prolog-peaceful { background-image: url('../assets/backgrounds/bg_prolog_peaceful.png'); }
 .story-box.bg-prolog-window   { background-image: url('../assets/backgrounds/bg_prolog_window.webp'); }
 .story-box.bg-prolog,
-.story-box.bg-prolog-1 { background-image: url('../assets/backgrounds/bg_prolog1.webp'); }
-.story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.webp'); }
-.story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.webp'); }
-.story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.webp'); }
+.story-box.bg-prolog-1 { background-image: url('../assets/backgrounds/bg_prolog1.png'); }
+.story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.png'); }
+.story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.png'); }
+.story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.png'); }
 .story-box.bg-backstory-airport { background-image: url('../assets/backgrounds/bg_backstory_airport.webp'); }
 .story-box.bg-backstory-house { background-image: url('../assets/backgrounds/bg_backstory_house.webp'); }
 .story-box.bg-backstory-aris-company { background-image: url('../assets/backgrounds/bg_backstory_aris_company.webp'); }
@@ -5209,6 +5209,9 @@ body.disable-crt .crt-flicker { display: none !important; }
 .expedition-location-card:hover:not(:disabled), .expedition-location-card:focus-visible:not(:disabled) { transform: translateY(-2px); border-color: var(--warning-yellow-border); background: rgba(43, 48, 47, 0.98); outline: 3px solid rgba(255, 209, 102, 0.25); outline-offset: 2px; }
 .expedition-location-card:disabled { cursor: not-allowed; opacity: 0.62; }
 .expedition-location-card.is-visited { border-style: dashed; }
+.expedition-confirm-route { width: 100%; margin-top: 12px; padding: 11px 14px; border: 1px solid var(--warning-yellow-border); background: rgba(62, 53, 28, 0.94); color: var(--warning-yellow-border); font: 0.78rem 'Share Tech Mono', monospace; letter-spacing: 0.7px; cursor: pointer; }
+.expedition-confirm-route:hover:not(:disabled), .expedition-confirm-route:focus-visible:not(:disabled) { background: rgba(91, 75, 29, 0.98); outline: 3px solid rgba(255, 209, 102, 0.25); outline-offset: 2px; }
+.expedition-confirm-route:disabled { cursor: not-allowed; opacity: 0.45; }
 .location-card-title { color: var(--cyan); font: 0.9rem 'Share Tech Mono', monospace; letter-spacing: 0.8px; }
 .location-card-risk { color: var(--warning-yellow-border); font: 0.72rem 'Share Tech Mono', monospace; }
 .location-card-resource { color: var(--text-muted); font: 0.72rem/1.3 'Share Tech Mono', monospace; }

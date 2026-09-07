@@ -15,7 +15,10 @@ import {
 } from './runtime/editorLayoutRuntime.js';
 
 // Assets
-const SPRITESHEET_SRC = new URL('../assets/sprites/sheets/spritesheet_father.png', import.meta.url).href;
+const SPRITESHEET_SOURCES = Object.freeze({
+  father: new URL('../assets/sprites/sheets/spritesheet_father.png', import.meta.url).href,
+  mother: new URL('../assets/sprites/sheets/spritesheet_mother.png', import.meta.url).href,
+});
 const MAP_SRC = new URL('../assets/backgrounds/scavenger_house_map.webp', import.meta.url).href;
 
 const ITEM_ASSETS = {
@@ -32,7 +35,7 @@ const ITEM_ASSETS = {
 // Each pose has different transparent padding inside its 256x256 cell.
 // These anchors pin the visible body center and lowest opaque foot pixel to a
 // stable world-space pivot, preventing the sprite from jumping between frames.
-const FATHER_FRAME_ANCHORS = {
+const FRAME_ANCHORS = {
   down: [
     { x: 168, y: 251 },
     { x: 124.5, y: 251 },
@@ -596,6 +599,7 @@ export class ScavengerMinigame {
     this.onComplete = onComplete;
     this.config = config || null;
     this.mode = config?.mode || 'prologue';
+    this.playerCharacter = config?.playerCharacter || (this.mode === 'prologue' ? 'mother' : 'father');
     this.elapsedSeconds = 0;
     this.aftershockTriggered = false;
     this.finishTimeoutId = null;
@@ -630,7 +634,7 @@ export class ScavengerMinigame {
 
     // Sprite Sheet
     this.spritesheet = new Image();
-    this.spritesheet.src = SPRITESHEET_SRC;
+    this.spritesheet.src = SPRITESHEET_SOURCES[this.playerCharacter] || SPRITESHEET_SOURCES.father;
     this.spritesLoaded = false;
     this.spritesheet.onload = () => { this.spritesLoaded = true; };
 
@@ -2327,7 +2331,7 @@ export class ScavengerMinigame {
       const scale = 0.38;
       const dw = sw * scale; // ~97px
       const dh = sh * scale; // ~97px
-      const frameAnchors = FATHER_FRAME_ANCHORS[p.dir] || FATHER_FRAME_ANCHORS.down;
+      const frameAnchors = FRAME_ANCHORS[p.dir] || FRAME_ANCHORS.down;
       const anchor = frameAnchors[col] || { x: sw / 2, y: sh - 5 };
       const groundOffset = 16;
       const dx = p.x - anchor.x * scale;

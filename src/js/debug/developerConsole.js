@@ -240,8 +240,8 @@ class DeveloperConsole {
   _createFloatingPill() {
     this.floatingPill = document.createElement('div');
     this.floatingPill.id = 'bunker72-dev-pill';
-    this.floatingPill.title = 'Tekan Backquote ( ` ) untuk buka/tutup console';
-    this.floatingPill.innerHTML = `⚙ DEV CONSOLE [ <span style="color:#ffd166;">\`</span> ]`;
+    this.floatingPill.title = 'Tekan Backquote ( ` ) atau ; untuk buka/tutup console';
+    this.floatingPill.innerHTML = `⚙ DEV CONSOLE [ <span style="color:#ffd166;">\` / ;</span> ]`;
     this.floatingPill.addEventListener('click', () => this.toggle());
     document.body.appendChild(this.floatingPill);
   }
@@ -415,7 +415,9 @@ class DeveloperConsole {
   }
 
   _handleKeyDown(e) {
-    if (e.code === 'Backquote' || e.key === '`') {
+    // Support both the traditional backtick shortcut and keyboards/layouts
+    // where the same physical key is reported as a semicolon.
+    if (e.code === 'Backquote' || e.key === '`' || e.key === ';') {
       const activeEl = document.activeElement;
       if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && activeEl.closest('#bunker72-dev-console') === null) {
         return; // Don't steal backquote if player is typing in an external input

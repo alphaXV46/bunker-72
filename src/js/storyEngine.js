@@ -60,6 +60,7 @@ export class StoryEngine {
     this._unlockedMinigameChoiceIds = new Set();
     this.sarahAnalysisIndex = 0;
     this.sarahAnalysisReviewedIds = new Set();
+    this.prologPlannedLocations = [];
 
     this.bunkerMinigame = new BunkerMinigame({
       root: this.dom.bunkerMinigame,
@@ -87,6 +88,7 @@ export class StoryEngine {
     this._unlockedMinigameChoiceIds?.clear();
     this.sarahAnalysisIndex = 0;
     this.sarahAnalysisReviewedIds.clear();
+    this.prologPlannedLocations = [];
     this.bunkerMinigame?.close();
     this.radioMiniGame?.resetFinalResult();
 
@@ -255,7 +257,10 @@ export class StoryEngine {
     if (sceneId === 'prolog_packing') {
       this.view.dom.dialogueText.textContent = '';
       this.view.isTyping = false;
-      this.view.startScavengerMinigame((result) => this.handleScavengerComplete(result));
+      this.view.startScavengerMinigame(
+        (result) => this.handleScavengerComplete(result),
+        { mode: 'prologue', playerCharacter: 'mother' }
+      );
       return;
     }
 
@@ -290,6 +295,21 @@ export class StoryEngine {
         (locationId) => this.startExpedition(locationId)
       );
       this.view.typeText(modifiedText, showMap, { ...choicesPayload, choices: [], expeditionMapReady: showMap });
+      return;
+    }
+
+    if (sceneId === 'prolog_expedition_map') {
+      const showPlanningMap = () => this.view.renderExpeditionPlanningMap(
+        EXPEDITION_LOCATIONS,
+        this.prologPlannedLocations,
+        (locationId) => this.handlePrologRouteSelect(locationId),
+        () => this.confirmPrologRoutePlan()
+      );
+      this.view.typeText(modifiedText, showPlanningMap, {
+        ...choicesPayload,
+        choices: [],
+        expeditionMapReady: showPlanningMap,
+      });
       return;
     }
 
@@ -402,8 +422,9 @@ export class StoryEngine {
       this.view.showTelltaleToast(`${summary.title}: ${items.length} barang diamankan.`);
     }
 
-    // Advance to evacuation intro
-    this.renderScene('prolog_intro');
+    // After the mother finishes gathering supplies inside the house, she
+    // sends the father to plan a second supply run before entering the bunker.
+    this.renderScene('prolog_expedition_call');
   }
 
   handleDay1Inspection(hotspotId) {
@@ -522,6 +543,38 @@ export class StoryEngine {
     this.sarahAnalysisIndex = index;
     this.sarahAnalysisReviewedIds.add(SARAH_ANALYSIS_SECTIONS[index].id);
     this.renderSarahAnalysis();
+  }
+
+  handlePrologRouteSelect(locationId) {
+    if (!EXPEDITION_LOCATIONS.some((location) => location.id === locationId)) return;
+    const selectedIndex = this.prologPlannedLocations.indexOf(locationId);
+    if (selectedIndex >= 0) {
+      this.prologPlannedLocations.splice(selectedIndex, 1);
+    } else {
+      if (this.prologPlannedLocations.length >= 2) return;
+      this.prologPlannedLocations.push(locationId);
+    }
+    this.view.renderExpeditionPlanningMap(
+      EXPEDITION_LOCATIONS,
+      this.prologPlannedLocations,
+      (nextLocationId) => this.handlePrologRouteSelect(nextLocationId),
+      () => this.confirmPrologRoutePlan()
+    );
+  }
+
+  confirmPrologRoutePlan() {
+    if (this.prologPlannedLocations.length < 2) return;
+    this.prologPlannedLocations.forEach((locationId) => {
+      this.model.setFlag(`prolog_route_${locationId}`);
+    });
+    this.model.history.push({
+      hour: '0 Jam',
+      text: `[PETA PROLOG] Ayah menandai ${this.prologPlannedLocations.join(' dan ')} sebagai rute persediaan.`,
+      choiceId: 'prolog_expedition_plan',
+      effect: 1,
+    });
+    this.onSave?.(this.model.toSaveData());
+    this.renderScene('prolog_intro');
   }
 
   completeSarahAnalysis() {

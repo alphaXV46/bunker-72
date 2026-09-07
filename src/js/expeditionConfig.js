@@ -36,6 +36,7 @@ const shared = (overrides) => ({
 export const EXPEDITION_CONFIGS = Object.freeze({
   neighbor_house: shared({
     id: 'neighbor_house',
+    playerCharacter: 'father',
     label: 'RUMAH TETANGGA',
     risk: 'Risiko rendah–sedang',
     resourceHint: 'Makanan & air dasar',
@@ -63,6 +64,7 @@ export const EXPEDITION_CONFIGS = Object.freeze({
 
   minimarket: shared({
     id: 'minimarket',
+    playerCharacter: 'father',
     label: 'MINIMARKET',
     risk: 'Risiko sedang–tinggi',
     resourceHint: 'Nilai sumber daya tertinggi',
@@ -97,6 +99,7 @@ export const EXPEDITION_CONFIGS = Object.freeze({
 
   medical_post: shared({
     id: 'medical_post',
+    playerCharacter: 'father',
     label: 'POS KESEHATAN',
     risk: 'Rute lebih panjang / abu tebal',
     resourceHint: 'P3K & perlindungan napas',

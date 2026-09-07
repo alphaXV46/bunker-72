@@ -1382,6 +1382,60 @@ export class GameView {
     this.updateBackButton();
   }
 
+  renderExpeditionPlanningMap(locations, selected = [], onSelect, onConfirm) {
+    this.clearDay1Hotspots();
+    this.dom.choicesPanel.innerHTML = '';
+    this.dom.storyBox.classList.add('has-interactive-choices');
+    this.currentChoicesPayload = null;
+
+    const card = document.getElementById('floating-interactive-card');
+    const toggleLabel = document.getElementById('toggle-btn-label');
+    if (card && toggleLabel) {
+      card.classList.remove('show-dialogue');
+      card.classList.add('show-choices');
+      toggleLabel.textContent = 'BACA CERITA';
+    }
+
+    const panel = document.createElement('div');
+    panel.className = 'expedition-map-panel';
+    panel.setAttribute('role', 'group');
+    panel.setAttribute('aria-label', 'Peta rute persiapan sebelum masuk bunker');
+    panel.innerHTML = `
+      <div class="expedition-map-header"><strong>PETA RUTE EKSPEDISI</strong><span>${selected.length} dari 2 rute ditandai</span></div>
+      <div class="expedition-map-route" aria-hidden="true">
+        <span class="route-node route-north">POS KESEHATAN</span>
+        <div class="route-crossing"><span class="route-node">RUMAH TETANGGA</span><b>INTERSECTION</b><span class="route-node">MINIMARKET</span></div>
+        <i class="route-stem"></i>
+        <span class="route-node route-south">BUNKER 72</span>
+      </div>
+      <div class="expedition-map-locations"></div>
+      <button type="button" class="expedition-confirm-route" ${selected.length < 2 ? 'disabled' : ''}>KONFIRMASI RUTE &amp; MASUK BUNKER</button>
+    `;
+    const list = panel.querySelector('.expedition-map-locations');
+    locations.forEach((location) => {
+      const isSelected = selected.includes(location.id);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `expedition-location-card${isSelected ? ' is-visited' : ''}`;
+      button.disabled = !isSelected && selected.length >= 2;
+      button.setAttribute('aria-label', `${location.label}${isSelected ? ' (rute ditandai)' : ''}`);
+      button.innerHTML = `<span class="location-card-title">${location.label}</span><span class="location-card-risk">${location.risk}</span><span class="location-card-resource">${location.resourceHint}</span><span class="location-card-state">${isSelected ? '✓ RUTE DITANDAI' : 'TANDAI RUTE'}</span>`;
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!button.disabled) onSelect?.(location.id);
+      });
+      list.appendChild(button);
+    });
+    panel.querySelector('.expedition-confirm-route').addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (selected.length >= 2) onConfirm?.();
+    });
+    this.dom.choicesPanel.appendChild(panel);
+    this.updateBackButton();
+  }
+
   /**
    * Renders interactive choice buttons.
    * Receives all data as parameters — no internal story data or model access.

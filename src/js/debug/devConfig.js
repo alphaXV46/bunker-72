@@ -36,8 +36,10 @@ export const STORY_SCENE_CATALOG = Object.freeze([
   { id: 'prolog_with_anak',      phase: 'Prolog', label: 'Prolog 03 — Janji dengan Maya' },
   { id: 'prolog_alert',          phase: 'Prolog', label: 'Prolog 04 — Sirene & Gempa Awal' },
   { id: 'prolog_packing',        phase: 'Prolog', label: 'Prolog 05 — Scavenger Evakuasi (40s)' },
-  { id: 'prolog_threshold',      phase: 'Prolog', label: 'Prolog 06 — Menutup Palka Bunker' },
-  { id: 'prolog_title',          phase: 'Prolog', label: 'Prolog 07 — Judul Bunker 72' },
+  { id: 'prolog_expedition_call', phase: 'Prolog', label: 'Prolog 06 — Ibu Meminta Ayah Mencari Persediaan' },
+  { id: 'prolog_expedition_map',  phase: 'Prolog', label: 'Prolog 07 — Peta Rute Ekspedisi' },
+  { id: 'prolog_threshold',      phase: 'Prolog', label: 'Prolog 08 — Menutup Palka Bunker' },
+  { id: 'prolog_title',          phase: 'Prolog', label: 'Prolog 09 — Judul Bunker 72' },
 
   // Day 1
   { id: 'day1_power_boot',       phase: 'Day 1', label: 'Hari 1 — Booting Panel Daya' },
@@ -49,7 +51,6 @@ export const STORY_SCENE_CATALOG = Object.freeze([
 
   // Day 2
   { id: 'day2_start',            phase: 'Day 2', label: 'Hari 2 — Gempa Susulan Subuh' },
-  { id: 'day2_expedition_setup', phase: 'Day 2', label: 'Hari 2 — Persiapan Ekspedisi' },
   { id: 'day2_expedition_map',   phase: 'Day 2', label: 'Hari 2 — Peta Rute Ekspedisi' },
   { id: 'day2_hendra_encounter', phase: 'Day 2', label: 'Hari 2 — Pertemuan Hendra' },
   { id: 'day2_expedition_return',phase: 'Day 2', label: 'Hari 2 — Kembali ke Bunker' },

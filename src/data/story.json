@@ -416,8 +416,8 @@
       "choices": []
     },
     "prolog_packing": {
-      "speaker": "Ransel Darurat",
-      "avatar": null,
+      "speaker": "Ibu",
+      "avatar": "ibu",
       "text": "Bawa tas yang siap dan barang yang aman dijangkau, lalu menuju palka. Jangan menunda keselamatan demi barang; hitung mundur ini hanya simulasi permainan.",
       "background": "packing",
       "hour": "0 Jam",
@@ -830,43 +830,48 @@
       ],
       "background": "normal",
       "hour": "30 Jam",
-      "objective": "Nilai persediaan dan siapkan ekspedisi singkat yang berisiko.",
+      "objective": "Nilai persediaan dan pilih rute ekspedisi singkat yang berisiko.",
       "choices": [
         {
           "id": "c_day2_begin_expedition",
-          "text": "Periksa ransel, kenakan perlindungan yang ada, lalu keluar sebentar untuk mencari sumber daya. Ini berbahaya—Aris hanya pergi karena persediaan keluarga menipis.",
-          "nextSceneId": "day2_expedition_setup",
+          "text": "Periksa peta rute dan pilih dua lokasi untuk mencari sumber daya. Ini berbahaya—Aris hanya pergi karena persediaan keluarga menipis.",
+          "nextSceneId": "day2_expedition_map",
           "knowledgeEffect": 0,
           "log": "Aris memutuskan ekspedisi singkat karena persediaan bunker menipis."
         }
       ]
     },
-    "day2_expedition_setup": {
-      "speaker": "Sarah",
+    "prolog_expedition_call": {
+      "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Mas, aku tahu kenapa kamu harus pergi, tapi abu di luar masih turun. Jangan cari terlalu jauh. Ambil yang bisa dibawa dan segera kembali.",
-      "conditionalText": [
-        {
-          "requiredFlag": "promised_maya",
-          "text": " Maya menarik ujung baju Aris. \"Ayah... mobilnya belum kita betulkan.\" Aris berlutut di depannya. \"Makanya Ayah harus pulang.\"",
-          "append": true
-        },
-        {
-          "requiredFlag": "toy_packed",
-          "text": " Maya menyelipkan mobil-mainan merah itu ke tangan Aris sebelum ia memakai masker.",
-          "append": true
-        }
-      ],
-      "background": "normal",
-      "hour": "30 Jam",
-      "objective": "Siapkan ekspedisi seperlunya dan pilih dua lokasi dari tiga tujuan.",
+      "text": "“Mas, air dan makanan kita belum cukup untuk bertahan lama. Kotak P3K juga tinggal satu. Kalau kita masuk sekarang tanpa tambahan persediaan, Maya akan berada dalam bahaya.”\n\n“Aku tahu ini berisiko, tapi tolong keluar sebentar mencari bekal. Jangan memaksakan diri—ambil yang paling penting, lalu segera kembali sebelum abu makin tebal.”",
+      "background": "packing",
+      "hour": "0 Jam",
+      "objective": "Dengarkan permintaan Ibu sebelum Ayah menentukan rute pencarian.",
       "choices": [
         {
-          "id": "c_day2_open_expedition_map",
-          "text": "Buka peta rute dan tentukan tujuan pertama.",
-          "nextSceneId": "day2_expedition_map",
+          "id": "c_prolog_accept_supply_run",
+          "text": "“Baik. Aku akan mencari persediaan yang paling penting dan segera kembali.”",
+          "nextSceneId": "prolog_expedition_map",
           "knowledgeEffect": 0,
-          "log": "Peta rute ekspedisi dibuka."
+          "log": "Ibu meminta Ayah mencari bekal tambahan."
+        }
+      ]
+    },
+    "prolog_expedition_map": {
+      "speaker": "Ayah",
+      "avatar": "ayah",
+      "text": "Sebelum kita masuk, Ayah tandai tiga titik yang mungkin masih punya bekal: rumah tetangga, minimarket, dan pos kesehatan. Kita tidak tahu kapan bisa keluar lagi, jadi persiapan rute ini akan menentukan berapa lama keluarga bertahan di bunker.",
+      "background": "packing",
+      "hour": "0 Jam",
+      "objective": "Rencanakan sumber daya yang akan dicari setelah keluarga aman di bunker.",
+      "choices": [
+        {
+          "id": "c_prolog_confirm_expedition_plan",
+          "text": "Simpan peta rute, amankan ransel, lalu masuk ke bunker.",
+          "nextSceneId": "prolog_intro",
+          "knowledgeEffect": 1,
+          "log": "Rute sumber daya ditandai sebelum evakuasi."
         }
       ]
     },

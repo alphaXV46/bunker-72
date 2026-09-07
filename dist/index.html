@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-DEsAFI77.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-B9RDOo4j.css">
+  <script type="module" crossorigin src="/assets/index-D7RCqghT.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Du7egqPp.css">
 </head>
 <body>
   <main id="game-container">
@@ -98,8 +98,6 @@
         <div class="scene-vignette"></div>
         <div class="scene-atmosphere">
           <span class="ceiling-light"></span>
-          <span class="dust dust-a"></span>
-          <span class="dust dust-b"></span>
           <span class="warning-sweep"></span>
         </div>
 
@@ -287,10 +285,10 @@
         <p id="ending-summary" class="ending-summary">Ringkasan 72 jam akan muncul di sini.</p>
       </div>
 
-      <div id="debrief-box" class="debrief-box hidden">
-        <h3>RINGKASAN MITIGASI TEKNIS</h3>
+      <details id="debrief-box" class="debrief-box hidden">
+        <summary>APA YANG SUDAH SIAP & PERLU DIPERBAIKI</summary>
         <ul id="debrief-list"></ul>
-      </div>
+      </details>
 
       <div class="choices-panel">
         <button id="restart-btn" class="choice-btn text-center">KEMBALI KE MENU UTAMA</button>
@@ -384,7 +382,7 @@
           <div class="settings-option-row">
             <span class="settings-label">EFEK VISUAL CRT:</span>
             <label class="crt-toggle-wrapper">
-              <input type="checkbox" id="crt-toggle" checked>
+              <input type="checkbox" id="crt-toggle">
               <span class="crt-toggle-custom"></span>
             </label>
           </div>
