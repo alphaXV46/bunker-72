@@ -4212,6 +4212,76 @@ body.disable-crt .crt-flicker { display: none !important; }
   font-size: clamp(0.76rem, 0.85vw, 0.88rem);
 }
 
+/* Normal ending: keep the outcome narrative and technical grade in one report
+ * directly beneath the ending title. */
+.normal-ending-final-card {
+  width: 100%;
+  background: linear-gradient(145deg, rgba(10, 15, 19, 0.94), rgba(8, 9, 11, 0.86));
+  border: 1px solid rgba(255, 209, 102, 0.42);
+  border-left: 5px solid var(--warning-yellow-border);
+  padding: clamp(12px, 1.15vw, 18px);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.38), 0 0 24px rgba(0, 0, 0, 0.28);
+}
+
+.normal-ending-final-card .good-ending-final-card__readiness {
+  background: rgba(255, 209, 102, 0.08);
+  border-color: rgba(255, 209, 102, 0.3);
+}
+
+.normal-ending-final-card .good-ending-final-card__readiness span {
+  color: var(--warning-yellow-border);
+}
+
+#ending-view.ending-normal-single-card .ending-description {
+  max-height: none;
+  overflow: visible;
+}
+
+@media (min-width: 921px) {
+  #ending-view.active.ending-normal-single-card,
+  #ending-view.active:has(.ending-type.ending-normal) {
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-content: start;
+    row-gap: clamp(10px, 1.2vh, 16px);
+    padding-bottom: clamp(30px, 5vh, 56px);
+    overflow-y: hidden !important;
+  }
+
+  #ending-view.active.ending-normal-single-card .ending-header,
+  #ending-view.active:has(.ending-type.ending-normal) .ending-header {
+    grid-column: 1;
+    grid-row: 1;
+    margin-top: clamp(18px, 6vh, 72px);
+  }
+
+  #ending-view.active.ending-normal-single-card .ending-content-box,
+  #ending-view.active:has(.ending-type.ending-normal) .ending-content-box {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    max-width: 520px;
+    margin-left: 0;
+  }
+
+  #ending-view.active.ending-normal-single-card .choices-panel,
+  #ending-view.active:has(.ending-type.ending-normal) .choices-panel {
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    max-width: 520px;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  #ending-view.active.ending-normal-single-card #restart-btn,
+  #ending-view.active:has(.ending-type.ending-normal) #restart-btn {
+    width: 100%;
+    margin-left: 0;
+    margin-bottom: 0;
+  }
+}
+
 /* Credits screen */
 #credits-view.active {
   align-items: center;
