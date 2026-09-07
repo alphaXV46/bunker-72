@@ -13,8 +13,15 @@ import { GameModel  } from './gameModel.js';
 import { GameView   } from './gameView.js';
 import { RetroAudio } from './retroAudio.js';
 import { BunkerMinigame } from './bunkerMinigame.js';
-import { ENDING_IDS, parseHour } from './constants.js';
+import { ENDING_IDS, parseHour, SARAH_WARNING_RESPONSE_BY_CHOICE_ID } from './constants.js';
 import { getExpeditionConfig, EXPEDITION_CONFIGS } from './expeditionConfig.js';
+import {
+  getSarahOfficeHotspot,
+  SARAH_OFFICE_DOCUMENTS,
+  SARAH_OFFICE_HOTSPOTS,
+  SARAH_OFFICE_IMAGE,
+} from './sarahOfficeConfig.js';
+import { SARAH_ANALYSIS_SECTIONS, SARAH_ANALYSIS_SECTION_IDS } from './sarahAnalysisConfig.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
@@ -51,6 +58,8 @@ export class StoryEngine {
     this.pendingMinigameChoice = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds = new Set();
+    this.sarahAnalysisIndex = 0;
+    this.sarahAnalysisReviewedIds = new Set();
 
     this.bunkerMinigame = new BunkerMinigame({
       root: this.dom.bunkerMinigame,
@@ -69,12 +78,15 @@ export class StoryEngine {
    * Called for both new games and save-file loads.
    */
   start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
+    this.view.clearSceneHotspots();
     this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health, expeditionVisitedLocations);
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
     this.pendingMinigameChoice = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds?.clear();
+    this.sarahAnalysisIndex = 0;
+    this.sarahAnalysisReviewedIds.clear();
     this.bunkerMinigame?.close();
     this.radioMiniGame?.resetFinalResult();
 
@@ -100,12 +112,30 @@ export class StoryEngine {
    * @param {string} sceneId
    */
   renderScene(sceneId) {
-    // Check health-zero fatal condition first, regardless of incoming scene.
-    if (this._checkFatalCondition(sceneId)) return;
+    // Health zero represents critical rescue, not family death.
+    if (this._checkCriticalRescueCondition(sceneId)) return;
 
     // Resolve logic-trigger pseudo-scenes before doing anything else.
     if (sceneId === 'ending_eval' || sceneId === 'trigger_ending_eval') {
       this.renderScene(this.model.evaluateEnding());
+      return;
+    }
+    if (sceneId === 'backstory_sarah_update' && this.model.flags.sarah_update_reviewed === true) {
+      this.renderScene('backstory_sarah_decision');
+      return;
+    }
+    if (sceneId === 'backstory_sarah_decision') {
+      if (this.model.flags.sarah_update_reviewed !== true) {
+        this.renderScene('backstory_sarah_update');
+        return;
+      }
+      if (this.model.flags.sarah_warning_response) {
+        this.renderScene('backstory_sarah_response');
+        return;
+      }
+    }
+    if (sceneId === 'backstory_sarah_response' && !this.model.flags.sarah_warning_response) {
+      this.renderScene('backstory_sarah_decision');
       return;
     }
     const scene = this.storyData.scenes[sceneId];
@@ -129,13 +159,16 @@ export class StoryEngine {
     const elapsed    = currHour - prevHour;
     const isEnding   = ENDING_IDS.includes(sceneId);
 
-    if (elapsed > 0 && !isEnding) {
+    if (elapsed > 0 && !isEnding && scene.phase !== 'backstory') {
       this.model.updateSurvivalStats(elapsed);
-      if (this._checkFatalCondition(sceneId)) return;
+      if (this._checkCriticalRescueCondition(sceneId)) return;
     }
 
     // Commit new scene to model.
     this.model.currentSceneId = sceneId;
+    if (scene.setFlags?.length) {
+      scene.setFlags.forEach((flag) => this.model.setFlag(flag));
+    }
 
     // ── Audio ──
     const isDomestic = ['prolog_home', 'prolog_with_ibu', 'prolog_with_anak'].includes(sceneId);
@@ -237,6 +270,18 @@ export class StoryEngine {
       return;
     }
 
+    if (sceneId === 'backstory_sarah_office') {
+      const showOffice = () => this.renderSarahOfficeHotspots();
+      this.view.typeText(modifiedText, showOffice, { ...choicesPayload, choices: [], interactiveReady: showOffice });
+      return;
+    }
+
+    if (sceneId === 'backstory_sarah_update') {
+      const showAnalysis = () => this.beginSarahAnalysis();
+      this.view.typeText(modifiedText, showAnalysis, { ...choicesPayload, choices: [], interactiveReady: showAnalysis });
+      return;
+    }
+
     if (sceneId === 'day2_expedition_map') {
       const showMap = () => this.view.renderExpeditionMap(
         EXPEDITION_LOCATIONS,
@@ -250,7 +295,8 @@ export class StoryEngine {
 
     if (scene.autoNextSceneId) {
       const isClickToContinueProlog = sceneId.startsWith('prolog_') && sceneId !== 'prolog_title';
-      if (isClickToContinueProlog) {
+      const isClickToContinue = isClickToContinueProlog || scene.advanceMode === 'click';
+      if (isClickToContinue) {
         this.view.typeText(modifiedText, () => {
           this.pendingClickNextSceneId = scene.autoNextSceneId;
         }, {
@@ -392,6 +438,101 @@ export class StoryEngine {
     this.onSave?.(this.model.toSaveData());
   }
 
+  getSarahOfficeHotspotState(spot) {
+    const readIds = this.model.flags.sarah_office_read_ids;
+    const isRead = spot.type === 'document' && readIds.includes(spot.id);
+    const isLocked = spot.type === 'progression' && !readIds.includes(spot.requiresReadId);
+    return {
+      read: isRead,
+      disabled: isLocked,
+      marker: isLocked ? '⌁' : isRead ? '✓' : '+',
+      displayLabel: isRead ? `${spot.label} · dibaca` : spot.label,
+      ariaLabel: `${spot.label}${isRead ? ' (sudah dibaca)' : isLocked ? ' (terkunci)' : ''}`,
+      hint: isLocked ? spot.lockedHint : '',
+    };
+  }
+
+  getSarahOfficeStatusText() {
+    const readCount = SARAH_OFFICE_DOCUMENTS.filter((document) =>
+      this.model.flags.sarah_office_read_ids.includes(document.id)
+    ).length;
+    const laptopState = this.model.flags.sarah_office_read_ids.includes('work_notes')
+      ? 'Laptop siap dibuka'
+      : 'Catatan kerja membuka laptop';
+    return `${readCount}/6 dibaca · ${laptopState}`;
+  }
+
+  renderSarahOfficeHotspots() {
+    this.view.renderSceneHotspots({
+      hotspots: SARAH_OFFICE_HOTSPOTS,
+      ariaLabel: 'Meja kerja interaktif Sarah',
+      layerClass: 'sarah-office-hotspot-layer',
+      hotspotClass: 'sarah-office-hotspot',
+      statusTitle: 'MEJA KERJA SARAH',
+      statusText: this.getSarahOfficeStatusText(),
+      image: SARAH_OFFICE_IMAGE,
+      getState: (spot) => this.getSarahOfficeHotspotState(spot),
+      onActivate: (hotspotId, button) => this.handleSarahOfficeHotspot(hotspotId, button),
+    });
+  }
+
+  handleSarahOfficeHotspot(hotspotId, returnFocus) {
+    const hotspot = getSarahOfficeHotspot(hotspotId);
+    if (!hotspot) return;
+    if (hotspot.type === 'progression') {
+      if (!this.model.flags.sarah_office_read_ids.includes(hotspot.requiresReadId)) return;
+      this.renderScene('backstory_sarah_baseline');
+      return;
+    }
+
+    if (this.model.markSarahOfficeDocumentRead(hotspot.id)) {
+      this.onSave?.(this.model.toSaveData());
+      this.view.refreshSceneHotspotStates(
+        SARAH_OFFICE_HOTSPOTS,
+        (spot) => this.getSarahOfficeHotspotState(spot),
+        this.getSarahOfficeStatusText()
+      );
+    }
+    this.view.showInformationPanel({
+      title: hotspot.title,
+      sourceLabel: hotspot.sourceLabel,
+      content: hotspot.content,
+      returnFocus,
+    });
+  }
+
+  beginSarahAnalysis() {
+    this.sarahAnalysisIndex = 0;
+    this.sarahAnalysisReviewedIds = new Set([SARAH_ANALYSIS_SECTIONS[0].id]);
+    this.renderSarahAnalysis();
+  }
+
+  renderSarahAnalysis() {
+    this.view.renderSarahAnalysis({
+      sections: SARAH_ANALYSIS_SECTIONS,
+      activeIndex: this.sarahAnalysisIndex,
+      reviewedIds: [...this.sarahAnalysisReviewedIds],
+      onNavigate: (index) => this.handleSarahAnalysisNavigate(index),
+      onComplete: () => this.completeSarahAnalysis(),
+    });
+  }
+
+  handleSarahAnalysisNavigate(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= SARAH_ANALYSIS_SECTIONS.length) return;
+    this.sarahAnalysisIndex = index;
+    this.sarahAnalysisReviewedIds.add(SARAH_ANALYSIS_SECTIONS[index].id);
+    this.renderSarahAnalysis();
+  }
+
+  completeSarahAnalysis() {
+    const allReviewed = SARAH_ANALYSIS_SECTION_IDS.every((id) => this.sarahAnalysisReviewedIds.has(id));
+    if (!allReviewed) return;
+    if (this.model.completeSarahUpdateReview()) {
+      this.onSave?.(this.model.toSaveData());
+    }
+    this.renderScene('backstory_sarah_decision');
+  }
+
   startExpedition(locationId) {
     const config = getExpeditionConfig(locationId);
     if (!config || this.model.expeditionVisitedLocations.includes(locationId) || this.model.expeditionVisitedLocations.length >= 2) return;
@@ -478,6 +619,16 @@ export class StoryEngine {
     }
 
     if (choice.disabled) return;
+
+    if (choice.id === 'c_sarah_baseline_complete' && this.model.completeSarahBaselineReview()) {
+      this.onSave?.(this.model.toSaveData());
+    }
+
+    const sarahWarningResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[choice.id];
+    if (sarahWarningResponse) {
+      this.commitSarahWarningDecision(choice, sarahWarningResponse);
+      return;
+    }
 
     if (choice.id === 'c_day2_hendra_help' && this.model.inventory.drink <= 0 && this.model.inventory.food <= 0) {
       this.view.showTelltaleToast('AIR & MAKANAN HABIS: Aris tidak bisa membagi persediaan.');
@@ -644,6 +795,28 @@ export class StoryEngine {
     this.renderScene(choice.nextSceneId);
   }
 
+  commitSarahWarningDecision(choice, response) {
+    if (this.model.flags.sarah_update_reviewed !== true) {
+      this.renderScene('backstory_sarah_update');
+      return;
+    }
+    if (!this.model.setSarahWarningResponse(response)) {
+      this.renderScene('backstory_sarah_response');
+      return;
+    }
+
+    this.model.history.push({
+      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
+      text: choice.log || choice.text,
+      choiceId: choice.id,
+      effect: 0,
+    });
+    this.view.renderProtocolLog(this.model.history);
+    this.audio.playClick();
+    this.onSave?.(this.model.toSaveData());
+    this.renderScene('backstory_sarah_response');
+  }
+
   /** Continue the story choice after a minigame station is complete. */
   finishBunkerEntry() {
     const choice = this.pendingMinigameChoice || this.pendingBunkerEntryChoice;
@@ -691,7 +864,7 @@ export class StoryEngine {
     this.audio.playClick();
     this.view.renderProtocolLog(this.model.history);
 
-    if (this._checkFatalCondition(this.model.currentSceneId)) return;
+    if (this._checkCriticalRescueCondition(this.model.currentSceneId)) return;
 
     const isDisabledScene = this.model.isInventoryDisabledScene(this.model.currentSceneId);
     if (scene) {
@@ -746,12 +919,12 @@ export class StoryEngine {
   // ─── PRIVATE HELPERS ──────────────────────────────────────────────────────
 
   /**
-   * If health has reached zero, redirect to the fatal ending immediately.
+   * If health has reached zero, redirect to critical rescue immediately.
    * @param {string} sceneId
    * @returns {boolean} true if a redirect was triggered.
    * @private
    */
-  _checkFatalCondition(sceneId) {
+  _checkCriticalRescueCondition(sceneId) {
     if (this.model.health <= 0 && sceneId !== 'ending_bad') {
       this.model.health = 0;
       this.renderScene('ending_bad');
@@ -798,7 +971,10 @@ export class StoryEngine {
     if (scene) {
       if (Array.isArray(scene.conditionalText)) {
         scene.conditionalText.forEach((cond) => {
-          if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === true) {
+          const requiredValue = Object.prototype.hasOwnProperty.call(cond, 'requiredValue')
+            ? cond.requiredValue
+            : true;
+          if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === requiredValue) {
             if (cond.position === 'prepend') {
               processedText = cond.text + processedText;
             } else {

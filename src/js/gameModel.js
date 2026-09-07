@@ -8,11 +8,24 @@
  * Dependencies: constants.js only.
  */
 
-import { clamp, ENDING_IDS, ENDING_RULES, SAVE_SCHEMA_VERSION, SURVIVAL } from './constants.js';
+import {
+  clamp,
+  ENDING_IDS,
+  ENDING_RULES,
+  NEW_GAME_START_SCENE_ID,
+  normalizeSarahOfficeReadIds,
+  normalizeSarahWarningResponse,
+  SARAH_WARNING_RESPONSE_BY_CHOICE_ID,
+  SAVE_SCHEMA_VERSION,
+  SURVIVAL,
+} from './constants.js';
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
 
-const INITIAL_SCENE_ID = 'prolog_home';
 const DEFAULT_FLAGS = Object.freeze({
+  sarah_warning_response: null,
+  sarah_office_read_ids: [],
+  sarah_baseline_reviewed: false,
+  sarah_update_reviewed: false,
   promised_maya: false,
   radio_reward_claimed: false,
   radio_quality: null,
@@ -82,9 +95,15 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_prolog_anak_promise': 'promised_maya',
 });
 
+const SARAH_PUBLIC_IMPACT_BODIES = Object.freeze({
+  escalate: 'Karena Sarah mendorong koordinasi lebih awal, beberapa wilayah memperoleh waktu tambahan untuk mengaktifkan titik kumpul dan memeriksa jalur evakuasi. Setelah keadaan mulai stabil, pesan dari sejumlah keluarga mencatat bahwa waktu itu membantu mereka bergerak lebih cepat. Sarah tahu hasil tersebut lahir dari kerja banyak pihak, tetapi lega rekomendasinya ikut membuka ruang untuk bersiap.',
+  verify: 'Keputusan Sarah untuk menunggu verifikasi menghasilkan informasi lintas instansi yang lebih lengkap sebelum tindak lanjut diperluas. Namun, waktu persiapan menjadi lebih sempit dan beberapa jalur sudah padat ketika warga mulai bergerak. Sebagian keluarga sempat terpisah sebelum akhirnya dipertemukan kembali di posko; bagi Sarah, hasil itu tetap menyimpan lega sekaligus beban.',
+  maintain: 'Karena respons saat itu dipertahankan sambil menunggu evaluasi berikutnya, sebagian wilayah hanya memiliki waktu persiapan yang pendek ketika kondisi memburuk. Beberapa akses sudah sulit dilalui, sementara posko masih mencatat warga yang belum kembali atau belum ditemukan. Pencarian terus dilakukan, dan Sarah menyimpan catatan itu sebagai pengingat tentang beratnya keputusan di tengah ketidakpastian.',
+});
+
 export class GameModel {
   constructor() {
-    this.currentSceneId = INITIAL_SCENE_ID;
+    this.currentSceneId = NEW_GAME_START_SCENE_ID;
     this.knowledge     = SURVIVAL.DEFAULTS.knowledge;
     this.hunger        = SURVIVAL.DEFAULTS.hunger;
     this.thirst        = SURVIVAL.DEFAULTS.thirst;
@@ -173,6 +192,36 @@ export class GameModel {
     return true;
   }
 
+  /** Commits Sarah's one canonical professional response. */
+  setSarahWarningResponse(response) {
+    const normalized = normalizeSarahWarningResponse(response);
+    if (!normalized || this.flags.sarah_warning_response !== null) return false;
+    this.flags.sarah_warning_response = normalized;
+    return true;
+  }
+
+  /** Records one validated Sarah office document without duplicates. */
+  markSarahOfficeDocumentRead(documentId) {
+    const previous = normalizeSarahOfficeReadIds(this.flags.sarah_office_read_ids);
+    const next = normalizeSarahOfficeReadIds([...previous, documentId]);
+    this.flags.sarah_office_read_ids = next;
+    return next.length > previous.length;
+  }
+
+  /** Commits completion only at the end of Sarah's baseline review. */
+  completeSarahBaselineReview() {
+    if (this.flags.sarah_baseline_reviewed === true) return false;
+    this.flags.sarah_baseline_reviewed = true;
+    return true;
+  }
+
+  /** Commits the later cross-agency data review exactly once. */
+  completeSarahUpdateReview() {
+    if (this.flags.sarah_update_reviewed === true) return false;
+    this.flags.sarah_update_reviewed = true;
+    return true;
+  }
+
   /**
    * Initializes or re-initializes model state.
    * Used for both new games and loading a save.
@@ -187,7 +236,7 @@ export class GameModel {
    * @param {number}   health
    */
   init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
-    this.currentSceneId = sceneId || INITIAL_SCENE_ID;
+    this.currentSceneId = sceneId || NEW_GAME_START_SCENE_ID;
     this.history        = Array.isArray(history) ? history : [];
     const validExpeditionIds = new Set(Object.keys(EXPEDITION_CONFIGS));
     this.expeditionVisitedLocations = Array.isArray(expeditionVisitedLocations)
@@ -200,6 +249,10 @@ export class GameModel {
       ...this._reconstructFlagsFromHistory(this.history),
       ...restoredFlags,
     };
+    this.flags.sarah_warning_response = normalizeSarahWarningResponse(this.flags.sarah_warning_response);
+    this.flags.sarah_office_read_ids = normalizeSarahOfficeReadIds(this.flags.sarah_office_read_ids);
+    this.flags.sarah_baseline_reviewed = this.flags.sarah_baseline_reviewed === true;
+    this.flags.sarah_update_reviewed = this.flags.sarah_update_reviewed === true;
 
     // Keep the Hendra decision as one mutually-exclusive outcome even when a
     // legacy save contains more than one stale social flag.
@@ -265,6 +318,8 @@ export class GameModel {
       if (entry.choiceId && FLAG_CHOICE_MAP[entry.choiceId]) {
         flags[FLAG_CHOICE_MAP[entry.choiceId]] = true;
       }
+      const sarahResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[entry?.choiceId];
+      if (sarahResponse) flags.sarah_warning_response = sarahResponse;
     });
     if (flags.air_remedied) {
       delete flags.air_uninspected;
@@ -455,29 +510,29 @@ export class GameModel {
   /** The one authoritative ending decision. No social or emotional flag is read here. */
   getEndingResult() {
     const preparedness = this.calculatePreparednessReport();
-    const fatalCondition = this.health <= 0;
+    const criticalRescueCondition = this.health <= 0;
     const criticalSurvivalStable = this.health >= ENDING_RULES.GOOD_HEALTH_MIN
       && this.flags.air_uninspected !== true
       && this.flags.smoke_poisoned !== true
       && this.flags.water_poisoned !== true
       && this.flags.water_ruined !== true;
-    const endingId = fatalCondition
+    const endingId = criticalRescueCondition
       ? 'ending_bad'
       : criticalSurvivalStable && preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN
         ? 'ending_good'
         : 'ending_normal';
-    return { endingId, preparedness, fatalCondition, criticalSurvivalStable };
+    return { endingId, preparedness, criticalRescueCondition, criticalSurvivalStable };
   }
 
   evaluateEnding() {
     return this.getEndingResult().endingId;
   }
 
-  /** Constructs 4–6 deterministic, state-driven epilogue cards. */
+  /** Constructs deterministic, state-driven epilogue cards. */
   evaluateModularEnding() {
     const result = this.getEndingResult();
     const { endingId, preparedness } = result;
-    const isFatal = endingId === 'ending_bad';
+    const isCriticalRescue = endingId === 'ending_bad';
     const modules = [];
     const hendraOutcome = this.flags.helped_stranger ? 'helped'
       : this.flags.stranger_guided ? 'guided'
@@ -488,11 +543,16 @@ export class GameModel {
       : hendraOutcome === 'guided'
         ? ' Petunjuk yang pernah Aris berikan membantu Hendra mencapai perlindungan lain.'
         : '';
+    const sarahPublicImpactBody = SARAH_PUBLIC_IMPACT_BODIES[this.flags.sarah_warning_response] || null;
+    const sarahPublicImpactModule = sarahPublicImpactBody
+      ? { id: 'sarah_public_impact', icon: '◎', title: 'DAMPAK PUBLIK — SARAH', tone: 'sarah', body: sarahPublicImpactBody }
+      : null;
 
-    if (isFatal) {
+    if (isCriticalRescue) {
+      modules.push({ id: 'rescue', icon: '◈', title: 'PENYELAMATAN KRITIS', tone: 'rescue', body: 'Tim SAR menjangkau shelter dan mengevakuasi Aris, Sarah, dan Maya dalam kondisi sangat lemah. Ketiganya selamat dan segera mendapat penanganan medis; pemulihan mereka membutuhkan waktu.' });
+      if (sarahPublicImpactModule) modules.push(sarahPublicImpactModule);
       modules.push(
-        { id: 'rescue', icon: '◈', title: 'PENUTUPAN KRISIS', tone: 'rescue', body: 'Tim pencari akhirnya menjangkau Bunker 72 setelah kondisi di dalam tidak lagi dapat dipulihkan. Tidak ada perayaan—hanya catatan tentang perlindungan yang habis terlalu cepat.' },
-        { id: 'bunker', icon: '◫', title: 'KONDISI BUNKER', tone: 'bunker', body: 'Kegagalan kondisi vital menutup pilihan keluarga sebelum jendela penyelamatan selesai.' },
+        { id: 'bunker', icon: '◫', title: 'KONDISI BUNKER', tone: 'bunker', body: 'Beberapa sistem perlindungan gagal bertahan. Keluarga harus meninggalkan perlengkapan saat dievakuasi; bunker perlu diperiksa petugas sebelum dapat digunakan kembali.' },
         { id: 'preparedness', icon: '⌁', title: 'CATATAN KESIAPSIAGAAN', tone: 'preparedness', body: 'Laporan ini menyoroti perlindungan teknis yang perlu diprioritaskan lebih awal pada situasi serupa.' },
       );
     } else {
@@ -502,6 +562,7 @@ export class GameModel {
         failed: `Panggilan radio tidak dapat dipastikan. Bunker akhirnya ditemukan melalui penyisiran sektor dan pencatatan shelter, bukan karena transmisi yang sempurna.${hendraRescueNote}`,
       };
       modules.push({ id: 'rescue', icon: '⌁', title: 'OPERASI PENYELAMATAN', tone: 'rescue', body: rescueBodies[preparedness.radioQuality] });
+      if (sarahPublicImpactModule) modules.push(sarahPublicImpactModule);
 
       const familyBody = this.flags.sarah_comforted_maya
         ? 'Sarah menjaga Maya tetap tenang ketika Aris menyelesaikan tugas teknis. Di luar bunker, mereka kembali membagi tanggung jawab yang sama.'
@@ -535,7 +596,7 @@ export class GameModel {
       else bunkerParts.push('Struktur Bunker 72 menahan tekanan terburuk hingga tim tiba.');
       if (this.flags.battery_committed) bunkerParts.push('Baterai ekstra benar-benar menjaga radio dan ventilasi hidup bersama pada jam-jam terakhir.');
       else if (this.flags.power_saved || this.flags.power_routed) bunkerParts.push('Pengaturan sirkuit memberi daya cukup untuk fungsi yang paling penting.');
-      if (this.flags.medical_mask_used) bunkerParts.push('Masker medis tetap siap sebagai perlindungan singkat saat blower melemah.');
+      if (this.flags.medical_mask_used) bunkerParts.push('Masker disiapkan untuk mengurangi paparan debu; masker tidak menyediakan oksigen atau menggantikan ventilasi.');
       modules.push({ id: 'bunker', icon: '▣', title: 'BUNKER 72', tone: 'bunker', body: bunkerParts.join(' ') });
 
       const preparationBody = preparedness.score >= 75
@@ -550,11 +611,11 @@ export class GameModel {
       ? 'GOOD ENDING — BERTAHAN DENGAN STABIL'
       : endingId === 'ending_normal'
         ? 'NORMAL ENDING — SELAMAT DENGAN KONSEKUENSI'
-        : 'BAD ENDING — KRISIS TIDAK TERATASI';
+        : 'BAD ENDING — PENYELAMATAN KRITIS';
     return {
       ...result,
       rescueTitle,
-      rescueBadge: isFatal ? 'STATUS: KRISIS FATAL' : `RESCUE: RADIO ${preparedness.radioQuality.toUpperCase()}`,
+      rescueBadge: isCriticalRescue ? 'STATUS: EVAKUASI & PERAWATAN MEDIS' : `RESCUE: RADIO ${preparedness.radioQuality.toUpperCase()}`,
       modules,
       narrativeFull: modules.map((module) => module.body).join(' '),
       preparednessScore: preparedness.score,

@@ -310,6 +310,7 @@ class DeveloperConsole {
             <button type="button" class="bdc-btn" id="bdc-toggle-godmode">God Mode: OFF</button>
             <button type="button" class="bdc-btn" id="bdc-toggle-nocollision">No Collision: OFF</button>
             <button type="button" class="bdc-btn" id="bdc-toggle-colliders">Colliders & Zones (F2): OFF</button>
+            <button type="button" class="bdc-btn" id="bdc-toggle-items">Item Positions (F9): OFF</button>
           </div>
 
           <!-- Fog of War Controls -->
@@ -499,6 +500,15 @@ class DeveloperConsole {
       colBtn.classList.toggle('active', sc.debugColliders);
     });
 
+    const itemBtn = el('bdc-toggle-items');
+    itemBtn?.addEventListener('click', () => {
+      const sc = this.storyEngine.view?.scavengerGame;
+      if (!sc) return;
+      const enabled = sc.setItemEditor(!sc.itemEditor?.enabled);
+      itemBtn.textContent = `Item Positions (F9): ${enabled ? 'ON' : 'OFF'}`;
+      itemBtn.classList.toggle('active', enabled);
+    });
+
     const fogBtn = el('bdc-toggle-fog');
     fogBtn?.addEventListener('click', () => {
       const sc = this.storyEngine.view?.scavengerGame;
@@ -590,7 +600,7 @@ class DeveloperConsole {
           <div style="font-weight:bold; color:${res.endingId === 'ending_good' ? '#00ff88' : res.endingId === 'ending_bad' ? '#ef4444' : '#ffd166'}; margin-bottom:4px;">
             RESULT: ${res.endingId.toUpperCase()} (Skor BNPB: ${res.preparedness?.score}/${res.preparedness?.maxScore})
           </div>
-          <div>Kondisi Fatal (HP <= 0): <b>${res.fatalCondition ? 'YA' : 'TIDAK'}</b></div>
+          <div>Penyelamatan Kritis (HP <= 0): <b>${res.criticalRescueCondition ? 'YA' : 'TIDAK'}</b></div>
           <div>Kebutuhan Kritis Stabil: <b>${res.criticalSurvivalStable ? 'YA' : 'TIDAK'}</b></div>
           <div>Radio VHF: <b>${res.preparedness?.radioQuality?.toUpperCase()}</b></div>
           <div style="margin-top:4px; border-top:1px dashed #334155; padding-top:4px;">
@@ -714,6 +724,13 @@ class DeveloperConsole {
       if (timerDisplay) {
         timerDisplay.textContent = '--';
       }
+    }
+
+    const itemBtn = el('bdc-toggle-items');
+    if (itemBtn) {
+      const itemEditorActive = Boolean(sc?.isActive && sc.itemEditor?.enabled);
+      itemBtn.textContent = `Item Positions (F9): ${itemEditorActive ? 'ON' : 'OFF'}`;
+      itemBtn.classList.toggle('active', itemEditorActive);
     }
 
     // Stats Status

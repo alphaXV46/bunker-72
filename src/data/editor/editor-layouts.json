@@ -1,0 +1,595 @@
+{
+  "version": 1,
+  "collision": {
+    "prologue_house": {
+      "version": 1,
+      "mapKey": "prologue_house",
+      "mapSize": {
+        "width": 1672,
+        "height": 941
+      },
+      "colliders": [
+        {
+          "id": "WALL_OUTER_WEST",
+          "type": "solid",
+          "x": 8,
+          "y": 18,
+          "w": 22,
+          "h": 806
+        },
+        {
+          "id": "WALL_OUTER_EAST",
+          "type": "solid",
+          "x": 1638,
+          "y": 18,
+          "w": 24,
+          "h": 806
+        },
+        {
+          "id": "WALL_OUTER_SOUTH_01",
+          "type": "solid",
+          "x": 8,
+          "y": 824,
+          "w": 640,
+          "h": 24
+        },
+        {
+          "id": "WALL_OUTER_SOUTH_02",
+          "type": "solid",
+          "x": 1140,
+          "y": 824,
+          "w": 522,
+          "h": 24
+        },
+        {
+          "id": "WALL_MASTER_TOP",
+          "type": "solid",
+          "x": 28,
+          "y": 18,
+          "w": 432,
+          "h": 22
+        },
+        {
+          "id": "WALL_MASTER_LEFT",
+          "type": "solid",
+          "x": 28,
+          "y": 18,
+          "w": 22,
+          "h": 270
+        },
+        {
+          "id": "WALL_MASTER_BOTTOM",
+          "type": "solid",
+          "x": 33,
+          "y": 286,
+          "w": 452,
+          "h": 24
+        },
+        {
+          "id": "WALL_MASTER_RIGHT",
+          "type": "solid",
+          "x": 450,
+          "y": 18,
+          "w": 22,
+          "h": 212
+        },
+        {
+          "id": "WALL_MASTER_ALCOVE_TOP",
+          "type": "solid",
+          "x": 450,
+          "y": 92,
+          "w": 112,
+          "h": 22
+        },
+        {
+          "id": "BED_MASTER",
+          "type": "solid",
+          "x": 136,
+          "y": 89,
+          "w": 124,
+          "h": 160
+        },
+        {
+          "id": "NIGHTSTAND_MASTER_LEFT",
+          "type": "solid",
+          "x": 107,
+          "y": 97,
+          "w": 24,
+          "h": 38
+        },
+        {
+          "id": "DRESSER_MASTER",
+          "type": "solid",
+          "x": 279,
+          "y": 58,
+          "w": 65,
+          "h": 75
+        },
+        {
+          "id": "WARDROBE_MASTER",
+          "type": "solid",
+          "x": 347,
+          "y": 60,
+          "w": 91,
+          "h": 109
+        },
+        {
+          "id": "PLANT_MASTER",
+          "type": "solid",
+          "x": 35,
+          "y": 55,
+          "w": 30,
+          "h": 35
+        },
+        {
+          "id": "WALL_BUNKER_TOP",
+          "type": "solid",
+          "x": 562,
+          "y": 10,
+          "w": 516,
+          "h": 26
+        },
+        {
+          "id": "WALL_BUNKER_LEFT",
+          "type": "solid",
+          "x": 562,
+          "y": 10,
+          "w": 22,
+          "h": 225
+        },
+        {
+          "id": "WALL_BUNKER_RIGHT",
+          "type": "solid",
+          "x": 1091,
+          "y": 13,
+          "w": 22,
+          "h": 225
+        },
+        {
+          "id": "WALL_BUNKER_FRONT_01",
+          "type": "solid",
+          "x": 572,
+          "y": 213,
+          "w": 176,
+          "h": 58
+        },
+        {
+          "id": "WALL_BUNKER_FRONT_02",
+          "type": "solid",
+          "x": 883,
+          "y": 205,
+          "w": 230,
+          "h": 67
+        },
+        {
+          "id": "SHELF_BUNKER",
+          "type": "solid",
+          "x": 592,
+          "y": 43,
+          "w": 100,
+          "h": 165
+        },
+        {
+          "id": "VAULT_DOOR_BUNKER",
+          "type": "solid",
+          "x": 672,
+          "y": 41,
+          "w": 422,
+          "h": 116
+        },
+        {
+          "id": "GENERATOR_BUNKER",
+          "type": "solid",
+          "x": 973,
+          "y": 119,
+          "w": 115,
+          "h": 85
+        },
+        {
+          "id": "WALL_CHILD_TOP",
+          "type": "solid",
+          "x": 1155,
+          "y": 18,
+          "w": 485,
+          "h": 22
+        },
+        {
+          "id": "WALL_CHILD_RIGHT",
+          "type": "solid",
+          "x": 1620,
+          "y": 18,
+          "w": 22,
+          "h": 302
+        },
+        {
+          "id": "WALL_CHILD_LEFT",
+          "type": "solid",
+          "x": 1213,
+          "y": 28,
+          "w": 22,
+          "h": 212
+        },
+        {
+          "id": "WALL_CHILD_ALCOVE_TOP",
+          "type": "solid",
+          "x": 1118,
+          "y": 164,
+          "w": 98,
+          "h": 22
+        },
+        {
+          "id": "WARDROBE_CHILD",
+          "type": "solid",
+          "x": 1210,
+          "y": 55,
+          "w": 85,
+          "h": 105
+        },
+        {
+          "id": "SHELF_CHILD",
+          "type": "solid",
+          "x": 1300,
+          "y": 80,
+          "w": 60,
+          "h": 78
+        },
+        {
+          "id": "DESK_CHILD",
+          "type": "solid",
+          "x": 1370,
+          "y": 78,
+          "w": 105,
+          "h": 75
+        },
+        {
+          "id": "BED_CHILD",
+          "type": "solid",
+          "x": 1490,
+          "y": 85,
+          "w": 95,
+          "h": 170
+        },
+        {
+          "id": "DRAWER_CHILD",
+          "type": "solid",
+          "x": 1510,
+          "y": 260,
+          "w": 55,
+          "h": 38
+        },
+        {
+          "id": "PLANT_CHILD",
+          "type": "solid",
+          "x": 1590,
+          "y": 195,
+          "w": 30,
+          "h": 45
+        },
+        {
+          "id": "WALL_OFFICE_TOP",
+          "type": "solid",
+          "x": 1226,
+          "y": 336,
+          "w": 406,
+          "h": 21
+        },
+        {
+          "id": "WALL_OFFICE_LEFT_01",
+          "type": "solid",
+          "x": 1231,
+          "y": 356,
+          "w": 34,
+          "h": 217,
+          "angle": 0
+        },
+        {
+          "id": "WALL_OFFICE_LEFT_02",
+          "type": "solid",
+          "x": 1239,
+          "y": 623,
+          "w": 30,
+          "h": 201,
+          "angle": 0
+        },
+        {
+          "id": "SHELF_OFFICE_TOP",
+          "type": "solid",
+          "x": 1363,
+          "y": 396,
+          "w": 149,
+          "h": 66
+        },
+        {
+          "id": "SHELF_OFFICE_RIGHT",
+          "type": "solid",
+          "x": 1584,
+          "y": 405,
+          "w": 41,
+          "h": 402,
+          "angle": -5
+        },
+        {
+          "id": "DESK_OFFICE_BACK",
+          "type": "solid",
+          "x": 1361,
+          "y": 540,
+          "w": 206,
+          "h": 137
+        },
+        {
+          "id": "WALL_KITCHEN_DIVIDER",
+          "type": "solid",
+          "x": 488,
+          "y": 286,
+          "w": 22,
+          "h": 158
+        },
+        {
+          "id": "COUNTER_KITCHEN_TOP",
+          "type": "solid",
+          "x": 47,
+          "y": 342,
+          "w": 315,
+          "h": 75
+        },
+        {
+          "id": "COUNTER_KITCHEN_LEFT",
+          "type": "solid",
+          "x": 30,
+          "y": 390,
+          "w": 44,
+          "h": 228
+        },
+        {
+          "id": "FRIDGE_KITCHEN",
+          "type": "solid",
+          "x": 331,
+          "y": 326,
+          "w": 75,
+          "h": 95
+        },
+        {
+          "id": "PANTRY_KITCHEN",
+          "type": "solid",
+          "x": 444,
+          "y": 327,
+          "w": 40,
+          "h": 95
+        },
+        {
+          "id": "ISLAND_KITCHEN",
+          "type": "solid",
+          "x": 161,
+          "y": 467,
+          "w": 190,
+          "h": 85
+        },
+        {
+          "id": "TABLE_DINING",
+          "type": "solid",
+          "x": 144,
+          "y": 620,
+          "w": 160,
+          "h": 106
+        },
+        {
+          "id": "PLANT_DINING",
+          "type": "solid",
+          "x": 30,
+          "y": 740,
+          "w": 35,
+          "h": 45
+        },
+        {
+          "id": "WALL_BATHROOM_TOP",
+          "type": "solid",
+          "x": 372,
+          "y": 543,
+          "w": 188,
+          "h": 22
+        },
+        {
+          "id": "WALL_BATHROOM_LEFT",
+          "type": "solid",
+          "x": 368,
+          "y": 539,
+          "w": 20,
+          "h": 290
+        },
+        {
+          "id": "WALL_BATHROOM_RIGHT",
+          "type": "solid",
+          "x": 544,
+          "y": 547,
+          "w": 20,
+          "h": 290
+        },
+        {
+          "id": "SOFA_LIVING_LEFT",
+          "type": "solid",
+          "x": 694,
+          "y": 327,
+          "w": 75,
+          "h": 281
+        },
+        {
+          "id": "SOFA_LIVING_BOTTOM",
+          "type": "solid",
+          "x": 730,
+          "y": 525,
+          "w": 153,
+          "h": 84
+        },
+        {
+          "id": "COFFEE_TABLE_LIVING",
+          "type": "solid",
+          "x": 802,
+          "y": 404,
+          "w": 87,
+          "h": 108
+        },
+        {
+          "id": "ARMCHAIR_LIVING",
+          "type": "solid",
+          "x": 923,
+          "y": 408,
+          "w": 52,
+          "h": 52,
+          "angle": -45
+        },
+        {
+          "id": "TV_CONSOLE_LIVING",
+          "type": "solid",
+          "x": 1066,
+          "y": 406,
+          "w": 50,
+          "h": 175
+        },
+        {
+          "id": "PLANT_LIVING",
+          "type": "solid",
+          "x": 660,
+          "y": 347,
+          "w": 36,
+          "h": 58
+        },
+        {
+          "id": "SIDE_TABLE_LIVING",
+          "type": "solid",
+          "x": 895,
+          "y": 559,
+          "w": 48,
+          "h": 47
+        },
+        {
+          "id": "WALL_FOYER_TOP_LEFT",
+          "type": "solid",
+          "x": 647,
+          "y": 680,
+          "w": 180,
+          "h": 112
+        },
+        {
+          "id": "WALL_FOYER_TOP_RIGHT",
+          "type": "solid",
+          "x": 917,
+          "y": 694,
+          "w": 194,
+          "h": 89
+        },
+        {
+          "id": "WALL_FOYER_LEFT",
+          "type": "solid",
+          "x": 648,
+          "y": 680,
+          "w": 22,
+          "h": 250
+        },
+        {
+          "id": "WALL_FOYER_RIGHT",
+          "type": "solid",
+          "x": 1118,
+          "y": 680,
+          "w": 22,
+          "h": 250
+        },
+        {
+          "id": "WALL_NEW_01",
+          "type": "solid",
+          "x": 1222,
+          "y": 272,
+          "w": 30,
+          "h": 86
+        }
+      ],
+      "exportedAt": "2026-09-04T12:52:20.152Z"
+    }
+  },
+  "fog": {},
+  "items": {
+    "prologue_house": {
+      "version": 1,
+      "mapKey": "prologue_house",
+      "mapSize": {
+        "width": 1672,
+        "height": 941
+      },
+      "items": [
+        {
+          "uid": "food-0",
+          "type": "food",
+          "x": 315,
+          "y": 384,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "food-1",
+          "type": "food",
+          "x": 44,
+          "y": 552,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "drink-0",
+          "type": "drink",
+          "x": 116,
+          "y": 368,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "drink-1",
+          "type": "drink",
+          "x": 159,
+          "y": 646,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "kit-0",
+          "type": "kit",
+          "x": 314,
+          "y": 106,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "radio-0",
+          "type": "radio",
+          "x": 1541,
+          "y": 642,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "battery-0",
+          "type": "battery",
+          "x": 1108,
+          "y": 531,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        },
+        {
+          "uid": "toy-0",
+          "type": "toy",
+          "x": 1591,
+          "y": 298,
+          "w": 36,
+          "h": 36,
+          "angle": 0
+        }
+      ],
+      "exportedAt": "2026-09-04T13:26:28.362Z"
+    }
+  },
+  "ui": {}
+}
