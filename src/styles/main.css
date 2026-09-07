@@ -898,23 +898,10 @@ input[type="range"] {
   animation: lightFlicker 4s infinite steps(2, end);
 }
 
-.dust,
 .warning-sweep {
   position: absolute;
   display: block;
 }
-
-.dust {
-  width: 38%;
-  height: 34%;
-  background-image: radial-gradient(rgba(236,224,174,0.22) 1px, transparent 2px);
-  background-size: 18px 18px;
-  opacity: 0.34;
-  animation: dustDrift 12s linear infinite;
-}
-
-.dust-a { top: 22%; left: 18%; }
-.dust-b { top: 42%; right: 12%; animation-duration: 16s; opacity: 0.22; }
 
 .warning-sweep {
   inset: 0;
@@ -2790,11 +2777,6 @@ body.title-card-active #settings-btn { display: none !important; }
   100% { opacity: 0.7; }
 }
 
-@keyframes dustDrift {
-  from { transform: translateY(0)   rotate(0deg);   }
-  to   { transform: translateY(-8%) rotate(0.5deg); }
-}
-
 @keyframes warningSweep {
   0%   { transform: translateX(-90%); }
   40%  { transform: translateX(100%); }
@@ -3322,10 +3304,6 @@ body.disable-crt .crt-flicker { display: none !important; }
   filter: sepia(0.42) hue-rotate(-12deg) brightness(0.88);
   transition: filter 0.6s ease;
 }
-.story-box.env-dusty .dust {
-  opacity: 0.72 !important;
-}
-
 /* env-smoky — smoke_poisoned
    Desaturate + blue-gray wash to simulate residual gas haze */
 .story-box.env-smoky {
