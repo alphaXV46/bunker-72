@@ -35,6 +35,118 @@
   --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath fill='%23050709' d='M6 3h4v4h4v4h4v4h4v4h4v4h4v10h-9v-4h-4v8h-9V7H6z'/%3E%3Cpath fill='%23ffd166' d='M10 7h4v4h4v4h4v4h4v4h4v6h-9v-4h-4v8h-5V11h-4z'/%3E%3Cpath fill='%23fff7d7' d='M14 11h4v4h-4zM18 15h4v4h-4zM22 19h4v4h-4z'/%3E%3Cpath fill='%235bc0be' d='M25 29h4v4h-4z'/%3E%3C/svg%3E") 6 4, pointer;
 }
 
+/* Ending text treatment: keep the artwork visible and let typography carry the
+ * narrative. The full-screen scrim on the cutscene still protects contrast,
+ * while the layered shadow keeps text readable over bright backgrounds. */
+.ending-cutscene .good-ending-dialogue {
+  left: clamp(18px, 7vw, 112px);
+  right: clamp(18px, 7vw, 112px);
+  bottom: clamp(22px, 5vh, 62px);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.ending-cutscene .good-ending-speaker {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding-bottom: 3px;
+  border-bottom: 2px solid currentColor;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9), 0 0 14px rgba(0, 0, 0, 0.95);
+}
+
+.ending-cutscene #good-ending-dialogue-text,
+.ending-cutscene #bad-ending-dialogue-text {
+  max-width: min(920px, 82vw);
+  margin: 0 0 18px;
+  color: #fff;
+  font-size: clamp(1.2rem, 1.6vw, 1.7rem);
+  line-height: 1.45;
+  text-wrap: pretty;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 5px rgba(0, 0, 0, 0.98), 0 0 18px rgba(0, 0, 0, 0.85);
+}
+
+.ending-cutscene #good-ending-next,
+.ending-cutscene #bad-ending-next {
+  margin-left: 0;
+  background: rgba(8, 12, 14, 0.72);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 0, 0, 0.45);
+}
+
+/* Ending explanations are presented as clean editorial text instead of cards. */
+#ending-view .ending-content-box,
+#ending-view .good-ending-final-card,
+#ending-view .normal-ending-final-card,
+#ending-view .epilogue-card {
+  background: transparent !important;
+  border: 0 !important;
+  border-left: 0 !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+#ending-view .ending-content-box {
+  padding: 0;
+}
+
+#ending-view .ending-description,
+#ending-view .good-ending-final-card__body p,
+#ending-view .epilogue-card-body {
+  color: var(--text-pixel);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+#ending-view .good-ending-final-card,
+#ending-view .normal-ending-final-card {
+  padding: 0;
+}
+
+#ending-view .good-ending-final-card__title,
+#ending-view .good-ending-final-card__eyebrow,
+#ending-view .epilogue-card-title,
+#ending-view .epilogue-icon {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 0, 0, 0.9);
+}
+
+#ending-view .good-ending-final-card__readiness {
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid rgba(231, 237, 240, 0.34);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+#ending-view .good-ending-final-card__score {
+  max-width: 760px;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.85);
+}
+
+#ending-view .ending-stats {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+@media (max-width: 600px) {
+  .ending-cutscene .good-ending-dialogue {
+    bottom: 22px;
+  }
+
+  .ending-cutscene #good-ending-dialogue-text,
+  .ending-cutscene #bad-ending-dialogue-text {
+    max-width: 100%;
+    font-size: clamp(1.05rem, 4.8vw, 1.4rem);
+  }
+}
+
 
 /* ============================================================
    SECTION 2: RESET & BASE
@@ -835,17 +947,10 @@ input[type="range"] {
 .story-box.bg-prolog-peaceful { background-image: url('../assets/backgrounds/bg_prolog_peaceful.png'); }
 .story-box.bg-prolog-window   { background-image: url('../assets/backgrounds/bg_prolog_window.webp'); }
 .story-box.bg-prolog,
-<<<<<<< Updated upstream
-.story-box.bg-prolog-1 { background-image: url('../assets/backgrounds/bg_prolog1.png'); }
-.story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.png'); }
-.story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.png'); }
-.story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.png'); }
-=======
 .story-box.bg-prolog-1 { background-image: url('../assets/backgrounds/bg_prolog1.webp'); }
-.story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.png'); }
+.story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.webp'); }
 .story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.webp'); }
 .story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.webp'); }
->>>>>>> Stashed changes
 .story-box.bg-backstory-airport { background-image: url('../assets/backgrounds/bg_backstory_airport.webp'); }
 .story-box.bg-backstory-house { background-image: url('../assets/backgrounds/bg_backstory_house.webp'); }
 .story-box.bg-backstory-aris-company { background-image: url('../assets/backgrounds/bg_backstory_aris_company.webp'); }
@@ -2670,7 +2775,7 @@ body.title-card-active #settings-btn { display: none !important; }
 #ending-view.ending-bg-best {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.48)),
-    url('../assets/backgrounds/bg_good_end_3.webp') center / cover no-repeat;
+    url('../assets/backgrounds/bg_good_end_3.jpg') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-fatal {
@@ -5406,4 +5511,279 @@ body.disable-crt .crt-flicker { display: none !important; }
     padding: 6px 8px;
     font-size: 10px;
   }
+}
+
+/* Outside-bunker story scenes use an unobstructed cinematic narration layer.
+ * Bunker scenes intentionally keep the regular tactical textbox. */
+.story-box.scene-outside .floating-interactive-card {
+  width: min(90%, 1080px);
+  min-height: 0;
+  padding: 0;
+  gap: 10px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.story-box.scene-outside .card-header {
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 4px !important;
+  background: transparent;
+}
+
+.story-box.scene-outside .speaker-name {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 0 4px !important;
+  color: var(--warning-yellow-border) !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 0, 0, 0.95);
+}
+
+.story-box.scene-outside .speaker-name::before {
+  color: var(--warning-yellow-border) !important;
+}
+
+.story-box.scene-outside .dialogue-overlay {
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.story-box.scene-outside .dialogue-overlay::before {
+  display: none;
+}
+
+.story-box.scene-outside .dialogue-body {
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.story-box.scene-outside .avatar-container {
+  border-color: rgba(255, 209, 102, 0.72);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.7);
+}
+
+.story-box.scene-outside .dialogue-text {
+  color: #fff;
+  font-size: clamp(1.2rem, 1.6vw, 1.7rem);
+  line-height: 1.45;
+  min-height: 70px;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.98), 0 0 6px rgba(0, 0, 0, 0.98), 0 0 18px rgba(0, 0, 0, 0.82);
+}
+
+.story-box.scene-outside .command-deck {
+  background: transparent;
+}
+
+@media (max-width: 600px) {
+  .story-box.scene-outside .floating-interactive-card {
+    width: calc(100% - 28px);
+  }
+
+  .story-box.scene-outside .dialogue-body {
+    gap: 10px;
+  }
+
+  .story-box.scene-outside .avatar-container {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+/* Direct background selectors keep the outside-bunker treatment active even
+ * while responsive layout rules are recalculated on short viewports. */
+.story-box:is(
+  .bg-backstory-airport,
+  .bg-backstory-house,
+  .bg-backstory-aris-company,
+  .bg-backstory-sarah-office,
+  .bg-backstory-sarah-office-interactive,
+  .bg-backstory-sarah-office-alert,
+  .bg-prolog-peaceful,
+  .bg-prolog-window,
+  .bg-prolog-2
+) .floating-interactive-card {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.story-box:is(
+  .bg-backstory-airport,
+  .bg-backstory-house,
+  .bg-backstory-aris-company,
+  .bg-backstory-sarah-office,
+  .bg-backstory-sarah-office-interactive,
+  .bg-backstory-sarah-office-alert,
+  .bg-prolog-peaceful,
+  .bg-prolog-window,
+  .bg-prolog-2
+) .dialogue-overlay {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.story-box:is(
+  .bg-backstory-airport,
+  .bg-backstory-house,
+  .bg-backstory-aris-company,
+  .bg-backstory-sarah-office,
+  .bg-backstory-sarah-office-interactive,
+  .bg-backstory-sarah-office-alert,
+  .bg-prolog-peaceful,
+  .bg-prolog-window,
+  .bg-prolog-2
+) .dialogue-overlay::before {
+  display: none !important;
+}
+
+.story-box:is(
+  .bg-backstory-airport,
+  .bg-backstory-house,
+  .bg-backstory-aris-company,
+  .bg-backstory-sarah-office,
+  .bg-backstory-sarah-office-interactive,
+  .bg-backstory-sarah-office-alert,
+  .bg-prolog-peaceful,
+  .bg-prolog-window,
+  .bg-prolog-2
+) .dialogue-text {
+  font-size: clamp(1.2rem, 1.6vw, 1.7rem) !important;
+  line-height: 1.45 !important;
+  min-height: 70px !important;
+}
+
+/* Prolog 6: Ibu meminta Ayah mencari persediaan. This scene uses the
+ * dedicated `packing` background, so it needs an explicit scene-id hook. */
+.story-box.scene-id-prolog_expedition_call .floating-interactive-card,
+.story-box.scene-id-prolog_expedition_call .dialogue-overlay {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.story-box.scene-id-prolog_expedition_call .floating-interactive-card {
+  min-height: 0;
+  padding: 0;
+}
+
+.story-box.scene-id-prolog_expedition_call .dialogue-overlay {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.story-box.scene-id-prolog_expedition_call .dialogue-overlay::before {
+  display: none !important;
+}
+
+.story-box.scene-id-prolog_expedition_call .dialogue-body {
+  display: flex !important;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.story-box.scene-id-prolog_expedition_call .avatar-container {
+  display: flex !important;
+}
+
+.story-box.scene-id-prolog_expedition_call .dialogue-text {
+  font-size: clamp(1.2rem, 1.6vw, 1.7rem) !important;
+  line-height: 1.45 !important;
+  min-height: 70px !important;
+}
+
+/* Speaker identity for all transparent-narration scenes. */
+.dialogue-speaker-label {
+  display: none;
+}
+
+.story-box:is(
+  .bg-backstory-airport,
+  .bg-backstory-house,
+  .bg-backstory-aris-company,
+  .bg-backstory-sarah-office,
+  .bg-backstory-sarah-office-interactive,
+  .bg-backstory-sarah-office-alert,
+  .bg-prolog-peaceful,
+  .bg-prolog-window,
+  .bg-prolog-2
+) .dialogue-speaker-label,
+.story-box.scene-id-prolog_expedition_call .dialogue-speaker-label {
+  display: block;
+  width: fit-content;
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  color: var(--warning-yellow-border);
+  border-bottom: 2px solid currentColor;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(0.95rem, 1.1vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.98), 0 0 12px rgba(0, 0, 0, 0.95);
+}
+
+/* Prolog 6 is narration-only: keep the speaker name, remove the portrait. */
+.story-box.scene-id-prolog_expedition_call .avatar-container {
+  display: none !important;
+}
+
+/* Prolog/backstory wrappers use display: contents, so expose the label from
+ * the active view mode as a reliable fallback for every non-bunker dialogue. */
+#game-view.prolog-mode .dialogue-speaker-label,
+#game-view.backstory-mode .dialogue-speaker-label {
+  display: block !important;
+  width: fit-content;
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  color: var(--warning-yellow-border);
+  border-bottom: 2px solid currentColor;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(0.95rem, 1.1vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.98), 0 0 12px rgba(0, 0, 0, 0.95);
+}
+
+.story-box.show-narration-speaker .dialogue-speaker-label {
+  display: block !important;
+}
+
+.story-box:is(
+  .bg-backstory-airport,
+  .bg-backstory-house,
+  .bg-backstory-aris-company,
+  .bg-backstory-sarah-office,
+  .bg-backstory-sarah-office-interactive,
+  .bg-backstory-sarah-office-alert,
+  .bg-prolog-peaceful,
+  .bg-prolog-window,
+  .bg-prolog-2
+) .avatar-container {
+  display: flex !important;
 }
