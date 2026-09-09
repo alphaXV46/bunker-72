@@ -13,7 +13,14 @@ import { GameModel  } from './gameModel.js';
 import { GameView   } from './gameView.js';
 import { RetroAudio } from './retroAudio.js';
 import { BunkerMinigame } from './bunkerMinigame.js';
-import { ENDING_IDS, parseHour, SARAH_WARNING_RESPONSE_BY_CHOICE_ID } from './constants.js';
+import {
+  CURRENT_STORY_REVISION,
+  ENDING_IDS,
+  NEW_GAME_START_SCENE_ID,
+  parseHour,
+  SARAH_WARNING_RESPONSE_BY_CHOICE_ID,
+  STORY_REVISIONS,
+} from './constants.js';
 import { getExpeditionConfig, EXPEDITION_CONFIGS } from './expeditionConfig.js';
 import {
   getSarahOfficeHotspot,
@@ -39,16 +46,18 @@ const EXPEDITION_LOCATIONS = Object.freeze(Object.values(EXPEDITION_CONFIGS).map
 export class StoryEngine {
   /**
    * @param {object}   options
-   * @param {object}   options.storyData  - Parsed story.json content.
-   * @param {object}   options.dom        - DOM element references passed from main.js.
-   * @param {Function} options.onSave     - Callback receiving a single saveData object.
-   * @param {Function} options.onEnd      - Callback invoked when the game reaches an ending.
+   * @param {object}   options.storyData        - Parsed story.json content.
+   * @param {object}   [options.legacyStoryData] - Optional parsed storyLegacyPhase7.json content.
+   * @param {object}   options.dom              - DOM element references passed from main.js.
+   * @param {Function} options.onSave           - Callback receiving a single saveData object.
+   * @param {Function} options.onEnd            - Callback invoked when the game reaches an ending.
    */
   constructor(options) {
-    this.storyData = options.storyData;
-    this.dom       = options.dom;
-    this.onSave    = options.onSave;
-    this.onEnd     = options.onEnd;
+    this.storyData       = options.storyData;
+    this.legacyStoryData = options.legacyStoryData || null;
+    this.dom             = options.dom;
+    this.onSave          = options.onSave;
+    this.onEnd           = options.onEnd;
 
     this.model = new GameModel();
     this.view  = new GameView(this.dom);
@@ -75,12 +84,64 @@ export class StoryEngine {
   }
 
   /**
+   * Resolves the story data object appropriate for the active story revision.
+   * Strictly isolated: never cross-falls back to another revision's dataset.
+   * If the requested revision dataset is unavailable or revision is unknown, returns null.
+   * @param {string} [revision]
+   * @returns {object|null}
+   */
+  getStoryData(revision = this.model?.storyRevision) {
+    if (revision === STORY_REVISIONS.LEGACY_PHASE7) {
+      return this.legacyStoryData || null;
+    }
+    if (revision === STORY_REVISIONS.SEALED72) {
+      return this.storyData || null;
+    }
+    return null;
+  }
+
+  /**
+   * Resolves a scene object by ID strictly from the active story revision data.
+   * Cross-revision fallback is strictly prohibited to prevent narrative leakage.
+   * @param {string} sceneId
+   * @param {string} [revision]
+   * @returns {object|null}
+   */
+  getScene(sceneId, revision = this.model?.storyRevision) {
+    const data = this.getStoryData(revision);
+    return data?.scenes?.[sceneId] || null;
+  }
+
+  /**
    * Initializes the model and begins rendering from the given scene.
    * Called for both new games and save-file loads.
+   *
+   * @param {string}   sceneId
+   * @param {number}   knowledge
+   * @param {Array}    history
+   * @param {object|null} flags
+   * @param {object|null} inventory
+   * @param {number}   hunger
+   * @param {number}   thirst
+   * @param {number}   health
+   * @param {Array}    expeditionVisitedLocations
+   * @param {string}   storyRevision
+   * @param {object|null} houseScavengeResult
    */
-  start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
+  start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = [], storyRevision = CURRENT_STORY_REVISION, houseScavengeResult = null) {
     this.view.clearSceneHotspots();
-    this.model.init(sceneId, knowledge, history, flags, inventory, hunger, thirst, health, expeditionVisitedLocations);
+    let activeRevision = storyRevision;
+    if (activeRevision !== STORY_REVISIONS.SEALED72 && activeRevision !== STORY_REVISIONS.LEGACY_PHASE7) {
+      console.warn(`[StoryEngine] Unknown story revision "${activeRevision}". Recovering to canonical revision "${CURRENT_STORY_REVISION}".`);
+      activeRevision = CURRENT_STORY_REVISION;
+    }
+    let targetSceneId = sceneId;
+    const isRuntimeSpecial = targetSceneId === 'ending_eval' || targetSceneId === 'trigger_ending_eval';
+    if (!this.getScene(targetSceneId, activeRevision) && !isRuntimeSpecial) {
+      console.warn(`[StoryEngine] Starting scene "${targetSceneId}" not found in revision "${activeRevision}". Recovering with canonical starting scene "${NEW_GAME_START_SCENE_ID}".`);
+      targetSceneId = NEW_GAME_START_SCENE_ID;
+    }
+    this.model.init(targetSceneId, knowledge, history, flags, inventory, hunger, thirst, health, expeditionVisitedLocations, activeRevision, houseScavengeResult);
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
     this.pendingMinigameChoice = null;
@@ -140,7 +201,7 @@ export class StoryEngine {
       this.renderScene('backstory_sarah_decision');
       return;
     }
-    const scene = this.storyData.scenes[sceneId];
+    const scene = this.getScene(sceneId);
     if (!scene) {
       console.error(`[StoryEngine] Scene "${sceneId}" not found in story data.`);
       return;
@@ -156,7 +217,7 @@ export class StoryEngine {
     }
 
     // Apply time-based survival stat decay for non-ending scenes.
-    const prevHour   = parseHour(this.storyData.scenes[this.model.currentSceneId]?.hour);
+    const prevHour   = parseHour(this.getScene(this.model.currentSceneId)?.hour);
     const currHour   = parseHour(scene.hour);
     const elapsed    = currHour - prevHour;
     const isEnding   = ENDING_IDS.includes(sceneId);
@@ -255,6 +316,10 @@ export class StoryEngine {
     this.pendingClickNextSceneId = null;
 
     if (sceneId === 'prolog_packing') {
+      if (this.model.houseScavengeResult) {
+        this.renderScene('prolog_expedition_call');
+        return;
+      }
       this.view.dom.dialogueText.textContent = '';
       this.view.isTyping = false;
       this.view.startScavengerMinigame(
@@ -358,9 +423,16 @@ export class StoryEngine {
 
   /**
    * Handles completion of 2D Top-Down Scavenger Minigame.
+   * Atomic transaction: applies inventory/flags/contract and advances to next scene checkpoint
+   * where the single unified save snapshot is persisted.
    * @param {object} result - { collectedItems: string[], reason: string }
    */
   handleScavengerComplete(result) {
+    if (this.model.houseScavengeResult) {
+      console.warn('[StoryEngine] Scavenger result already committed; skipping duplicate invocation.');
+      return;
+    }
+
     const items = result?.collectedItems || [];
     const fallbackCounts = {
       food: items.filter((id) => id === 'food').length,
@@ -378,6 +450,16 @@ export class StoryEngine {
     }));
     const isLate = Boolean(result?.lateEvacuation || result?.reason === 'time_out');
     const lostItem = result?.lostItem || null;
+
+    // Canonical summary contract for reload idempotency and provenance
+    this.model.houseScavengeResult = {
+      reason: isLate ? 'time_out' : (result?.reason === 'entered_hatch' ? 'entered_hatch' : 'completed'),
+      collectedItems: [...items],
+      resourceCounts: { ...resourceCounts },
+      lateEvacuation: isLate,
+      lostItem,
+      committedAtSceneId: 'prolog_expedition_call',
+    };
 
     // Reset packed flags
     this.model.flags.food_packed = (resourceCounts.food || 0) > 0;
@@ -402,11 +484,6 @@ export class StoryEngine {
     const isDisabledScene = this.model.isInventoryDisabledScene('prolog_intro');
     this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
 
-    // Persist the exact stackable payoff and independent radio/battery/toy
-    // flags before the next scene renders. Older saves remain valid because
-    // this uses the existing inventory and flag schema.
-    this.onSave?.(this.model.toSaveData());
-
     const summary = {
       ...(result?.summary || {}),
       itemCount: items.length,
@@ -422,8 +499,8 @@ export class StoryEngine {
       this.view.showTelltaleToast(`${summary.title}: ${items.length} barang diamankan.`);
     }
 
-    // After the mother finishes gathering supplies inside the house, she
-    // sends the father to plan a second supply run before entering the bunker.
+    // Advance to next scene checkpoint. The single canonical save snapshot
+    // will be persisted atomically with sceneId: 'prolog_expedition_call'.
     this.renderScene('prolog_expedition_call');
   }
 
@@ -443,14 +520,14 @@ export class StoryEngine {
     }
 
     this.model.history.push({
-      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '6 Jam',
+      hour: this.getScene(this.model.currentSceneId)?.hour ?? '6 Jam',
       text: `[INSPEKSI] ${hotspot.label}: ${hotspot.text}`,
       choiceId: `inspection_${hotspot.id}`,
       effect: knowledge,
     });
     this.view.renderProtocolLog(this.model.history);
     this.view.showDay1InspectionFeedback(hotspot.text);
-    this.view.renderHud(this.storyData.scenes[this.model.currentSceneId], this.model.knowledge, this.model.currentSceneId, this.model.flags,
+    this.view.renderHud(this.getScene(this.model.currentSceneId), this.model.knowledge, this.model.currentSceneId, this.model.flags,
       this.model.hunger, this.model.thirst, this.model.health);
     this.view.updateInventoryUI(this.model.isInventoryDisabledScene(this.model.currentSceneId), this.model.inventory);
     this.view.renderDay1Hotspots(DAY1_HOTSPOTS, this.model.flags,
@@ -611,20 +688,24 @@ export class StoryEngine {
 
   handleExpeditionComplete(result) {
     const locationId = result?.locationId;
-    if (!getExpeditionConfig(locationId) || this.model.expeditionVisitedLocations.includes(locationId)) return;
+    if (!getExpeditionConfig(locationId) || this.model.expeditionVisitedLocations.includes(locationId)) {
+      console.warn(`[StoryEngine] Expedition location "${locationId}" already visited or invalid; ignoring.`);
+      return;
+    }
     this.model.expeditionVisitedLocations.push(locationId);
     this._applyExpeditionResult(result);
     const config = getExpeditionConfig(locationId);
     this.model.history.push({
-      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '30 Jam',
+      hour: this.getScene(this.model.currentSceneId)?.hour ?? '30 Jam',
       text: `[EKSPEDISI] ${config.label}: ${result.collectedItems?.length || 0} unit dibawa pulang (${result.reason || 'returned'}).`,
       choiceId: `expedition_${locationId}`,
       effect: 0,
     });
     this.view.renderProtocolLog(this.model.history);
     this.view.updateInventoryUI(false, this.model.inventory);
-    this.onSave?.(this.model.toSaveData());
 
+    // Atomic transaction: advance to destination scene where the single canonical
+    // save snapshot is committed with the new sceneId.
     if (!this.model.flags.hendra_encountered) {
       this.renderScene('day2_hendra_encounter');
     } else if (this.model.expeditionVisitedLocations.length >= 2) {
@@ -641,7 +722,7 @@ export class StoryEngine {
     const quality = committed ? requestedQuality : this.model.flags.radio_quality;
     if (!['clear', 'weak', 'failed'].includes(quality)) return;
 
-    const scene = this.storyData.scenes[this.model.currentSceneId];
+    const scene = this.getScene(this.model.currentSceneId);
     if (committed) {
       this.model.history.push({
         hour: scene?.hour ?? '68 Jam',
@@ -650,8 +731,8 @@ export class StoryEngine {
         effect: 0,
       });
       this.view.renderProtocolLog(this.model.history);
-      this.onSave?.(this.model.toSaveData());
     }
+    // Atomic transaction: single canonical save snapshot committed in renderScene
     this.renderScene(`day3_radio_${quality}`);
   }
 
@@ -800,7 +881,7 @@ export class StoryEngine {
 
     // Record decision in history.
     const historyEntry = {
-      hour:     this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
+      hour:     this.getScene(this.model.currentSceneId)?.hour ?? '--',
       text:     choice.log || choice.text,
       choiceId: choice.id  ?? null,
       effect,
@@ -859,7 +940,7 @@ export class StoryEngine {
     }
 
     this.model.history.push({
-      hour: this.storyData.scenes[this.model.currentSceneId]?.hour ?? '--',
+      hour: this.getScene(this.model.currentSceneId)?.hour ?? '--',
       text: choice.log || choice.text,
       choiceId: choice.id,
       effect: 0,
@@ -906,7 +987,7 @@ export class StoryEngine {
     const result = this.model.useInventoryItem(key);
     if (!result) return; // Item not available
 
-    const scene = this.storyData.scenes[this.model.currentSceneId];
+    const scene = this.getScene(this.model.currentSceneId);
     this.model.history.push({
       hour:     scene?.hour ?? '--',
       text:     `Menggunakan ${result.label} dari inventaris: ${result.effectText}`,
@@ -961,7 +1042,7 @@ export class StoryEngine {
       }
       this.view.renderSpeaker(react);
       this.view.typeText(react.text, () => {
-        const currentScene = this.storyData.scenes[this.model.currentSceneId];
+        const currentScene = this.getScene(this.model.currentSceneId);
         this._inventoryReactionTimeout = setTimeout(() => {
           this.restoreSceneDialogue(currentScene);
         }, 3000);
@@ -1020,7 +1101,7 @@ export class StoryEngine {
   processNarrativeText(sceneId, rawText, speaker) {
     let processedText = rawText;
 
-    const scene = this.storyData.scenes[sceneId];
+    const scene = this.getScene(sceneId);
     if (scene) {
       if (Array.isArray(scene.conditionalText)) {
         scene.conditionalText.forEach((cond) => {
@@ -1085,7 +1166,7 @@ export class StoryEngine {
     if (this._inventoryReactionTimeout) {
       clearTimeout(this._inventoryReactionTimeout);
       this._inventoryReactionTimeout = null;
-      const currentScene = this.storyData.scenes[this.model.currentSceneId];
+      const currentScene = this.getScene(this.model.currentSceneId);
       if (currentScene) {
         this.restoreSceneDialogue(currentScene);
       }
@@ -1124,7 +1205,7 @@ export class StoryEngine {
   // ─── DEVELOPER CONSOLE & DEBUG HOOKS ────────────────────────────────────
 
   debugJumpToScene(sceneId) {
-    if (!this.storyData.scenes[sceneId] && sceneId !== 'ending_eval' && sceneId !== 'trigger_ending_eval') {
+    if (!this.getScene(sceneId) && sceneId !== 'ending_eval' && sceneId !== 'trigger_ending_eval') {
       console.warn(`[StoryEngine] Invalid debug scene ID: "${sceneId}"`);
       return false;
     }

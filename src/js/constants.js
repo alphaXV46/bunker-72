@@ -45,7 +45,21 @@ export const POWER_THRESHOLDS = Object.freeze({
 });
 
 export const SAVE_KEY = 'bunker72_save_v1';
-export const SAVE_SCHEMA_VERSION = 3;
+export const SAVE_BACKUP_KEY = 'bunker72_save_v1_backup';
+export const SAVE_SCHEMA_VERSION = 4;
+
+/**
+ * Story revisions represent distinct narrative timelines, decoupled from the
+ * physical storage schema version.
+ * - SEALED72: Redesigned narrative timeline (prologue expedition + internal Day 2 crisis).
+ * - LEGACY_PHASE7: Original timeline (prologue directly to bunker + Day 2 outside expedition).
+ */
+export const STORY_REVISIONS = Object.freeze({
+  SEALED72: 'sealed72',
+  LEGACY_PHASE7: 'legacy_phase7',
+});
+
+export const CURRENT_STORY_REVISION = STORY_REVISIONS.SEALED72;
 
 /** Fresh runs always begin in the pre-disaster narrative. Existing saves retain their scene. */
 export const NEW_GAME_START_SCENE_ID = 'backstory_return';

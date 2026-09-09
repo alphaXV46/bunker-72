@@ -10,6 +10,7 @@
 
 import {
   clamp,
+  CURRENT_STORY_REVISION,
   ENDING_IDS,
   ENDING_RULES,
   NEW_GAME_START_SCENE_ID,
@@ -17,6 +18,7 @@ import {
   normalizeSarahWarningResponse,
   SARAH_WARNING_RESPONSE_BY_CHOICE_ID,
   SAVE_SCHEMA_VERSION,
+  STORY_REVISIONS,
   SURVIVAL,
 } from './constants.js';
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
@@ -104,6 +106,7 @@ const SARAH_PUBLIC_IMPACT_BODIES = Object.freeze({
 export class GameModel {
   constructor() {
     this.currentSceneId = NEW_GAME_START_SCENE_ID;
+    this.storyRevision = CURRENT_STORY_REVISION;
     this.knowledge     = SURVIVAL.DEFAULTS.knowledge;
     this.hunger        = SURVIVAL.DEFAULTS.hunger;
     this.thirst        = SURVIVAL.DEFAULTS.thirst;
@@ -111,6 +114,7 @@ export class GameModel {
     this.history       = [];
     this.flags         = {};
     this.expeditionVisitedLocations = [];
+    this.houseScavengeResult = null;
     this.inventory     = { ...SURVIVAL.DEFAULTS.inventory };
   }
 
@@ -234,9 +238,18 @@ export class GameModel {
    * @param {number}   hunger
    * @param {number}   thirst
    * @param {number}   health
+   * @param {Array}    expeditionVisitedLocations
+   * @param {string}   storyRevision
+   * @param {object|null} houseScavengeResult
    */
-  init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = []) {
+  init(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = [], storyRevision = CURRENT_STORY_REVISION, houseScavengeResult = null) {
     this.currentSceneId = sceneId || NEW_GAME_START_SCENE_ID;
+    this.storyRevision  = (storyRevision === STORY_REVISIONS.SEALED72 || storyRevision === STORY_REVISIONS.LEGACY_PHASE7)
+      ? storyRevision
+      : CURRENT_STORY_REVISION;
+    this.houseScavengeResult = houseScavengeResult && typeof houseScavengeResult === 'object'
+      ? { ...houseScavengeResult }
+      : null;
     this.history        = Array.isArray(history) ? history : [];
     const validExpeditionIds = new Set(Object.keys(EXPEDITION_CONFIGS));
     this.expeditionVisitedLocations = Array.isArray(expeditionVisitedLocations)
@@ -644,17 +657,22 @@ export class GameModel {
    * @returns {object}
    */
   toSaveData() {
-    return {
-      version:   SAVE_SCHEMA_VERSION,
-      sceneId:   this.currentSceneId,
-      knowledge: this.knowledge,
-      history:   this.history,
-      flags:     this.flags,
-      inventory: this.inventory,
-      hunger:    this.hunger,
-      thirst:    this.thirst,
-      health:    this.health,
+    const data = {
+      version:       SAVE_SCHEMA_VERSION,
+      storyRevision: this.storyRevision,
+      sceneId:       this.currentSceneId,
+      knowledge:     this.knowledge,
+      history:       this.history,
+      flags:         this.flags,
+      inventory:     this.inventory,
+      hunger:        this.hunger,
+      thirst:        this.thirst,
+      health:        this.health,
       expeditionVisitedLocations: [...this.expeditionVisitedLocations],
     };
+    if (this.houseScavengeResult) {
+      data.houseScavengeResult = { ...this.houseScavengeResult };
+    }
+    return data;
   }
 }

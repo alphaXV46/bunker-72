@@ -11,15 +11,16 @@
  */
 
 import storyData from '../data/story.json';
+import legacyStoryData from '../data/storyLegacyPhase7.json';
 import { StoryEngine } from './storyEngine.js';
 import {
+  CURRENT_STORY_REVISION,
   NEW_GAME_START_SCENE_ID,
-  normalizeSarahOfficeReadIds,
-  normalizeSarahWarningResponse,
   SAVE_KEY,
   SAVE_SCHEMA_VERSION,
   SURVIVAL,
 } from './constants.js';
+import { migrateSaveData } from './saveMigration.js';
 import { preloadAssets } from './assetLoader.js';
 import { RadioMiniGame } from './radioMiniGame.js';
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
@@ -90,119 +91,35 @@ const dom = {
 
 // ─── SAVE HELPERS ────────────────────────────────────────────────────────────
 
-const SUPPORTED_RUNTIME_SCENES = new Set([
-  'ending_eval',
-  'trigger_ending_eval',
-]);
-// Removed scenes are mapped by ID only; their old story content is not loaded.
-const LEGACY_DAY4_IDS = new Set([
-  'ending_fatal',
-  'trigger_secret_ending_eval',
-  'ending_best',
-  'ending_secret_best',
-  'ending_secret_bad',
-  'ending_stranded_bad',
-  'ending_near_miss',
-]);
-const LEGACY_DAY2_EXPEDITION_SCENES = new Set([
-  'day2_expedition_setup',
-  'day2_damage_check', 'day2_panic_exit', 'day2_calm_check', 'day2_find_leak',
-  'day2_leak_poor_fix', 'day2_remedy_air', 'day2_remedy_air_success', 'day2_seal_leak',
-  'day2_stranger_knock', 'day2_stranger_resolved', 'day2_radio_setup', 'day2_radio_save',
-  'day2_radio_drain', 'day2_power_good', 'day2_power_bad', 'day2_scavenge_check',
-  'day2_scavenge_success', 'day2_scavenge_fail', 'day2_scavenge_bypass_fail', 'day2_scavenge_slow_success', 'trigger_scavenge_eval',
-]);
-const LEGACY_DAY3_CONSEQUENCE_SCENES = new Set([
-  'day3_water_issue', 'day3_pressure_pinch', 'day3_pinch_water_resolved', 'day3_pinch_vent_inspected',
-  'day3_water_poisoned', 'day3_water_boil', 'day3_water_filter', 'day3_signal_bad', 'day3_signal_good',
-  'day3_knock_hear', 'day3_knock_verify', 'day3_knock_open', 'day3_final_vigil',
-]);
-
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function normalizeExpeditionLocations(value) {
-  const validIds = new Set(Object.keys(EXPEDITION_CONFIGS));
-  return Array.isArray(value)
-    ? [...new Set(value.filter((id) => typeof id === 'string' && validIds.has(id)))]
-    : [];
-}
-
-function normalizeSarahFlags(value) {
-  if (!isPlainObject(value)) return null;
-  return {
-    ...value,
-    sarah_warning_response: normalizeSarahWarningResponse(value.sarah_warning_response),
-    sarah_office_read_ids: normalizeSarahOfficeReadIds(value.sarah_office_read_ids),
-    sarah_baseline_reviewed: value.sarah_baseline_reviewed === true,
-    sarah_update_reviewed: value.sarah_update_reviewed === true,
-  };
-}
-
-function createFreshSave(loadNotice) {
-  return {
-    version: SAVE_SCHEMA_VERSION,
-    sceneId: NEW_GAME_START_SCENE_ID,
-    knowledge: SURVIVAL.DEFAULTS.knowledge,
-    history: [],
-    flags: {},
-    inventory: { food: 0, drink: 0, kit: 0 },
-    hunger: SURVIVAL.DEFAULTS.hunger,
-    thirst: SURVIVAL.DEFAULTS.thirst,
-    health: SURVIVAL.DEFAULTS.health,
-    expeditionVisitedLocations: [],
-    loadNotice,
-  };
-}
-
-function normalizeSaveData(save) {
-  if (!isPlainObject(save)) return null;
-
-  const storedSceneId = typeof save.sceneId === 'string' ? save.sceneId : '';
-  const isLegacyDay4 = storedSceneId.startsWith('day4_') || LEGACY_DAY4_IDS.has(storedSceneId);
-  const isLegacyDay2 = LEGACY_DAY2_EXPEDITION_SCENES.has(storedSceneId);
-  const isLegacyDay3 = LEGACY_DAY3_CONSEQUENCE_SCENES.has(storedSceneId);
-  const isValidScene = Boolean(storyData.scenes[storedSceneId]) || SUPPORTED_RUNTIME_SCENES.has(storedSceneId);
-
-  if (!isValidScene && !isLegacyDay4 && !isLegacyDay2 && !isLegacyDay3) {
-    return createFreshSave('Save lama menunjuk adegan yang sudah tidak tersedia. Permainan dimulai kembali dengan aman.');
-  }
-
-  return {
-    version: SAVE_SCHEMA_VERSION,
-    sceneId: isLegacyDay4 ? 'ending_eval' : isLegacyDay2 ? 'day2_expedition_map' : isLegacyDay3 ? 'day3_start' : storedSceneId,
-    knowledge: typeof save.knowledge === 'number' ? save.knowledge : SURVIVAL.DEFAULTS.knowledge,
-    history: Array.isArray(save.history) ? save.history : [],
-    flags: normalizeSarahFlags(save.flags),
-    inventory: isPlainObject(save.inventory) ? save.inventory : {},
-    hunger: save.hunger,
-    thirst: save.thirst,
-    health: save.health,
-    expeditionVisitedLocations: normalizeExpeditionLocations(save.expeditionVisitedLocations),
-    loadNotice: isLegacyDay4
-      ? 'Save Day 4 lama dipindahkan ke evaluasi akhir jam ke-72.'
-      : isLegacyDay2
-        ? 'Save Day 2 lama dipindahkan ke peta rute ekspedisi.'
-        : isLegacyDay3
-          ? 'Save Day 3 lama dipindahkan ke awal rangkaian konsekuensi baru.'
-        : null,
-  };
-}
-
 /**
- * Reads and validates a save from localStorage.
+ * Reads, migrates, and validates a save from localStorage.
  * Enables or disables the Continue button accordingly.
- * @returns {object|null} Parsed save data, or null if none/invalid.
+ * Protects unsupported future save schemas without overwriting.
+ * @returns {object|null} Normalized save data, or null if none/invalid.
  */
 function checkSaveData() {
   const raw = localStorage.getItem(SAVE_KEY);
   if (raw) {
     try {
-      const save = normalizeSaveData(JSON.parse(raw));
-      if (save) {
+      const migrationResult = migrateSaveData(raw, {
+        storyData,
+        legacyStoryData,
+        storage: localStorage,
+        backupOldSave: true,
+      });
+
+      if (migrationResult.isFutureVersion) {
+        console.warn('[main] Future save version encountered; preserving raw data without overwriting.');
+        dom.continueBtn.disabled = true;
+        return null;
+      }
+
+      if (migrationResult.success && migrationResult.data) {
+        if (migrationResult.migrated) {
+          localStorage.setItem(SAVE_KEY, JSON.stringify(migrationResult.data));
+        }
         dom.continueBtn.disabled = false;
-        return save;
+        return migrationResult.data;
       }
     } catch (e) {
       console.error('[main] Corrupted save data — clearing:', e);
@@ -284,6 +201,7 @@ async function initGame() {
 
   storyEngine = new StoryEngine({
     storyData,
+    legacyStoryData,
     dom: {
       statusTime:        dom.statusTime,
       statusDay:         dom.statusDay,
@@ -375,7 +293,19 @@ async function initGame() {
     showScreen('game');
     storyEngine.audio.playBGM();
     const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
-    storyEngine.start(NEW_GAME_START_SCENE_ID, knowledge, [], null, { food: 0, drink: 0, kit: 0 }, hunger, thirst, health, []);
+    storyEngine.start(
+      NEW_GAME_START_SCENE_ID,
+      knowledge,
+      [],
+      null,
+      { food: 0, drink: 0, kit: 0 },
+      hunger,
+      thirst,
+      health,
+      [],
+      CURRENT_STORY_REVISION,
+      null
+    );
   });
 
   dom.continueBtn.addEventListener('click', () => {
@@ -393,6 +323,8 @@ async function initGame() {
       save.thirst,
       save.health,
       save.expeditionVisitedLocations,
+      save.storyRevision,
+      save.houseScavengeResult ?? null
     );
     if (save.loadNotice) {
       storyEngine.view.showTelltaleToast(save.loadNotice);
