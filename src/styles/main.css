@@ -835,10 +835,17 @@ input[type="range"] {
 .story-box.bg-prolog-peaceful { background-image: url('../assets/backgrounds/bg_prolog_peaceful.png'); }
 .story-box.bg-prolog-window   { background-image: url('../assets/backgrounds/bg_prolog_window.webp'); }
 .story-box.bg-prolog,
+<<<<<<< Updated upstream
 .story-box.bg-prolog-1 { background-image: url('../assets/backgrounds/bg_prolog1.png'); }
 .story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.png'); }
 .story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.png'); }
 .story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.png'); }
+=======
+.story-box.bg-prolog-1 { background-image: url('../assets/backgrounds/bg_prolog1.webp'); }
+.story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.png'); }
+.story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.webp'); }
+.story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.webp'); }
+>>>>>>> Stashed changes
 .story-box.bg-backstory-airport { background-image: url('../assets/backgrounds/bg_backstory_airport.webp'); }
 .story-box.bg-backstory-house { background-image: url('../assets/backgrounds/bg_backstory_house.webp'); }
 .story-box.bg-backstory-aris-company { background-image: url('../assets/backgrounds/bg_backstory_aris_company.webp'); }

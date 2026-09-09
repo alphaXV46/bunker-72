@@ -23,10 +23,17 @@ import bgGoodEnd from '../assets/backgrounds/bg_good_end.webp';
 import bgMenu from '../assets/backgrounds/bg_menu.webp';
 import bgPrologPeaceful from '../assets/backgrounds/bg_prolog_peaceful.png';
 import bgPrologWindow from '../assets/backgrounds/bg_prolog_window.webp';
+<<<<<<< Updated upstream
 import bgProlog1 from '../assets/backgrounds/bg_prolog1.png';
 import bgProlog2 from '../assets/backgrounds/bg_prolog2.png';
 import bgProlog3 from '../assets/backgrounds/bg_prolog3.png';
 import bgProlog4 from '../assets/backgrounds/bg_prolog4.png';
+=======
+import bgProlog1 from '../assets/backgrounds/bg_prolog1.webp';
+import bgProlog2 from '../assets/backgrounds/bg_prolog2.png';
+import bgProlog3 from '../assets/backgrounds/bg_prolog3.webp';
+import bgProlog4 from '../assets/backgrounds/bg_prolog4.webp';
+>>>>>>> Stashed changes
 import bgDay1 from '../assets/backgrounds/bg_day1.webp';
 import bgDay2 from '../assets/backgrounds/bg_day2.webp';
 import bgDay3 from '../assets/backgrounds/bg_day3.webp';
