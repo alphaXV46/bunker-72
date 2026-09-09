@@ -68,6 +68,7 @@ const dom = {
   // Dialogue
   storyBox:        document.getElementById('story-box'),
   speakerName:     document.getElementById('speaker-name'),
+  dialogueSpeakerLabel: document.getElementById('dialogue-speaker-label'),
   speakerAvatar:   document.getElementById('speaker-avatar'),
   avatarContainer: document.getElementById('avatar-container'),
   dialogueText:    document.getElementById('dialogue-text'),

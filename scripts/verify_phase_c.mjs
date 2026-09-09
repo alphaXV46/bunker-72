@@ -37,12 +37,12 @@ const requiredPhaseCScenes = [
   'prolog_return_home',
   'prolog_evac_decision',
   'day2_start',
-  'day2_expedition_return',
 ];
 
 for (const sceneId of requiredPhaseCScenes) {
   assert(scenes[sceneId], `Required scene "${sceneId}" must exist in sealed72 story.json`);
 }
+assert(scenes.day2_expedition_return || scenes.day2_stabilized, 'day2_expedition_return or day2_stabilized must exist in sealed72');
 
 // In sealed72, old outside expedition scenes must NOT exist
 assert(!scenes.day2_expedition_map, 'day2_expedition_map must NOT exist in sealed72 story.json');
@@ -392,22 +392,30 @@ try {
       bunkerMinigame: { close: noop },
     });
 
-    // Day 2 start has internal bridge choice
+    // Day 2 start progression to Day 3
     const day2StartChoices = scenes.day2_start.choices;
     assert.equal(day2StartChoices.length, 1);
-    assert.equal(day2StartChoices[0].id, 'c_day2_internal_bridge');
-    assert.equal(day2StartChoices[0].nextSceneId, 'day2_expedition_return');
-
-    engine.handleChoiceSelect(day2StartChoices[0]);
-    assert.equal(model.currentSceneId, 'day2_expedition_return');
-    assert.equal(model.flags.day2_internal_bridge_complete, true);
-
-    // Day 2 expedition return has choice to Day 3
-    const day2ReturnChoices = scenes.day2_expedition_return.choices;
-    assert.equal(day2ReturnChoices[0].id, 'c_day2_return_day3');
-    assert.equal(day2ReturnChoices[0].nextSceneId, 'day3_start');
-
-    engine.handleChoiceSelect(day2ReturnChoices[0]);
+    if (day2StartChoices[0].id === 'c_day2_internal_bridge') {
+      assert.equal(day2StartChoices[0].nextSceneId, 'day2_expedition_return');
+      engine.handleChoiceSelect(day2StartChoices[0]);
+      assert.equal(model.currentSceneId, 'day2_expedition_return');
+      assert.equal(model.flags.day2_internal_bridge_complete, true);
+      const day2ReturnChoices = scenes.day2_expedition_return.choices;
+      assert.equal(day2ReturnChoices[0].id, 'c_day2_return_day3');
+      assert.equal(day2ReturnChoices[0].nextSceneId, 'day3_start');
+      engine.handleChoiceSelect(day2ReturnChoices[0]);
+    } else {
+      assert.equal(day2StartChoices[0].id, 'c_day2_assess_systems');
+      engine.handleChoiceSelect(day2StartChoices[0]);
+      assert.equal(model.currentSceneId, 'day2_systems_check');
+      engine.handleChoiceSelect(scenes.day2_systems_check.choices[0]);
+      assert.equal(model.currentSceneId, 'day2_air_response');
+      engine.handleChoiceSelect(scenes.day2_air_response.choices.find(c => c.id === 'c_day2_air_clean_manual'));
+      assert.equal(model.currentSceneId, 'day2_family_check');
+      engine.handleChoiceSelect(scenes.day2_family_check.choices[0]);
+      assert.equal(model.currentSceneId, 'day2_stabilized');
+      engine.handleChoiceSelect(scenes.day2_stabilized.choices[0]);
+    }
     assert.equal(model.currentSceneId, 'day3_start');
 
     // Verify startExpedition is guarded against sealed72

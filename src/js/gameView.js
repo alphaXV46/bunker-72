@@ -20,7 +20,7 @@ const GOOD_ENDING_BACKGROUNDS = {
   opening: new URL('../assets/backgrounds/bg_good_end.webp', import.meta.url).href,
   one: new URL('../assets/backgrounds/bg_good_end_1.webp', import.meta.url).href,
   two: new URL('../assets/backgrounds/bg_good_end_2.webp', import.meta.url).href,
-  three: new URL('../assets/backgrounds/bg_good_end_3.webp', import.meta.url).href,
+  three: new URL('../assets/backgrounds/bg_good_end_3.jpg', import.meta.url).href,
 };
 
 const BAD_ENDING_BACKGROUNDS = {
@@ -788,18 +788,24 @@ export class GameView {
       'bg-backstory-sarah-office', 'bg-backstory-sarah-office-interactive', 'bg-backstory-sarah-office-alert',
       'bg-backstory-bunker-plan', 'bg-backstory-bunker-build', 'bg-backstory-bunker-complete',
       'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-day2', 'bg-day3', 'bg-normal', 'bg-rusak', 'scene-alert',
+      'scene-outside',
+      'show-narration-speaker',
       'speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'has-interactive-choices',
       ...ENV_CLASSES
     );
 
     const isProlog = String(scene.background || '').startsWith('prolog');
     const isBackstory = scene.phase === 'backstory';
+    const isOutsideBunker = isBackstory && !String(scene.background || '').startsWith('backstory_bunker');
     const isCinematic = isProlog || isBackstory;
+    const showNarrationSpeaker = isProlog || isOutsideBunker;
     const isPacking = sceneId === 'prolog_packing';
     const isTitleCard = scene.background === 'titlecard';
     const gameView = this.dom.storyBox.closest('#game-view');
     gameView?.classList.toggle('prolog-mode', isCinematic);
     gameView?.classList.toggle('backstory-mode', isBackstory);
+    this.dom.storyBox.classList.toggle('scene-outside', isOutsideBunker);
+    this.dom.storyBox.classList.toggle('show-narration-speaker', showNarrationSpeaker);
     gameView?.classList.toggle('packing-mode', isPacking);
     gameView?.classList.toggle('title-card-mode', isTitleCard);
     document.body.classList.toggle('prolog-active', isCinematic);
@@ -866,6 +872,9 @@ export class GameView {
     const speakerClass = ['ayah', 'ibu', 'anak', 'penyintas', 'penjarah', 'sar'].includes(baseSpeaker) ? `speaker-${baseSpeaker}` : 'speaker-narrator';
 
     this.dom.speakerName.textContent = scene.speaker;
+    if (this.dom.dialogueSpeakerLabel) {
+      this.dom.dialogueSpeakerLabel.textContent = scene.speaker;
+    }
     this.dom.storyBox.classList.remove('speaker-ayah', 'speaker-ibu', 'speaker-anak', 'speaker-narrator', 'speaker-penyintas', 'speaker-penjarah', 'speaker-sar');
     this.dom.storyBox.classList.add(speakerClass);
 
