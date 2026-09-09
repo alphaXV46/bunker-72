@@ -50,7 +50,16 @@ const DEFAULT_FLAGS = Object.freeze({
   maya_toy_callback: false,
   sarah_comforted_maya: false,
   hendra_encountered: false,
+  helped_stranger: false,
+  stranger_guided: false,
   stranger_family_first: false,
+  prolog_minimarket_visited: false,
+  prolog_medical_visited: false,
+  prolog_minimarket_claimed: false,
+  prolog_medical_claimed: false,
+  prolog_opt2_consumed: false,
+  bunker_plan_confirmed: false,
+  day2_internal_bridge_complete: false,
   medical_mask_ready: false,
   has_radio: false,
   radio_packed: false,
@@ -62,6 +71,12 @@ const DEFAULT_FLAGS = Object.freeze({
   snack_packed: false,
   toy_packed: false,
   late_evacuation: false,
+  spare_filter_used: false,
+  day2_crisis_applied: false,
+  day2_air_cleared: false,
+  day2_power_conserved: false,
+  day2_power_draw_heavy: false,
+  day2_fatigue_applied: false,
 });
 
 // ─── FLAG RECONSTRUCTION MAP ────────────────────────────────────────────────
@@ -71,6 +86,13 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day1_air_noinspect':    'air_uninspected',
   'c_day1_air_fix':          'air_remedied',
   'c_day1_air_spare_filter': 'air_seal_good',
+  'c_day2_assess_systems': 'day2_crisis_applied',
+  'c_day2_focus_air': 'day2_crisis_applied',
+  'c_day2_focus_power': 'day2_crisis_applied',
+  'c_day2_air_use_spare_filter': 'day2_air_cleared',
+  'c_day2_air_clean_manual': 'day2_air_cleared',
+  'c_day2_power_use_mask': 'day2_power_conserved',
+  'c_day2_power_endure': 'day2_power_conserved',
   'c_day3_water_filter':     'water_filtered',
   'c_day3_water_reserve': 'water_reserve_used',
   'c_day3_water_ration': 'water_rationed',
@@ -88,6 +110,17 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_prolog_pack_radio': 'radio_packed',
   'c_prolog_pack_snack': 'snack_packed',
   'c_prolog_pack_toy': 'toy_packed',
+  'c_prolog_choose_minimarket': 'prolog_minimarket_visited',
+  'c_prolog_choose_medical': 'prolog_medical_visited',
+  'c_prolog_minimarket_take': 'prolog_minimarket_visited',
+  'c_prolog_medical_take': 'prolog_medical_visited',
+  'c_prolog_minimarket_second_take': 'prolog_minimarket_visited',
+  'c_prolog_medical_second_take': 'prolog_medical_visited',
+  'c_prolog_hendra_help': 'helped_stranger',
+  'c_prolog_hendra_family': 'stranger_family_first',
+  'c_prolog_opt2_skip_home': 'prolog_opt2_consumed',
+  'c_prolog_confirm_bunker_plan': 'bunker_plan_confirmed',
+  'c_day2_internal_bridge': 'day2_internal_bridge_complete',
   'c_day1_maya_light': 'maya_comforted',
   'c_day1_maya_toy': 'maya_comforted',
   'c_day1_maya_strict': 'sarah_comforted_maya',
@@ -273,9 +306,10 @@ export class GameModel {
     const latestHendraChoice = [...this.history].reverse().find((entry) => [
       'c_day2_hendra_help', 'c_day2_hendra_guide', 'c_day2_hendra_family',
       'c_day2_stranger_airlock', 'c_day2_stranger_intercom', 'c_day2_stranger_harsh',
+      'c_prolog_hendra_help', 'c_prolog_hendra_family',
     ].includes(entry?.choiceId));
     const historyOutcome = latestHendraChoice && (
-      latestHendraChoice.choiceId === 'c_day2_hendra_help' || latestHendraChoice.choiceId === 'c_day2_stranger_airlock' ? 'helped_stranger' :
+      latestHendraChoice.choiceId === 'c_day2_hendra_help' || latestHendraChoice.choiceId === 'c_day2_stranger_airlock' || latestHendraChoice.choiceId === 'c_prolog_hendra_help' ? 'helped_stranger' :
       latestHendraChoice.choiceId === 'c_day2_hendra_guide' || latestHendraChoice.choiceId === 'c_day2_stranger_intercom' ? 'stranger_guided' :
       'stranger_family_first'
     );
@@ -299,6 +333,9 @@ export class GameModel {
     // radio_saved is read only for legacy-save migration; the active game has
     // one canonical communication state: radio_quality.
     delete this.flags.radio_saved;
+    if (this.flags.air_remedied === true || this.flags.day2_air_cleared === true) {
+      delete this.flags.air_uninspected;
+    }
 
     this.knowledge      = (typeof knowledge === 'number' && !isNaN(knowledge)) ? clamp(knowledge, 0, SURVIVAL.KNOWLEDGE_MAX) : SURVIVAL.DEFAULTS.knowledge;
     this.hunger         = (typeof hunger    === 'number' && !isNaN(hunger))    ? clamp(hunger, 0, this.getMaxStat('hunger'))    : SURVIVAL.DEFAULTS.hunger;
@@ -334,8 +371,17 @@ export class GameModel {
       const sarahResponse = SARAH_WARNING_RESPONSE_BY_CHOICE_ID[entry?.choiceId];
       if (sarahResponse) flags.sarah_warning_response = sarahResponse;
     });
-    if (flags.air_remedied) {
+    if (flags.air_remedied || flags.day2_air_cleared) {
       delete flags.air_uninspected;
+    }
+    if (history.some(e => e.choiceId === 'c_day1_air_spare_filter' || e.choiceId === 'c_day2_air_use_spare_filter' || e.choiceId === 'c_day3_final_keep_air')) {
+      flags.spare_filter_used = true;
+    }
+    if (history.some(e => e.choiceId === 'c_day2_power_endure')) {
+      flags.day2_fatigue_applied = true;
+    }
+    if (history.some(e => e.choiceId === 'c_day2_power_use_mask')) {
+      flags.medical_mask_used = true;
     }
     if (history.some(e => e.choiceId === 'c_prolog_pack_battery')) {
       flags.extra_battery = true;
@@ -347,20 +393,38 @@ export class GameModel {
       flags.has_radio = true;
       flags.radio_packed = true;
     }
+    if (history.some(e => e.choiceId === 'c_prolog_minimarket_take' || e.choiceId === 'c_prolog_minimarket_second_take')) {
+      flags.prolog_minimarket_visited = true;
+      flags.prolog_minimarket_claimed = true;
+      flags.extra_battery = true;
+      flags.battery_packed = true;
+      flags.food_packed = true;
+      flags.drink_packed = true;
+    }
+    if (history.some(e => e.choiceId === 'c_prolog_medical_take' || e.choiceId === 'c_prolog_medical_second_take')) {
+      flags.prolog_medical_visited = true;
+      flags.prolog_medical_claimed = true;
+      flags.kit_packed = true;
+      flags.medical_mask_ready = true;
+    }
+    if (history.some(e => e.choiceId === 'c_prolog_hendra_help' || e.choiceId === 'c_prolog_opt2_medical' || e.choiceId === 'c_prolog_opt2_minimarket' || e.choiceId === 'c_prolog_opt2_skip_home')) {
+      flags.prolog_opt2_consumed = true;
+    }
     // A history-only save may not carry the flags object. Reconstruct the
     // single latest Hendra outcome so the encounter cannot repeat on resume.
     const latestHendra = [...history].reverse().find((entry) => [
       'c_day2_hendra_help', 'c_day2_hendra_guide', 'c_day2_hendra_family',
       'c_day2_stranger_airlock', 'c_day2_stranger_intercom', 'c_day2_stranger_harsh',
+      'c_prolog_hendra_help', 'c_prolog_hendra_family',
     ].includes(entry?.choiceId));
     if (latestHendra) {
       flags.hendra_encountered = true;
       delete flags.helped_stranger;
       delete flags.stranger_guided;
       delete flags.stranger_family_first;
-      if (latestHendra.choiceId === 'c_day2_hendra_help' || latestHendra.choiceId === 'c_day2_stranger_airlock') flags.helped_stranger = true;
+      if (latestHendra.choiceId === 'c_day2_hendra_help' || latestHendra.choiceId === 'c_day2_stranger_airlock' || latestHendra.choiceId === 'c_prolog_hendra_help') flags.helped_stranger = true;
       if (latestHendra.choiceId === 'c_day2_hendra_guide' || latestHendra.choiceId === 'c_day2_stranger_intercom') flags.stranger_guided = true;
-      if (latestHendra.choiceId === 'c_day2_hendra_family' || latestHendra.choiceId === 'c_day2_stranger_harsh') flags.stranger_family_first = true;
+      if (latestHendra.choiceId === 'c_day2_hendra_family' || latestHendra.choiceId === 'c_day2_stranger_harsh' || latestHendra.choiceId === 'c_prolog_hendra_family') flags.stranger_family_first = true;
     }
     return flags;
   }
@@ -473,7 +537,8 @@ export class GameModel {
 
     const airFailure = this.flags.air_uninspected === true || this.flags.smoke_poisoned === true;
     const airPrepared = this.flags.air_seal_good === true || this.flags.air_remedied === true
-      || this.flags.final_air_protected === true || this.flags.found_spare_filter === true;
+      || this.flags.final_air_protected === true || this.flags.found_spare_filter === true
+      || this.flags.day2_air_cleared === true;
     addCategory('air', 'Udara & Shelter', airFailure ? 0 : airPrepared ? 20 : 10, 20,
       airFailure ? 'Perlindungan udara tidak cukup aman saat krisis meningkat.' : airPrepared ? 'Ventilasi atau perlindungan shelter dipersiapkan sebelum tekanan memuncak.' : 'Shelter bertahan, tetapi perlindungan udara hanya berada pada tingkat dasar.');
 
@@ -482,7 +547,7 @@ export class GameModel {
     addCategory('water', 'Air Bersih', waterFailure ? 0 : waterSafe ? 15 : 7, 15,
       waterFailure ? 'Keamanan air tidak dapat dipertahankan sampai akhir.' : waterSafe ? 'Air dipulihkan dengan prosedur aman sebelum persediaan kritis.' : 'Keluarga mengelola cadangan air, tetapi tidak memperoleh lapisan perlindungan penyaringan penuh.');
 
-    const powerStable = this.flags.power_saved === true || this.flags.power_routed === true || this.flags.battery_committed === true;
+    const powerStable = this.flags.power_saved === true || this.flags.power_routed === true || this.flags.battery_committed === true || this.flags.day2_power_conserved === true;
     const powerSupported = this.flags.radio_power_stable === true || this.flags.extra_battery === true;
     addCategory('power', 'Daya Darurat', powerStable ? 15 : powerSupported ? 10 : 5, 15,
       powerStable ? 'Daya dialokasikan sehingga fungsi bunker penting bertahan.' : powerSupported ? 'Cadangan daya membantu, tetapi distribusinya tetap terbatas.' : 'Cadangan daya hanya cukup untuk fungsi dasar.');
@@ -551,11 +616,14 @@ export class GameModel {
       : this.flags.stranger_guided ? 'guided'
         : this.flags.stranger_family_first ? 'family_first' : null;
 
-    const hendraRescueNote = hendraOutcome === 'helped'
-      ? ' Hendra kemudian menguatkan petunjuk sektor yang sudah diterima tim.'
-      : hendraOutcome === 'guided'
-        ? ' Petunjuk yang pernah Aris berikan membantu Hendra mencapai perlindungan lain.'
-        : '';
+    const isSealed72 = this.storyRevision === STORY_REVISIONS.SEALED72;
+    const hendraRescueNote = isSealed72
+      ? (hendraOutcome === 'helped' ? ' Catatan dari Hendra di posko bukit membantu mengonfirmasi arah pencarian di sektor pemukiman barat.' : '')
+      : (hendraOutcome === 'helped'
+          ? ' Hendra kemudian menguatkan petunjuk sektor yang sudah diterima tim.'
+          : hendraOutcome === 'guided'
+            ? ' Petunjuk yang pernah Aris berikan membantu Hendra mencapai perlindungan lain.'
+            : '');
     const sarahPublicImpactBody = SARAH_PUBLIC_IMPACT_BODIES[this.flags.sarah_warning_response] || null;
     const sarahPublicImpactModule = sarahPublicImpactBody
       ? { id: 'sarah_public_impact', icon: '◎', title: 'DAMPAK PUBLIK — SARAH', tone: 'sarah', body: sarahPublicImpactBody }
@@ -596,12 +664,24 @@ export class GameModel {
       modules.push({ id: 'maya', icon: '◇', title: 'MAYA', tone: 'maya', body: mayaBody });
 
       if (hendraOutcome) {
-        const hendraBodies = {
-          helped: 'Hendra mengingat bantuan Aris di perjalanan ekspedisi. Pertemuan itu menjadi bagian dari cerita para penyintas setelah evakuasi.',
-          guided: 'Arahan Aris membantu Hendra memilih jalur perlindungan yang lebih aman. Mereka bertemu lagi sebagai dua penyintas yang sama-sama berhasil keluar.',
-          family_first: 'Aris memilih kembali kepada Sarah dan Maya ketika persediaan serta kondisi luar tidak memungkinkan berhenti. Nasib Hendra tidak dijadikan vonis atas keputusan itu.',
-        };
-        modules.push({ id: 'hendra', icon: '◍', title: 'HENDRA', tone: 'hendra', body: hendraBodies[hendraOutcome] });
+        if (isSealed72) {
+          if (hendraOutcome === 'helped') {
+            modules.push({
+              id: 'hendra',
+              icon: '◍',
+              title: 'HENDRA',
+              tone: 'hendra',
+              body: 'Hendra yang berhasil bebas sebelum gempa susulan berhasil mencapai posko bukit. Catatan evakuasinya kemudian mengonfirmasi keberadaan keluarga Aris di sisi barat rekahan.',
+            });
+          }
+        } else {
+          const hendraBodies = {
+            helped: 'Hendra mengingat bantuan Aris di perjalanan ekspedisi. Pertemuan itu menjadi bagian dari cerita para penyintas setelah evakuasi.',
+            guided: 'Arahan Aris membantu Hendra memilih jalur perlindungan yang lebih aman. Mereka bertemu lagi sebagai dua penyintas yang sama-sama berhasil keluar.',
+            family_first: 'Aris memilih kembali kepada Sarah dan Maya ketika persediaan serta kondisi luar tidak memungkinkan berhenti. Nasib Hendra tidak dijadikan vonis atas keputusan itu.',
+          };
+          modules.push({ id: 'hendra', icon: '◍', title: 'HENDRA', tone: 'hendra', body: hendraBodies[hendraOutcome] });
+        }
       }
 
       const bunkerParts = [];

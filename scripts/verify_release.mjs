@@ -15,12 +15,35 @@ try {
   const storyData = JSON.parse(fs.readFileSync('src/data/story.json', 'utf8'));
   const scenes = storyData.scenes;
   const previousStory = JSON.parse(execFileSync('git', ['show', 'HEAD:src/data/story.json'], { encoding: 'utf8' })).scenes;
-  const intentionalNewScenes = new Set(['prolog_expedition_call', 'prolog_expedition_map']);
+  const intentionalNewScenes = new Set([
+    'prolog_expedition_call',
+    'prolog_expedition_map',
+    'prolog_minimarket',
+    'prolog_medical',
+    'prolog_hendra_encounter',
+    'prolog_hendra_helped',
+    'prolog_hendra_passed',
+    'prolog_aftershock',
+    'prolog_route_failure',
+    'prolog_minimarket_second',
+    'prolog_medical_second',
+    'prolog_return_home',
+    'prolog_evac_decision',
+    'day2_systems_check',
+    'day2_air_response',
+    'day2_power_response',
+    'day2_family_check',
+    'day2_stabilized',
+  ]);
   assert(Object.keys(scenes).every((id) => previousStory[id] || intentionalNewScenes.has(id)), 'Unexpected scene added');
   assert(Object.keys(scenes).filter((id) => !previousStory[id]).every((id) => intentionalNewScenes.has(id)), 'Unexpected scene added');
   const intentionalMechanicsChanges = new Set([
     'prolog_question',
+    'prolog_expedition_map',
+    'day1_lockdoor',
     'day2_start',
+    'day2_expedition_return',
+    'day3_final_dilemma',
   ]);
   for (const [id, scene] of Object.entries(scenes)) {
     const mechanics = (s) => ({ hour:s.hour, phase:s.phase, next:s.autoNextSceneId,
@@ -31,7 +54,6 @@ try {
   const runtimeEdges = {
     backstory_sarah_office:['backstory_sarah_baseline'], backstory_sarah_update:['backstory_sarah_decision'],
     prolog_packing:['prolog_expedition_call'], day1_inspection:['day1_lockdoor'],
-    day2_expedition_map:['day2_hendra_encounter','day2_expedition_return'],
     day3_radio_rescue:['day3_radio_clear','day3_radio_weak','day3_radio_failed'],
     ending_eval:ENDING_IDS, trigger_ending_eval:ENDING_IDS,
   };
@@ -100,6 +122,18 @@ try {
   engine.handleChoiceSelect(scenes.prolog_expedition_call.choices[0]);
   assert.equal(model.currentSceneId,'prolog_expedition_map');
   engine.handleChoiceSelect(scenes.prolog_expedition_map.choices[0]);
+  assert.equal(model.currentSceneId,'prolog_minimarket');
+  engine.handleChoiceSelect(scenes.prolog_minimarket.choices[0]);
+  assert.equal(model.currentSceneId,'prolog_hendra_encounter');
+  engine.handleChoiceSelect(scenes.prolog_hendra_encounter.choices[0]);
+  assert.equal(model.currentSceneId,'prolog_hendra_helped');
+  engine.handleDialogueClick();
+  assert.equal(model.currentSceneId,'prolog_route_failure');
+  engine.handleChoiceSelect(scenes.prolog_route_failure.choices.find(c=>c.id==='c_prolog_return_home_direct'));
+  assert.equal(model.currentSceneId,'prolog_return_home');
+  engine.handleChoiceSelect(scenes.prolog_return_home.choices[0]);
+  assert.equal(model.currentSceneId,'prolog_evac_decision');
+  engine.handleChoiceSelect(scenes.prolog_evac_decision.choices[0]);
   assert.equal(model.currentSceneId,'prolog_intro');
   for(let i=0;i<8&&model.currentSceneId!=='prolog_title';i++)engine.handleDialogueClick();
   // Station completion supplied at the integration boundary; no puzzle solution claim.
@@ -107,13 +141,14 @@ try {
   engine.handleChoiceSelect(scenes.prolog_title.choices[0]);engine.handleChoiceSelect(scenes.day1_power_boot.choices[0]);
   ['ventilation','power','radio'].forEach(id=>engine.handleDay1Inspection(id));
   engine.renderScene('day1_lockdoor');
-  for(const id of ['c_day1_air_spare_filter','c_day1_air_safe_inventory','c_day1_water_rational','c_day1_sanitation_good','c_day1_rest_good','c_day1_maya_light','c_day2_begin_expedition']) {
+  for(const id of ['c_day1_air_spare_filter','c_day1_air_safe_inventory','c_day1_water_rational','c_day1_sanitation_good','c_day1_rest_good','c_day1_maya_light']) {
     const c=scenes[model.currentSceneId].choices.find(c=>c.id===id);assert(c,`${model.currentSceneId} lacks ${id}`);engine.handleChoiceSelect(c);
   }
-  engine.handleExpeditionComplete({locationId:'neighbor_house',collectedItems:['food','drink']});
-  engine.handleChoiceSelect(scenes.day2_hendra_encounter.choices[1]);
-  engine.handleExpeditionComplete({locationId:'medical_post',collectedItems:['kit','mask']});
-  assert.equal(model.currentSceneId,'day2_expedition_return');
+  assert.equal(model.currentSceneId,'day2_start');
+  for(const id of ['c_day2_assess_systems','c_day2_focus_air','c_day2_air_clean_manual','c_day2_finalize_day']) {
+    const c=scenes[model.currentSceneId].choices.find(c=>c.id===id);assert(c,`${model.currentSceneId} lacks ${id}`);engine.handleChoiceSelect(c);
+  }
+  assert.equal(model.currentSceneId,'day2_stabilized');
   for(const id of ['c_day2_return_day3','c_day3_check_water','c_day3_water_filter','c_day3_power_radio']) {
     engine.handleChoiceSelect(scenes[model.currentSceneId].choices.find(c=>c.id===id));
   }

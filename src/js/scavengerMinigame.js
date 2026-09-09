@@ -202,7 +202,7 @@ const PROLOGUE_COLLIDERS = Object.freeze([
 // does not draw these regions; gameplay/fog logic keeps its own doorway data.
 const PROLOGUE_WALKABLE_OPENINGS = Object.freeze([
   { id: 'DOOR_MAIN_ENTRANCE',    name: 'Pintu Utama / Foyer',       x: 795,  y: 680, w: 158, h: 25 },
-  { id: 'DOOR_BUNKER_ENTRANCE',  name: 'Ambang Masuk Bunker',       x: 732,  y: 205, w: 136, h: 30 },
+  { id: 'DOOR_BUNKER_ENTRANCE',  name: 'Ambang Akses Shelter',      x: 732,  y: 205, w: 136, h: 30 },
   { id: 'DOOR_MASTER',            name: 'Pintu Kamar Utama',         x: 450,  y: 230, w: 22,  h: 52 },
   { id: 'DOOR_CHILD',             name: 'Pintu Kamar Anak',          x: 1155, y: 230, w: 22,  h: 55 },
   { id: 'DOOR_OFFICE',            name: 'Pintu Studio / Kantor',     x: 1180, y: 405, w: 22,  h: 60 },
@@ -232,7 +232,7 @@ const PROLOGUE_ROOMS = Object.freeze([
   },
   {
     id: 'bunker',
-    name: 'RUANG PALKA BUNKER 72 (DARURAT)',
+    name: 'TITIK KUMPUL (AKSES SHELTER)',
     adjacent: ['living'],
     rects: [
       { x: 562, y: 10, w: 516, h: 240 }
@@ -292,7 +292,7 @@ const PROLOGUE_DOORWAYS = Object.freeze([
   },
   {
     id: 'd_living_bunker',
-    name: 'Ambang Masuk Bunker',
+    name: 'Ambang Akses Shelter',
     rooms: ['living', 'bunker'],
     x: 800,
     y: 220,
@@ -564,10 +564,10 @@ const FOG_EDGE_BLUR = 14;
 // custom expedition-style durations do not silently inherit the prologue's
 // 40-second thresholds.
 const PROLOGUE_TENSION_EVENTS = Object.freeze([
-  { id: 'tension-30', remainingRatio: 0.75, message: 'GEMPA SUSULAN — CEPAT, ARIS!', shake: 3.5, audio: 'playForeshadowTremor' },
-  { id: 'tension-20', remainingRatio: 0.50, message: 'ARIS! CEPAT KE BUNKER!', shake: 4.5, audio: 'playAlarm' },
-  { id: 'tension-10', remainingRatio: 0.25, message: 'PALKA SEGERA DITUTUP!', shake: 5.5, audio: 'playSiren' },
-  { id: 'tension-5',  remainingRatio: 0.125, message: 'DETIK TERAKHIR — MASUK SEKARANG!', shake: 7, audio: 'playDamageAlert' },
+  { id: 'tension-30', remainingRatio: 0.75, message: 'GUNCANGAN TERASA — AMANKAN PERSEDIAAN RUMAH!', shake: 3.5, audio: 'playForeshadowTremor' },
+  { id: 'tension-20', remainingRatio: 0.50, message: 'WAKTU TERBATAS — UTAMAKAN KEBUTUHAN POKOK!', shake: 4.5, audio: 'playAlarm' },
+  { id: 'tension-10', remainingRatio: 0.25, message: 'SEGERA KEMBALI KE TITIK KUMPUL BERSAMA MAYA!', shake: 5.5, audio: 'playSiren' },
+  { id: 'tension-5',  remainingRatio: 0.125, message: 'DETIK TERAKHIR — LETAKKAN BEKAL DI TITIK KUMPUL!', shake: 7, audio: 'playDamageAlert' },
 ]);
 
 const PROLOGUE_ITEMS = Object.freeze([
@@ -586,7 +586,7 @@ const PROLOGUE_BUNKER_HATCH = Object.freeze({
   y: 170,
   w: 160,
   h: 48,
-  label: 'PALKA BUNKER 72',
+  label: 'TITIK KUMPUL BEKAL (AKSES SHELTER)',
 });
 
 export class ScavengerMinigame {
@@ -978,9 +978,10 @@ export class ScavengerMinigame {
     // HUD Header
     this.hudHeader = document.createElement('div');
     this.hudHeader.className = 'scavenger-hud-header';
+    const timerLabel = this.timerEnabled ? (this.mode === 'prologue' ? 'WAKTU SIAGA:' : 'EVAKUASI:') : 'EKSPEDISI:';
     this.hudHeader.innerHTML = `
       <div class="scavenger-timer-badge${this.timerEnabled ? '' : ' no-timer'}" id="scavenger-timer">
-        <span class="timer-icon">${this.timerEnabled ? '⚠' : '◷'}</span> ${this.timerEnabled ? 'EVAKUASI:' : 'EKSPEDISI:'} <strong id="timer-val">${this.timerEnabled ? timerDefaultStr : 'TANPA BATAS WAKTU'}</strong>
+        <span class="timer-icon">${this.timerEnabled ? '⚠' : '◷'}</span> ${timerLabel} <strong id="timer-val">${this.timerEnabled ? timerDefaultStr : 'TANPA BATAS WAKTU'}</strong>
       </div>
       <div class="scavenger-room-badge" id="scavenger-room" style="background: rgba(14, 18, 26, 0.92); border: 1px solid #5bc0be; color: #5bc0be; font-family: 'Share Tech Mono', monospace; padding: 6px 14px; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 1px; box-shadow: 0 4px 16px rgba(0,0,0,0.7);">
         📍 <span id="room-name-val">${this.config?.label || 'RUANG KELUARGA'}</span>
@@ -1032,7 +1033,7 @@ export class ScavengerMinigame {
     this.desktopHints.innerHTML = `
       <span><span class="hint-key">WASD / ARAH</span> Gerak</span>
       <span>•</span>
-      <span><span class="hint-key">E / SPASI</span> Ambil / Masuk</span>
+      <span><span class="hint-key">E / SPASI</span> ${this.mode === 'prologue' ? 'Ambil / Simpan' : 'Ambil / Masuk'}</span>
       <span>•</span>
       <span><span class="hint-key">1-5</span> Pilih Slot</span>
       <span>•</span>
@@ -1059,7 +1060,7 @@ export class ScavengerMinigame {
       </div>
       <div class="touch-actions">
         <button type="button" class="touch-action-btn touch-drop-btn" id="touch-drop-btn">BUANG [Q]</button>
-        <button type="button" class="touch-action-btn" id="touch-interact-btn">AMBIL / MASUK [E]</button>
+        <button type="button" class="touch-action-btn" id="touch-interact-btn">${this.mode === 'prologue' ? 'AMBIL / SIMPAN [E]' : 'AMBIL / MASUK [E]'}</button>
       </div>
     `;
 
@@ -1198,7 +1199,11 @@ export class ScavengerMinigame {
           return;
         }
         this.emptyHatchConfirmUntil = now + 3000;
-        this._showNotification('MASUK TANPA PERSEDIAAN? Tekan E / SPASI lagi untuk konfirmasi.');
+        this._showNotification(
+          this.mode === 'prologue'
+            ? 'SELESAI TANPA TAMBAHAN BEKAL? Tekan E / SPASI lagi untuk konfirmasi.'
+            : 'MASUK TANPA PERSEDIAAN? Tekan E / SPASI lagi untuk konfirmasi.'
+        );
         retroAudio.playAlert?.();
         return;
       }
@@ -2376,11 +2381,17 @@ export class ScavengerMinigame {
       const exitCenter = { x: nearbyExit.x + nearbyExit.w / 2, y: nearbyExit.y + nearbyExit.h / 2 };
       let msg = '';
       if (this.emptyHatchConfirmUntil && Date.now() < this.emptyHatchConfirmUntil) {
-        msg = '[ TEKAN E / SPASI LAGI: MASUK TANPA BARANG ]';
+        msg = this.mode === 'prologue'
+          ? '[ TEKAN E / SPASI LAGI: SELESAI TANPA TAMBAHAN BEKAL ]'
+          : '[ TEKAN E / SPASI LAGI: MASUK TANPA BARANG ]';
       } else if (this.backpack.length > 0) {
-        msg = `[ E / SPASI: MASUK BUNKER (${this.backpack.length} BARANG) ]`;
+        msg = this.mode === 'prologue'
+          ? `[ E / SPASI: SIMPAN BEKAL (${this.backpack.length} BARANG) ]`
+          : `[ E / SPASI: MASUK BUNKER (${this.backpack.length} BARANG) ]`;
       } else {
-        msg = '[ E / SPASI: MASUK BUNKER 72 ]';
+        msg = this.mode === 'prologue'
+          ? '[ E / SPASI: TITIK KUMPUL BEKAL ]'
+          : '[ E / SPASI: MASUK BUNKER 72 ]';
       }
       this._drawBadge(ctx, exitCenter.x, exitCenter.y - 38, msg, '#00ff88');
     }
@@ -2778,17 +2789,30 @@ export class ScavengerMinigame {
 
     let lostItem = null;
     const lateEvacuation = (reason === 'time_out');
+    const isPrologue = this.mode === 'prologue';
 
     if (lateEvacuation && this.backpack.length > 0) {
       lostItem = this.backpack.pop();
       this._updateHUD();
-      this._showNotification(`WAKTU HABIS — EVAKUASI DARURAT! ${lostItem.name} tertinggal di luar!`);
+      if (isPrologue) {
+        this._showNotification(`WAKTU SIAGA HABIS! ${lostItem.name} tidak sempat dibawa ke titik kumpul!`);
+      } else {
+        this._showNotification(`WAKTU HABIS — EVAKUASI DARURAT! ${lostItem.name} tertinggal di luar!`);
+      }
     } else if (lateEvacuation) {
-      this._showNotification('WAKTU HABIS — EVAKUASI DARURAT!');
+      if (isPrologue) {
+        this._showNotification('WAKTU SIAGA HABIS — SEGERA KE TITIK KUMPUL BERSAMA MAYA!');
+      } else {
+        this._showNotification('WAKTU HABIS — EVAKUASI DARURAT!');
+      }
     }
 
     // Sound effect
-    retroAudio.playDoorLock?.();
+    if (isPrologue) {
+      retroAudio.playItemCollect?.();
+    } else {
+      retroAudio.playDoorLock?.();
+    }
 
     const resourceCounts = { food: 0, drink: 0, kit: 0, radio: 0, battery: 0, toy: 0 };
     const collectedTypes = this.backpack.map((it) => {
@@ -2802,8 +2826,14 @@ export class ScavengerMinigame {
     const timeRemaining = Math.max(0, Math.ceil(this.timeLeft));
     const securedBackpack = [...this.backpack];
     const resultSummary = {
-      title: lateEvacuation ? 'EVAKUASI TERLAMBAT' : 'EVAKUASI SELESAI',
-      reason: lateEvacuation ? 'WAKTU HABIS' : (reason === 'entered_hatch' ? 'PALKA TERKUNCI' : 'RUTE SELESAI'),
+      title: lateEvacuation
+        ? (isPrologue ? 'WAKTU SIAGA HABIS' : 'EVAKUASI TERLAMBAT')
+        : (isPrologue ? 'BEKAL BERHASIL DIAMANKAN' : 'EVAKUASI SELESAI'),
+      reason: lateEvacuation
+        ? 'WAKTU HABIS'
+        : (reason === 'entered_hatch'
+            ? (isPrologue ? 'BEKAL DIAMANKAN' : 'PALKA TERKUNCI')
+            : 'RUTE SELESAI'),
       itemCount: collectedTypes.length,
       timeRemaining,
       lateEvacuation,

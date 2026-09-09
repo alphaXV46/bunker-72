@@ -363,7 +363,7 @@ export class StoryEngine {
       return;
     }
 
-    if (sceneId === 'prolog_expedition_map') {
+    if (sceneId === 'prolog_expedition_map' && this.model?.storyRevision === STORY_REVISIONS.LEGACY_PHASE7) {
       const showPlanningMap = () => this.view.renderExpeditionPlanningMap(
         EXPEDITION_LOCATIONS,
         this.prologPlannedLocations,
@@ -484,14 +484,24 @@ export class StoryEngine {
     const isDisabledScene = this.model.isInventoryDisabledScene('prolog_intro');
     this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
 
+    const isSealed72 = this.model?.storyRevision === STORY_REVISIONS.SEALED72;
+    const defaultReason = isLate
+      ? 'WAKTU HABIS'
+      : (result?.reason === 'entered_hatch'
+          ? (isSealed72 ? 'BEKAL DIAMANKAN' : 'PALKA TERKUNCI')
+          : 'RUTE SELESAI');
+    const defaultTitle = isLate
+      ? (isSealed72 ? 'WAKTU SIAGA HABIS' : 'EVAKUASI TERLAMBAT')
+      : (isSealed72 ? 'BEKAL BERHASIL DIAMANKAN' : 'EVAKUASI SELESAI');
+
     const summary = {
       ...(result?.summary || {}),
       itemCount: items.length,
       lateEvacuation: isLate,
       lostItem,
       timeRemaining: Number.isFinite(Number(result?.timeRemaining)) ? Math.max(0, Number(result.timeRemaining)) : 0,
-      reason: isLate ? 'WAKTU HABIS' : (result?.reason === 'entered_hatch' ? 'PALKA TERKUNCI' : 'RUTE SELESAI'),
-      title: isLate ? 'EVAKUASI TERLAMBAT' : 'EVAKUASI SELESAI',
+      reason: result?.summary?.reason || defaultReason,
+      title: result?.summary?.title || defaultTitle,
     };
     if (this.view.showScavengerResult) {
       this.view.showScavengerResult({ ...result, collectedItems: items, resourceCounts, summary });
@@ -644,9 +654,12 @@ export class StoryEngine {
     this.prologPlannedLocations.forEach((locationId) => {
       this.model.setFlag(`prolog_route_${locationId}`);
     });
+    const prologRouteLogText = this.model?.storyRevision === STORY_REVISIONS.SEALED72
+      ? `[PETA PROLOG] Rute ${this.prologPlannedLocations.join(' dan ')} dicermati untuk perbekalan.`
+      : `[PETA PROLOG] Ayah menandai ${this.prologPlannedLocations.join(' dan ')} sebagai rute persediaan.`;
     this.model.history.push({
       hour: '0 Jam',
-      text: `[PETA PROLOG] Ayah menandai ${this.prologPlannedLocations.join(' dan ')} sebagai rute persediaan.`,
+      text: prologRouteLogText,
       choiceId: 'prolog_expedition_plan',
       effect: 1,
     });
@@ -664,6 +677,10 @@ export class StoryEngine {
   }
 
   startExpedition(locationId) {
+    if (this.model?.storyRevision === STORY_REVISIONS.SEALED72) {
+      console.warn('[StoryEngine] Day 2 outside expedition is disabled for sealed72 revision.');
+      return;
+    }
     const config = getExpeditionConfig(locationId);
     if (!config || this.model.expeditionVisitedLocations.includes(locationId) || this.model.expeditionVisitedLocations.length >= 2) return;
     this.view.dom.choicesPanel.innerHTML = '';
@@ -754,6 +771,13 @@ export class StoryEngine {
 
     if (choice.disabled) return;
 
+    if (choice.requireFlags?.length && !choice.requireFlags.every((f) => this.model.flags[f] === true)) {
+      return;
+    }
+    if (choice.forbiddenFlags?.length && choice.forbiddenFlags.some((f) => this.model.flags[f] === true)) {
+      return;
+    }
+
     if (choice.id === 'c_sarah_baseline_complete' && this.model.completeSarahBaselineReview()) {
       this.onSave?.(this.model.toSaveData());
     }
@@ -811,6 +835,85 @@ export class StoryEngine {
     if (choice.id === 'c_day1_air_fix') {
       this.model.deleteFlag('air_uninspected');
       this.model.setFlag('air_remedied');
+    }
+    if (choice.id === 'c_day1_air_spare_filter') {
+      this.model.deleteFlag('air_uninspected');
+      this.model.setFlag('air_seal_good');
+      this.model.setFlag('spare_filter_used');
+    }
+    if (choice.id === 'c_day2_air_use_spare_filter') {
+      this.model.deleteFlag('air_uninspected');
+      this.model.setFlag('day2_air_cleared');
+      this.model.setFlag('spare_filter_used');
+      this.model.setFlag('day2_crisis_applied');
+    }
+    if (choice.id === 'c_day2_air_clean_manual') {
+      this.model.deleteFlag('air_uninspected');
+      this.model.setFlag('day2_air_cleared');
+      this.model.setFlag('day2_power_draw_heavy');
+      this.model.setFlag('day2_crisis_applied');
+    }
+    if (choice.id === 'c_day2_power_use_mask') {
+      this.model.setFlag('day2_power_conserved');
+      this.model.setFlag('medical_mask_used');
+      this.model.setFlag('day2_crisis_applied');
+    }
+    if (choice.id === 'c_day2_power_endure') {
+      this.model.setFlag('day2_power_conserved');
+      this.model.setFlag('day2_crisis_applied');
+      if (!this.model.flags.day2_fatigue_applied) {
+        this.model.setFlag('day2_fatigue_applied');
+        this.model.modifyHealth(-5);
+      }
+    }
+    if (choice.id === 'c_day3_final_keep_air') {
+      this.model.setFlag('final_air_protected');
+      this.model.setFlag('spare_filter_used');
+    }
+
+    // Phase C Prologue outside expedition supply choices
+    if (choice.id === 'c_prolog_minimarket_take' || choice.id === 'c_prolog_minimarket_second_take') {
+      this.model.setFlag('prolog_minimarket_visited');
+      if (!this.model.flags.prolog_minimarket_claimed) {
+        this.model.setFlag('prolog_minimarket_claimed');
+        this.model.addInventoryItem('food', 1);
+        this.model.addInventoryItem('drink', 1);
+        this.model.setFlag('extra_battery');
+        this.model.setFlag('battery_packed');
+        this.model.setFlag('food_packed');
+        this.model.setFlag('drink_packed');
+      }
+    }
+    if (choice.id === 'c_prolog_medical_take' || choice.id === 'c_prolog_medical_second_take') {
+      this.model.setFlag('prolog_medical_visited');
+      if (!this.model.flags.prolog_medical_claimed) {
+        this.model.setFlag('prolog_medical_claimed');
+        this.model.addInventoryItem('kit', 1);
+        this.model.setFlag('kit_packed');
+        this.model.setFlag('medical_mask_ready');
+      }
+    }
+    if (choice.id === 'c_prolog_hendra_help') {
+      this.model.deleteFlag('stranger_family_first');
+      this.model.deleteFlag('stranger_guided');
+      this.model.setFlag('helped_stranger');
+      this.model.setFlag('hendra_encountered');
+      this.model.setFlag('prolog_opt2_consumed');
+    }
+    if (choice.id === 'c_prolog_hendra_family') {
+      this.model.deleteFlag('helped_stranger');
+      this.model.deleteFlag('stranger_guided');
+      this.model.setFlag('stranger_family_first');
+      this.model.setFlag('hendra_encountered');
+    }
+    if (choice.id === 'c_prolog_opt2_medical' || choice.id === 'c_prolog_opt2_minimarket' || choice.id === 'c_prolog_opt2_skip_home') {
+      this.model.setFlag('prolog_opt2_consumed');
+    }
+    if (choice.id === 'c_prolog_confirm_bunker_plan') {
+      this.model.setFlag('bunker_plan_confirmed');
+    }
+    if (choice.id === 'c_day2_internal_bridge') {
+      this.model.setFlag('day2_internal_bridge_complete');
     }
 
     // Day 2 Hendra encounter: exactly one narrative outcome.
@@ -1108,7 +1211,12 @@ export class StoryEngine {
           const requiredValue = Object.prototype.hasOwnProperty.call(cond, 'requiredValue')
             ? cond.requiredValue
             : true;
-          if (cond.requiredFlag && this.model.flags[cond.requiredFlag] === requiredValue) {
+          const currentVal = (cond.requiredFlag && Object.prototype.hasOwnProperty.call(this.model.flags, cond.requiredFlag))
+            ? this.model.flags[cond.requiredFlag]
+            : false;
+          const flagMatches = !cond.requiredFlag || currentVal === requiredValue;
+          const forbiddenMatches = !cond.forbiddenFlag || !this.model.flags[cond.forbiddenFlag];
+          if (flagMatches && forbiddenMatches) {
             if (cond.position === 'prepend') {
               processedText = cond.text + processedText;
             } else {

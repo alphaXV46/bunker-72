@@ -450,7 +450,7 @@ try {
     }, { get: (target, key) => target[key] ?? noop });
 
     const model = new GameModel();
-    model.init('day2_expedition_map', 5, [], {}, { food: 2, drink: 2, kit: 1 }, 80, 80, 80, []);
+    model.init('day2_expedition_map', 5, [], {}, { food: 2, drink: 2, kit: 1 }, 80, 80, 80, [], STORY_REVISIONS.LEGACY_PHASE7);
 
     const saves = [];
     const engine = Object.create(StoryEngine.prototype);
