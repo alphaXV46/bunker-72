@@ -95,8 +95,8 @@ Ending evaluation (`getEndingResult`) is purely deterministic and evaluates tech
    - **Experience**: Canonical **critical rescue**—NOT family death. Bunker systems reach maximum failure threshold; SAR breaches the shelter and evacuates Aris, Sarah, and Maya alive in severe physical exhaustion, requiring immediate intensive medical care. Age 10+ compliant with zero graphic violence or fatality.
 
 ### Independence of Technical & Social Systems
-- Helping Hendra (`helped_stranger`) consumes 1 medical kit but does **not** preclude achieving the Good ending when sound technical choices are maintained.
-- Choosing Family First (`stranger_family_first`) preserves 1 medical kit without moral penalties or hidden narrative locks.
+- Helping Hendra (`c_prolog_hendra_help`, `helped_stranger`) consumes Supply Opportunity #2 / remaining expedition time (`prolog_opt2_consumed = true`). It does **not** automatically consume `inventory.kit` and does not preclude Good with sound technical choices.
+- Choosing Family First (`stranger_family_first`) leaves Opportunity #2 available without moral penalties or hidden narrative locks. Both choices preserve the same pre-choice inventory; later supply collection or legitimate item use is separate.
 - A failed radio attempt (`radio_quality: 'failed'`) can still achieve the Good ending ($\ge 60$ score) through sector searches and residential records.
 - Sarah's BMKG advisory response (`sarah_warning_response`) influences public context in the epilogue without modifying technical preparedness.
 
@@ -149,20 +149,23 @@ Deterministic verification scripts run in Vite SSR node environments to validate
 | :--- | :--- | :---: |
 | `node scripts/verify_phase_a.mjs` | Schema v4, revision isolation, migration fixtures A–P, atomic result commits. | **PASS** |
 | `node scripts/verify_phase_b.mjs` | House scavenger mechanics, prologue narrative split, supply staging. | **PASS** |
-| `node scripts/verify_phase_c.mjs` | Prologue supply run, Hendra encounter, open-air aftershock, route failure. | **PASS** |
+| `node scripts/verify_phase_c.mjs` | Prologue supply run, Hendra encounter, identical-inventory HELP/FAMILY FIRST assertions (0/1/2 kits), Opportunity #2 cost, open-air aftershock, route failure. | **PASS** |
 | `node scripts/verify_phase_d.mjs` | Day 2 internal crisis, single-use filter idempotency, safe ventilation modes. | **PASS** |
 | `node scripts/verify_phase_e.mjs` | Modular epilogue sequencing, social flag invariance, failed-radio GOOD path. | **PASS** |
-| `node scripts/verify_phase_f.mjs` | 6 playthrough archetypes, rescue copy grounding, power/battery terminology. | **PASS** |
+| `node scripts/verify_phase_f.mjs` | 6 model-state archetypes (not browser playthroughs), rescue copy grounding, power/battery terminology. | **PASS** |
 | `node scripts/verify_release.mjs` | 73 scenes, 77 choices, 12 ending combinations, runtime reachability. | **PASS** |
 
 ### Production Build & Lint Gates
 - `cmd.exe /c "npm run build"`: Bundles with Vite in production mode with zero errors (79 modules transformed, asset hashing verified).
-- `git diff --check`: Zero trailing whitespace, indentation errors, or merge markers.
+- `git diff --check`: No whitespace errors reported by Git.
 
 ---
 
 ## 8. Verification Boundary & Operational Notes
 
-- **Automated Verification**: Complete deterministic test coverage and headless bundling verification have been performed and confirmed green across all suites.
-- **Browser & Device Testing**: Automated Edge testing harness (`scripts/verify_release_browser.mjs`) is provided for environments equipped with Playwright. For public distribution, manual playtesting across varied physical touchscreens (iOS Safari and Android Chrome) is encouraged to ensure optimal font readability and audio policy compliance under specific mobile OS restrictions.
-- **Asset Integrity**: All 18 scene backgrounds, avatar expressions, item icons, audio cues, and sprite sheets are bundled and decoded through `assetLoader.js` with zero missing asset warnings.
+- **Automated Verification**: Phase A–F and release checks execute static assertions and Node/Vite SSR model/controller simulations with mocked browser services. Phase F archetypes initialize ending-state fixtures; they are not full interactive playthroughs. Production bundling is a separate build check.
+- **Browser Evidence**: No successful Phase F/final-pass browser or physical-device run is established. Playwright resolution in this final pass returned `MODULE_NOT_FOUND`. `scripts/verify_release_browser.mjs` is an available harness, not proof of execution. Screenshots in `scratch/release-qa` dated September 6, 2026 are historical artifacts and do not certify the current release. The harness also contains legacy scene/save assumptions, so its existence does not establish current `sealed72` coverage.
+- **Unverified Browser/Device Checks**: Actual rendering at 390x844 and 844x390, touch interaction, keyboard focus/Tab/Enter/Space/Escape behavior, real AudioContext/autoplay policy, browser console errors, 60 FPS, memory leaks, and actual HTTP 404/network behavior remain unverified for this release. The harness listens for uncaught `pageerror` events; it does not establish console, audio, performance, memory, or network coverage.
+- **Asset Integrity Boundary**: Static asset-reference checks and production bundling do not prove successful browser decoding/playback or absence of HTTP 404 responses.
+- **QA Boundary**: Static/responsive code review and deterministic verification are separate from real browser/device validation, which remains a recommended non-blocking manual check.
+- **Release Status: READY WITH MINOR ISSUES** — automated suites and production build pass; real browser/device QA remains. For this school project, this verification gap alone is not a release blocker.

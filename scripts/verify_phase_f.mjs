@@ -174,7 +174,7 @@ try {
   console.log('[5/12] Testing Archetype D: Help Hendra + Strong Technical Play (GOOD reachable)...');
   {
     const m = new GameModel();
-    // Player used 1 kit to help Hendra (kit: 1 instead of 2)
+    // Same inventory as Family First: helping costs Opportunity #2, not a kit.
     m.init('day3_final_hours', 10, [], {
       radio_quality: 'clear',
       air_seal_good: true,
@@ -188,7 +188,7 @@ try {
       battery_committed: true,
       day2_air_cleared: true,
       helped_stranger: true,
-    }, { food: 3, drink: 3, kit: 1 }, 75, 75, 85);
+    }, { food: 3, drink: 3, kit: 2 }, 75, 75, 85);
 
     const result = m.getEndingResult();
     assert.equal(result.endingId, 'ending_good', 'Helping Hendra must not prevent GOOD ending with strong technical play');
@@ -207,7 +207,7 @@ try {
   console.log('[6/12] Testing Archetype E: Family First + Strong Technical Play (No moral penalty)...');
   {
     const m = new GameModel();
-    // Player kept the kit (kit: 2)
+    // Same inventory as Help Hendra; Opportunity #2 remains available at the choice.
     m.init('day3_final_hours', 10, [], {
       radio_quality: 'clear',
       air_seal_good: true,

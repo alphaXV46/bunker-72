@@ -140,6 +140,39 @@ try {
     clearChoices: noop,
   }, { get: (target, key) => target[key] ?? noop });
 
+  // Same pre-choice inventory: Hendra costs remaining expedition time, never a kit.
+  for (const kit of [0, 1, 2]) {
+    for (const help of [true, false]) {
+      const model = new GameModel();
+      model.init('prolog_hendra_encounter', 0, [], {
+        prolog_minimarket_visited: true,
+        prolog_minimarket_claimed: true,
+      }, { food: 2, drink: 2, kit });
+      const before = { ...model.inventory };
+      const engine = Object.create(StoryEngine.prototype);
+      Object.assign(engine, {
+        model, storyData, legacyStoryData, view: mockView,
+        audio: new Proxy({}, { get: () => noop }), onSave: noop,
+        bunkerMinigame: { close: noop },
+      });
+      engine.handleChoiceSelect(hendraScene.choices.find(c =>
+        c.id === (help ? 'c_prolog_hendra_help' : 'c_prolog_hendra_family')));
+      assert.equal(model.inventory.kit, kit, 'Hendra choice must not directly consume a medical kit');
+      assert.deepEqual(model.inventory, before, 'Both Hendra choices preserve pre-choice inventory');
+      assert.equal(model.flags.prolog_opt2_consumed, help, 'Only HELP consumes Opportunity #2');
+      assert.equal(model.currentSceneId, help ? 'prolog_hendra_helped' : 'prolog_hendra_passed');
+      if (help) {
+        assert.equal(scenes[model.currentSceneId].choices.length, 0);
+        engine.handleDialogueClick();
+        assert.equal(model.currentSceneId, 'prolog_route_failure');
+        assert(!scenes[model.currentSceneId].choices.some(c => c.id.startsWith('c_prolog_opt2_')));
+      } else {
+        engine.handleChoiceSelect(hendraPassedScene.choices.find(c => c.id === 'c_prolog_opt2_medical'));
+        assert.equal(model.currentSceneId, 'prolog_medical_second', 'FAMILY FIRST retains Opportunity #2');
+      }
+    }
+  }
+
   // PATH 1: Help Hendra
   {
     const model = new GameModel();
