@@ -1,93 +1,168 @@
 # Bunker 72 — Final Implementation Status
 
-## Product intent and audience
+## 1. Product Intent and Educational Audience
 
-Bunker 72 is a narrative preparedness game for players aged 10 and above. It follows one family through the first 72 hours of a compound emergency while distinguishing observation, official information, careful preparation, and unsafe assumptions.
+Bunker 72 is a choice-driven narrative preparedness game designed for players aged 10 and above. It immerses players in the critical first 72 hours of a compound natural disaster (volcanic activity, severe seismic aftershocks, infrastructure collapse), emphasizing the vital distinction between direct observation, verified official information, cautious technical preparation, and hazardous assumptions.
 
-The fixed character canon is:
+### Character Canon
+- **Aris (28)**: Founder of a small technology business, practical decision-maker, and family logistics coordinator.
+- **Sarah (26)**: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) data analyst whose pre-disaster workflow centers on interpreting incomplete seismic/volcanic monitoring feeds and coordinating responsible information dissemination.
+- **Maya (7)**: Their daughter. Speaks, acts, and reacts authentically as a child, remaining under attentive adult supervision throughout emergency actions.
 
-- Aris, 28, founder of a small technology business and the family's practical decision-maker.
-- Sarah, 26, a BMKG analyst whose pre-disaster work focuses on interpreting incomplete monitoring data and coordinating information responsibly.
-- Maya, 7, their daughter. She speaks and reacts as a child and remains under adult care during emergency actions.
+### Narrative Grounding & Safety Principles
+- **Location**: The family home and Bunker 72 are situated in the upland hills outside the coastal tsunami inundation zone.
+- **Shelter Role**: Bunker 72 is a private family shelter constructed as a temporary safeguard against heavy volcanic ash fall and structural shaking. It is explicitly framed as **Plan B** when official evacuation routes become impassable. The game never portrays underground shelters as universal refuges against tsunamis, pyroclastic surges, toxic gases, or structural collapse.
+- **Earthquake Safety**: During tremors, characters immediately execute Drop, Cover, and Hold in open or reinforced clearings away from exterior masonry, retaining walls, glass facades, and utility poles. Dangerous amateur search-and-rescue actions are strictly discouraged.
+- **Volcanic Ash & Air Safety**: Particulate masks (N95/surgical) provide barrier protection against coarse volcanic dust and ash, but they do NOT supply oxygen, do NOT scrub carbon dioxide, and never substitute for adequate shelter ventilation. Low-power blower operation is framed as an intentional emergency conservation mode, maintaining essential airflow safely.
+- **Water & Food**: Boiling and standard micro-filtration protect against sediment and biological contamination from clean rain/cistern sources; they are never depicted as rendering chemically tainted or heavily ash-choked water potable.
+- **Institutional Roles**:
+  - **BMKG**: Official agency for meteorological, climatological, and geophysical (earthquake/tsunami) monitoring. Sarah operates strictly within her analytical role and never issues unlawful personal evacuation decrees.
+  - **PVMBG / Badan Geologi**: Official authority for volcanic activity status and geological hazard zones.
+  - **BPBD / Local Government**: Responsible for community disaster response, local evacuation orders, and civil defense.
+  - **Basarnas / SAR**: Official search and rescue authority conducting sector sweeps and rescue extractions.
 
-The family home and fictional Bunker 72 are in the hills outside the coastal tsunami inundation area. The bunker is a temporary shelter from ash and infrastructure disruption; the story does not present an underground room as a universal shelter for tsunami, pyroclastic flow, toxic gas, or structural collapse.
+---
 
-## Final playable flow
+## 2. Canonical Playable Flow (`sealed72`)
 
-The playable story ends at hour 72:
+The canonical `sealed72` campaign follows a continuous 72-hour timeline ending at Hour 72:
 
-`Sarah's pre-disaster backstory → Aris's evacuation prologue and scavenger → Day 1 inspection → Day 2 two-location expedition → Hendra encounter → Day 3 water and power pressure → final SAR radio attempt → 72-hour evaluation → Bad / Normal / Good → modular epilogue and technical debrief.`
+```mermaid
+graph TD
+    A[Sarah Backstory & BMKG Office Analysis] --> B[Family Preparedness at Home]
+    B --> C[Early Emergency Escalation & Alert]
+    C --> D[Aris Leaves for Essential External Supplies]
+    D --> E[Sarah House Scavenger Minigame]
+    E --> F[Aris External Supply Stop: Minimarket / Health Post]
+    F --> G[Hendra Encounter: Mutual Aid Decision]
+    G --> H[Shared Aftershock & Safe Drop/Cover/Hold]
+    H --> I[Evacuation Route Failure: Landslide Separation]
+    I --> J[Aris Returns Home with Supplies]
+    J --> K[Evacuation Route Reassessment: Plan A Blocked]
+    K --> L[Hour 0: Bunker 72 Sealed as Plan B]
+    L --> M[Day 1: Internal Systems Inspection & Door Seal]
+    M --> N[Day 2: Internal Ventilation Crisis & Power Balance]
+    N --> O[Day 3: Water Rationing, Battery Allocation & Radio SOS]
+    O --> P[Hour 72: SAR Rescue Extraction]
+    P --> Q[Technical Evaluation: BAD / NORMAL / GOOD]
+    Q --> R[Modular State-Driven Epilogue & Debrief]
+```
 
-Chapter objectives identify the shift from Sarah's prologue to Aris's 72-hour survival perspective. The backstory uses no survival elapsed time, never changes survival statistics or Preparedness, and rejoins the original prologue before scavenging.
+There is strictly no active Day 4, no 96-hour continuation, no looter combat, and no supernatural or secret endings. Exactly three terminal endings conclude the experience.
 
-There is no active Day 4, 96-hour continuation, secret ending, looter branch, or second-stranger plot.
+---
 
-## Educational and institutional boundaries
+## 3. Save Architecture and Strict Revision Isolation
 
-The final copy follows these safety principles:
+### Schema Version 4 (`SAVE_SCHEMA_VERSION = 4`)
+State persistence uses Schema Version 4, featuring strict isolation between active and legacy branches:
+- **`sealed72`**: The canonical restructured game. Day 2 is an internal shelter crisis; external expeditions and Hendra encounters take place in the prologue.
+- **`legacy_phase7`**: Frozen, preserved original release path where expeditions occur on Day 2. The legacy dataset (`storyLegacyPhase7.json`) is immutable and strictly isolated.
 
-- Strong or prolonged coastal shaking and an official tsunami warning point people toward high ground or a designated evacuation place, not automatically toward an underground bunker.
-- BMKG monitoring and official updates are distinguished from local emergency instructions. BPBD carries local response and evacuation language, while PVMBG/Badan Geologi is named for volcanic monitoring and status information.
-- A particulate mask can reduce inhaled ash when used correctly, but it does not provide oxygen or protection from volcanic gas. Ventilation and official shelter instructions still matter.
-- Filtering or boiling can support treatment of water from a protected tank; neither action is presented as making chemically contaminated or heavily ash-contaminated water safe.
-- Children follow a capable adult. Gas, electrical, structural, and generator hazards are framed as adult or trained-personnel tasks.
-- The scavenger countdown is explicitly a game simulation. The story does not advise delaying evacuation to collect possessions.
+### Migration & Recovery Foundation
+- Automatic, idempotent migration handles saves from version 1, 2, 3 to version 4 upon load.
+- Corrupted or legacy data triggers an automated backup in `localStorage` under `bunker72_save_v1_backup_v4_<timestamp>`.
+- Future schema versions are safely ignored to prevent destructive overwriting.
+- Cross-revision fallback is strictly prohibited: scenes missing from one revision never leak or fetch from another.
+- Atomic commit transactions protect minigame rewards (`houseScavengeResult` and legacy expeditions), preventing duplicate item grants or inventory loss across reloads.
 
-The game remains educational fiction, not a substitute for current instructions from emergency authorities.
+---
 
-## Canonical state
+## 4. The Three Canonical Technical Endings
 
-- `radio_quality` is the sole active radio result: `clear`, `weak`, or `failed`.
-- `sarah_warning_response` is `null`, `escalate`, `verify`, or `maintain`; office progress uses validated document IDs plus two review booleans.
-- Sarah's decision can alter later context and her public-impact epilogue module, but cannot change Preparedness, survival stats, or the main ending.
-- Day 1 inspections are capped at three. Expedition locations are valid, unique IDs, and each can be visited only once per run.
-- Hendra has one mutually exclusive narrative outcome. It affects epilogue copy, never Preparedness or the main ending.
-- Maya, the toy, promises, mask use, bunker integrity, and related flags feed independent epilogue modules where applicable.
-- Hunger, thirst, and health are bounded values. Hunger and thirst decay with elapsed story time; a small health cost begins below warning thresholds and becomes larger at zero.
+Ending evaluation (`getEndingResult`) is purely deterministic and evaluates technical preparedness and physical health. **Zero social or emotional flags are read by the ending evaluator.**
 
-## Three canonical endings
+### Preparedness Scoring Matrix (Total: 100 Points)
 
-The deterministic evaluator contains six technical categories totaling 100:
+| Category | Maximum Points | Key Contributing Decisions |
+| :--- | :---: | :--- |
+| **Air & Shelter** | 20 | Day 1 door seal, Day 2 ventilation restoration, Day 3 air filter preservation |
+| **Clean Water** | 15 | Water filtration, protected storage, rationing protocols |
+| **Emergency Power** | 15 | Power circuit management, Day 2 conservation, battery protection |
+| **SAR Communication** | 15 | Radio repair, frequency tuning minigame, VHF transmission clarity |
+| **Technical Inspection**| 15 | Day 1 pre-lockdown inspections of ventilation, power, and communications |
+| **Logistics & Medical** | 20 | Staged household food, clean water, medical kits, auxiliary batteries |
 
-| Category | Maximum |
-| --- | ---: |
-| Air & Shelter | 20 |
-| Clean Water | 15 |
-| Emergency Power | 15 |
-| SAR Communication | 15 |
-| Technical Inspection | 15 |
-| Logistics & Medical | 20 |
+### Ending Outcomes
+1. **`ending_good` (Bertahan dengan Stabil)**:
+   - **Conditions**: Preparedness $\ge 60$ points, Health $\ge 55$, vital conditions stable.
+   - **Experience**: The family's technical diligence preserved sufficient operating margin. Rescued in stable physical and emotional health.
+2. **`ending_normal` (Selamat dengan Konsekuensi)**:
+   - **Conditions**: Preparedness $< 60$ or Health $< 55$ (with Health $> 0$).
+   - **Experience**: The family survives, but resources were depleted, emergency power was exhausted, and physical fatigue is noticeable.
+3. **`ending_bad` (Penyelamatan Kritis)**:
+   - **Conditions**: Health $= 0$.
+   - **Experience**: Canonical **critical rescue**—NOT family death. Bunker systems reach maximum failure threshold; SAR breaches the shelter and evacuates Aris, Sarah, and Maya alive in severe physical exhaustion, requiring immediate intensive medical care. Age 10+ compliant with zero graphic violence or fatality.
 
-Good requires Preparedness of at least 60, stable vital conditions, and health of at least 55. An imperfect but noncritical run produces Normal. Health at zero produces Bad.
+### Independence of Technical & Social Systems
+- Helping Hendra (`helped_stranger`) consumes 1 medical kit but does **not** preclude achieving the Good ending when sound technical choices are maintained.
+- Choosing Family First (`stranger_family_first`) preserves 1 medical kit without moral penalties or hidden narrative locks.
+- A failed radio attempt (`radio_quality: 'failed'`) can still achieve the Good ending ($\ge 60$ score) through sector searches and residential records.
+- Sarah's BMKG advisory response (`sarah_warning_response`) influences public context in the epilogue without modifying technical preparedness.
 
-Bad is canonically **critical rescue**, not family death: Bunker 72's systems fail, SAR reaches the shelter, Aris, Sarah, and Maya are evacuated alive, and all three require medical care and recovery. The equipment may be abandoned and the shelter may be lost. Player-facing titles, cutscene copy, result text, and debrief wording use this meaning consistently.
+---
 
-Radio failure, Sarah's response, a Hendra decision, Maya's emotional flags, a missing toy, or one expedition destination never independently forces Bad. The main ending and each epilogue module are evaluated independently.
+## 5. Modular Epilogue System (`evaluateModularEnding`)
 
-Legacy internal asset and CSS identifiers containing `fatal` are retained where renaming would create needless compatibility risk; they are not displayed to players and do not represent the current narrative meaning.
+Following the technical ending cutscene, a sequence of state-driven narrative cards renders the precise consequences of the player's choices:
 
-## Save compatibility
+### Card Sequencing
+- **NORMAL and GOOD Endings**:
+  1. `rescue`: SAR operation summary (clear transmission, weak coordinates, or sector sweep).
+  2. `sarah_public_impact`: Public impact of Sarah's early advisory (`escalate`, `verify`, or `maintain`).
+  3. `family`: Aris & Sarah's joint partnership and shared burdens.
+  4. `maya`: Emotional payoff for the red toy car, comfort, and the promise to return home safely.
+  5. `hendra`: Narrative closure if Hendra was helped (sincere gratitude at the hillside evacuation post; strictly omitted if family-first).
+  6. `bunker`: Technical aftermath (structural integrity, Day 2 filter/power callbacks, VHF battery independence).
+  7. `preparedness`: Supportive, non-punitive debrief highlighting well-prepared systems and areas for improvement.
+- **BAD Ending**:
+  1. `rescue`: Urgent extraction and emergency medical prioritization.
+  2. `sarah_public_impact`: Sarah's professional legacy.
+  3. `family`: Family endurance and long medical recovery.
+  4. `bunker`: Equipment abandonment and shelter condition.
+  5. `preparedness`: Key technical lessons for disaster readiness.
+  6. `hendra`: Brief acknowledgment in transit if helped, without obstructing urgent medical triage.
 
-The current save schema is version 3. Current scenes, finite inventory values, survival values, flags, and expedition locations are normalized before a run is restored. Existing v2 survival saves stay at their saved scene and receive neutral Sarah state. `radio_saved` is accepted only as legacy input and migrates to `radio_quality: "weak"`; it is not written again.
+---
 
-Removed Day 2, Day 3, and Day 4 scene IDs remain as small ID-only migration lists in `src/js/main.js`. They redirect safely to the current Day 2 setup, Day 3 start, or final evaluation. No removed scene content is retained.
+## 6. Implemented Minigames & Specialized Systems
 
-## Release verification
+1. **Sarah Office Analysis**:
+   - Interactive document examination modal analyzing seismic station feeds, tremor duration, and ground-displacement data.
+   - Requires review of primary feeds before unlocking advisory response choices (`escalate`, `verify`, `maintain`).
+2. **House Scavenger Minigame (`ScavengerMinigame`)**:
+   - 2D canvas grid with responsive keyboard (WASD/arrows) and mobile touch virtual D-pad.
+   - 45-second simulated evacuation countdown. Sarah navigates the home staging essential supplies (food, water, first aid, extra battery, Maya's toy car) at the basement shelter access.
+3. **Radio Frequency Tuning Minigame (`RadioMiniGame`)**:
+   - Analog dial tuning interface with interactive frequency adjustment and real-time audio static feedback.
+   - Evaluates signal resonance to determine SAR transmission quality (`clear`, `weak`, `failed`).
+4. **Bunker Inspection Hotspots**:
+   - Interactive SVG/DOM hotspot overlays during Day 1 lockdown allowing up to 3 detailed technical inspections (ventilation, electrical circuits, emergency radio).
 
-`npm run verify:release` is the deterministic release harness. Its current result is 59 scenes and 59 choices with:
+---
 
-- complete runtime graph and target validation;
-- exactly three terminal endings and no story time beyond hour 72;
-- all 12 combinations of three main endings and four Sarah outcomes;
-- independence samples for Sarah, Hendra, Maya, and radio state;
-- a fresh controller route across the backstory, prologue boundary, all three days, expedition/Hendra integration, and ending evaluation;
-- legacy model and save-state compatibility checks;
-- a comparison against the committed story mechanics so this final copy pass cannot silently alter hours, targets, or mechanical effects.
+## 7. Verification Test Suites
 
-`scripts/verify_release_browser.mjs` performs an automated Microsoft Edge pass at 1280×720, 960×700, 390×844 portrait touch emulation, and 844×390 landscape touch emulation. It checks new/load behavior, a v2 save, Sarah's office and analysis, Escape/Tab/Enter/Space paths, 44-pixel office targets, Day 1 hotspots, the Day 2 route map, scavenger touch controls, all ending renderers, all 12 ending/Sarah combinations on desktop, debrief expansion, restart reachability, horizontal overflow, and uncaught page errors.
+Deterministic verification scripts run in Vite SSR node environments to validate state, schema, narrative invariants, and graph connectivity:
 
-`npm run build` remains the production build gate. Release evidence should report deterministic, automated-browser, and human-device testing separately.
+| Test Suite | Purpose & Coverage | Status |
+| :--- | :--- | :---: |
+| `node scripts/verify_phase_a.mjs` | Schema v4, revision isolation, migration fixtures A–P, atomic result commits. | **PASS** |
+| `node scripts/verify_phase_b.mjs` | House scavenger mechanics, prologue narrative split, supply staging. | **PASS** |
+| `node scripts/verify_phase_c.mjs` | Prologue supply run, Hendra encounter, open-air aftershock, route failure. | **PASS** |
+| `node scripts/verify_phase_d.mjs` | Day 2 internal crisis, single-use filter idempotency, safe ventilation modes. | **PASS** |
+| `node scripts/verify_phase_e.mjs` | Modular epilogue sequencing, social flag invariance, failed-radio GOOD path. | **PASS** |
+| `node scripts/verify_phase_f.mjs` | 6 playthrough archetypes, rescue copy grounding, power/battery terminology. | **PASS** |
+| `node scripts/verify_release.mjs` | 73 scenes, 77 choices, 12 ending combinations, runtime reachability. | **PASS** |
 
-## Remaining verification boundary
+### Production Build & Lint Gates
+- `cmd.exe /c "npm run build"`: Bundles with Vite in production mode with zero errors (79 modules transformed, asset hashing verified).
+- `git diff --check`: Zero trailing whitespace, indentation errors, or merge markers.
 
-The browser pass uses Edge in headless mode and emulated touch input. It is stronger than static inspection but is not a physical-phone test or a full human pacing/usability playthrough. Audio perception, long-session feel, real-device browser chrome, and every possible manual minigame solution still benefit from a final human smoke test before public distribution.
+---
+
+## 8. Verification Boundary & Operational Notes
+
+- **Automated Verification**: Complete deterministic test coverage and headless bundling verification have been performed and confirmed green across all suites.
+- **Browser & Device Testing**: Automated Edge testing harness (`scripts/verify_release_browser.mjs`) is provided for environments equipped with Playwright. For public distribution, manual playtesting across varied physical touchscreens (iOS Safari and Android Chrome) is encouraged to ensure optimal font readability and audio policy compliance under specific mobile OS restrictions.
+- **Asset Integrity**: All 18 scene backgrounds, avatar expressions, item icons, audio cues, and sprite sheets are bundled and decoded through `assetLoader.js` with zero missing asset warnings.

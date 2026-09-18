@@ -466,7 +466,7 @@ try {
   // =========================================================================
   // 12. QA ROUTE L: Legacy Revision Isolation
   // =========================================================================
-  console.log('[12/12] Testing Route L: Legacy revision preservation and strict isolation...');
+  console.log('[12/13] Testing Route L: Legacy revision preservation and strict isolation...');
   {
     assert(legacyStoryData.scenes.day2_expedition_map, 'day2_expedition_map must exist in legacy');
     assert(legacyStoryData.scenes.day2_hendra_encounter, 'day2_hendra_encounter must exist in legacy');
@@ -475,6 +475,50 @@ try {
     const legacyModel = new GameModel();
     legacyModel.init('day2_start', 5, [], null, null, 70, 70, 70, [], STORY_REVISIONS.LEGACY_PHASE7);
     assert.equal(legacyModel.storyRevision, STORY_REVISIONS.LEGACY_PHASE7);
+  }
+
+  // =========================================================================
+  // 13. SAFETY, NARRATIVE HARDENING & AGE-10+ INVARIANTS (RULES A-E)
+  // =========================================================================
+  console.log('[13/13] Testing Safety & Narrative Hardening (Rules A-E)...');
+  {
+    // A. Mask text never presents masks as substitute for ventilation
+    const maskChoice = scenes.day2_power_response.choices.find(c => c.id === 'c_day2_power_use_mask');
+    assert(maskChoice, 'c_day2_power_use_mask must exist');
+    assert(!maskChoice.text.toLowerCase().includes('bernapas nyaman selagi sirkulasi rendah'));
+    assert.match(maskChoice.text, /kompartemen servis|debu/i, 'Mask must be framed around dusty service compartment');
+    assert.match(maskChoice.log, /ventilasi shelter tetap berjalan pada mode hemat yang aman/i, 'Ventilation must be explicitly safe');
+
+    // B. Reduced blower mode is explicitly an intended safe emergency mode
+    assert.match(scenes.day2_power_response.text, /ventilasi tetap berfungsi aman dan memadai/i, 'Reduced blower mode must be explicitly safe and adequate');
+
+    // C. No detailed real-world ventilation repair procedures remain
+    const day2ScenesCombined = [
+      scenes.day2_start.text,
+      scenes.day2_systems_check.text,
+      scenes.day2_air_response.text,
+      scenes.day2_power_response.text,
+      scenes.day2_family_check.text,
+      scenes.day2_stabilized.text,
+      ...scenes.day2_air_response.choices.map(c => `${c.text} ${c.log}`),
+      ...scenes.day2_power_response.choices.map(c => `${c.text} ${c.log}`),
+    ].join(' ');
+
+    assert(!day2ScenesCombined.includes('baut paking'), 'baut paking must be removed');
+    assert(!day2ScenesCombined.includes('permukaan kasa'), 'permukaan kasa must be removed');
+    assert(!day2ScenesCombined.includes('putaran tinggi blower'), 'putaran tinggi blower must be removed');
+    assert(!day2ScenesCombined.includes('manual scraping'), 'manual scraping must not appear');
+    assert(!day2ScenesCombined.includes('gasket tightening'), 'gasket tightening must not appear');
+
+    // D. No sealed72 Day 2 text says the bunker is universally or exclusively safe
+    assert(!day2ScenesCombined.includes('satu-satunya tempat aman'), 'Universal bunker superiority claim must not appear');
+    assert(!day2ScenesCombined.includes('hanya di bunker'), 'Universal bunker superiority claim must not appear');
+    assert.match(scenes.day2_start.text, /belum dibuka kembali|dalam asesmen petugas/i, 'Reason to remain must be closed/unassessed routes');
+
+    // E. Family-first Hendra route gains no factual Hendra update
+    const hendraFamilyCond = scenes.day2_stabilized.conditionalText.find(c => c.requiredFlag === 'stranger_family_first');
+    assert(hendraFamilyCond, 'stranger_family_first conditional text must exist in day2_stabilized');
+    assert.match(hendraFamilyCond.text, /tidak tahu bagaimana nasibnya/i, 'Hendra fate must remain strictly unknown');
   }
 
 } finally {

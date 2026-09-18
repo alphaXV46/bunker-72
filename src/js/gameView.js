@@ -1777,9 +1777,7 @@ export class GameView {
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
     }[character]));
     const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
-    const reportModules = endingId === 'ending_normal'
-      ? modules.filter((module) => module.id === 'rescue' || module.id === 'family')
-      : modules;
+    const reportModules = modules;
 
     if ((endingId === 'ending_good' || endingId === 'ending_normal') && reportModules.length) {
       const reportClass = endingId === 'ending_normal' ? 'normal-ending-final-card' : 'good-ending-final-card';
@@ -1848,7 +1846,7 @@ export class GameView {
       const items = modularData?.preparedness?.debriefItems || [];
       debriefList.innerHTML = items.map((item) => `
         <li class="preparedness-debrief-item">
-            <strong>${escapeHtml(item.label)} — ${item.score}/${item.max}: ${item.positive ? 'SUDAH MENDUKUNG' : 'PERLU DIPERSIAPKAN'}</strong>
+            <strong>${escapeHtml(item.label)} — ${item.score}/${item.max}: ${item.positive ? 'SUDAH MENDUKUNG' : 'MASIH PERLU DIPERKUAT'}</strong>
           <span>${escapeHtml(item.detail)}</span>
         </li>
       `).join('');

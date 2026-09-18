@@ -819,7 +819,7 @@
     "day2_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BPBD] ...abu vulkanik menutupi sebagian besar wilayah perbukitan dan jalan lingkar... warga diimbau tetap berada di shelter masing-masing sampai asesmen jalur darat selesai... [STATIK]\n\nJam ke-30. Gempa susulan berkekuatan sedang kembali menghentak lereng di atas Bunker 72. Di dalam shelter, getaran terasa cukup keras; suara derit terdengar dari palka atas dan dengung kipas ventilasi mendadak tersendat. Beban listrik berkedip tidak stabil di panel meteran. Sarah segera mendekap Maya di dipan lipat, sementara Aris berdiri memeriksa indikator shelter.",
+      "text": "[RADIO BPBD] ...jalur penghubung timur masih ditutup dan dalam asesmen petugas pascagempa susulan; warga diimbau tidak memaksakan melintas di akses yang rusak... hujan abu masih pekat di lereng barat... [STATIK]\n\nJam ke-30. Gempa susulan berkekuatan sedang kembali menghentak lereng di atas Bunker 72. Di dalam shelter, getaran terasa cukup keras; suara derit terdengar dari palka atas dan dengung kipas ventilasi mendadak tersendat. Beban listrik berkedip tidak stabil di panel meteran. Sarah segera mendekap Maya di dipan lipat, sementara Aris berdiri memeriksa indikator shelter. Selagi jalur evakuasi belum dibuka kembali oleh petugas, keluarga memutuskan tetap bertahan di shelter sambil terus memantau arahan resmi.",
       "conditionalText": [
         {
           "requiredFlag": "air_uninspected",
@@ -1102,11 +1102,11 @@
     "day2_systems_check": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris membuka penutup instrumen dan memeriksa dua meteran utama. Guncangan gempa tadi mengganggu instalasi internal: sambungan rumah filter udara sedikit merenggang sehingga debu halus mulai menghambat aliran, sementara inverter daya darurat menunjukkan fluktuasi beban.\n\nSarah: \"Mas, suara blower terdengar lebih berat dari biasanya. Kita perlu memastikan aliran udara tetap bersih, tapi kalau semua sirkuit dipaksa menyala penuh, cadangan daya kita yang akan tertekan.\"",
+      "text": "Aris membuka penutup instrumen dan memeriksa dua meteran utama. Guncangan gempa tadi mengganggu instalasi internal: jalur ventilasi terhambat oleh penumpukan debu vulkanik, sementara beban listrik darurat berfluktuasi.\n\nSarah: \"Mas, suara blower terdengar lebih berat dari biasanya. Kita perlu memastikan aliran udara tetap bersih, tapi kalau semua sirkuit dipaksa menyala penuh, cadangan daya kita yang akan tertekan.\"",
       "conditionalText": [
         {
           "requiredFlag": "inspected_ventilation",
-          "text": "\n\nAris mengingat posisinya dari pemeriksaan Hari 1: yang bergetar adalah paking penyaring pada rumah blower, bukan pipa saluran utama yang pecah. Titik masalahnya jelas dan bisa ditangani langsung.",
+          "text": "\n\nAris mengingat posisinya dari pemeriksaan Hari 1: jalur ventilasi utama tetap utuh, hanya modul penyaring yang memerlukan penyesuaian teknis agar aliran kembali normal.",
           "append": true
         },
         {
@@ -1121,14 +1121,14 @@
       "choices": [
         {
           "id": "c_day2_focus_air",
-          "text": "Prioritaskan pemulihan ventilasi: tangani rumah filter agar sirkulasi udara lekas bersih.",
+          "text": "Prioritaskan pemulihan ventilasi: tangani modul saringan agar sirkulasi udara lekas bersih.",
           "nextSceneId": "day2_air_response",
           "knowledgeEffect": 0,
-          "log": "Aris memprioritaskan pembersihan dan penyesuaian unit filtrasi udara."
+          "log": "Aris memprioritaskan pembersihan dan penyesuaian sistem ventilasi."
         },
         {
           "id": "c_day2_focus_power",
-          "text": "Prioritaskan stabilitas daya: kurangi beban sirkuit dan jalankan blower pada mode hemat darurat.",
+          "text": "Prioritaskan stabilitas daya: kurangi beban sirkuit dan alihkan blower ke mode darurat hemat daya yang aman.",
           "nextSceneId": "day2_power_response",
           "knowledgeEffect": 0,
           "log": "Aris memprioritaskan pengurangan beban listrik untuk menghemat cadangan daya."
@@ -1138,7 +1138,7 @@
     "day2_air_response": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris membuka kompartemen filter di samping palka. Getaran gempa tadi menggeser kedudukan kisi penyaring sehingga partikulat abu vulkanik mulai menumpuk di permukaan kasa. Blower harus dibersihkan dan disetel ulang agar udara kembali mengalir lancar.",
+      "text": "Aris membuka kompartemen ventilasi di samping palka. Getaran gempa tadi menyebabkan penumpukan debu di jalur saringan sehingga sirkulasi udara terhambat. Komponen ventilasi harus disetel kembali agar aliran udara kembali lancar.",
       "conditionalText": [
         {
           "requiredFlag": "found_spare_filter",
@@ -1153,7 +1153,7 @@
       "choices": [
         {
           "id": "c_day2_air_use_spare_filter",
-          "text": "Pasang filter cadangan bersih dari loker untuk memulihkan aliran tanpa membebani motor.",
+          "text": "Ganti unit saringan dengan filter cadangan bersih dari loker untuk memulihkan aliran udara.",
           "nextSceneId": "day2_family_check",
           "requireFlags": [
             "found_spare_filter"
@@ -1166,29 +1166,29 @@
             "spare_filter_used"
           ],
           "knowledgeEffect": 1,
-          "log": "Aris memasang filter cadangan; sirkulasi udara kembali normal tanpa membebani daya."
+          "log": "Aris memasang filter cadangan; aliran udara pulih stabil tanpa membebani cadangan daya."
         },
         {
           "id": "c_day2_air_clean_manual",
-          "text": "Bersihkan kisi filter secara manual dan kencangkan baut paking; jalankan blower putaran tinggi.",
+          "text": "Bersihkan jalur servis dan setel kembali komponen ventilasi agar aliran udara pulih.",
           "nextSceneId": "day2_family_check",
           "setFlags": [
             "day2_air_cleared",
             "day2_power_draw_heavy"
           ],
           "knowledgeEffect": 0,
-          "log": "Aris membersihkan saringan secara manual; putaran tinggi blower memberi beban ekstra pada daya."
+          "log": "Aris membersihkan jalur servis dan menyetel kembali komponen ventilasi; sistem bekerja ekstra sehingga membebani daya."
         }
       ]
     },
     "day2_power_response": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris mematikan penerangan sekunder dan menurunkan sakelar sirkuit tambahan di panel daya. Tegangan inverter segera kembali tenang di angka stabil. Blower dipindahkan ke mode darurat hemat daya sesuai prosedur teknis shelter, meski pertukaran udara berlangsung lebih lambat.",
+      "text": "Aris mematikan penerangan sekunder dan menurunkan sakelar sirkuit tambahan di panel daya. Tegangan inverter segera kembali tenang di angka stabil. Sesuai rancangan teknis shelter, blower dialihkan ke mode darurat hemat daya: sistem ventilasi tetap berfungsi aman dan memadai untuk kebutuhan pernapasan keluarga, meski pertukaran udara berlangsung lebih lambat dan tenang.\n\nSaat Aris membuka kompartemen servis di dekat panel untuk memeriksa kabel, partikel debu halus yang terguncang gempa tampak beterbangan di sekitar ruang servis.",
       "conditionalText": [
         {
           "requiredFlag": "medical_mask_ready",
-          "text": "\n\nMasker pelindung debu yang dibawa dari pos kesehatan darurat tersimpan dekat meja kerja.",
+          "text": "\n\nMasker partikulat dari pos kesehatan darurat tersedia di dekat meja kerja, siap digunakan untuk melindungi pernapasan dari debu saat memeriksa kompartemen servis.",
           "append": true
         }
       ],
@@ -1198,7 +1198,7 @@
       "choices": [
         {
           "id": "c_day2_power_use_mask",
-          "text": "Bagikan masker partikulat kepada keluarga agar bernapas nyaman selagi sirkulasi rendah.",
+          "text": "Kenakan masker partikulat saat memeriksa kompartemen servis yang berdebu agar terhindar dari paparan partikel halus.",
           "nextSceneId": "day2_family_check",
           "requireFlags": [
             "medical_mask_ready"
@@ -1207,17 +1207,17 @@
             "day2_power_conserved"
           ],
           "knowledgeEffect": 1,
-          "log": "Keluarga mengenakan masker partikulat selama mode hemat daya; udara tetap aman terhirup."
+          "log": "Masker partikulat dipakai saat memeriksa kompartemen servis; ventilasi shelter tetap berjalan pada mode hemat yang aman."
         },
         {
           "id": "c_day2_power_endure",
-          "text": "Tenangkan keluarga di dipan dan batasi aktivitas fisik selagi sirkulasi berjalan lambat.",
+          "text": "Selesaikan pemeriksaan panel tanpa masker, lalu dampingi keluarga beristirahat di dipan selagi mode hemat berjalan.",
           "nextSceneId": "day2_family_check",
           "setFlags": [
             "day2_power_conserved"
           ],
           "knowledgeEffect": 0,
-          "log": "Keluarga beristirahat membatasi gerak selama mode hemat daya; udara terasa sedikit pengap."
+          "log": "Pemeriksaan panel diselesaikan tanpa masker; sedikit paparan debu dan adaptasi mode hemat membuat fisik sedikit letih, sementara ventilasi tetap aman."
         }
       ]
     },
@@ -1264,7 +1264,7 @@
     "day2_stabilized": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Jam ke-54. Menjelang pergantian malam menuju hari ketiga, dengung mesin di dalam bunker kembali ke ritme stabil. Indikator filter dan daya berada pada batas operasional yang terkendali, meski cadangan sistem mulai menipis. Sarah menatap kalender catatan darurat di dinding: mereka sudah bertahan lebih dari dua hari penuh. Ujian terberat akan datang pada jam-jam terakhir besok.",
+      "text": "Jam ke-54. Menjelang pergantian malam menuju hari ketiga, dengung mesin di dalam bunker kembali ke ritme stabil. Indikator filter dan daya berada pada batas operasional yang terkendali, meski cadangan sistem mulai menipis. Sarah menatap kalender catatan darurat di dinding: mereka sudah bertahan lebih dari dua hari penuh. Selagi akses evakuasi di luar belum dipastikan aman oleh petugas, keluarga memilih tetap bertahan di shelter dengan persediaan yang ada. Ujian terberat akan datang pada jam-jam terakhir besok.",
       "conditionalText": [
         {
           "requiredFlag": "sarah_warning_response",
@@ -1298,7 +1298,7 @@
         },
         {
           "requiredFlag": "stranger_family_first",
-          "text": " Aris merapatkan genggamannya pada tangan Sarah, sadar bahwa setiap keputusan di saat genting membawa beban tersendiri.",
+          "text": " Aris teringat pria yang ditemuinya di persimpangan tadi siang; Aris tidak tahu bagaimana nasibnya setelah guncangan susulan itu, dan hanya bisa berharap ia menemukan keselamatan sendiri.",
           "append": true
         }
       ],
@@ -1435,10 +1435,10 @@
         },
         {
           "id": "c_day3_power_dual",
-          "text": "Pasang baterai ekstra agar radio dan ventilasi tetap aktif bersama.",
+          "text": "Pasang baterai ekstra untuk pemancar radio agar daya darurat bunker tetap fokus menopang ventilasi.",
           "nextSceneId": "day3_radio_rescue",
           "knowledgeEffect": 1,
-          "log": "Baterai ekstra menjaga radio dan ventilasi tetap aktif bersama.",
+          "log": "Baterai ekstra dipasang ke pemancar radio; daya darurat bunker difokuskan untuk ventilasi.",
           "requireFlags": ["extra_battery"],
           "setFlags": ["power_saved", "radio_power_stable", "battery_committed"]
         },
@@ -1641,7 +1641,7 @@
     "ending_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Tim SAR menemukan dan mengevakuasi Aris, Sarah, dan Maya. Ketiganya selamat dalam kondisi sangat lemah dan segera mendapat perawatan medis. Kegagalan sistem bunker membuat pemulihan mereka membutuhkan waktu.",
+      "text": "Tim SAR membuka pintu palka dan mengevakuasi Aris, Sarah, dan Maya. Ketiganya selamat dalam kondisi sangat lemah dan segera mendapat penanganan medis darurat. Kerusakan sistem perlindungan membuat pemulihan mereka membutuhkan waktu, namun keluarga tetap utuh bersama.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1649,7 +1649,7 @@
     "ending_normal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Keluarga berhasil keluar, namun tiga hari di bawah tanah meninggalkan kelelahan, keterbatasan, dan pekerjaan pemulihan yang panjang.",
+      "text": "Pintu palka akhirnya dibuka oleh tim penyelamat. Tiga hari di bawah tanah menyisakan kelelahan fisik, cadangan yang menipis, dan peralatan yang aus, namun Aris, Sarah, dan Maya selamat dan siap memulai masa pemulihan.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1657,7 +1657,7 @@
     "ending_good": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Keluarga mencapai penyelamatan dalam keadaan relatif stabil. Tidak semua langkah sempurna, tetapi persiapan teknis memberi mereka cukup ruang untuk bertahan.",
+      "text": "Pintu palka terbuka menyambut tim penyelamat dan udara luar yang mulai tenang. Persiapan teknis memberi keluarga margin yang cukup untuk bertahan dalam kondisi relatif stabil di tengah dampak bencana yang masih luas.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []
