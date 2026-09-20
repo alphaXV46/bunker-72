@@ -9,7 +9,6 @@ import avatarAyahCemas from '../assets/avatars/ayah/ayah_cemas.png';
 import avatarIbuSerius from '../assets/avatars/ibu/ibu_serius.png';
 import avatarIbuSenyum from '../assets/avatars/ibu/ibu_senyum.png';
 import avatarIbuCemas from '../assets/avatars/ibu/ibu_cemas.png';
-import avatarAnak from '../assets/avatars/avatar_anak.png';
 import avatarAnakSenyum from '../assets/avatars/anak/anak_senyum.png';
 import avatarAnakSerius from '../assets/avatars/anak/anak_serius.png';
 import avatarAnakCemas from '../assets/avatars/anak/anak_cemas.png';
@@ -39,6 +38,7 @@ import bgBadEnd3 from '../assets/backgrounds/bg_bad_end_3.webp';
 import bgFatalEnd from '../assets/backgrounds/bg_fatal_end.webp';
 import bgBackstoryAirport from '../assets/backgrounds/bg_backstory_airport.webp';
 import bgBackstoryHouse from '../assets/backgrounds/bg_backstory_house.webp';
+import bgBackstoryFamilyPreparedness from '../assets/backgrounds/backstory_family_preparedness.webp';
 import bgBackstoryArisCompany from '../assets/backgrounds/bg_backstory_aris_company.webp';
 import bgBackstorySarahOffice from '../assets/backgrounds/bg_backstory_sarah_office.webp';
 import bgBackstorySarahOfficeInteractive from '../assets/backgrounds/bg_backstory_sarah_office_interactive.webp';
@@ -81,6 +81,7 @@ const ASSET_URLS = [
   bgFatalEnd,
   bgBackstoryAirport,
   bgBackstoryHouse,
+  bgBackstoryFamilyPreparedness,
   bgBackstoryArisCompany,
   bgBackstorySarahOffice,
   bgBackstorySarahOfficeInteractive,
@@ -97,7 +98,6 @@ const ASSET_URLS = [
   avatarIbuSerius,
   avatarIbuSenyum,
   avatarIbuCemas,
-  avatarAnak,
   avatarAnakSenyum,
   avatarAnakSerius,
   avatarAnakCemas,

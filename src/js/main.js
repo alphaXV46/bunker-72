@@ -145,6 +145,7 @@ function showScreen(screenKey) {
   if (target) target.classList.add('active');
 
   if (screenKey !== 'game') {
+    storyEngine?.view.closeDayTransition();
     storyEngine?.view.clearSceneHotspots();
     storyEngine?.audio.stopAll();
   }
@@ -194,7 +195,7 @@ async function initGame() {
       // reachable developer chunk; the branch itself is compile-time false
       // in a release build.
       const { bootstrapDevTools } = await import(/* @vite-ignore */ DEV_BOOTSTRAP_MODULE);
-      bootstrapDevTools();
+      await bootstrapDevTools();
     } catch (error) {
       console.warn('[main] Developer tools unavailable; continuing normally.', error);
     }
@@ -216,8 +217,10 @@ async function initGame() {
       statusStructure:   dom.statusStructure,
       statusPower:       dom.statusPower,
       resourceItems:     dom.resourceItems,
+      gameView:          dom.gameView,
       storyBox:          dom.storyBox,
       speakerName:       dom.speakerName,
+      dialogueSpeakerLabel: dom.dialogueSpeakerLabel,
       speakerAvatar:     dom.speakerAvatar,
       avatarContainer:   dom.avatarContainer,
       dialogueText:      dom.dialogueText,

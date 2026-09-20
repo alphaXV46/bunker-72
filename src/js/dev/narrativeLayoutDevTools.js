@@ -1,5 +1,6 @@
 import { ScreenLayoutEditor } from '../screenLayoutEditor.js';
 import { editorDataStore } from '../editorDataStore.js';
+import { setVisualEditorActive } from './editorInputGate.js';
 
 /**
  * Developer-only adapter for the DOM dialogue/choice layout editor.
@@ -7,7 +8,14 @@ import { editorDataStore } from '../editorDataStore.js';
  * or pointer-editing code in a release build.
  */
 export class NarrativeLayoutDevTools {
-  constructor({ root, onSave = () => {}, onStatus = () => {}, canToggle = () => true } = {}) {
+  constructor({
+    root,
+    onSave = () => {},
+    onStatus = () => {},
+    canToggle = () => true,
+    onBeforeEnable = () => {},
+    onEnabledChange = () => {},
+  } = {}) {
     this.root = root;
     this.canToggle = canToggle;
     this.feedback = null;
@@ -24,6 +32,12 @@ export class NarrativeLayoutDevTools {
         onSave(result);
       },
       onStatus,
+      editorId: 'ui-layout',
+      onBeforeEnable,
+      onEnabledChange: (enabled, editorId) => {
+        setVisualEditorActive(editorId, enabled);
+        onEnabledChange(enabled, editorId);
+      },
     });
   }
 

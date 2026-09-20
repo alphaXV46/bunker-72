@@ -8,7 +8,7 @@ const readEditorData = () => {
   try {
     return JSON.parse(fs.readFileSync(EDITOR_DATA_PATH, 'utf8'));
   } catch (_) {
-    return { version: 1, collision: {}, fog: {}, ui: {} };
+    return { version: 1, collision: {}, fog: {}, items: {}, hotspots: {}, ui: {} };
   }
 };
 
@@ -26,6 +26,10 @@ const isValidEditorData = (value) => Boolean(
   && (!value.items || (
     typeof value.items === 'object'
     && !Array.isArray(value.items)
+  ))
+  && (!value.hotspots || (
+    typeof value.hotspots === 'object'
+    && !Array.isArray(value.hotspots)
   ))
   && value.ui
   && typeof value.ui === 'object'

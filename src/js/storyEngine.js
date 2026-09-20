@@ -29,10 +29,28 @@ import {
   SARAH_OFFICE_IMAGE,
 } from './sarahOfficeConfig.js';
 import { SARAH_ANALYSIS_SECTIONS, SARAH_ANALYSIS_SECTION_IDS } from './sarahAnalysisConfig.js';
+import { getRuntimeHotspotOverride } from './runtime/editorLayoutRuntime.js';
+import { clamp } from './runtime/layoutSchema.js';
+import { isVisualEditorActive, subscribeVisualEditorState } from './dev/editorInputGate.js';
 
 // ─── RADIO SCENES ───────────────────────────────────────────────────────────
 // Scenes during which the radio SFX should play on entry.
 const RADIO_SCENES = new Set(['day3_start', 'day3_radio_rescue']);
+const DAY_TRANSITIONS = Object.freeze({
+  day2_start: {
+    kicker: 'HARI 1 SELESAI // JAM KE-30',
+    title: 'GEMPA SUSULAN',
+    narrative: 'Lampu darurat padam sesaat. Dari atas bunker terdengar retakan panjang—gempa susulan berkekuatan 5,6 Mw menghantam lereng sekali lagi. Getarannya singkat, tetapi cukup untuk menjatuhkan debu ke jalur ventilasi dan membuat beban listrik berkedip.',
+    detail: 'Keluarga menahan napas sampai dengung blower kembali stabil. Hari Kedua dimulai dalam shelter yang masih berdiri, tetapi sistemnya harus segera diperiksa.',
+    continueLabel: 'LANJUTKAN KE DAY 2',
+  },
+  day3_start: {
+    kicker: 'MENJELANG HARI KETIGA',
+    title: 'DAY 3',
+    narrative: 'Malam berikutnya berlalu dalam tidur yang terputus-putus. Gemuruh jauh merambat melalui beton, lebih pelan dari kemarin. Sarah merapatkan selimut Maya sementara Aris menjaga lampu terakhir tetap menyala.',
+    detail: 'Di sela desis radio, terdengar kabar abu mulai menipis. Cadangan semakin sedikit, tetapi untuk pertama kalinya, harapan evakuasi terasa dekat.',
+  },
+});
 const DAY1_HOTSPOTS = Object.freeze([
   { id: 'supply', flag: 'inspected_supply', label: 'Lemari Persediaan', x: 29, y: 23, w: 24, h: 34, text: 'Rak persediaan masih tertata. Satu kaleng makanan dan botol air bisa dipindahkan ke meja kerja tanpa mengusik cadangan utama.', reward: { item: 'food', amount: 1 } },
   { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 58, y: 45, w: 12, h: 19, text: 'Loker P3K berisi kasa dan antiseptik yang masih kering. Kotak ini mudah dijangkau bila ada yang terluka.', reward: { item: 'kit', amount: 1 } },
@@ -42,6 +60,51 @@ const DAY1_HOTSPOTS = Object.freeze([
   { id: 'family_storage', flag: 'inspected_family_storage', label: 'Penyimpanan Keluarga', x: 84, y: 73, w: 13, h: 18, text: 'Kotak penyimpanan keluarga berisi selimut dan foto lama. Menaruhnya dekat dipan membuat malam pertama terasa sedikit lebih manusiawi.' },
 ]);
 const EXPEDITION_LOCATIONS = Object.freeze(Object.values(EXPEDITION_CONFIGS).map(({ id, label, risk, resourceHint }) => ({ id, label, risk, resourceHint })));
+
+const HOTSPOT_GEOMETRY_KEYS = ['x', 'y', 'w', 'h'];
+
+const clearAutoAdvanceTimer = (timerId) => {
+  if (timerId == null) return;
+  if (typeof window !== 'undefined' && typeof window.clearTimeout === 'function') {
+    window.clearTimeout(timerId);
+    return;
+  }
+  if (typeof clearTimeout === 'function') clearTimeout(timerId);
+};
+
+const scheduleAutoAdvanceTimer = (callback, delayMs) => {
+  if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {
+    return window.setTimeout(callback, delayMs);
+  }
+  return setTimeout(callback, delayMs);
+};
+
+const mergeHotspotGeometry = (sceneKey, hotspots) => {
+  const overrides = getRuntimeHotspotOverride(sceneKey);
+  const overrideById = new Map(
+    (Array.isArray(overrides) ? overrides : [])
+      .filter((spot) => spot && spot.id)
+      .map((spot) => [String(spot.id), spot])
+  );
+  return hotspots.map((spot) => {
+    const override = overrideById.get(String(spot.id));
+    const merged = { ...spot };
+    if (override) {
+      HOTSPOT_GEOMETRY_KEYS.forEach((key) => {
+        if (Number.isFinite(Number(override[key]))) merged[key] = Number(override[key]);
+      });
+    }
+    const width = clamp(Number(merged.w) || 8, 1, 100);
+    const height = clamp(Number(merged.h) || 8, 1, 100);
+    return {
+      ...merged,
+      x: clamp(Number(merged.x) || 0, 0, Math.max(0, 100 - width)),
+      y: clamp(Number(merged.y) || 0, 0, Math.max(0, 100 - height)),
+      w: width,
+      h: height,
+    };
+  });
+};
 
 export class StoryEngine {
   /**
@@ -70,6 +133,16 @@ export class StoryEngine {
     this.sarahAnalysisIndex = 0;
     this.sarahAnalysisReviewedIds = new Set();
     this.prologPlannedLocations = [];
+    this._autoAdvanceTimer = null;
+    this._autoAdvanceRequest = null;
+    this._blockedAutoAdvance = null;
+    this._unsubscribeVisualEditor = subscribeVisualEditorState((active) => {
+      if (active) {
+        this._pauseAutoAdvanceForEditor();
+      } else {
+        this._resumeAutoAdvanceAfterEditor();
+      }
+    });
 
     this.bunkerMinigame = new BunkerMinigame({
       root: this.dom.bunkerMinigame,
@@ -129,6 +202,7 @@ export class StoryEngine {
    * @param {object|null} houseScavengeResult
    */
   start(sceneId, knowledge, history = [], flags = null, inventory = null, hunger, thirst, health, expeditionVisitedLocations = [], storyRevision = CURRENT_STORY_REVISION, houseScavengeResult = null) {
+    this._cancelAutoAdvance();
     this.view.clearSceneHotspots();
     let activeRevision = storyRevision;
     if (activeRevision !== STORY_REVISIONS.SEALED72 && activeRevision !== STORY_REVISIONS.LEGACY_PHASE7) {
@@ -174,9 +248,24 @@ export class StoryEngine {
    * the view to render the new scene.
    * @param {string} sceneId
    */
-  renderScene(sceneId) {
+  renderScene(sceneId, { skipDayTransition = false } = {}) {
+    this._cancelAutoAdvance();
+    if (!skipDayTransition) this.view.closeDayTransition?.();
     // Health zero represents critical rescue, not family death.
     if (this._checkCriticalRescueCondition(sceneId)) return;
+
+    const dayTransition = DAY_TRANSITIONS[sceneId];
+    const canShowDayTransition = Boolean(
+      this.view.dom?.gameView && typeof this.view.showDayTransition === 'function'
+    );
+    if (dayTransition && !skipDayTransition && canShowDayTransition) {
+      this.view.showDayTransition({
+        ...dayTransition,
+        onDark: () => sceneId === 'day2_start' ? this.audio.playEarthquake() : this.audio.playRumble(),
+        onContinue: () => this.renderScene(sceneId, { skipDayTransition: true }),
+      });
+      return;
+    }
 
     // Resolve logic-trigger pseudo-scenes before doing anything else.
     if (sceneId === 'ending_eval' || sceneId === 'trigger_ending_eval') {
@@ -256,7 +345,7 @@ export class StoryEngine {
       this.audio.stopRadioSound();
     }
 
-    if (scene.background === 'prolog4' || sceneId === 'day2_start') {
+    if (scene.background === 'prolog4') {
       this.audio.playEarthquake();
     }
 
@@ -295,7 +384,7 @@ export class StoryEngine {
 
     // Pass pre-computed boolean — View does not need the model reference.
     this.view.updateInventoryUI(isDisabledScene, this.model.inventory);
-    this.view.renderSceneArt(scene, this.model.flags, sceneId);
+    this.view.renderSceneArt(scene, this.model.flags, sceneId, this.model.storyRevision);
     this.view.renderSpeaker(scene);
     this.view.renderSystemAlert(alertTag);
 
@@ -330,11 +419,13 @@ export class StoryEngine {
     }
 
     if (sceneId === 'day1_inspection') {
+      const day1Hotspots = mergeHotspotGeometry('day1_inspection', DAY1_HOTSPOTS);
       const showInspection = () => this.view.renderDay1Hotspots(
-        DAY1_HOTSPOTS,
+        day1Hotspots,
         this.model.flags,
         (hotspotId) => this.handleDay1Inspection(hotspotId),
-        () => this.renderScene('day1_lockdoor')
+        () => this.renderScene('day1_lockdoor'),
+        DAY1_HOTSPOTS,
       );
       this.view.typeText(modifiedText, showInspection, { ...choicesPayload, choices: [], inspectionReady: showInspection });
       return;
@@ -394,7 +485,7 @@ export class StoryEngine {
 
       const delay = typeof scene.autoAdvanceDelay === 'number' ? scene.autoAdvanceDelay : 1100;
       const autoAdvance = () => {
-        window.setTimeout(() => this.renderScene(scene.autoNextSceneId), delay);
+        this._scheduleAutoAdvance(sceneId, scene.autoNextSceneId, delay);
       };
       this.view.typeText(modifiedText, autoAdvance, {
         ...choicesPayload,
@@ -515,6 +606,7 @@ export class StoryEngine {
   }
 
   handleDay1Inspection(hotspotId) {
+    if (isVisualEditorActive()) return;
     const hotspot = DAY1_HOTSPOTS.find((spot) => spot.id === hotspotId);
     if (!hotspot || this.model.flags[hotspot.flag]) return;
     const inspectionCount = DAY1_HOTSPOTS.filter((spot) => this.model.flags[spot.flag]).length;
@@ -540,9 +632,11 @@ export class StoryEngine {
     this.view.renderHud(this.getScene(this.model.currentSceneId), this.model.knowledge, this.model.currentSceneId, this.model.flags,
       this.model.hunger, this.model.thirst, this.model.health);
     this.view.updateInventoryUI(this.model.isInventoryDisabledScene(this.model.currentSceneId), this.model.inventory);
-    this.view.renderDay1Hotspots(DAY1_HOTSPOTS, this.model.flags,
+    const day1Hotspots = mergeHotspotGeometry('day1_inspection', DAY1_HOTSPOTS);
+    this.view.renderDay1Hotspots(day1Hotspots, this.model.flags,
       (id) => this.handleDay1Inspection(id),
-      () => this.renderScene('day1_lockdoor'));
+      () => this.renderScene('day1_lockdoor'),
+      DAY1_HOTSPOTS);
     this.onSave?.(this.model.toSaveData());
   }
 
@@ -571,8 +665,10 @@ export class StoryEngine {
   }
 
   renderSarahOfficeHotspots() {
+    const sarahHotspots = mergeHotspotGeometry('backstory_sarah_office', SARAH_OFFICE_HOTSPOTS);
     this.view.renderSceneHotspots({
-      hotspots: SARAH_OFFICE_HOTSPOTS,
+      hotspots: sarahHotspots,
+      baseHotspots: SARAH_OFFICE_HOTSPOTS,
       ariaLabel: 'Meja kerja interaktif Sarah',
       layerClass: 'sarah-office-hotspot-layer',
       hotspotClass: 'sarah-office-hotspot',
@@ -585,6 +681,7 @@ export class StoryEngine {
   }
 
   handleSarahOfficeHotspot(hotspotId, returnFocus) {
+    if (isVisualEditorActive()) return;
     const hotspot = getSarahOfficeHotspot(hotspotId);
     if (!hotspot) return;
     if (hotspot.type === 'progression') {
@@ -759,6 +856,7 @@ export class StoryEngine {
    * @param {object} choice - Choice object from story.json.
    */
   handleChoiceSelect(choice) {
+    if (isVisualEditorActive()) return;
     if (this._inventoryReactionTimeout) {
       clearTimeout(this._inventoryReactionTimeout);
       this._inventoryReactionTimeout = null;
@@ -1072,6 +1170,7 @@ export class StoryEngine {
    * @param {string} key - Inventory item key ('food', 'drink', 'kit', 'radio').
    */
   handleInventoryClick(key) {
+    if (isVisualEditorActive()) return;
     // Guard: inventory is disabled during ending/eval scenes.
     if (this.model.isInventoryDisabledScene(this.model.currentSceneId)) return;
 
@@ -1264,6 +1363,7 @@ export class StoryEngine {
   }
 
   handleDialogueClick() {
+    if (isVisualEditorActive()) return;
     if (this.pendingClickNextSceneId) {
       const nextSceneId = this.pendingClickNextSceneId;
       this.pendingClickNextSceneId = null;
@@ -1344,5 +1444,79 @@ export class StoryEngine {
     if (this.view?.scavengerGame) {
       this.view.scavengerGame.setTimeScale(scale);
     }
+  }
+
+  _cancelAutoAdvance() {
+    if (this._autoAdvanceTimer != null) {
+      clearAutoAdvanceTimer(this._autoAdvanceTimer);
+      this._autoAdvanceTimer = null;
+    }
+    this._autoAdvanceRequest = null;
+    this._blockedAutoAdvance = null;
+  }
+
+  _pauseAutoAdvanceForEditor() {
+    if (!this._autoAdvanceRequest) return;
+    if (this._autoAdvanceTimer != null) {
+      clearAutoAdvanceTimer(this._autoAdvanceTimer);
+      this._autoAdvanceTimer = null;
+      this._autoAdvanceRequest.remainingMs = Math.max(
+        0,
+        this._autoAdvanceRequest.dueAt - Date.now(),
+      );
+    }
+    this._blockedAutoAdvance = this._autoAdvanceRequest;
+  }
+
+  _resumeAutoAdvanceAfterEditor() {
+    const request = this._blockedAutoAdvance;
+    if (!request || this.model.currentSceneId !== request.sourceSceneId) return;
+    this._blockedAutoAdvance = null;
+    this._autoAdvanceRequest = request;
+    const delay = Math.max(0, Number(request.remainingMs ?? request.delayMs ?? 0));
+    request.dueAt = Date.now() + delay;
+    this._autoAdvanceTimer = scheduleAutoAdvanceTimer(() => {
+      this._autoAdvanceTimer = null;
+      if (this.model.currentSceneId !== request.sourceSceneId) {
+        this._autoAdvanceRequest = null;
+        return;
+      }
+      if (isVisualEditorActive()) {
+        this._blockedAutoAdvance = request;
+        return;
+      }
+      this._autoAdvanceRequest = null;
+      this.renderScene(request.nextSceneId);
+    }, delay);
+  }
+
+  _scheduleAutoAdvance(sourceSceneId, nextSceneId, delayMs) {
+    this._cancelAutoAdvance();
+    const request = {
+      sourceSceneId,
+      nextSceneId,
+      delayMs: Math.max(0, Number(delayMs) || 0),
+      remainingMs: Math.max(0, Number(delayMs) || 0),
+      dueAt: Date.now() + Math.max(0, Number(delayMs) || 0),
+    };
+    this._autoAdvanceRequest = request;
+    if (isVisualEditorActive()) {
+      this._blockedAutoAdvance = request;
+      return;
+    }
+    this._autoAdvanceTimer = scheduleAutoAdvanceTimer(() => {
+      this._autoAdvanceTimer = null;
+      if (this.model.currentSceneId !== sourceSceneId) {
+        this._autoAdvanceRequest = null;
+        return;
+      }
+      if (isVisualEditorActive()) {
+        request.remainingMs = 0;
+        this._blockedAutoAdvance = request;
+        return;
+      }
+      this._autoAdvanceRequest = null;
+      this.renderScene(nextSceneId);
+    }, request.delayMs);
   }
 }

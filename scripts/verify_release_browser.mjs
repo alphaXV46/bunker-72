@@ -27,7 +27,7 @@ try {
    await page.evaluate(()=>localStorage.removeItem('bunker72_crt_disabled'));await page.reload();await page.locator('#new-game-btn').waitFor({state:'visible'});await page.waitForFunction(()=>document.body.classList.contains('disable-crt'));
   async function resume(sceneId,extra={},health=100){
     await page.evaluate(({sceneId,extra,health})=>localStorage.setItem('bunker72_save_v1',JSON.stringify({
-      version:3,sceneId,knowledge:8,history:[],flags:extra,inventory:{food:3,drink:3,kit:2},health,hunger:90,thirst:90,
+      version:3,storyRevision:'sealed72',sceneId,knowledge:8,history:[],flags:extra,inventory:{food:3,drink:3,kit:2},health,hunger:90,thirst:90,
     })),{sceneId,extra,health});
     await page.reload();await page.locator('#continue-btn').click();
     await page.waitForFunction(()=>document.querySelector('#game-view.active, #ending-view.active'));
@@ -43,6 +43,16 @@ try {
   async function noHorizontalScroll(label){
     const metrics=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
     assert(metrics.scroll<=metrics.client+2,`${name}: horizontal scroll at ${label} ${JSON.stringify(metrics)}`);
+  }
+  async function assertChoiceVisibleAndMoves(sceneId,choiceName,nextSceneId){
+    await resume(sceneId);
+    await skip();
+    const choice=page.getByRole('button',{name:choiceName});
+    await choice.waitFor({state:'visible'});
+    const box=await choice.boundingBox();
+    assert(box&&box.width>0&&box.height>0,`${name}: ${sceneId} choice is not rendered with nonzero dimensions`);
+    await choice.click();
+    await page.locator(`#story-box.scene-id-${nextSceneId}`).waitFor({state:'attached'});
   }
   if(name==='desktop'){
     await page.evaluate(()=>localStorage.setItem('bunker72_save_v1',JSON.stringify({version:2,sceneId:'day2_start',knowledge:5,history:[],flags:{},inventory:{food:2,drink:2,kit:1},health:80,hunger:75,thirst:70})));
@@ -84,6 +94,8 @@ try {
   await resume('day2_expedition_map');await skip();await fit('.expedition-map-panel button');
   await noHorizontalScroll('expedition map');
   await page.screenshot({path:`scratch/release-qa/${name}-map.png`});
+  await assertChoiceVisibleAndMoves('prolog_expedition_call',/Buka peta lingkungan dan pantau titik perbekalan Aris\./,'prolog_expedition_map');
+  await assertChoiceVisibleAndMoves('prolog_expedition_map',/Tuju Minimarket warga/,'prolog_minimarket');
   await resume('prolog_packing');await page.locator('.scavenger-touch-controls').waitFor({state:'attached'});
   if(touch){await fit('.scavenger-touch-controls button');await page.locator('.touch-right').tap();await page.locator('#touch-interact-btn').tap();}
   await page.screenshot({path:`scratch/release-qa/${name}-scavenger.png`});

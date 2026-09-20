@@ -1,6 +1,7 @@
 import { CollisionEditor, normalizeCollisionLabel } from '../collisionEditor.js';
 import { editorDataStore } from '../editorDataStore.js';
 import { ScavengerItemEditor } from './scavengerItemEditor.js';
+import { setVisualEditorActive } from './editorInputGate.js';
 
 const SOLID_COLLIDER_TYPE = 'solid';
 const FREE_CAMERA_KEYS = ['w', 'a', 's', 'd'];
@@ -573,6 +574,8 @@ export class ScavengerDevTools {
   }
 
   destroy() {
+    setVisualEditorActive('scavenger', false);
+    this.host.canvas?.removeAttribute('data-bunker72-editor-surface');
     this.itemEditor?.destroy();
     this.collisionEditor?.destroy();
     this.fogEditor?.destroy();
@@ -602,6 +605,11 @@ export class ScavengerDevTools {
 
   _syncDeveloperModePause() {
     const active = this.isDeveloperModeActive();
+    setVisualEditorActive('scavenger', active);
+    if (this.host.canvas) {
+      if (active) this.host.canvas.dataset.bunker72EditorSurface = 'true';
+      else this.host.canvas.removeAttribute('data-bunker72-editor-surface');
+    }
     if (active) {
       if (!this.developerPauseSnapshot) {
         this.developerPauseSnapshot = {

@@ -14,6 +14,7 @@ const createEmptyDocument = () => ({
   collision: {},
   fog: {},
   items: {},
+  hotspots: {},
   ui: {},
 });
 
@@ -29,6 +30,9 @@ const normalizeDocument = (value) => {
       : {},
     items: source.items && typeof source.items === 'object' && !Array.isArray(source.items)
       ? source.items
+      : {},
+    hotspots: source.hotspots && typeof source.hotspots === 'object' && !Array.isArray(source.hotspots)
+      ? source.hotspots
       : {},
     ui: source.ui && typeof source.ui === 'object' && !Array.isArray(source.ui)
       ? source.ui

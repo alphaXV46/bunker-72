@@ -7,6 +7,8 @@ import {
   normalizeLayout,
 } from './runtime/layoutSchema.js';
 
+import { cinematicValue, withCanonicalPresentation } from './runtime/prologuePresentation.js';
+
 const MIN_SIZE = 32;
 const HANDLE_SIZE = 10;
 
@@ -16,7 +18,7 @@ const clone = (value) => {
 };
 
 const setImportant = (element, property, value) => {
-  element.style.setProperty(property, value, 'important');
+  element.style.setProperty(property, cinematicValue(property, value), 'important');
 };
 
 /**
@@ -26,11 +28,22 @@ const setImportant = (element, property, value) => {
  * responsive game shell.
  */
 export class ScreenLayoutEditor {
-  constructor({ root = null, persistence = null, onStatus = () => {}, onSave = () => {} } = {}) {
+  constructor({
+    root = null,
+    persistence = null,
+    onStatus = () => {},
+    onSave = () => {},
+    editorId = 'ui-layout',
+    onBeforeEnable = () => {},
+    onEnabledChange = () => {},
+  } = {}) {
     this.root = null;
     this.persistence = persistence;
     this.onStatus = onStatus;
     this.onSave = onSave;
+    this.editorId = String(editorId || 'ui-layout');
+    this.onBeforeEnable = onBeforeEnable;
+    this.onEnabledChange = onEnabledChange;
     this.enabled = false;
     this.sceneKey = 'global';
     this.profile = 'desktop';
@@ -49,6 +62,8 @@ export class ScreenLayoutEditor {
     this._managedElements = new Set();
     this._visibilityOverrides = new Set();
     this._visualRefreshFrameId = null;
+    this._dragVisualFrameId = null;
+    this._layoutReady = false;
 
     this._handlePointerDown = (event) => this._onPointerDown(event);
     this._handlePointerMove = (event) => this._onPointerMove(event);
@@ -85,6 +100,7 @@ export class ScreenLayoutEditor {
   }
 
   detach() {
+    this._cancelDrag(true);
     if (this.root) {
       this.root.removeEventListener('pointerdown', this._handlePointerDown);
       this.root.removeEventListener('pointermove', this._handlePointerMove);
@@ -97,8 +113,11 @@ export class ScreenLayoutEditor {
       window.cancelAnimationFrame(this._visualRefreshFrameId);
       this._visualRefreshFrameId = null;
     }
+    if (this._dragVisualFrameId !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this._dragVisualFrameId);
+      this._dragVisualFrameId = null;
+    }
     this.root = null;
-    this.drag = null;
   }
 
   destroy() {
@@ -117,31 +136,41 @@ export class ScreenLayoutEditor {
   async setScene(sceneKey) {
     const nextKey = String(sceneKey || 'global');
     if (nextKey === this.sceneKey) {
+      if (this.enabled && this._layoutReady) this._ensureProfileDefaults();
       this.refresh();
       return;
     }
 
+    this._cancelDrag(true);
     this._clearManagedStyles();
     this.sceneKey = nextKey;
     this.selectedId = null;
     this.layout = normalizeLayout(null);
+    this._layoutReady = false;
     this.history = [];
     this.future = [];
     const token = ++this._sceneToken;
 
-    this._applyCurrentProfile();
+    this._clearOverlayBoxes();
+    this._applyCurrentProfile(false);
     this.refresh();
 
     try {
       const loaded = await this.persistence?.load?.(nextKey);
       if (token !== this._sceneToken) return;
       this.layout = normalizeLayout(loaded);
-      this._applyCurrentProfile();
+      this._layoutReady = true;
+      if (this.enabled) this._ensureProfileDefaults();
+      this._applyCurrentProfile(this.enabled);
       this.statusMessage = loaded ? `LAYOUT ${nextKey.toUpperCase()} DIMUAT` : 'LAYOUT DEFAULT';
       this.refresh();
     } catch (error) {
+      if (token !== this._sceneToken) return;
+      this._layoutReady = true;
+      if (this.enabled) this._ensureProfileDefaults();
       this.statusMessage = 'LAYOUT FILE DIABAIKAN';
       console.warn('[ScreenLayoutEditor] Tidak dapat memuat layout scene.', error);
+      this._applyCurrentProfile(this.enabled);
       this.refresh();
     }
   }
@@ -149,15 +178,20 @@ export class ScreenLayoutEditor {
   setEnabled(enabled) {
     const next = Boolean(enabled);
     if (next === this.enabled) {
-      if (next) this.refresh();
+      if (next) {
+        this._ensureProfileDefaults();
+        this.refresh();
+      }
       return this.enabled;
     }
 
+    if (next) this.onBeforeEnable?.();
     this.enabled = next;
-    this.drag = null;
+    if (!next) this._cancelDrag(true);
     this.history = [];
     this.future = [];
     if (this.enabled) {
+      this._ensureProfileDefaults();
       this._setEditorVisibility(true);
       this._applyCurrentProfile(true);
       this._createOverlay();
@@ -176,6 +210,7 @@ export class ScreenLayoutEditor {
       this._boxes.clear();
       this.statusMessage = 'EDITOR UI OFF';
     }
+    this.onEnabledChange?.(this.enabled, this.editorId);
     this._notifyStatus();
     return this.enabled;
   }
@@ -197,7 +232,7 @@ export class ScreenLayoutEditor {
 
   getStatus() {
     const selected = this._getTarget(this.selectedId);
-    const box = selected ? this._getBox(selected) : null;
+    const box = selected ? this._getDisplayBox(selected) : null;
     return {
       enabled: this.enabled,
       sceneKey: this.sceneKey,
@@ -265,6 +300,12 @@ export class ScreenLayoutEditor {
     if (!this.root) return;
     this.profile = profileForWidth(this.root.clientWidth || window.innerWidth);
     if (this.enabled) {
+      if (!this._layoutReady) {
+        this._clearOverlayBoxes();
+        this._renderToolbar();
+        return;
+      }
+      this._ensureProfileDefaults();
       this._setEditorVisibility(true);
       this._applyCurrentProfile(true);
       this._renderOverlay();
@@ -402,6 +443,10 @@ export class ScreenLayoutEditor {
   }
 
   _readBox(target) {
+    return withCanonicalPresentation(this.root, () => this._readCanonicalBox(target));
+  }
+
+  _readCanonicalBox(target) {
     const frame = this._getFrame(target);
     const frameRect = frame.element.getBoundingClientRect();
     const elementRect = target.element.getBoundingClientRect();
@@ -418,31 +463,47 @@ export class ScreenLayoutEditor {
   }
 
   _getBox(target) {
-    if (!target) return null;
+    if (!target || !this._layoutReady) return null;
     const profile = this._getProfileData();
     if (!profile[target.id]) profile[target.id] = this._readBox(target);
     profile[target.id] = normalizeBox(profile[target.id]);
     return profile[target.id];
   }
 
+  _ensureProfileDefaults() {
+    if (!this._layoutReady || !this.enabled) return;
+    const profile = this._getProfileData();
+    this._getTargets().forEach((target) => {
+      if (!profile[target.id]) profile[target.id] = this._readBox(target);
+    });
+  }
+
   _applyBox(target, box) {
     if (!target?.element || !box) return;
     const element = target.element;
     this._managedElements.add(element);
+    const isMovePreview = this.drag?.id === target.id
+      && !this.drag.handle
+      && this.drag.previewOffset;
+    const appliedBox = isMovePreview ? this.drag.startBox : box;
     setImportant(element, 'position', 'absolute');
-    setImportant(element, 'left', `${box.x * 100}%`);
-    setImportant(element, 'top', `${box.y * 100}%`);
+    setImportant(element, 'left', `${appliedBox.x * 100}%`);
+    setImportant(element, 'top', `${appliedBox.y * 100}%`);
     setImportant(element, 'right', 'auto');
     setImportant(element, 'bottom', 'auto');
-    setImportant(element, 'width', `${box.w * 100}%`);
-    setImportant(element, 'height', `${box.h * 100}%`);
+    setImportant(element, 'width', `${appliedBox.w * 100}%`);
+    setImportant(element, 'height', `${appliedBox.h * 100}%`);
     setImportant(element, 'min-width', '0');
     setImportant(element, 'min-height', '0');
     setImportant(element, 'max-width', 'none');
     setImportant(element, 'max-height', 'none');
     setImportant(element, 'margin', '0');
     setImportant(element, 'box-sizing', 'border-box');
-    setImportant(element, 'transform', `rotate(${box.angle}deg)`);
+    const previewOffset = this.drag?.id === target.id && this.drag?.previewOffset;
+    const transform = previewOffset
+      ? `translate3d(${previewOffset.x}px, ${previewOffset.y}px, 0) rotate(${box.angle}deg)`
+      : `rotate(${box.angle}deg)`;
+    setImportant(element, 'transform', transform);
     setImportant(element, 'transform-origin', 'center center');
   }
 
@@ -498,7 +559,12 @@ export class ScreenLayoutEditor {
     if (!this.root || this._overlay) return;
     this._overlay = document.createElement('div');
     this._overlay.className = 'screen-layout-editor-overlay';
+    this._overlay.dataset.bunker72EditorSurface = 'true';
     this._overlay.setAttribute('aria-hidden', 'true');
+    this._overlay.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
     this.root.appendChild(this._overlay);
   }
 
@@ -506,6 +572,7 @@ export class ScreenLayoutEditor {
     if (!this.root || this._toolbar) return;
     this._toolbar = document.createElement('div');
     this._toolbar.className = 'screen-layout-editor-toolbar';
+    this._toolbar.dataset.bunker72EditorSurface = 'true';
     this._toolbar.setAttribute('aria-hidden', 'true');
     this.root.appendChild(this._toolbar);
   }
@@ -514,6 +581,7 @@ export class ScreenLayoutEditor {
     if (!this.root || this._info) return;
     this._info = document.createElement('div');
     this._info.className = 'screen-layout-editor-info';
+    this._info.dataset.bunker72EditorSurface = 'true';
     this._info.setAttribute('role', 'note');
     this._info.innerHTML = `
       <strong>EDITOR UI AKTIF</strong>
@@ -529,11 +597,11 @@ export class ScreenLayoutEditor {
     this._info.hidden = !this.helpVisible;
   }
 
-  _getOverlayRect(target) {
+  _getOverlayRect(target, box = this._getDisplayBox(target)) {
+    if (!box) return null;
     const rootRect = this.root.getBoundingClientRect();
     const frame = this._getFrame(target);
     const frameRect = frame.element.getBoundingClientRect();
-    const box = this._getBox(target);
     return {
       x: frameRect.left - rootRect.left + box.x * frameRect.width,
       y: frameRect.top - rootRect.top + box.y * frameRect.height,
@@ -549,7 +617,7 @@ export class ScreenLayoutEditor {
 
     targets.forEach((target) => {
       const rect = this._getOverlayRect(target);
-      if (rect.w < 1 || rect.h < 1) return;
+      if (!rect || rect.w < 1 || rect.h < 1) return;
       activeIds.add(target.id);
       let boxElement = this._boxes.get(target.id);
       if (!boxElement) {
@@ -571,7 +639,8 @@ export class ScreenLayoutEditor {
         this._boxes.set(target.id, boxElement);
       }
 
-      const box = this._getBox(target);
+      const box = this._getDisplayBox(target);
+      if (!box) return;
       boxElement.classList.toggle('is-selected', this.selectedId === target.id);
       boxElement.style.left = `${rect.x}px`;
       boxElement.style.top = `${rect.y}px`;
@@ -659,6 +728,47 @@ export class ScreenLayoutEditor {
     };
   }
 
+  _getDisplayBox(target) {
+    if (!target) return null;
+    if (this.drag?.id === target.id && this.drag.previewBox) return this.drag.previewBox;
+    return this._getBox(target);
+  }
+
+  _clearOverlayBoxes() {
+    this._boxes.forEach((boxElement) => boxElement.remove());
+    this._boxes.clear();
+  }
+
+  _scheduleDragVisualRefresh() {
+    if (this._dragVisualFrameId !== null || typeof window === 'undefined') return;
+    this._dragVisualFrameId = window.requestAnimationFrame(() => {
+      this._dragVisualFrameId = null;
+      this._flushDragVisualRefresh();
+    });
+  }
+
+  _flushDragVisualRefresh() {
+    if (!this.enabled || !this.drag) return;
+    const target = this._getTarget(this.drag.id);
+    if (!target || !this.drag.previewBox) return;
+    this._applyBox(target, this.drag.previewBox);
+    this._renderOverlay();
+    this._renderToolbar();
+  }
+
+  _cancelDrag(removeHistory = false) {
+    if (this._dragVisualFrameId !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this._dragVisualFrameId);
+      this._dragVisualFrameId = null;
+    }
+    if (!this.drag) return;
+    const target = this._getTarget(this.drag.id);
+    this.drag.previewOffset = null;
+    if (target) this._applyBox(target, this._getBox(target));
+    if (removeHistory && this.drag._historyRecorded) this.history.pop();
+    this.drag = null;
+  }
+
   _onPointerDown(event) {
     if (!this.enabled) return;
     const boxElement = event.target.closest?.('.screen-layout-editor-box');
@@ -671,14 +781,17 @@ export class ScreenLayoutEditor {
     if (!target) return;
     const handle = event.target.closest?.('.screen-layout-editor-handle')?.dataset.handle || null;
     this.selectedId = id;
-    this._beginMutation();
     this.drag = {
       pointerId: event.pointerId,
       id,
       handle,
-      startPoint: this._getFramePoint(event, target),
+      frameRect: this._getFrame(target).element.getBoundingClientRect(),
+      startPoint: { x: event.clientX, y: event.clientY },
       startBox: { ...this._getBox(target) },
+      previewBox: { ...this._getBox(target) },
+      previewOffset: null,
     };
+    this._beginMutation();
     boxElement.setPointerCapture?.(event.pointerId);
     this.statusMessage = `${target.label} DIPILIH`;
     this._renderOverlay();
@@ -690,10 +803,12 @@ export class ScreenLayoutEditor {
     event.preventDefault();
     const target = this._getTarget(this.drag.id);
     if (!target) return;
-    const point = this._getFramePoint(event, target);
+    const frameRect = this.drag.frameRect;
+    const frameWidth = Math.max(1, frameRect.width);
+    const frameHeight = Math.max(1, frameRect.height);
     const start = this.drag.startBox;
-    const dx = point.x - this.drag.startPoint.x;
-    const dy = point.y - this.drag.startPoint.y;
+    const dx = (event.clientX - this.drag.startPoint.x) / frameWidth;
+    const dy = (event.clientY - this.drag.startPoint.y) / frameHeight;
     let x = start.x;
     let y = start.y;
     let w = start.w;
@@ -704,38 +819,54 @@ export class ScreenLayoutEditor {
       y = clamp(start.y + dy, 0, 1 - start.h);
     } else {
       if (this.drag.handle.includes('w')) {
-        x = clamp(start.x + dx, 0, start.x + start.w - MIN_SIZE / Math.max(1, target.element.parentElement?.clientWidth || 1));
+        x = clamp(start.x + dx, 0, start.x + start.w - MIN_SIZE / frameWidth);
         w = start.w - (x - start.x);
       }
       if (this.drag.handle.includes('e')) {
-        w = clamp(start.w + dx, MIN_SIZE / Math.max(1, target.element.parentElement?.clientWidth || 1), 1 - start.x);
+        w = clamp(start.w + dx, MIN_SIZE / frameWidth, 1 - start.x);
       }
       if (this.drag.handle.includes('n')) {
-        y = clamp(start.y + dy, 0, start.y + start.h - MIN_SIZE / Math.max(1, target.element.parentElement?.clientHeight || 1));
+        y = clamp(start.y + dy, 0, start.y + start.h - MIN_SIZE / frameHeight);
         h = start.h - (y - start.y);
       }
       if (this.drag.handle.includes('s')) {
-        h = clamp(start.h + dy, MIN_SIZE / Math.max(1, target.element.parentElement?.clientHeight || 1), 1 - start.y);
+        h = clamp(start.h + dy, MIN_SIZE / frameHeight, 1 - start.y);
       }
     }
 
-    const box = this._getBox(target);
-    Object.assign(box, normalizeBox({ ...box, x, y, w, h, angle: start.angle }));
-    this._changed(`${target.label} ${Math.round(w * 100)}%x${Math.round(h * 100)}%`);
+    this.drag.previewBox = normalizeBox({ ...start, x, y, w, h, angle: start.angle });
+    this.drag.previewOffset = this.drag.handle
+      ? null
+      : {
+          x: (this.drag.previewBox.x - start.x) * frameWidth,
+          y: (this.drag.previewBox.y - start.y) * frameHeight,
+        };
+    this.statusMessage = `${target.label} ${Math.round(w * 100)}%x${Math.round(h * 100)}%`;
+    this._scheduleDragVisualRefresh();
   }
 
   _onPointerUp(event) {
     if (!this.drag || this.drag.pointerId !== event.pointerId) return;
     event.preventDefault();
+    this._flushDragVisualRefresh();
+    const target = this._getTarget(this.drag.id);
+    const current = target ? this._getBox(target) : null;
+    const preview = this.drag.previewBox;
+    const changed = current && preview && ['x', 'y', 'w', 'h', 'angle'].some((key) => current[key] !== preview[key]);
+    if (current && preview) Object.assign(current, normalizeBox(preview));
+    if (!changed && this.drag._historyRecorded) this.history.pop();
+    this.drag.previewOffset = null;
     this.drag = null;
-    this._renderToolbar();
+    if (target && current && changed) this._changed(`${target.label} DIPERBARUI`);
+    else this.refresh();
   }
 
   _onPointerCancel(event) {
     if (!this.drag || this.drag.pointerId !== event.pointerId) return;
+    this._cancelDrag(true);
     this.drag = null;
     this.statusMessage = 'EDIT UI DIBATALKAN';
-    this._renderToolbar();
+    this.refresh();
   }
 
   _onWheel(event) {

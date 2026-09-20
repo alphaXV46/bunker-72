@@ -98,7 +98,7 @@
       "speaker": "Sarah",
       "avatar": "ibu",
       "text": "Malam itu Sarah membagikan catatannya kepada Aris. \"Aku tidak ingin kita hidup dalam rasa takut. Aku hanya ingin rumah ini punya pilihan saat keadaan berubah.\" Aris mengangguk, lalu bertanya berapa besar perlindungan yang benar-benar mereka perlukan.",
-      "background": "backstory_house",
+      "background": "backstory_family_preparedness",
       "phase": "backstory",
       "narrativeTime": "Beberapa minggu kemudian",
       "hour": "0 Jam",
@@ -507,10 +507,10 @@
     "day1_inspection": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Bus daya sudah menyala. Sebelum kita menyalakan blower, luangkan beberapa menit untuk memeriksa titik-titik penting bunker. Kamu bisa memeriksa paling banyak tiga titik; pilih yang paling membantu keluarga malam ini.",
+      "text": "Bus daya sudah menyala, tetapi bunker masih bergantung pada baterai cadangan. Blower harus segera menstabilkan tekanan dan memaksa udara melewati filter karbon. Membuka terlalu banyak panel akan membuang waktu, menguras cadangan, dan membuat isolasi udara tidak aman. Karena itu Ayah menetapkan triase: pilih maksimal tiga titik yang paling membantu keluarga, lalu kembali ke sistem udara.",
       "background": "normal",
       "hour": "6 Jam",
-      "objective": "Periksa maksimal tiga titik penting di dalam bunker.",
+      "objective": "Pilih maksimal tiga titik prioritas, lalu stabilkan sistem udara.",
       "choices": []
     },
     "day1_lockdoor": {
@@ -819,7 +819,7 @@
     "day2_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BPBD] ...jalur penghubung timur masih ditutup dan dalam asesmen petugas pascagempa susulan; warga diimbau tidak memaksakan melintas di akses yang rusak... hujan abu masih pekat di lereng barat... [STATIK]\n\nJam ke-30. Gempa susulan berkekuatan sedang kembali menghentak lereng di atas Bunker 72. Di dalam shelter, getaran terasa cukup keras; suara derit terdengar dari palka atas dan dengung kipas ventilasi mendadak tersendat. Beban listrik berkedip tidak stabil di panel meteran. Sarah segera mendekap Maya di dipan lipat, sementara Aris berdiri memeriksa indikator shelter. Selagi jalur evakuasi belum dibuka kembali oleh petugas, keluarga memutuskan tetap bertahan di shelter sambil terus memantau arahan resmi.",
+      "text": "[RADIO BPBD] ...jalur penghubung timur masih ditutup dan dalam asesmen petugas pascagempa susulan; warga diimbau tidak memaksakan melintas di akses yang rusak... hujan abu masih pekat di lereng barat... [STATIK]\n\nJam ke-30. Setelah guncangan 5,6 Mw tadi, suara derit masih terdengar dari palka atas dan dengung kipas ventilasi tersendat. Beban listrik berkedip tidak stabil di panel meteran. Sarah segera mendekap Maya di dipan lipat, sementara Aris berdiri memeriksa indikator shelter. Selagi jalur evakuasi belum dibuka kembali oleh petugas, keluarga memutuskan tetap bertahan di shelter sambil terus memantau arahan resmi.",
       "conditionalText": [
         {
           "requiredFlag": "air_uninspected",

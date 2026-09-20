@@ -252,7 +252,13 @@ class DeveloperConsole {
     this.container.className = 'hidden';
 
     // Prevent typing inside dev console from triggering game hotkeys (e.g. Space, F)
-    this.container.addEventListener('keydown', (e) => e.stopPropagation());
+    this.container.addEventListener('keydown', (e) => {
+      // Let the shared visual-editor switch reach GameView even when the
+      // console has focus; all other console typing remains local to it.
+      const key = String(e.key || '').toLowerCase();
+      if (key === 'f6' || key === 'f10') return;
+      e.stopPropagation();
+    });
 
     this.container.innerHTML = `
       <div class="bdc-header">

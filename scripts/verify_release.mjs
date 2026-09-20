@@ -12,8 +12,28 @@ try {
   const { StoryEngine } = await vite.ssrLoadModule('/src/js/storyEngine.js');
   const { ENDING_IDS, parseHour, NEW_GAME_START_SCENE_ID } = await vite.ssrLoadModule('/src/js/constants.js');
   const { SARAH_ANALYSIS_SECTION_IDS } = await vite.ssrLoadModule('/src/js/sarahAnalysisConfig.js');
+  const { isSealed72NarrativeScene, isSpecialPrologueScene } = await vite.ssrLoadModule('/src/js/runtime/prologuePresentation.js');
   const storyData = JSON.parse(fs.readFileSync('src/data/story.json', 'utf8'));
   const scenes = storyData.scenes;
+  const narrativeSceneIds = Object.keys(scenes).filter((id) => id.startsWith('prolog_') || scenes[id].phase === 'backstory');
+  for (const [id, scene] of Object.entries(scenes)) {
+    const expected = id.startsWith('prolog_') || scene.phase === 'backstory';
+    assert.equal(
+      isSealed72NarrativeScene(id, scene, 'sealed72'),
+      expected,
+      `${id}: sealed72 narrative detection must use scene ID/phase semantics`
+    );
+  }
+  assert(narrativeSceneIds.includes('prolog_expedition_call'), 'Prologue expedition call must be a narrative scene');
+  assert(narrativeSceneIds.includes('prolog_expedition_map'), 'Prologue expedition map must be a narrative scene');
+  for (const [id, scene] of Object.entries(scenes)) {
+    if (scene.background === 'packing' && id.startsWith('prolog_')) {
+      assert(isSealed72NarrativeScene(id, scene, 'sealed72'), `${id}: packing-background prolog must stay in narrative detection`);
+    }
+  }
+  assert(isSpecialPrologueScene('prolog_packing'), 'Scavenger scene must remain presentation-isolated');
+  assert(isSpecialPrologueScene('prolog_title'), 'Title card must remain presentation-isolated');
+  assert(!isSealed72NarrativeScene('prolog_expedition_call', scenes.prolog_expedition_call, 'legacy_phase7'), 'Legacy prolog must not activate sealed72 presentation');
   const previousStory = JSON.parse(execFileSync('git', ['show', 'HEAD:src/data/story.json'], { encoding: 'utf8' })).scenes;
   const intentionalNewScenes = new Set([
     'prolog_expedition_call',

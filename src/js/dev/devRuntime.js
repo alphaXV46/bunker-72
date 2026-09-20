@@ -122,20 +122,65 @@ class NoopLayoutDevTools {
   destroy() {}
 }
 
+class NoopHotspotDevTools {
+  enabled = false;
+  helpVisible = false;
+
+  setContext() {
+    return Promise.resolve(null);
+  }
+
+  setEnabled() {
+    return false;
+  }
+
+  toggle() {
+    return false;
+  }
+
+  toggleHelp() {
+    return false;
+  }
+
+  getStatus() {
+    return {
+      enabled: false,
+      helpVisible: false,
+      sceneKey: 'global',
+      selectedId: null,
+      selectedBox: null,
+      hotspotCount: 0,
+      statusMessage: 'HOTSPOT EDITOR OFF',
+    };
+  }
+
+  handleKeyDown() {
+    return false;
+  }
+
+  refresh() {}
+
+  destroy() {}
+}
+
 const noopScavengerFactory = () => new NoopScavengerDevTools();
 const noopLayoutFactory = () => new NoopLayoutDevTools();
+const noopHotspotFactory = () => new NoopHotspotDevTools();
 
 let scavengerFactory = noopScavengerFactory;
 let layoutFactory = noopLayoutFactory;
+let hotspotFactory = noopHotspotFactory;
 let developerConsoleInitializer = null;
 
 export const registerDevTools = ({
   createScavengerDevTools = noopScavengerFactory,
   createLayoutDevTools = noopLayoutFactory,
+  createHotspotDevTools = noopHotspotFactory,
   initDeveloperConsole = null,
 } = {}) => {
   scavengerFactory = createScavengerDevTools;
   layoutFactory = createLayoutDevTools;
+  hotspotFactory = createHotspotDevTools;
   developerConsoleInitializer = initDeveloperConsole;
 };
 
@@ -154,6 +199,15 @@ export const createLayoutDevTools = (options) => {
   } catch (error) {
     console.warn('[devRuntime] Layout tools failed; using the no-op adapter.', error);
     return noopLayoutFactory(options);
+  }
+};
+
+export const createHotspotDevTools = (options) => {
+  try {
+    return hotspotFactory(options);
+  } catch (error) {
+    console.warn('[devRuntime] Hotspot tools failed; using the no-op adapter.', error);
+    return noopHotspotFactory(options);
   }
 };
 

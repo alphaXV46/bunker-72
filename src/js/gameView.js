@@ -10,11 +10,13 @@
  * small developer-tools gateway. The gateway stays a no-op in release builds.
  */
 
-import { clamp, parseHour, POWER_THRESHOLDS, getTimePhase, getKnowledgeLabel, PREPAREDNESS_EVALUATION } from './constants.js';
+import { clamp, parseHour, POWER_THRESHOLDS, getTimePhase, getKnowledgeLabel, PREPAREDNESS_EVALUATION, STORY_REVISIONS } from './constants.js';
 import { ScavengerMinigame } from './scavengerMinigame.js';
-import { createLayoutDevTools, DEV_TOOLS_ENABLED } from './dev/devRuntime.js';
-import { getRuntimeUILayout } from './runtime/editorLayoutRuntime.js';
+import { createHotspotDevTools, createLayoutDevTools, DEV_TOOLS_ENABLED } from './dev/devRuntime.js';
+import { installVisualEditorInputGuard, isVisualEditorActive } from './dev/editorInputGate.js';
+import { getRuntimeUILayout, setRuntimeHotspotOverride } from './runtime/editorLayoutRuntime.js';
 import { applyRuntimeUILayout } from './runtime/uiLayoutRuntime.js';
+import { isSealed72NarrativeScene, isSpecialPrologueScene, ProloguePresentation } from './runtime/prologuePresentation.js';
 
 const GOOD_ENDING_BACKGROUNDS = {
   opening: new URL('../assets/backgrounds/bg_good_end.webp', import.meta.url).href,
@@ -54,6 +56,7 @@ export class GameView {
    */
   constructor(dom) {
     this.dom            = dom;
+    this.prologuePresentation = new ProloguePresentation(dom.storyBox);
     this.controller     = null;
     this.isTyping       = false;
     this.typingTimeoutId = null;
@@ -70,14 +73,23 @@ export class GameView {
     this.goodEndingCutsceneStep = 0;
     this.badEndingCutsceneStep = 0;
     this.sceneHotspotResizeObserver = null;
+    this._activeHotspotContext = null;
     this.informationPanelEscapeHandler = null;
     this.informationPanelReturnFocus = null;
+    this.dayTransitionKeyHandler = null;
 
     // The real editor is registered only by the development bootstrap. The
     // release build receives a no-op adapter with the same small contract.
     this.layoutEditor = createLayoutDevTools({
       root: this.dom.storyBox,
       canToggle: () => !this.scavengerGame,
+      onBeforeEnable: () => this.hotspotEditor?.setEnabled(false),
+    });
+    this.hotspotEditor = createHotspotDevTools({
+      root: this.dom.storyBox,
+      canToggle: () => Boolean(this._activeHotspotContext) && !this.scavengerGame,
+      onBeforeEnable: () => this.layoutEditor?.setEnabled(false),
+      onChange: ({ sceneKey, hotspots }) => this._applyHotspotGeometry(sceneKey, hotspots),
     });
     this.layoutEditorRequested = DEV_TOOLS_ENABLED
       && typeof window !== 'undefined'
@@ -90,6 +102,7 @@ export class GameView {
    */
   init(controller) {
     this.controller = controller;
+    if (DEV_TOOLS_ENABLED) installVisualEditorInputGuard();
     this._setupDialogueClickListener();
     this._setupKeyboardShortcuts();
     this._setupInventoryListeners();
@@ -309,6 +322,7 @@ export class GameView {
 
     // Shortcut 'F' key to toggle fullscreen
     window.addEventListener('keydown', (e) => {
+      if (isVisualEditorActive()) return;
       if (e.key === 'f' || e.key === 'F') {
         const target = e.target;
         if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
@@ -347,7 +361,40 @@ export class GameView {
 
   _setupKeyboardShortcuts() {
     window.addEventListener('keydown', (event) => {
+      if (this.dom.gameView?.querySelector('.day-transition-overlay')) return;
+      const key = String(event.key || '').toLowerCase();
+      if (DEV_TOOLS_ENABLED && key === 'f6' && !event.repeat) {
+        event.preventDefault();
+        if (!this.scavengerGame) {
+          this.hotspotEditor?.setEnabled(false);
+          this.layoutEditor?.setEnabled(!this.layoutEditor?.enabled);
+        }
+        return;
+      }
+      if (DEV_TOOLS_ENABLED && key === 'f10' && !event.repeat) {
+        event.preventDefault();
+        if (!this.scavengerGame) {
+          const nextHotspotEnabled = !this.hotspotEditor?.enabled;
+          this.layoutEditor?.setEnabled(false);
+          this.hotspotEditor?.setEnabled(nextHotspotEnabled);
+        }
+        return;
+      }
+
+      if (this.hotspotEditor?.handleKeyDown(event)) {
+        event.preventDefault();
+        return;
+      }
       if (this.layoutEditor?.handleKeyDown(event)) {
+        event.preventDefault();
+        return;
+      }
+
+      if (isVisualEditorActive() && (event.code === 'Space' || event.code === 'Enter')) {
+        event.preventDefault();
+        return;
+      }
+      if (isVisualEditorActive() && !this.scavengerGame) {
         event.preventDefault();
         return;
       }
@@ -745,7 +792,7 @@ export class GameView {
    * Applies background and alert CSS classes to the story box.
    * @param {object} scene
    */
-  renderSceneArt(scene, flags = {}, sceneId = '') {
+  renderSceneArt(scene, flags = {}, sceneId = '', storyRevision = 'sealed72') {
     if (!['day1_inspection', 'backstory_sarah_office'].includes(sceneId)) this.clearSceneHotspots();
     const hour = parseHour(scene.hour);
     const gameplayDayBg = hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
@@ -763,6 +810,7 @@ export class GameView {
       prolog4: 'bg-prolog-4',
       backstory_airport: 'bg-backstory-airport',
       backstory_house: 'bg-backstory-house',
+      backstory_family_preparedness: 'bg-backstory-family-preparedness',
       backstory_aris_company: 'bg-backstory-aris-company',
       backstory_sarah_office: 'bg-backstory-sarah-office',
       backstory_sarah_office_interactive: 'bg-backstory-sarah-office-interactive',
@@ -784,7 +832,7 @@ export class GameView {
     this.dom.storyBox.classList.remove(
       'bg-prolog-peaceful', 'bg-prolog-window',
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
-      'bg-backstory-airport', 'bg-backstory-house', 'bg-backstory-aris-company',
+      'bg-backstory-airport', 'bg-backstory-house', 'bg-backstory-family-preparedness', 'bg-backstory-aris-company',
       'bg-backstory-sarah-office', 'bg-backstory-sarah-office-interactive', 'bg-backstory-sarah-office-alert',
       'bg-backstory-bunker-plan', 'bg-backstory-bunker-build', 'bg-backstory-bunker-complete',
       'bg-titlecard', 'bg-hari1', 'bg-day1', 'bg-day2', 'bg-day3', 'bg-normal', 'bg-rusak', 'scene-alert',
@@ -794,13 +842,17 @@ export class GameView {
       ...ENV_CLASSES
     );
 
-    const isProlog = String(scene.background || '').startsWith('prolog');
+    const isPacking = sceneId === 'prolog_packing';
+    const isTitleCard = sceneId === 'prolog_title';
     const isBackstory = scene.phase === 'backstory';
-    const isOutsideBunker = isBackstory && !String(scene.background || '').startsWith('backstory_bunker');
+    const isBunkerBackstory = sceneId.startsWith('backstory_bunker') || sceneId === 'backstory_time_passes';
+    const isOutsideBunker = isBackstory && !isBunkerBackstory;
+    const isSealed72Narrative = isSealed72NarrativeScene(sceneId, scene, storyRevision);
+    const isLegacyProlog = storyRevision === STORY_REVISIONS.LEGACY_PHASE7
+      && sceneId.startsWith('prolog_');
+    const isProlog = (isSealed72Narrative || isLegacyProlog) && !isSpecialPrologueScene(sceneId);
     const isCinematic = isProlog || isBackstory;
     const showNarrationSpeaker = isProlog || isOutsideBunker;
-    const isPacking = sceneId === 'prolog_packing';
-    const isTitleCard = scene.background === 'titlecard';
     const gameView = this.dom.storyBox.closest('#game-view');
     gameView?.classList.toggle('prolog-mode', isCinematic);
     gameView?.classList.toggle('backstory-mode', isBackstory);
@@ -828,6 +880,7 @@ export class GameView {
     const activeSceneKey = sceneId || 'global';
     void this.layoutEditor.setScene(activeSceneKey);
     applyRuntimeUILayout(this.dom.storyBox, getRuntimeUILayout(activeSceneKey));
+    this.prologuePresentation.setActive(isSealed72Narrative && !isSpecialPrologueScene(sceneId));
 
     this.dom.storyBox.classList.add(bgClassMap[scene.background] || 'bg-day1');
     this.dom.storyBox.classList.add(`scene-id-${sceneId}`);
@@ -1004,6 +1057,9 @@ export class GameView {
   clearSceneHotspots() {
     this.closeInformationPanel();
     this.clearSarahAnalysis();
+    this.hotspotEditor?.setEnabled(false);
+    this.hotspotEditor?.setContext(null);
+    this._activeHotspotContext = null;
     this.sceneHotspotResizeObserver?.disconnect();
     this.sceneHotspotResizeObserver = null;
     this.dom.storyBox?.querySelector('.scene-hotspot-layer')?.remove();
@@ -1150,7 +1206,7 @@ export class GameView {
   renderSceneHotspots({
     hotspots = [], ariaLabel = 'Titik interaksi', layerClass = '', hotspotClass = '',
     statusTitle = '', statusText = '', image = null, getState = () => ({}),
-    onActivate, progression = null,
+    onActivate, progression = null, baseHotspots = hotspots,
   } = {}) {
     this.clearSceneHotspots();
     const layer = document.createElement('div');
@@ -1226,13 +1282,37 @@ export class GameView {
       finish.textContent = progression.label;
       finish.disabled = progression.disabled === true;
       finish.setAttribute('aria-label', progression.ariaLabel || progression.label);
-      finish.addEventListener('click', () => progression.onActivate?.());
+      finish.addEventListener('click', () => progression.onActivate?.(finish));
       layer.appendChild(finish);
     }
     this.dom.storyBox.appendChild(layer);
     this.dom.storyBox.classList.add('scene-hotspot-active');
     if (layerClass.includes('sarah-office-hotspot-layer')) this.dom.storyBox.classList.add('sarah-office-active');
+    this._activeHotspotContext = {
+      sceneKey: this.controller?.model?.currentSceneId || 'global',
+      hotspots: hotspots.map((spot) => ({ ...spot })),
+      baseHotspots: baseHotspots.map((spot) => ({ ...spot })),
+      stage,
+    };
+    void this.hotspotEditor?.setContext(this._activeHotspotContext);
     return layer;
+  }
+
+  _applyHotspotGeometry(sceneKey, hotspots = []) {
+    if (!this._activeHotspotContext || this._activeHotspotContext.sceneKey !== sceneKey) return;
+    setRuntimeHotspotOverride(sceneKey, hotspots);
+    this._activeHotspotContext.hotspots = hotspots.map((spot) => ({ ...spot }));
+    const layer = this.dom.storyBox?.querySelector('.scene-hotspot-layer');
+    const stage = layer?.querySelector('.scene-hotspot-stage');
+    if (!stage) return;
+    hotspots.forEach((spot) => {
+      const button = stage.querySelector(`[data-hotspot-id="${spot.id}"]`);
+      if (!button) return;
+      button.style.left = `min(${spot.x}%, calc(100% - 44px))`;
+      button.style.top = `min(${spot.y}%, calc(100% - 44px))`;
+      button.style.width = `${spot.w || 8}%`;
+      button.style.height = `${spot.h || 8}%`;
+    });
   }
 
   refreshSceneHotspotStates(hotspots, getState, statusText = '') {
@@ -1257,7 +1337,7 @@ export class GameView {
     });
   }
 
-  renderDay1Hotspots(hotspots, flags = {}, onInspect, onFinish) {
+  renderDay1Hotspots(hotspots, flags = {}, onInspect, onFinish, baseHotspots = hotspots) {
     const inspectedCount = hotspots.filter((spot) => flags[spot.flag]).length;
     this.renderSceneHotspots({
       hotspots,
@@ -1275,13 +1355,173 @@ export class GameView {
         };
       },
       onActivate: onInspect,
+      baseHotspots,
       progression: {
         className: 'day1-hotspot-finish',
         label: inspectedCount >= 3 ? 'LANJUTKAN KE SISTEM UDARA' : 'SELESAIKAN PEMERIKSAAN',
         disabled: inspectedCount === 0,
-        onActivate: onFinish,
+        onActivate: (finishButton) => this.showDay1AirTransition({
+          inspectedCount,
+          onContinue: onFinish,
+          returnFocus: finishButton,
+        }),
       },
     });
+  }
+
+  showDay1AirTransition({ inspectedCount = 0, onContinue = () => {}, returnFocus = null } = {}) {
+    this.closeInformationPanel();
+    this.informationPanelReturnFocus = returnFocus;
+    const overlay = document.createElement('div');
+    overlay.className = 'scene-information-overlay day1-air-transition-overlay';
+    overlay.setAttribute('role', 'presentation');
+    overlay.addEventListener('click', (event) => event.stopPropagation());
+
+    const panel = document.createElement('section');
+    panel.className = 'scene-information-panel day1-air-transition-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-labelledby', 'day1-air-transition-title');
+
+    const heading = document.createElement('h2');
+    heading.id = 'day1-air-transition-title';
+    heading.textContent = 'TRANSISI KE SISTEM UDARA';
+    const source = document.createElement('p');
+    source.className = 'scene-information-source';
+    source.textContent = 'PROTOKOL TRIASE // DAY 1 // BUNKER 72';
+    const progress = document.createElement('p');
+    progress.className = 'scene-information-progress';
+    progress.textContent = `${inspectedCount}/3 TITIK PRIORITAS DIPERIKSA`;
+    const explanationTitle = document.createElement('h3');
+    explanationTitle.textContent = 'KENAPA MAKSIMAL TIGA TITIK?';
+    const explanation = document.createElement('p');
+    explanation.className = 'scene-information-body';
+    explanation.textContent = 'Baterai cadangan hanya cukup untuk menjaga panel kontrol dan blower tetap hidup saat udara distabilkan. Membuka terlalu banyak panel akan membuang waktu dan membuat isolasi bunker tidak aman sebelum filter karbon bekerja.';
+    const decision = document.createElement('p');
+    decision.className = 'scene-information-body';
+    decision.textContent = inspectedCount >= 3
+      ? 'Tiga titik prioritas sudah cukup untuk mengambil keputusan awal tentang bekal, kondisi medis, dan jalur teknis. Panel harus ditutup sekarang agar keluarga bisa masuk ke tahap penyaringan udara.'
+      : `Kamu baru memeriksa ${inspectedCount} titik. Titik lain sengaja ditinggalkan supaya blower dapat segera dinyalakan; melanjutkan berarti menerima informasi yang sudah terkumpul dan memprioritaskan keselamatan udara.`;
+
+    const actions = document.createElement('div');
+    actions.className = 'day1-air-transition-actions';
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'scene-information-close day1-air-transition-back';
+    back.textContent = 'KEMBALI KE TITIK INSPEKSI';
+    back.addEventListener('click', () => this.closeInformationPanel());
+    const continueButton = document.createElement('button');
+    continueButton.type = 'button';
+    continueButton.className = 'day1-air-transition-continue';
+    continueButton.textContent = 'LANJUTKAN KE SISTEM UDARA';
+    continueButton.addEventListener('click', () => {
+      this.closeInformationPanel();
+      onContinue?.();
+    });
+    actions.append(back, continueButton);
+    panel.append(heading, source, progress, explanationTitle, explanation, decision, actions);
+    overlay.appendChild(panel);
+    this.dom.storyBox.appendChild(overlay);
+
+    const focusables = [back, continueButton];
+    this.informationPanelEscapeHandler = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.closeInformationPanel();
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        const currentIndex = focusables.indexOf(document.activeElement);
+        const nextIndex = (currentIndex + (event.shiftKey ? focusables.length - 1 : 1)) % focusables.length;
+        focusables[nextIndex].focus();
+      }
+    };
+    document.addEventListener('keydown', this.informationPanelEscapeHandler);
+    continueButton.focus();
+  }
+
+  showDayTransition({
+    kicker = '',
+    title = 'PERGANTIAN HARI',
+    narrative = '',
+    detail = '',
+    onDark = () => {},
+    onContinue = () => {},
+  } = {}) {
+    this.closeDayTransition();
+    const overlay = document.createElement('div');
+    overlay.className = 'day-transition-overlay';
+    overlay.setAttribute('role', 'presentation');
+    overlay.addEventListener('click', (event) => event.stopPropagation());
+
+    const panel = document.createElement('section');
+    panel.className = 'day-transition-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-labelledby', 'day-transition-title');
+
+    const marker = document.createElement('p');
+    marker.className = 'day-transition-kicker';
+    marker.textContent = kicker;
+    const heading = document.createElement('h2');
+    heading.id = 'day-transition-title';
+    heading.textContent = title;
+    const body = document.createElement('p');
+    body.className = 'day-transition-narrative';
+    body.textContent = '';
+    const note = document.createElement('p');
+    note.className = 'day-transition-detail';
+    note.textContent = '';
+    panel.append(marker, heading, body, note);
+    overlay.appendChild(panel);
+    this.dom.gameView.appendChild(overlay);
+    this.dom.gameView.classList.add('day-cinematic-active');
+    overlay.tabIndex = -1;
+    this.dayTransitionTimers = [];
+    const later = (fn, delay) => this.dayTransitionTimers.push(setTimeout(fn, delay));
+    const typeBeat = (element, text, done) => {
+      let index = 0;
+      const tick = () => {
+        element.textContent = text.slice(0, ++index);
+        if (index < text.length) later(tick, 28);
+        else later(done, 2200);
+      };
+      tick();
+    };
+    later(() => {
+      onDark();
+      panel.classList.add('is-visible');
+      typeBeat(body, narrative, () => {
+        body.hidden = true;
+        typeBeat(note, detail, () => {
+          panel.classList.remove('is-visible');
+          later(() => {
+            onContinue();
+            overlay.classList.add('is-revealing');
+            later(() => this.closeDayTransition(), 2200);
+          }, 700);
+        });
+      });
+    }, 1300);
+
+    this.dayTransitionKeyHandler = (event) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        overlay.focus();
+      }
+    };
+    document.addEventListener('keydown', this.dayTransitionKeyHandler);
+    overlay.focus();
+  }
+
+  closeDayTransition() {
+    this.dayTransitionTimers?.forEach(clearTimeout);
+    this.dayTransitionTimers = [];
+    this.dom.gameView?.classList.remove('day-cinematic-active');
+    this.dom.gameView?.querySelector('.day-transition-overlay')?.remove();
+    if (this.dayTransitionKeyHandler) {
+      document.removeEventListener('keydown', this.dayTransitionKeyHandler);
+      this.dayTransitionKeyHandler = null;
+    }
   }
 
   showInformationPanel({ title, sourceLabel = '', content, returnFocus = null } = {}) {
@@ -1934,6 +2174,7 @@ export class GameView {
    */
   startScavengerMinigame(onComplete, config = null) {
     this.layoutEditor.setEnabled(false);
+    this.hotspotEditor?.setEnabled(false);
     this.destroyScavengerMinigame();
     this.scavengerGame = new ScavengerMinigame(this.dom.storyBox, (result) => {
       this.scavengerGame = null;

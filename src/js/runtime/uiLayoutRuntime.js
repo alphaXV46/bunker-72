@@ -1,9 +1,10 @@
 import { normalizeLayout, profileForWidth } from './layoutSchema.js';
+import { cinematicValue } from './prologuePresentation.js';
 
 const managedElementsByRoot = new WeakMap();
 
 const setImportant = (element, property, value) => {
-  element.style.setProperty(property, value, 'important');
+  element.style.setProperty(property, cinematicValue(property, value), 'important');
 };
 
 const clearElementStyles = (element) => {
