@@ -24,6 +24,18 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
+function readBinary(relativePath) {
+  return fs.readFileSync(path.join(root, relativePath));
+}
+
+function pngHasAlphaChannel(relativePath) {
+  const bytes = readBinary(relativePath);
+  // PNG IHDR stores the color type at byte 25. Types 4 and 6 carry alpha.
+  return bytes.length >= 26
+    && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    && (bytes[25] === 4 || bytes[25] === 6);
+}
+
 function resolveAssetReference(file, reference) {
   if (reference.startsWith('/src/assets/')) return path.join(root, reference.slice(1));
   if (reference.startsWith('../assets/')) return path.resolve(path.dirname(path.join(root, file)), reference);
@@ -105,6 +117,10 @@ for (const cssClass of [
   'bg-prolog-2',
   'bg-prolog-3',
   'bg-prolog-4',
+  'bg-prolog-minimarket',
+  'bg-prolog-medical',
+  'bg-prolog-hendra',
+  'bg-prolog-route-failure',
   'bg-backstory-airport',
   'bg-backstory-house',
   'bg-backstory-family-preparedness',
@@ -117,6 +133,40 @@ for (const cssClass of [
   'bg-backstory-bunker-complete',
 ]) {
   check(css.includes(`.story-box.${cssClass}`), `main.css: missing background selector .story-box.${cssClass}`);
+}
+
+const normalEndingAsset = 'src/assets/backgrounds/bg_normal_end.webp';
+const comparisonEndingAssets = [
+  'src/assets/backgrounds/bg_bad_end.webp',
+  'src/assets/backgrounds/bg_bad_end_2.webp',
+  'src/assets/backgrounds/bg_bad_end_3.webp',
+  'src/assets/backgrounds/bg_good_end.webp',
+  'src/assets/backgrounds/bg_good_end_1.webp',
+  'src/assets/backgrounds/bg_good_end_2.webp',
+  'src/assets/backgrounds/bg_good_end_3.jpg',
+];
+check(fs.existsSync(path.join(root, normalEndingAsset)), `missing dedicated NORMAL ending asset ${normalEndingAsset}`);
+check(css.includes("url('../assets/backgrounds/bg_normal_end.webp')"), 'main.css: NORMAL ending still lacks the dedicated bg_normal_end.webp mapping');
+check(gameView.includes("ending_normal:") && gameView.includes("bgClass:    'ending-bg-normal'"), 'gameView.js: ending_normal no longer maps to ending-bg-normal');
+
+if (fs.existsSync(path.join(root, normalEndingAsset))) {
+  const normalBytes = readBinary(normalEndingAsset);
+  for (const otherAsset of comparisonEndingAssets) {
+    if (fs.existsSync(path.join(root, otherAsset))) {
+      check(!normalBytes.equals(readBinary(otherAsset)), `${normalEndingAsset} must not be byte-identical to ${otherAsset}`);
+    }
+  }
+}
+
+for (const portrait of [
+  'src/assets/avatars/avatar_penyintas.png',
+  'src/assets/avatars/avatar_sar.png',
+  'src/assets/avatars/avatar_penjarah.png',
+]) {
+  check(fs.existsSync(path.join(root, portrait)), `missing NPC portrait ${portrait}`);
+  if (fs.existsSync(path.join(root, portrait))) {
+    check(pngHasAlphaChannel(portrait), `${portrait} must carry an alpha channel after matte cleanup`);
+  }
 }
 
 if (failures.length) {

@@ -26,6 +26,10 @@ import bgProlog1 from '../assets/backgrounds/bg_prolog1.webp';
 import bgProlog2 from '../assets/backgrounds/bg_prolog2.webp';
 import bgProlog3 from '../assets/backgrounds/bg_prolog3.webp';
 import bgProlog4 from '../assets/backgrounds/bg_prolog4.webp';
+import bgPrologMinimarket from '../assets/backgrounds/bg_prolog_minimarket.webp';
+import bgPrologMedical from '../assets/backgrounds/bg_prolog_medical.webp';
+import bgPrologHendra from '../assets/backgrounds/bg_prolog_hendra.webp';
+import bgPrologRouteFailure from '../assets/backgrounds/bg_prolog_route_failure.webp';
 import bgDay1 from '../assets/backgrounds/bg_day1.webp';
 import bgDay2 from '../assets/backgrounds/bg_day2.webp';
 import bgDay3 from '../assets/backgrounds/bg_day3.webp';
@@ -35,6 +39,7 @@ import bgGoodEnd3 from '../assets/backgrounds/bg_good_end_3.jpg';
 import bgBadEnd from '../assets/backgrounds/bg_bad_end.webp';
 import bgBadEnd2 from '../assets/backgrounds/bg_bad_end_2.webp';
 import bgBadEnd3 from '../assets/backgrounds/bg_bad_end_3.webp';
+import bgNormalEnd from '../assets/backgrounds/bg_normal_end.webp';
 import bgFatalEnd from '../assets/backgrounds/bg_fatal_end.webp';
 import bgBackstoryAirport from '../assets/backgrounds/bg_backstory_airport.webp';
 import bgBackstoryHouse from '../assets/backgrounds/bg_backstory_house.webp';
@@ -69,6 +74,10 @@ const ASSET_URLS = [
   bgProlog2,
   bgProlog3,
   bgProlog4,
+  bgPrologMinimarket,
+  bgPrologMedical,
+  bgPrologHendra,
+  bgPrologRouteFailure,
   bgDay1,
   bgDay2,
   bgDay3,
@@ -78,6 +87,7 @@ const ASSET_URLS = [
   bgBadEnd,
   bgBadEnd2,
   bgBadEnd3,
+  bgNormalEnd,
   bgFatalEnd,
   bgBackstoryAirport,
   bgBackstoryHouse,

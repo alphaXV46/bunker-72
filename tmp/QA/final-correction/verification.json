@@ -1,0 +1,95 @@
+{
+  "results": [
+    {
+      "check": "verify_assets",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_phase_a",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_phase_b",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_phase_c",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_phase_d",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_phase_e",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_phase_f",
+      "exitCode": 0
+    },
+    {
+      "check": "verify_release",
+      "exitCode": 0
+    },
+    {
+      "check": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "check": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "check": "story changes limited to background mappings",
+      "exitCode": 0
+    }
+  ],
+  "mappings": [
+    {
+      "id": "prolog_home",
+      "before": "prolog_peaceful",
+      "after": "prolog1"
+    },
+    {
+      "id": "prolog_with_ibu",
+      "before": "prolog_peaceful",
+      "after": "prolog1"
+    },
+    {
+      "id": "prolog_with_anak",
+      "before": "prolog_peaceful",
+      "after": "prolog1"
+    },
+    {
+      "id": "prolog_radio_peaceful",
+      "before": "prolog_peaceful",
+      "after": "prolog1"
+    },
+    {
+      "id": "prolog_intro",
+      "before": "prolog2",
+      "after": "prolog3"
+    },
+    {
+      "id": "prolog_expedition_call",
+      "before": "packing",
+      "after": "prolog2"
+    },
+    {
+      "id": "prolog_expedition_map",
+      "before": "packing",
+      "after": "prolog2"
+    },
+    {
+      "id": "prolog_return_home",
+      "before": "packing",
+      "after": "prolog_window"
+    },
+    {
+      "id": "prolog_evac_decision",
+      "before": "packing",
+      "after": "prolog_window"
+    }
+  ]
+}

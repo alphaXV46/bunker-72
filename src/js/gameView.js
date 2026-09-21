@@ -808,6 +808,10 @@ export class GameView {
       prolog2: 'bg-prolog-2',
       prolog3: 'bg-prolog-3',
       prolog4: 'bg-prolog-4',
+      prolog_minimarket: 'bg-prolog-minimarket',
+      prolog_medical: 'bg-prolog-medical',
+      prolog_hendra: 'bg-prolog-hendra',
+      prolog_route_failure: 'bg-prolog-route-failure',
       backstory_airport: 'bg-backstory-airport',
       backstory_house: 'bg-backstory-house',
       backstory_family_preparedness: 'bg-backstory-family-preparedness',
@@ -832,6 +836,7 @@ export class GameView {
     this.dom.storyBox.classList.remove(
       'bg-prolog-peaceful', 'bg-prolog-window',
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
+      'bg-prolog-minimarket', 'bg-prolog-medical', 'bg-prolog-hendra', 'bg-prolog-route-failure',
       'bg-backstory-airport', 'bg-backstory-house', 'bg-backstory-family-preparedness', 'bg-backstory-aris-company',
       'bg-backstory-sarah-office', 'bg-backstory-sarah-office-interactive', 'bg-backstory-sarah-office-alert',
       'bg-backstory-bunker-plan', 'bg-backstory-bunker-build', 'bg-backstory-bunker-complete',

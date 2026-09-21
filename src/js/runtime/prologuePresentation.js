@@ -82,7 +82,10 @@ export class ProloguePresentation {
       const stage = this.root.getBoundingClientRect();
       const gap = stage.height < 450 ? 8 : 16;
       const inset = stage.width < 600 ? 14 : 28;
-      const top = 16;
+      // Optional artwork strip for wide family interiors on portrait screens.
+      // Presentation-only: never persisted into editor coordinates or saves.
+      const artRatio = parseFloat(getComputedStyle(this.root).getPropertyValue('--cinematic-art-reserve-ratio')) || 0;
+      const top = Math.max(16, Math.min(stage.height * 0.4, stage.width * artRatio + 16));
       const bottom = stage.height - gap;
       const set = (el, property, value) => el.style.setProperty(`--cinematic-${property}`, value);
       const fit = (el, maxHeight) => {

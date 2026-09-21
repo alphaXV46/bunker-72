@@ -951,6 +951,10 @@ input[type="range"] {
 .story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.webp'); }
 .story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.webp'); }
 .story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.webp'); }
+.story-box.bg-prolog-minimarket { background-image: url('../assets/backgrounds/bg_prolog_minimarket.webp'); }
+.story-box.bg-prolog-medical { background-image: url('../assets/backgrounds/bg_prolog_medical.webp'); }
+.story-box.bg-prolog-hendra { background-image: url('../assets/backgrounds/bg_prolog_hendra.webp'); }
+.story-box.bg-prolog-route-failure { background-image: url('../assets/backgrounds/bg_prolog_route_failure.webp'); }
 .story-box.bg-backstory-airport { background-image: url('../assets/backgrounds/bg_backstory_airport.webp'); }
 .story-box.bg-backstory-house { background-image: url('../assets/backgrounds/bg_backstory_house.webp'); }
 .story-box.bg-backstory-family-preparedness { background-image: url('../assets/backgrounds/backstory_family_preparedness.webp'); }
@@ -2770,7 +2774,7 @@ body.title-card-active #settings-btn { display: none !important; }
 #ending-view.ending-bg-normal {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.55)),
-    url('../assets/backgrounds/bg_bad_end.webp') center / cover no-repeat;
+    url('../assets/backgrounds/bg_normal_end.webp') 58% center / cover no-repeat;
 }
 
 #ending-view.ending-bg-best {
@@ -5954,7 +5958,11 @@ body.disable-crt .crt-flicker { display: none !important; }
   .bg-backstory-sarah-office-alert,
   .bg-prolog-peaceful,
   .bg-prolog-window,
-  .bg-prolog-2
+  .bg-prolog-2,
+  .bg-prolog-minimarket,
+  .bg-prolog-medical,
+  .bg-prolog-hendra,
+  .bg-prolog-route-failure
 ) .floating-interactive-card {
   background: transparent !important;
   border: 0 !important;
@@ -5973,7 +5981,11 @@ body.disable-crt .crt-flicker { display: none !important; }
   .bg-backstory-sarah-office-alert,
   .bg-prolog-peaceful,
   .bg-prolog-window,
-  .bg-prolog-2
+  .bg-prolog-2,
+  .bg-prolog-minimarket,
+  .bg-prolog-medical,
+  .bg-prolog-hendra,
+  .bg-prolog-route-failure
 ) .dialogue-overlay {
   position: relative !important;
   inset: auto !important;
@@ -5997,7 +6009,11 @@ body.disable-crt .crt-flicker { display: none !important; }
   .bg-backstory-sarah-office-alert,
   .bg-prolog-peaceful,
   .bg-prolog-window,
-  .bg-prolog-2
+  .bg-prolog-2,
+  .bg-prolog-minimarket,
+  .bg-prolog-medical,
+  .bg-prolog-hendra,
+  .bg-prolog-route-failure
 ) .dialogue-overlay::before {
   display: none !important;
 }
@@ -6012,7 +6028,11 @@ body.disable-crt .crt-flicker { display: none !important; }
   .bg-backstory-sarah-office-alert,
   .bg-prolog-peaceful,
   .bg-prolog-window,
-  .bg-prolog-2
+  .bg-prolog-2,
+  .bg-prolog-minimarket,
+  .bg-prolog-medical,
+  .bg-prolog-hendra,
+  .bg-prolog-route-failure
 ) .dialogue-text {
   font-size: clamp(1.2rem, 1.6vw, 1.7rem) !important;
   line-height: 1.45 !important;
@@ -6079,7 +6099,11 @@ body.disable-crt .crt-flicker { display: none !important; }
   .bg-backstory-sarah-office-alert,
   .bg-prolog-peaceful,
   .bg-prolog-window,
-  .bg-prolog-2
+  .bg-prolog-2,
+  .bg-prolog-minimarket,
+  .bg-prolog-medical,
+  .bg-prolog-hendra,
+  .bg-prolog-route-failure
 ) .dialogue-speaker-label,
 .story-box.scene-id-prolog_expedition_call .dialogue-speaker-label {
   display: block;
@@ -6133,9 +6157,103 @@ body.disable-crt .crt-flicker { display: none !important; }
   .bg-backstory-sarah-office-alert,
   .bg-prolog-peaceful,
   .bg-prolog-window,
-  .bg-prolog-2
+  .bg-prolog-2,
+  .bg-prolog-minimarket,
+  .bg-prolog-medical,
+  .bg-prolog-hendra,
+  .bg-prolog-route-failure
 ) .avatar-container {
   display: flex !important;
+}
+
+/* The narrow portrait crop has limited horizontal visibility; keep each new
+ * exterior subject inside the frame without introducing mobile-only assets. */
+@media (max-width: 600px) and (orientation: portrait) {
+  #ending-view.ending-bg-normal { background-position: 65% center; }
+  .story-box.cinematic-prologue.bg-prolog-2 { background-position: 58% center; }
+  #game-container:has(.story-box.cinematic-prologue.bg-prolog-2) > .system-alert-banner {
+    width: calc(100% - 40px);
+    max-width: none;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .story-box.cinematic-prologue:is(.bg-prolog-3, .bg-prolog-4) { background-position: 92% center; }
+  .story-box.bg-prolog-minimarket { background-position: 62% center; }
+  .story-box.bg-prolog-medical { background-position: 62% center; }
+  .story-box.bg-prolog-hendra { background-position: 61% center; }
+  .story-box.bg-prolog-route-failure { background-position: 58% center; }
+}
+
+/* Existing home interiors spread the family across the frame. On wide
+ * screens the left reading column avoids Maya; portrait shows the complete
+ * illustration above the transparent narrative instead of cropping parents. */
+@media (min-width: 601px) {
+  #game-view .story-box.cinematic-prologue:is(.bg-prolog-1, .bg-prolog-window) {
+    --cinematic-art-reserve-ratio: 0.18;
+  }
+  #game-view .story-box.cinematic-prologue:is(.bg-prolog-1, .bg-prolog-window) :is(#dialogue-container, #command-deck-container) {
+    width: min(44%, var(--cinematic-width, 850px)) !important;
+  }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  #game-view .story-box.cinematic-prologue:is(.bg-prolog-1, .bg-prolog-window) {
+    --cinematic-art-reserve-ratio: 0.5625;
+    background-size: 100% auto;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-color: var(--bg-color);
+  }
+}
+
+/* NORMAL artwork safe area: keep the complete report, debrief and menu
+ * reachable without putting the duplicate score panel over the family. */
+#ending-view.active.ending-normal-single-card.ending-bg-normal {
+  display: grid !important;
+  grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 10px 24px;
+  padding: clamp(14px, 2vw, 28px);
+  overflow: hidden !important;
+}
+#ending-view.active.ending-normal-single-card > .ending-stats.hidden {
+  display: none !important;
+}
+#ending-view.active.ending-normal-single-card > :is(.ending-header, .ending-content-box, .debrief-box, .choices-panel) {
+  grid-column: 1;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+#ending-view.active.ending-normal-single-card > .ending-header { grid-row: 1; }
+#ending-view.active.ending-normal-single-card .ending-type {
+  font-size: clamp(1.45rem, 3vw, 2.7rem);
+}
+#ending-view.active.ending-normal-single-card > .ending-content-box {
+  grid-row: 2;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+#ending-view.active.ending-normal-single-card > .debrief-box {
+  grid-row: 3;
+  max-height: 20vh;
+  overflow-y: auto;
+}
+#ending-view.active.ending-normal-single-card.ending-bg-normal > .choices-panel { grid-row: 4; }
+@media (max-width: 600px) and (orientation: portrait) {
+  #ending-view.active.ending-normal-single-card.ending-bg-normal {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(220px, 38%) minmax(0, 1fr) auto auto;
+    gap: 8px;
+  }
+  #ending-view.active.ending-normal-single-card > .ending-content-box { grid-row: 3; }
+  #ending-view.active.ending-normal-single-card > .debrief-box { grid-row: 4; }
+  #ending-view.active.ending-normal-single-card.ending-bg-normal > .choices-panel { grid-row: 5; }
 }
 
 /* sealed72 narrative presentation: saved F6 coordinates are fallbacks only.

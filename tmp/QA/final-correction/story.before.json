@@ -250,7 +250,7 @@
       "speaker": "Narator",
       "avatar": null,
       "text": "Sore itu di perbukitan Rakata Selatan terasa begitu tenteram. Aris, 28 tahun, pulang kepada Sarah, 26 tahun, dan putri mereka, Maya, 7 tahun. Cahaya senja keemasan menerobos jendela kayu ruang tamu. Di atas karpet, Anak tertawa riang mendorong mobil-mobilan merahnya, sementara dari arah dapur tercium aroma sedap masakan Ibu yang sedang menyiapkan makan malam.",
-      "background": "prolog1",
+      "background": "prolog_peaceful",
       "hour": "0 Jam",
       "objective": "72 JAM PERTAMA — ARIS: temani keluarga di rumah.",
       "choices": [
@@ -288,7 +288,7 @@
       "speaker": "Ibu",
       "avatar": "ibu",
       "text": "\"Mas, pas sekali kamu sudah pulang! Coba cicipi sedikit kuah sayurnya... gurihnya sudah pas belum? Anak dari tadi siang menanyakan kapan Ayahnya pulang. Rasanya hangat sekali kalau kita bisa kumpul lengkap seperti ini.\"",
-      "background": "prolog1",
+      "background": "prolog_peaceful",
       "hour": "0 Jam",
       "objective": "Bercengkrama dengan keluarga sebelum santap malam.",
       "choices": [
@@ -312,7 +312,7 @@
       "speaker": "Anak",
       "avatar": "anak",
       "text": "\"Ayah! Lihat, mobil pemadam kebakaranku bisa meluncur kencang! Nguuung... ciitt! Tapi roda belakangnya agak goyang, Yah. Nanti sehabis makan malam, Ayah bantu kencangkan bautnya ya?\"",
-      "background": "prolog1",
+      "background": "prolog_peaceful",
       "hour": "0 Jam",
       "objective": "Temani anak tersayang bermain sejenak.",
       "choices": [
@@ -356,7 +356,7 @@
           "text": " Penyiar melanjutkan: \"Pemantauan kondisi wilayah terus dilakukan. Belum ada perubahan besar pada imbauan saat ini, tetapi masyarakat diminta tetap mengikuti informasi resmi.\" Sarah mengenali bahwa evaluasi rutin masih menjadi dasar respons."
         }
       ],
-      "background": "prolog1",
+      "background": "prolog_peaceful",
       "hour": "0 Jam",
       "objective": "Simak siaran radio senja di ruang tamu.",
       "choices": [
@@ -428,7 +428,7 @@
       "speaker": "Narator",
       "avatar": null,
       "text": "Pukul 18.07. Sirene evakuasi kota meraung-raung bersahutan di kejauhan. Dari ambang jendela rumah, puncak Krakatau memuntahkan lidah api dan gelombang kejut ke angkasa. Udara pesisir mulai dipenuhi bau belerang tajam dan rintik abu panas yang turun bagai salju hitam.",
-      "background": "prolog3",
+      "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Evakuasi keluarga sebelum jalur permukaan tertutup abu.",
       "autoNextSceneId": "prolog_road",
@@ -849,7 +849,7 @@
       "speaker": "Sarah",
       "avatar": "ibu",
       "text": "Sarah menata barang-barang yang berhasil dihimpun ke dekat titik kumpul akses shelter. Maya duduk tenang di sampingnya. Di luar, Aris sedang melangkah cepat menyusuri jalan pemukiman selagi pergerakan lokal masih diizinkan petugas.\n\n\"Bekal rumah sudah diamankan di dekat palka. Maya aman bersamaku. Sekarang giliran Aris memastikan kebutuhan pokok dari luar sebelum akses ditutup.\"",
-      "background": "prolog2",
+      "background": "packing",
       "hour": "0 Jam",
       "objective": "Pantau pergerakan Aris dalam mencari perbekalan luar.",
       "choices": [
@@ -866,7 +866,7 @@
       "speaker": "Aris",
       "avatar": "ayah",
       "text": "Di luar, langit mulai diselimuti kabut abu vulkanik tipis. Sirene berkala terdengar di kejauhan, tetapi jalan lingkungan masih bisa dilalui warga. Peta persimpangan menunjukkan dua lokasi layanan darurat yang masih beroperasi di sisi barat dan timur pemukiman, serta jalan penghubung menuju jalur bukit.\n\nAris harus memilih tujuan pertamanya secara cermat:",
-      "background": "prolog2",
+      "background": "packing",
       "hour": "0 Jam",
       "objective": "Pilih lokasi perbekalan pertama sebelum situasi memburuk.",
       "choices": [
@@ -1069,7 +1069,7 @@
       "speaker": "Sarah",
       "avatar": "ibu",
       "text": "Pintu pagar terbuka tergesa dan Aris melangkah masuk dengan napas memburu. Sarah menghela napas lega seketika, sementara Maya langsung memeluk pinggang ayahnya erat-erat. Aris meletakkan perbekalan yang dibawanya di dekat tumpukan bekal darurat di teras.\n\nSarah: \"Mas, syukurlah kamu kembali... Aku terus memantau radio. BMKG baru saja memperbarui info gempa susulan berkekuatan besar, dan BPBD mengumumkan jalur penghubung timur menuju posko evakuasi bukit ditutup total akibat amblasan tanah. BPBD mengimbau warga di lereng barat untuk tidak memaksakan melintas dan mencari perlindungan mandiri yang aman.\"\n\nAris: \"Aku melihatnya sendiri di persimpangan, Sarah. Jalurnya ambles sedalam beberapa meter dan tertutup tiang beton roboh. Membawa Maya berjalan kaki menyeberangi rekahan itu saat gempa susulan masih rawan sudah bukan pilihan aman.\"",
-      "background": "prolog_window",
+      "background": "packing",
       "hour": "0 Jam",
       "objective": "Evaluasi situasi dan bahas keputusan rencana evakuasi bersama Sarah.",
       "choices": [
@@ -1086,7 +1086,7 @@
       "speaker": "Sarah",
       "avatar": "ibu",
       "text": "Sarah menatap peta rute dan jendela luar saat butiran abu mulai turun ke atap: \"Kalau jalurnya masih terbuka, Rencana A kita tetap jalan ke posko bukit. Tapi sekarang aksesnya rusak parah, dan membawa Maya melintasi rekahan tanah di bawah hujan abu jelas bukan pilihan aman.\"\n\nAris: \"Posisi rumah kita memang sengaja kita pilih di perbukitan tinggi, di luar jangkauan tsunami pesisir dan di luar jalur utama luncuran awan panas. Bahaya nyata di sini sekarang adalah hujan abu vulkanik, reruntuhan material, dan isolasi jaringan jalan. Bunker kita punya struktur beton bawah tanah, ventilasi terfilter, baterai cadangan, dan air bersih. Selama akses tertutup, masuk ke shelter ini adalah Rencana B paling rasional untuk menjaga kita bertiga tetap aman.\"\n\nSarah mengangguk tegas: \"Setuju, Mas. Ambil tas perbekalan, kita bawa Maya masuk ke palka sekarang.\"",
-      "background": "prolog_window",
+      "background": "packing",
       "hour": "0 Jam",
       "objective": "Konfirmasi keputusan untuk berlindung di Bunker 72.",
       "choices": [
