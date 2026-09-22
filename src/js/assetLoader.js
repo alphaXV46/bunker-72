@@ -35,7 +35,7 @@ import bgDay2 from '../assets/backgrounds/bg_day2.webp';
 import bgDay3 from '../assets/backgrounds/bg_day3.webp';
 import bgGoodEnd1 from '../assets/backgrounds/bg_good_end_1.webp';
 import bgGoodEnd2 from '../assets/backgrounds/bg_good_end_2.webp';
-import bgGoodEnd3 from '../assets/backgrounds/bg_good_end_3.jpg';
+import bgGoodEnd3 from '../assets/backgrounds/bg_good_end_3.webp';
 import bgBadEnd from '../assets/backgrounds/bg_bad_end.webp';
 import bgBadEnd2 from '../assets/backgrounds/bg_bad_end_2.webp';
 import bgBadEnd3 from '../assets/backgrounds/bg_bad_end_3.webp';

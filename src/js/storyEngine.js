@@ -53,9 +53,9 @@ const DAY_TRANSITIONS = Object.freeze({
 });
 const DAY1_HOTSPOTS = Object.freeze([
   { id: 'supply', flag: 'inspected_supply', label: 'Lemari Persediaan', x: 29, y: 23, w: 24, h: 34, text: 'Rak persediaan masih tertata. Satu kaleng makanan dan botol air bisa dipindahkan ke meja kerja tanpa mengusik cadangan utama.', reward: { item: 'food', amount: 1 } },
-  { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 58, y: 45, w: 12, h: 19, text: 'Loker P3K berisi kasa dan antiseptik yang masih kering. Kotak ini mudah dijangkau bila ada yang terluka.', reward: { item: 'kit', amount: 1 } },
-  { id: 'ventilation', flag: 'inspected_ventilation', label: 'Ventilasi', x: 57, y: 18, w: 12, h: 20, text: 'Kisi ventilasi berdebu, tetapi di balik panel ada filter cadangan yang belum terpasang. Pengetahuan teknis +1.', knowledge: 1, setFlags: ['found_spare_filter'] },
-  { id: 'power', flag: 'inspected_power', label: 'Panel Daya', x: 25, y: 24, w: 6, h: 14, text: 'Panel daya menyala stabil. Menandai sakelar pemutus utama akan mempercepat respons jika arus kembali melonjak. Pengetahuan teknis +1.', knowledge: 1 },
+  { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 52, y: 39, w: 10, h: 13, text: 'Loker P3K berisi kasa dan antiseptik yang masih kering. Kotak ini mudah dijangkau bila ada yang terluka.', reward: { item: 'kit', amount: 1 } },
+  { id: 'ventilation', flag: 'inspected_ventilation', label: 'Ventilasi', x: 53.83, y: 3.72, w: 11.36, h: 18.60, text: 'Kisi ventilasi berdebu, tetapi di balik panel ada filter cadangan yang belum terpasang. Pengetahuan teknis +1.', knowledge: 1, setFlags: ['found_spare_filter'] },
+  { id: 'power', flag: 'inspected_power', label: 'Panel Daya', x: 64.29, y: 26.57, w: 5.68, h: 17.54, text: 'Panel daya menyala stabil. Menandai sakelar pemutus utama akan mempercepat respons jika arus kembali melonjak. Pengetahuan teknis +1.', knowledge: 1 },
   { id: 'radio', flag: 'inspected_radio', label: 'Radio VHF', x: 34, y: 62, w: 13, h: 12, text: 'Radio VHF masih menerima dengung statik. Rentang sinyal komunikasi bisa dicari nanti, setelah udara benar-benar aman.' },
   { id: 'family_storage', flag: 'inspected_family_storage', label: 'Penyimpanan Keluarga', x: 84, y: 73, w: 13, h: 18, text: 'Kotak penyimpanan keluarga berisi selimut dan foto lama. Menaruhnya dekat dipan membuat malam pertama terasa sedikit lebih manusiawi.' },
 ]);
@@ -1170,6 +1170,9 @@ export class StoryEngine {
       this.model.setFlag('final_air_protected');
       this.model.setFlag('spare_filter_used');
     }
+    if (choice.id === 'c_day1_water_waste') {
+      this.model.addInventoryItem('drink', -1);
+    }
 
     // Phase C Prologue outside expedition supply choices
     if (choice.id === 'c_prolog_minimarket_take' || choice.id === 'c_prolog_minimarket_second_take') {
@@ -1317,7 +1320,12 @@ export class StoryEngine {
       const opened = this.radioMiniGame?.open({
         finalAttempt: true,
         inspectedRadio: this.model.flags.inspected_radio === true,
-        extraBattery: this.model.flags.extra_battery === true,
+        extraBattery: this.model.flags.battery_committed === true,
+        radioPowerLimited: this.model.flags.radio_power_limited === true,
+        powerStrained: this.model.flags.power_strained === true
+          && this.model.flags.power_radio_priority !== true
+          && this.model.flags.battery_committed !== true
+          && this.model.flags.power_routed !== true,
       });
       if (!opened) this.handleFinalRadioResult({ quality: 'failed', frequency: 0, strength: 0 });
       return;
@@ -1580,7 +1588,10 @@ export class StoryEngine {
       if (currentScene) {
         this.restoreSceneDialogue(currentScene);
       }
+      return;
     }
+
+    this.view.showChoiceCard?.();
   }
 
   restoreSceneDialogue(scene) {

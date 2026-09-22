@@ -1,3 +1,5 @@
+const GOOD_ENDING_MUSIC_URL = new URL('../audio/bgm/music_good_ending.ogg', import.meta.url).href;
+
 export class RetroAudio {
   constructor() {
     this.ctx = null;
@@ -8,6 +10,10 @@ export class RetroAudio {
     this.buffers = {};
     this.bgmSource = null;
     this.bgmState = 'playing'; // default to playing so it starts automatically on init
+    this.goodEndingMusicSource = null;
+    this.goodEndingMusicGain = null;
+    this.goodEndingMusicRequestId = 0;
+    this.goodEndingMusicBufferPromise = null;
     this.radioSource = null;
     this.radioTimeout = null;
     this.activeSources = new Set();
@@ -113,7 +119,73 @@ export class RetroAudio {
     }
   }
 
-  stopAll() {
+  preloadGoodEndingMusic() {
+    if (!this.goodEndingMusicBufferPromise) {
+      this.goodEndingMusicBufferPromise = this.getAudioBuffer(GOOD_ENDING_MUSIC_URL).catch((error) => {
+        this.goodEndingMusicBufferPromise = null;
+        throw error;
+      });
+    }
+    return this.goodEndingMusicBufferPromise;
+  }
+
+  async playGoodEndingMusic() {
+    this.stopGoodEndingMusic();
+    const requestId = this.goodEndingMusicRequestId;
+    this.stopDomesticPeace();
+    this.stopBGM();
+    this.init();
+
+    try {
+      if (this.ctx.state === 'suspended') await this.ctx.resume();
+      const buffer = await this.preloadGoodEndingMusic();
+      if (requestId !== this.goodEndingMusicRequestId || this.ctx.state !== 'running') return;
+
+      const source = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      const start = this.ctx.currentTime;
+      source.buffer = buffer;
+      source.loop = false;
+      gain.gain.setValueAtTime(0.72, start);
+      gain.gain.setValueAtTime(0.72, start + Math.max(0, buffer.duration - 2.5));
+      gain.gain.linearRampToValueAtTime(0, start + buffer.duration);
+      source.connect(gain);
+      gain.connect(this.masterGain);
+      source.onended = () => {
+        if (this.goodEndingMusicSource === source) {
+          this.goodEndingMusicSource = null;
+          this.goodEndingMusicGain = null;
+        }
+        try { source.disconnect(); } catch (e) {}
+        try { gain.disconnect(); } catch (e) {}
+      };
+      this.goodEndingMusicSource = source;
+      this.goodEndingMusicGain = gain;
+      source.start();
+    } catch (error) {
+      if (requestId !== this.goodEndingMusicRequestId) return;
+      console.error('Failed to play Good Ending music:', error);
+      this.playDomesticPeace();
+    }
+  }
+
+  stopGoodEndingMusic() {
+    this.goodEndingMusicRequestId += 1;
+    const source = this.goodEndingMusicSource;
+    const gain = this.goodEndingMusicGain;
+    this.goodEndingMusicSource = null;
+    this.goodEndingMusicGain = null;
+    if (source) {
+      try { source.stop(); } catch (e) {}
+      try { source.disconnect(); } catch (e) {}
+    }
+    if (gain) {
+      try { gain.disconnect(); } catch (e) {}
+    }
+  }
+
+  stopAll({ suspend = true } = {}) {
+    this.stopGoodEndingMusic();
     this.stopDomesticPeace();
     this.stopRadioSound();
     this.stopBGM();
@@ -122,7 +194,7 @@ export class RetroAudio {
       try { source.disconnect(); } catch (e) {}
     });
     this.activeSources.clear();
-    if (this.ctx && this.ctx.state !== 'closed') {
+    if (suspend && this.ctx && this.ctx.state !== 'closed') {
       this.ctx.suspend().catch(() => {});
     }
   }

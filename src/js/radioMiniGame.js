@@ -14,6 +14,7 @@ export class RadioMiniGame {
     this.finalResultResolved = false;
     this.sessionCompleted = false;
     this.signalBonus = 0;
+    this.signalPenalty = 0;
     this.clearThreshold = 88;
     this.completionTimer = null;
 
@@ -88,6 +89,9 @@ export class RadioMiniGame {
     this.sessionCompleted = false;
     this.isLocked = false;
     this.signalBonus = finalAttempt && options.extraBattery ? 10 : 0;
+    this.signalPenalty = finalAttempt
+      ? (options.radioPowerLimited ? 8 : 0) + (options.powerStrained ? 7 : 0)
+      : 0;
     this.clearThreshold = finalAttempt && options.inspectedRadio ? 82 : 88;
 
     const possibleTargets = [94.8, 96.2, 98.4, 101.5, 103.8, 105.2];
@@ -103,7 +107,7 @@ export class RadioMiniGame {
     }
     if (this.dom.broadcastBox) {
       this.dom.broadcastBox.textContent = finalAttempt
-        ? 'Panggilan simulasi ke jaringan Basarnas/SAR. Angka MHz di sini adalah rentang fiksi permainan; mutu sinyal menentukan seberapa lengkap posisi bunker terbaca.'
+        ? `Panggilan simulasi ke jaringan Basarnas/SAR. Angka MHz di sini adalah rentang fiksi permainan; mutu sinyal menentukan seberapa lengkap posisi bunker terbaca.${this.signalPenalty ? ' Daya transmisi terbatas oleh pembagian beban bunker.' : ''}`
         : 'Mencari siaran simulasi. Receiver VHF bunker dapat dipakai untuk memantau informasi.';
       this.dom.broadcastBox.classList.remove('broadcast-active');
     }
@@ -134,7 +138,7 @@ export class RadioMiniGame {
   _getSignalStrength() {
     const diff = Math.abs(this.currentFreq - this.targetFreq);
     const raw = Math.max(0, Math.min(100, Math.round((1 - diff / 3) * 100)));
-    return Math.min(100, raw + this.signalBonus);
+    return Math.max(0, Math.min(100, raw + this.signalBonus - this.signalPenalty));
   }
 
   _getFinalQuality(strength) {

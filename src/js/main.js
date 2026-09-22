@@ -45,6 +45,7 @@ const dom = {
   newGameBtn:  document.getElementById('new-game-btn'),
   continueBtn: document.getElementById('continue-btn'),
   creditsBtn:  document.getElementById('credits-btn'),
+  endingCreditsBtn: document.getElementById('ending-credits-btn'),
   restartBtn:  document.getElementById('restart-btn'),
 
   // Credits / settings overlay buttons
@@ -140,14 +141,23 @@ const SCREENS = ['menuView', 'gameView', 'endingView', 'creditsView'];
  * @param {'menu'|'game'|'ending'|'credits'} screenKey
  */
 function showScreen(screenKey) {
+  const enteringGoodEnding = screenKey === 'ending'
+    && dom.endingView?.classList.contains('ending-single-card');
+  const keepGoodEndingAudio = screenKey === 'credits'
+    && dom.endingView?.classList.contains('active')
+    && dom.endingView?.classList.contains('ending-single-card');
+  if (screenKey !== 'ending' && dom.endingView?.classList.contains('active')) {
+    dom.endingView.scrollTop = 0;
+  }
   SCREENS.forEach((key) => dom[key]?.classList.remove('active'));
   const target = dom[`${screenKey}View`];
   if (target) target.classList.add('active');
+  if (screenKey === 'ending') dom.endingView.scrollTop = 0;
 
   if (screenKey !== 'game') {
     storyEngine?.view.closeDayTransition();
     storyEngine?.view.clearSceneHotspots();
-    storyEngine?.audio.stopAll();
+    if (!keepGoodEndingAudio) storyEngine?.audio.stopAll({ suspend: !enteringGoodEnding });
   }
 }
 
@@ -246,6 +256,9 @@ async function initGame() {
       localStorage.removeItem(SAVE_KEY); // clear save on completion
       storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags, history, modularEnding);
       showScreen('ending');
+      if (endingId === 'ending_good') {
+        storyEngine.audio.playGoodEndingMusic();
+      }
     },
   });
 
@@ -348,7 +361,15 @@ async function initGame() {
     showScreen('menu');
   });
 
-  dom.creditsBtn?.addEventListener('click',      () => showScreen('credits'));
+  dom.creditsBtn?.addEventListener('click', () => {
+    dom.creditsView?.classList.remove('credits-after-ending');
+    showScreen('credits');
+  });
+  dom.endingCreditsBtn?.addEventListener('click', () => {
+    dom.creditsView?.classList.add('credits-after-ending');
+    dom.creditsView.scrollTop = 0;
+    showScreen('credits');
+  });
   dom.closeCreditsBtn?.addEventListener('click', () => showScreen('menu'));
 
   if (dom.settingsMenuBtn && dom.settingsModal) {
@@ -367,6 +388,9 @@ async function initGame() {
   // This one-shot handler fires on the very first interaction.
   const initAudioOnFirstInteraction = () => {
     storyEngine?.audio.init();
+    storyEngine?.audio.preloadGoodEndingMusic().catch((error) => {
+      console.warn('Good Ending music preload failed:', error);
+    });
     document.removeEventListener('click',   initAudioOnFirstInteraction);
     document.removeEventListener('keydown', initAudioOnFirstInteraction);
   };

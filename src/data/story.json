@@ -673,7 +673,8 @@
           "text": "Bebaskan minum kapan saja jika tenggorokan terasa kering akibat sisa debu.",
           "nextSceneId": "day1_water_waste",
           "knowledgeEffect": -1,
-          "log": "Air dipakai terlalu longgar."
+          "log": "Air dipakai terlalu longgar.",
+          "setFlags": ["water_used_freely"]
         },
         {
           "id": "c_day1_water_rational",
@@ -706,21 +707,23 @@
           "text": "Tempatkan ember sanitasi berpenutup rapat di sudut ventilasi buang dengan cairan disinfektan.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
-          "log": "Zona bersih dan limbah dipisahkan."
+          "log": "Zona bersih dan limbah dipisahkan.",
+          "setFlags": ["sanitation_secured"]
         },
         {
           "id": "c_day1_sanitation_door",
           "text": "Letakkan wadah limbah terbuka tepat di samping pintu keluar utama agar mudah dibuang nanti.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
-          "log": "Barang dan limbah bercampur dekat pintu."
+          "log": "Barang dan limbah bercampur dekat pintu.",
+          "setFlags": ["sanitation_exposed"]
         }
       ]
     },
     "day1_water_waste": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Air ini terasa sangat menyegarkan di tenggorokan, tapi melihat sepertiga botol pertama tandas dalam hitungan jam... hatiku menciut, Mas. Kehausan di ruang bawah tanah akan memicu kepanikan lebih cepat dari yang kita duga. Mari segera tata area sanitasi sebelum kuman menyebar.",
+      "text": "Satu botol pertama habis lebih cepat dari perkiraan. Sarah menatap rak, lalu menutup jeriken rapat. \"Kita masih bisa mengaturnya, Mas. Tapi mulai sekarang setiap botol harus dihitung.\" Mereka beralih menata area sanitasi sebelum malam tiba.",
       "background": "normal",
       "hour": "18 Jam",
       "objective": "Perbaiki pengelolaan air dan amankan sanitasi ruangan.",
@@ -730,14 +733,16 @@
           "text": "Pisahkan area tidur, area makan, dan area limbah dengan wadah fisik bersegel.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
-          "log": "Zona bersih dan limbah dipisahkan."
+          "log": "Zona bersih dan limbah dipisahkan.",
+          "setFlags": ["sanitation_secured"]
         },
         {
           "id": "c_day1_waterwaste_sanitation_door",
           "text": "Semprotkan disinfektan pekat secara berkala pada tumpukan limbah terbuka.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
-          "log": "Barang dan limbah bercampur dekat pintu."
+          "log": "Barang dan limbah bercampur dekat pintu.",
+          "setFlags": ["sanitation_exposed"]
         }
       ]
     },
@@ -835,7 +840,7 @@
     "day2_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BPBD] ...jalur penghubung timur masih ditutup dan dalam asesmen petugas pascagempa susulan; warga diimbau tidak memaksakan melintas di akses yang rusak... hujan abu masih pekat di lereng barat... [STATIK]\n\nJam ke-30. Setelah guncangan 5,6 Mw tadi, suara derit masih terdengar dari palka atas dan dengung kipas ventilasi tersendat. Beban listrik berkedip tidak stabil di panel meteran. Sarah segera mendekap Maya di dipan lipat, sementara Aris berdiri memeriksa indikator shelter. Selagi jalur evakuasi belum dibuka kembali oleh petugas, keluarga memutuskan tetap bertahan di shelter sambil terus memantau arahan resmi.",
+      "text": "[RADIO BPBD] ...jalur timur ditutup setelah gempa susulan; jangan melintasi akses rusak... abu masih pekat di lereng barat... [STATIK]\n\nJam ke-30. Palka berderit setelah guncangan 5,6 Mw. Kipas tersendat dan meteran daya berkedip. Sarah menarik Maya mendekat. Aris menatap panel: mereka tetap di bunker sesuai arahan petugas, tetapi sistemnya harus diperiksa sekarang.",
       "conditionalText": [
         {
           "requiredFlag": "air_uninspected",
@@ -1144,7 +1149,7 @@
     "day2_systems_check": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-36. Setelah stabilizer mekanis tenang, Aris membuka penutup instrumen dan membandingkan dua meteran utama. Ventilasi masih melemah dan beban listrik darurat masih berfluktuasi; rotor hanya mencegah gangguan mekanis merambat lebih jauh, bukan menyelesaikan dua masalah operasional itu.\n\nSarah: \"Mas, sekarang kita tahu gangguannya saling berhubungan. Sebelum memilih jalur udara atau daya, buka panel servis supaya pemeriksaan berikutnya tidak dilakukan dari sisi yang berdebu dan sempit.\"",
+      "text": "Jam ke-36. Stabilizer sudah tenang, tetapi meteran ventilasi dan daya masih naik-turun. Menyelaraskan rotor hanya menghentikan getaran; masalah utama belum selesai.\n\n\"Buka panel servis dulu, Mas,\" kata Sarah. \"Baru setelah itu kita pilih udara atau daya.\"",
       "conditionalText": [
         {
           "requiredFlag": "inspected_ventilation",
@@ -1162,22 +1167,7 @@
       "objective": "Buka panel servis sebelum menentukan prioritas pemulihan udara atau daya.",
       "autoNextSceneId": "day2_service_hatch",
       "advanceMode": "click",
-      "choices": [
-        {
-          "id": "c_day2_focus_air",
-          "text": "Prioritaskan pemulihan ventilasi: tangani modul saringan agar sirkulasi udara lekas bersih.",
-          "nextSceneId": "day2_air_response",
-          "knowledgeEffect": 0,
-          "log": "Aris memprioritaskan pembersihan dan penyesuaian sistem ventilasi."
-        },
-        {
-          "id": "c_day2_focus_power",
-          "text": "Prioritaskan stabilitas daya: kurangi beban sirkuit dan alihkan blower ke mode darurat hemat daya yang aman.",
-          "nextSceneId": "day2_power_response",
-          "knowledgeEffect": 0,
-          "log": "Aris memprioritaskan pengurangan beban listrik untuk menghemat cadangan daya."
-        }
-      ]
+      "choices": []
     },
     "day2_service_hatch": {
       "speaker": "Aris",
@@ -1281,7 +1271,7 @@
     "day2_power_response": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris mematikan penerangan sekunder dan menurunkan sakelar sirkuit tambahan di panel daya. Tegangan inverter segera kembali tenang di angka stabil. Sesuai rancangan teknis shelter, blower dialihkan ke mode darurat hemat daya: sistem ventilasi tetap berfungsi aman dan memadai untuk kebutuhan pernapasan keluarga, meski pertukaran udara berlangsung lebih lambat dan tenang.\n\nSaat Aris membuka kompartemen servis di dekat panel untuk memeriksa kabel, partikel debu halus yang terguncang gempa tampak beterbangan di sekitar ruang servis.",
+      "text": "Aris mematikan lampu sekunder. Tegangan kembali stabil; blower masuk mode darurat hemat daya dan tetap berfungsi aman, meski aliran udara lebih lambat.\n\nSaat ia membuka kompartemen kabel, debu halus beterbangan di wajahnya. Ia berhenti sejenak sebelum melanjutkan pemeriksaan.",
       "conditionalText": [
         {
           "requiredFlag": "medical_mask_ready",
@@ -1321,16 +1311,26 @@
     "day2_family_check": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Sarah menyeka dahi Maya dan memeriksa sudut penyimpanan logistik. Guncangan susulan tadi sempat menggetarkan rak persediaan, tetapi penataan yang cermat menjaga sebagian besar perbekalan tetap pada tempatnya. Maya duduk merapat ke Sarah, mendengarkan desau mesin yang berangsur stabil.\n\nMaya: \"Bu, sekarang aman?\"\n\nSarah memeluknya. \"Lebih baik dari tadi. Kita tetap harus hati-hati, ya.\"",
+      "text": "Sarah memeriksa rak yang terguncang, lalu menyeka dahi Maya. Desau mesin mulai stabil.\n\n\"Bu, sekarang aman?\" tanya Maya.\n\n\"Lebih baik dari tadi,\" jawab Sarah sambil memeluknya. \"Kita tetap harus hati-hati.\"",
       "conditionalText": [
         {
-          "requiredFlag": "day1_water_rational",
-          "text": " Jeriken air yang terikat kencang di rangka besi tidak bergeser sama sekali; disiplin penyimpanan Hari 1 terbukti penting.",
+          "requiredFlag": "water_rational_good",
+          "text": " Botol cadangan yang ditandai pada Hari 1 masih utuh di rak; mereka punya sedikit ruang untuk memilih saat air kembali dibutuhkan.",
           "append": true
         },
         {
-          "requiredFlag": "day1_water_waste",
-          "text": " Jeriken air yang tutupnya kurang kencang sempat menetes ke lantai; Sarah segera mengeringkannya dan memastikan katup terkunci rapat.",
+          "requiredFlag": "water_used_freely",
+          "text": " Satu botol sudah habis sejak malam pertama. Sarah menghitung ulang sisanya sebelum menutup rak.",
+          "append": true
+        },
+        {
+          "requiredFlag": "sanitation_secured",
+          "text": " Ember limbah tetap tertutup setelah guncangan; sudut tidur masih bersih.",
+          "append": true
+        },
+        {
+          "requiredFlag": "sanitation_exposed",
+          "text": " Wadah limbah terbuka tergeser oleh guncangan. Sarah membersihkan lantai sebelum Maya kembali ke dipan.",
           "append": true
         },
         {
@@ -1361,7 +1361,7 @@
     "day2_stabilized": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Jam ke-54. Menjelang pergantian malam menuju hari ketiga, dengung mesin di dalam bunker kembali ke ritme yang lebih stabil. Beberapa indikator kembali terbaca, tetapi bunker belum pulih sempurna dan cadangan sistem mulai menipis. Sarah menatap kalender catatan darurat di dinding: mereka sudah bertahan lebih dari dua hari penuh. Selagi akses evakuasi di luar belum dipastikan aman oleh petugas, keluarga memilih tetap bertahan di shelter dengan persediaan yang ada. Ujian terberat akan datang pada jam-jam terakhir besok.",
+      "text": "Jam ke-54. Dengung mesin kembali teratur, tetapi cadangan terus menipis. Sarah mencoret hari kedua pada kalender darurat. \"Kita sudah sejauh ini,\" katanya kepada Maya. Dari radio, belum ada izin melewati jalur yang rusak. Mereka tetap di bunker dan menyiapkan diri untuk hari terakhir.",
       "conditionalText": [
         {
           "requiredFlag": "sarah_warning_response",
@@ -1465,6 +1465,16 @@
       "text": "Air aman tinggal sedikit. Cadangan tangki tertutup mengandung endapan; sistem pengolahan bunker dirancang untuk cadangan ini. Air yang diduga tercemar bahan kimia atau abu tidak otomatis aman setelah disaring atau direbus. Aris mempertimbangkan cadangan botol, pengolahan tangki, dan pembagian persediaan.",
       "conditionalText": [
         {
+          "requiredFlag": "water_rational_good",
+          "text": " Botol yang disisihkan pada malam pertama masih tersedia; keputusan lama itu memberi mereka ruang bernapas.",
+          "position": "append"
+        },
+        {
+          "requiredFlag": "water_used_freely",
+          "text": " Rak terasa lebih kosong setelah satu botol habis pada malam pertama.",
+          "position": "append"
+        },
+        {
           "requiredFlag": "water_filtered",
           "text": " Sistem penyaringan yang pernah disiapkan masih memberi kita pilihan memulihkan sebagian air, walau ia akan memakai daya.",
           "position": "append"
@@ -1508,6 +1518,11 @@
       "avatar": "ayah",
       "text": "Panel daya turun ke mode darurat. Radio, blower, dan filter air tidak bisa semuanya bekerja penuh sampai malam. Aris menahan sakelar utama sebelum memutuskan sirkuit mana yang dipertahankan.",
       "conditionalText": [
+        {
+          "requiredFlag": "power_strained",
+          "text": " Pengolahan air baru saja menyerap cadangan daya. Jika blower tetap diprioritaskan tanpa jalur bantu, kekuatan panggilan radio akan turun.",
+          "position": "append"
+        },
         {
           "requiredFlag": "extra_battery",
           "text": " Baterai ekstra VHF dari minimarket tetap terpisah dari panel bunker—cadangan ini hanya membantu pemancar/transceiver saat komunikasi, bukan memberi daya ke sistem bunker.",
@@ -1670,7 +1685,7 @@
     "day3_final_dilemma": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Lampu turun lagi. Tinggal satu keputusan kecil yang menentukan bagaimana keluarga melewati malam: gunakan sisa daya untuk perlindungan udara, gunakan perlengkapan medis, atau simpan semuanya agar panel tidak jatuh total.",
+      "text": "Lampu turun lagi. Sarah memeriksa napas Maya dan menatap panel yang berkedip. Masih ada satu tindakan sebelum bantuan tiba: jaga aliran udara dengan filter cadangan, siapkan masker saat menangani debu, atau matikan sirkuit tambahan agar indikator bertahan.",
       "conditionalText": [
         {
           "requiredFlag": "maya_toy_callback",
@@ -1719,7 +1734,7 @@
     "day3_final_hours": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "71:32. Penerangan darurat melemah dan tidak lagi stabil. Di luar, abu mulai mereda; di dalam, keluarga menjaga sistem yang tersisa sambil menunggu sampai jam ke-72. Tidak ada lagi perbaikan besar malam ini—yang tersisa adalah tetap bersama dan mempertahankan bunker.",
+      "text": "Menjelang jam ke-72, lampu darurat berkedip sekali lagi. Maya mencari tangan Aris. \"Kalau lampunya padam, kita tetap bersama, kan?\" Aris menggenggamnya. \"Sampai pintu itu terbuka.\" Di luar, abu mulai mereda. Mereka menjaga sistem yang tersisa dan menunggu suara dari palka.",
       "conditionalText": [
         {
           "requiredFlag": "final_air_protected",

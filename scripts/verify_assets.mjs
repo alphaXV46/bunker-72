@@ -143,7 +143,7 @@ const comparisonEndingAssets = [
   'src/assets/backgrounds/bg_good_end.webp',
   'src/assets/backgrounds/bg_good_end_1.webp',
   'src/assets/backgrounds/bg_good_end_2.webp',
-  'src/assets/backgrounds/bg_good_end_3.jpg',
+  'src/assets/backgrounds/bg_good_end_3.webp',
 ];
 check(fs.existsSync(path.join(root, normalEndingAsset)), `missing dedicated NORMAL ending asset ${normalEndingAsset}`);
 check(css.includes("url('../assets/backgrounds/bg_normal_end.webp')"), 'main.css: NORMAL ending still lacks the dedicated bg_normal_end.webp mapping');

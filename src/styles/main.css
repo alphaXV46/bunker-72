@@ -2817,7 +2817,7 @@ body.title-card-active #settings-btn { display: none !important; }
 #ending-view.ending-bg-best {
   background:
     linear-gradient(rgba(8,9,11,0.08), rgba(8,9,11,0.48)),
-    url('../assets/backgrounds/bg_good_end_3.jpg') center / cover no-repeat;
+    url('../assets/backgrounds/bg_good_end_3.webp') center / cover no-repeat;
 }
 
 #ending-view.ending-bg-fatal {
@@ -4252,7 +4252,7 @@ body.disable-crt .crt-flicker { display: none !important; }
   background-color: #080b0d;
   background-image: var(--cutscene-bg);
   background-position: center;
-  background-size: cover;
+  background-size: contain;
   background-repeat: no-repeat;
   opacity: 0;
   pointer-events: none;
@@ -4272,10 +4272,6 @@ body.disable-crt .crt-flicker { display: none !important; }
   display: block;
   opacity: 1;
   pointer-events: auto;
-}
-
-.ending-cutscene.is-changing {
-  animation: good-ending-beat-in 520ms ease-out both;
 }
 
 .good-ending-cutscene__topline {
@@ -4331,11 +4327,6 @@ body.disable-crt .crt-flicker { display: none !important; }
 @keyframes good-ending-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@keyframes good-ending-beat-in {
-  from { opacity: 1; transform: scale(1.015); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 /* Good ending uses one final report card after the three image beats. */
@@ -6504,5 +6495,223 @@ body.disable-crt .crt-flicker { display: none !important; }
     flex: 1;
     height: auto !important;
     min-height: 0 !important;
+  }
+}
+
+/* Good Ending: let each illustration breathe, then move to a separate report. */
+#ending-view.active.ending-cutscene-playing {
+  overflow: hidden !important;
+  overscroll-behavior: contain;
+}
+
+.ending-cutscene .good-ending-dialogue {
+  padding: 14px clamp(14px, 2vw, 24px);
+  background: linear-gradient(90deg, rgba(4, 8, 10, 0.82), rgba(4, 8, 10, 0.56) 78%, transparent);
+  border-radius: 4px;
+}
+
+.good-ending-cutscene.is-revealing .good-ending-dialogue {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.good-ending-cutscene.is-revealing .good-ending-cutscene__topline { opacity: 0; }
+
+.good-ending-timecard[hidden],
+#ending-view #ending-credits-btn[hidden] { display: none !important; }
+
+.good-ending-timecard {
+  position: absolute;
+  top: clamp(66px, 12vh, 140px);
+  left: clamp(18px, 7vw, 112px);
+  color: var(--text-pixel);
+  font-family: 'VT323', monospace;
+  font-size: clamp(1.4rem, 3vw, 2.6rem);
+  letter-spacing: 3px;
+  text-shadow: 0 2px 12px #000, 0 0 22px #000;
+}
+
+#ending-view.active.ending-single-card.ending-report-screen {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(12px, 2vh, 20px);
+  padding: clamp(22px, 4vh, 48px) clamp(18px, 5vw, 60px);
+  overflow-y: auto !important;
+  background: radial-gradient(circle at 50% 0%, #1a2927 0%, #0b1316 48%, #07090b 100%);
+  animation: good-ending-report-enter 650ms ease-out both;
+}
+
+@keyframes good-ending-report-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#ending-view.active.ending-single-card.ending-report-screen > :is(.ending-header, .ending-content-box, .debrief-box, .choices-panel) {
+  position: static;
+  width: min(720px, 100%);
+  max-width: 720px;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  grid-column: auto;
+  grid-row: auto;
+  overflow: visible;
+}
+
+#ending-view.active.ending-single-card.ending-report-screen .ending-header {
+  padding: 0 0 10px;
+}
+
+#ending-view.active.ending-single-card.ending-report-screen .ending-content-box {
+  padding: 0;
+}
+
+#ending-view.active.ending-single-card.ending-report-screen .choices-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+  padding-bottom: 12px;
+}
+
+#ending-view.active.ending-single-card.ending-report-screen .choices-panel .choice-btn {
+  width: auto;
+  min-width: min(260px, 100%);
+  margin: 0;
+  white-space: normal;
+}
+
+#ending-view.active.ending-single-card.ending-report-screen #restart-btn {
+  width: min(260px, 100%);
+  border-left-color: var(--line-bright);
+  color: var(--text-muted);
+}
+
+.good-ending-final-card__lead {
+  margin: 0 0 14px;
+  color: var(--text-pixel);
+  font-size: clamp(1rem, 1.25vw, 1.25rem);
+  line-height: 1.55;
+}
+
+.good-ending-final-card__personal {
+  margin: 0 0 18px;
+  color: #d6e4dd;
+  font-size: clamp(0.9rem, 1.05vw, 1.05rem);
+  line-height: 1.5;
+}
+
+.good-ending-details {
+  margin: 18px 0 12px;
+  border-top: 1px solid rgba(102, 224, 142, 0.32);
+  border-bottom: 1px solid rgba(102, 224, 142, 0.32);
+}
+
+.good-ending-details summary {
+  min-height: 44px;
+  align-content: center;
+  color: var(--accent-green-border);
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.good-ending-details__body p {
+  margin: 0 0 12px;
+  color: var(--text-pixel);
+  font-size: clamp(0.88rem, 1vw, 1rem);
+  line-height: 1.48;
+}
+
+.good-ending-details__body strong { color: var(--accent-green-border); }
+
+#credits-view.credits-after-ending.active {
+  background: radial-gradient(circle at 50% 12%, #1b2928, #090d10 58%, #050607);
+  animation: good-ending-fade-in 900ms ease-out both;
+}
+
+#credits-view.credits-after-ending.active .ending-header { text-align: center; }
+
+#credits-view.credits-after-ending.active .credits-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+#credits-view.credits-after-ending .credits-panel__heading,
+#credits-view.credits-after-ending .credits-thanks { text-align: center; }
+
+#credits-view.credits-after-ending .credit-person {
+  display: block;
+  min-height: 0;
+  padding: 14px 8px;
+  text-align: center;
+  background: transparent;
+  border: 0;
+}
+
+#credits-view.credits-after-ending .credit-person__number,
+#credits-view.credits-after-ending .credit-social,
+#credits-view.credits-after-ending .credits-panel__signal { display: none; }
+
+#credits-view.credits-after-ending .credit-person__identity { align-items: center; }
+
+@media (max-width: 600px) {
+  .ending-cutscene .good-ending-dialogue {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 12px;
+    background: rgba(4, 8, 10, 0.78);
+  }
+
+  #ending-view.active.ending-single-card.ending-report-screen .choices-panel .choice-btn,
+  #ending-view.active.ending-single-card.ending-report-screen #restart-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #ending-view.active.ending-single-card.ending-report-screen,
+  #credits-view.credits-after-ending.active { animation: none; }
+}
+
+/* Keep Day 1–3 narration readable until the player opens its action list. */
+#game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .floating-interactive-card {
+  box-sizing: border-box;
+  max-height: min(68dvh, 560px, calc(100% - 20px));
+}
+
+#game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .card-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--line-bright) transparent;
+}
+
+#game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .dialogue-text {
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+#game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .choice-btn {
+  font-size: clamp(0.875rem, 1vw, 1rem);
+}
+
+#game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .floating-interactive-card.show-dialogue .card-nav-toggle-btn[aria-expanded="false"] {
+  border-color: var(--warning-yellow-border);
+  color: var(--warning-yellow-border);
+}
+
+@media (max-width: 480px) {
+  #game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .card-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #game-view:not(.prolog-mode):not(.packing-mode):not(.title-card-mode) .header-actions {
+    flex-wrap: wrap;
   }
 }

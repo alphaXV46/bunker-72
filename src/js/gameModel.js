@@ -33,6 +33,10 @@ const DEFAULT_FLAGS = Object.freeze({
   promised_maya: false,
   radio_reward_claimed: false,
   radio_quality: null,
+  water_rational_good: false,
+  water_used_freely: false,
+  sanitation_secured: false,
+  sanitation_exposed: false,
   water_reserve_used: false,
   water_rationed: false,
   power_radio_priority: false,
@@ -100,6 +104,12 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day1_air_newseal':      'air_seal_good',
   'c_day1_air_fix':          'air_remedied',
   'c_day1_air_spare_filter': 'air_seal_good',
+  'c_day1_water_rational': 'water_rational_good',
+  'c_day1_water_waste': 'water_used_freely',
+  'c_day1_sanitation_good': 'sanitation_secured',
+  'c_day1_waterwaste_sanitation_good': 'sanitation_secured',
+  'c_day1_sanitation_door': 'sanitation_exposed',
+  'c_day1_waterwaste_sanitation_door': 'sanitation_exposed',
   'c_day2_assess_systems': 'day2_crisis_applied',
   'c_day2_focus_air': 'day2_crisis_applied',
   'c_day2_focus_power': 'day2_crisis_applied',
@@ -380,6 +390,13 @@ export class GameModel {
         return [key, typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : defaultValue];
       })
     );
+    // Older sealed72 saves recorded this choice but did not spend a bottle.
+    // A new save carries the flag, so the migration runs only once.
+    if (this.storyRevision === STORY_REVISIONS.SEALED72
+      && !Object.prototype.hasOwnProperty.call(restoredFlags, 'water_used_freely')
+      && this.history.some((entry) => entry?.choiceId === 'c_day1_water_waste')) {
+      this.inventory.drink = Math.max(0, this.inventory.drink - 1);
+    }
 
     // Dynamic New Game+ progression check.
     this.flags.ng_plus = localStorage.getItem('bunker72_game_completed') === 'true';
@@ -797,6 +814,7 @@ export class GameModel {
       }
       if (this.flags.battery_committed) bunkerParts.push('Baterai ekstra menopang pemancar radio VHF secara mandiri tanpa membebani daya darurat bunker.');
       else if (this.flags.power_saved || this.flags.power_routed) bunkerParts.push('Pengaturan sirkuit memberi daya cukup untuk fungsi yang paling penting.');
+      if (this.flags.final_power_conserved) bunkerParts.push('Pada jam terakhir, sirkuit tambahan dimatikan sehingga indikator dasar bunker tetap menyala saat tim tiba.');
       if (this.flags.medical_mask_used) bunkerParts.push('Masker disiapkan untuk mengurangi paparan debu; masker tidak menyediakan oksigen atau menggantikan ventilasi.');
       modules.push({ id: 'bunker', icon: '▣', title: 'BUNKER 72', tone: 'bunker', body: bunkerParts.join(' ') });
 

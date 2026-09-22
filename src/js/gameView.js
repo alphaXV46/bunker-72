@@ -22,7 +22,7 @@ const GOOD_ENDING_BACKGROUNDS = {
   opening: new URL('../assets/backgrounds/bg_good_end.webp', import.meta.url).href,
   one: new URL('../assets/backgrounds/bg_good_end_1.webp', import.meta.url).href,
   two: new URL('../assets/backgrounds/bg_good_end_2.webp', import.meta.url).href,
-  three: new URL('../assets/backgrounds/bg_good_end_3.jpg', import.meta.url).href,
+  three: new URL('../assets/backgrounds/bg_good_end_3.webp', import.meta.url).href,
 };
 
 const BAD_ENDING_BACKGROUNDS = {
@@ -71,6 +71,7 @@ export class GameView {
     this.canReviewNarrative = false;
     this.backButton = null;
     this.goodEndingCutsceneStep = 0;
+    this.goodEndingRevealTimer = null;
     this.badEndingCutsceneStep = 0;
     this.sceneHotspotResizeObserver = null;
     this._activeHotspotContext = null;
@@ -158,9 +159,8 @@ export class GameView {
       },
     ];
     const beat = beats[this.badEndingCutsceneStep];
-    cutscene.classList.remove('ending-cutscene-bg-opening', 'ending-cutscene-bg-rescue', 'ending-cutscene-bg-final', 'is-changing');
-    void cutscene.offsetWidth;
-    cutscene.classList.add(`ending-cutscene-bg-${beat.background}`, 'is-changing');
+    cutscene.classList.remove('ending-cutscene-bg-opening', 'ending-cutscene-bg-rescue', 'ending-cutscene-bg-final');
+    cutscene.classList.add(`ending-cutscene-bg-${beat.background}`);
     cutscene.style.setProperty('--cutscene-bg', `url("${BAD_ENDING_BACKGROUNDS[beat.background]}")`);
     speaker.textContent = beat.speaker;
     dialogue.textContent = beat.text;
@@ -173,6 +173,8 @@ export class GameView {
     if (!cutscene) return;
     this.badEndingCutsceneStep = 0;
     this.dom.endingView.classList.remove('ending-bg-fatal');
+    this.dom.endingView.scrollTop = 0;
+    this.dom.endingView.classList.add('ending-cutscene-playing');
     cutscene.classList.add('is-active');
     cutscene.setAttribute('aria-hidden', 'false');
     this._renderBadEndingBeat();
@@ -188,6 +190,7 @@ export class GameView {
     }
     cutscene.classList.remove('is-active', 'ending-cutscene-bg-opening', 'ending-cutscene-bg-rescue', 'ending-cutscene-bg-final');
     cutscene.setAttribute('aria-hidden', 'true');
+    this.dom.endingView.classList.remove('ending-cutscene-playing');
     this.dom.endingView.classList.add('ending-bg-fatal');
   }
 
@@ -197,39 +200,54 @@ export class GameView {
     const dialogue = document.getElementById('good-ending-dialogue-text');
     const step = document.getElementById('good-ending-step');
     const nextButton = document.getElementById('good-ending-next');
+    const timecard = document.getElementById('good-ending-timecard');
     if (!cutscene || !speaker || !dialogue || !step || !nextButton) return;
 
     const beats = [
       {
         background: 'opening',
-        speaker: 'IBU',
-        text: '“Lihat... langitnya sudah mulai terang.” Ibu menggenggam tangan mereka. “Kita benar-benar berhasil melewati malam ini. Terima kasih karena tidak pernah menyerah.”',
+        speaker: 'NARATOR',
+        text: 'Palka terbuka. Setelah 72 jam di bawah tanah, Aris, Sarah, dan Maya akhirnya menghirup udara luar bersama.',
+        revealDelay: 1600,
       },
       {
         background: 'one',
-        speaker: 'AYAH',
-        text: '“Kita berhasil...” Ayah menarik napas panjang. “Terima kasih sudah tetap bersama. Sekarang kita bisa keluar dengan tenang—dan mulai lagi dari sana.”',
+        speaker: 'ARIS',
+        text: '“Kita keluar bersama.” Aris menatap Sarah dan Maya. Mereka melangkah pelan, masih lelah, tetapi tak lagi sendirian.',
       },
       {
         background: 'two',
         speaker: 'MAYA',
-        text: '“Ayah... Ibu... terima kasih sudah melindungiku.” Maya memeluk mereka erat. “Aku takut, tapi karena kita bersama, aku tidak merasa sendirian.”',
+        text: '“Aku sempat takut kita tidak akan keluar.” Maya memeluk mereka erat. “Tapi Ayah dan Ibu selalu ada.”',
+        revealDelay: 850,
       },
       {
         background: 'three',
         speaker: 'NARATOR',
-        text: 'Pintu bunker terbuka. Cahaya pagi menyambut keluarga itu—sebuah awal baru setelah 72 jam bertahan hidup.',
+        text: 'Hari-hari pemulihan masih panjang. Namun keluarga itu dapat memulainya bersama, selangkah demi selangkah.',
+        revealDelay: 1000,
       },
     ];
     const beat = beats[this.goodEndingCutsceneStep];
     cutscene.classList.remove('ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three', 'is-changing');
-    void cutscene.offsetWidth;
-    cutscene.classList.add(`ending-cutscene-bg-${beat.background}`, 'is-changing');
+    cutscene.classList.add(`ending-cutscene-bg-${beat.background}`);
     cutscene.style.setProperty('--cutscene-bg', `url("${GOOD_ENDING_BACKGROUNDS[beat.background]}")`);
     speaker.textContent = beat.speaker;
     dialogue.textContent = beat.text;
     step.textContent = `0${this.goodEndingCutsceneStep + 1} / 04`;
+    if (timecard) timecard.hidden = beat.background !== 'three';
     nextButton.textContent = this.goodEndingCutsceneStep === 3 ? 'LIHAT HASIL AKHIR' : 'LANJUTKAN';
+    if (this.goodEndingRevealTimer) clearTimeout(this.goodEndingRevealTimer);
+    const delay = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ? 0 : (beat.revealDelay || 0);
+    cutscene.classList.toggle('is-revealing', delay > 0);
+    nextButton.disabled = delay > 0;
+    if (delay > 0) {
+      this.goodEndingRevealTimer = setTimeout(() => {
+        cutscene.classList.remove('is-revealing');
+        nextButton.disabled = false;
+        this.goodEndingRevealTimer = null;
+      }, delay);
+    }
   }
 
   _startGoodEndingCutscene() {
@@ -237,6 +255,9 @@ export class GameView {
     if (!cutscene) return;
     this.goodEndingCutsceneStep = 0;
     this.dom.endingView.classList.remove('ending-bg-best');
+    this.dom.endingView.scrollTop = 0;
+    this.dom.endingView.classList.add('ending-cutscene-playing');
+    this._setGoodEndingReportInert(true);
     cutscene.classList.add('is-active');
     cutscene.setAttribute('aria-hidden', 'false');
     this._renderGoodEndingBeat();
@@ -244,7 +265,7 @@ export class GameView {
 
   _advanceGoodEndingCutscene() {
     const cutscene = document.getElementById('good-ending-cutscene');
-    if (!cutscene?.classList.contains('is-active')) return;
+    if (!cutscene?.classList.contains('is-active') || cutscene.classList.contains('is-revealing')) return;
     if (this.goodEndingCutsceneStep < 3) {
       this.goodEndingCutsceneStep += 1;
       this._renderGoodEndingBeat();
@@ -253,7 +274,18 @@ export class GameView {
 
     cutscene.classList.remove('is-active', 'ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three');
     cutscene.setAttribute('aria-hidden', 'true');
+    this.dom.endingView.classList.remove('ending-cutscene-playing');
     this.dom.endingView.classList.add('ending-bg-best');
+    this.dom.endingView.classList.add('ending-report-screen');
+    this._setGoodEndingReportInert(false);
+    this.dom.endingView.scrollTop = 0;
+    this.dom.endingTitle.setAttribute('tabindex', '-1');
+    this.dom.endingTitle.focus();
+  }
+
+  _setGoodEndingReportInert(inert) {
+    this.dom.endingView.querySelectorAll(':scope > .ending-header, :scope > .ending-content-box, :scope > .ending-stats, :scope > .debrief-box, :scope > .choices-panel')
+      .forEach((section) => { section.inert = inert; });
   }
 
   // ─── LISTENER SETUP (private) ─────────────────────────────────────────────
@@ -415,6 +447,10 @@ export class GameView {
           if (this.isTyping) {
             this.skipTyping();
           } else if (choicesVisible) {
+            if (this.isChoiceCardHidden()) {
+              this.showChoiceCard();
+              return;
+            }
             // The prolog's single "continue" choice is also keyboard accessible.
             const continueButton = this.dom.choicesPanel.querySelector('.title-continue');
             if (continueButton) continueButton.click();
@@ -425,7 +461,7 @@ export class GameView {
         }
       }
 
-      if (!this.dom.choicesPanel?.children.length) return;
+      if (!this.dom.choicesPanel?.children.length || this.isChoiceCardHidden()) return;
       const keyNumber = Number(event.key);
       if (!Number.isInteger(keyNumber) || keyNumber < 1 || keyNumber > 3) return;
       const button = this.dom.choicesPanel.children[keyNumber - 1];
@@ -474,6 +510,28 @@ export class GameView {
     });
   }
 
+  isChoiceCardHidden() {
+    const gameView = this.dom.gameView;
+    const card = document.getElementById('floating-interactive-card');
+    return Boolean(card?.classList.contains('show-dialogue')
+      && gameView && !gameView.classList.contains('prolog-mode')
+      && !gameView.classList.contains('packing-mode')
+      && !gameView.classList.contains('title-card-mode'));
+  }
+
+  showChoiceCard() {
+    if (!this.isChoiceCardHidden() || !this.dom.choicesPanel?.children.length) return false;
+    const card = document.getElementById('floating-interactive-card');
+    card.classList.remove('show-dialogue');
+    card.classList.add('show-choices');
+    const cardBody = card.querySelector('.card-body');
+    if (cardBody) cardBody.scrollTop = 0;
+    const toggleLabel = document.getElementById('toggle-btn-label');
+    if (toggleLabel) toggleLabel.textContent = 'BACA CERITA';
+    document.getElementById('card-nav-toggle-btn')?.setAttribute('aria-expanded', 'true');
+    return true;
+  }
+
   _setupCardAndDrawerListeners() {
     const card = document.getElementById('floating-interactive-card');
     const toggleBtn = document.getElementById('card-nav-toggle-btn');
@@ -486,15 +544,24 @@ export class GameView {
     if (toggleBtn && card && toggleLabel) {
       toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (this.isTyping) {
+          this.skipTyping();
+          return;
+        }
+        if (!this.dom.choicesPanel?.children.length) return;
         if (card.classList.contains('show-choices')) {
           card.classList.remove('show-choices');
           card.classList.add('show-dialogue');
-          toggleLabel.textContent = 'PILIHAN AKSI';
+          toggleLabel.textContent = card.dataset.actionLabel || 'LIHAT PILIHAN';
+          toggleBtn.setAttribute('aria-expanded', 'false');
         } else {
           card.classList.remove('show-dialogue');
           card.classList.add('show-choices');
           toggleLabel.textContent = 'BACA CERITA';
+          toggleBtn.setAttribute('aria-expanded', 'true');
         }
+        const cardBody = card.querySelector('.card-body');
+        if (cardBody) cardBody.scrollTop = 0;
       });
     }
 
@@ -795,8 +862,13 @@ export class GameView {
   renderSceneArt(scene, flags = {}, sceneId = '', storyRevision = 'sealed72') {
     if (!['day1_inspection', 'backstory_sarah_office'].includes(sceneId)) this.clearSceneHotspots();
     const hour = parseHour(scene.hour);
-    const gameplayDayBg = hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
-    const damagedBg = hour >= 48 ? 'bg-day3' : 'bg-rusak';
+    const gameplayDayBg = sceneId.startsWith('day1_') ? 'bg-day1'
+      : sceneId.startsWith('day2_') ? 'bg-day2'
+        : sceneId.startsWith('day3_') ? 'bg-day3'
+          : hour >= 48 ? 'bg-day3' : hour >= 24 ? 'bg-day2' : 'bg-day1';
+    const damagedBg = sceneId.startsWith('day2_') ? 'bg-rusak'
+      : sceneId.startsWith('day3_') ? 'bg-day3'
+        : hour >= 48 ? 'bg-day3' : 'bg-rusak';
     const bgClassMap = {
       peaceful: 'bg-prolog-peaceful',
       prolog_peaceful: 'bg-prolog-peaceful',
@@ -1231,13 +1303,16 @@ export class GameView {
 
     const stage = document.createElement('div');
     stage.className = 'scene-hotspot-stage';
-    if (image?.url) {
-      stage.style.backgroundImage = `url("${image.url}")`;
+    if (image?.width && image?.height) {
+      if (image.url) stage.style.backgroundImage = `url("${image.url}")`;
+      if (image.fit === 'cover') layer.style.overflow = 'hidden';
       const updateStageBounds = () => {
         const layerWidth = layer.clientWidth;
         const layerHeight = layer.clientHeight;
         if (!layerWidth || !layerHeight || !image.width || !image.height) return;
-        const scale = Math.min(layerWidth / image.width, layerHeight / image.height);
+        const scale = image.fit === 'cover'
+          ? Math.max(layerWidth / image.width, layerHeight / image.height)
+          : Math.min(layerWidth / image.width, layerHeight / image.height);
         const renderedWidth = image.width * scale;
         const renderedHeight = image.height * scale;
         stage.style.width = `${renderedWidth}px`;
@@ -1350,6 +1425,7 @@ export class GameView {
       ariaLabel: 'Titik diagnosis pascagempa',
       layerClass: 'day2-hotspot-layer',
       hotspotClass: 'day2-hotspot',
+      image: { width: 1672, height: 941, fit: 'cover' },
       statusTitle: 'DIAGNOSIS PASCA-GEMPA',
       statusText: `${inspectedCount}/${primaryHotspots.length} titik primer · 3 cukup untuk lanjut`,
       getState: (spot) => {
@@ -1380,6 +1456,7 @@ export class GameView {
       ariaLabel: 'Titik inspeksi bunker',
       layerClass: 'day1-hotspot-layer',
       hotspotClass: 'day1-hotspot',
+      image: { width: 1672, height: 941, fit: 'cover' },
       statusTitle: 'INSPEKSI BUNKER',
       statusText: `${inspectedCount}/3 titik diperiksa`,
       getState: (spot) => {
@@ -1744,9 +1821,12 @@ export class GameView {
     const card = document.getElementById('floating-interactive-card');
     const toggleLabel = document.getElementById('toggle-btn-label');
     if (card && toggleLabel) {
-      card.classList.remove('show-dialogue');
-      card.classList.add('show-choices');
-      toggleLabel.textContent = 'AKSI WAJIB';
+      const holdNarrative = /^day[123]_/.test(this.controller?.model?.currentSceneId || '');
+      card.dataset.actionLabel = 'LIHAT AKSI';
+      card.classList.toggle('show-dialogue', holdNarrative);
+      card.classList.toggle('show-choices', !holdNarrative);
+      toggleLabel.textContent = holdNarrative ? 'LIHAT AKSI' : 'AKSI WAJIB';
+      document.getElementById('card-nav-toggle-btn')?.setAttribute('aria-expanded', String(!holdNarrative));
     }
 
     const panel = document.createElement('div');
@@ -1800,9 +1880,12 @@ export class GameView {
     const card = document.getElementById('floating-interactive-card');
     const toggleLabel = document.getElementById('toggle-btn-label');
     if (card && toggleLabel && choices?.length && !currentSceneId.startsWith('prolog_') && currentSceneId !== 'prolog_title') {
-      card.classList.remove('show-dialogue');
-      card.classList.add('show-choices');
-      toggleLabel.textContent = 'BACA CERITA';
+      const holdNarrative = /^day[123]_/.test(currentSceneId);
+      card.dataset.actionLabel = 'LIHAT PILIHAN';
+      card.classList.toggle('show-dialogue', holdNarrative);
+      card.classList.toggle('show-choices', !holdNarrative);
+      toggleLabel.textContent = holdNarrative ? 'LIHAT PILIHAN' : 'BACA CERITA';
+      document.getElementById('card-nav-toggle-btn')?.setAttribute('aria-expanded', String(!holdNarrative));
     }
 
     if (!choices?.length) {
@@ -1938,7 +2021,10 @@ export class GameView {
     if (card && toggleLabel) {
       card.classList.remove('show-choices');
       card.classList.add('show-dialogue');
+      const cardBody = card.querySelector('.card-body');
+      if (cardBody) cardBody.scrollTop = 0;
       toggleLabel.textContent = 'PILIHAN AKSI';
+      document.getElementById('card-nav-toggle-btn')?.setAttribute('aria-expanded', 'false');
     }
     
     // Create/reuse TextNode to avoid repeated DOM layout thrashing & string allocations
@@ -2073,10 +2159,17 @@ export class GameView {
    * @param {object} flags            - Player state flags reconstructed from history.
    */
   renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null) {
+    this._setGoodEndingReportInert(false);
+    this.dom.endingView.scrollTop = 0;
+    if (this.goodEndingRevealTimer) {
+      clearTimeout(this.goodEndingRevealTimer);
+      this.goodEndingRevealTimer = null;
+    }
     const cutscene = document.getElementById('good-ending-cutscene');
     if (cutscene) {
-      cutscene.classList.remove('is-active', 'ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three');
+      cutscene.classList.remove('is-active', 'is-revealing', 'is-changing', 'ending-cutscene-bg-opening', 'ending-cutscene-bg-one', 'ending-cutscene-bg-two', 'ending-cutscene-bg-three');
       cutscene.setAttribute('aria-hidden', 'true');
+      cutscene.style.removeProperty('--cutscene-bg');
     }
     const badCutscene = document.getElementById('bad-ending-cutscene');
     if (badCutscene) {
@@ -2088,7 +2181,9 @@ export class GameView {
 
     this.dom.endingTitle.classList.remove('ending-bad', 'ending-normal', 'ending-best');
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
-    this.dom.endingView.classList.remove('ending-single-card', 'ending-normal-single-card');
+    this.dom.endingView.classList.remove('ending-single-card', 'ending-normal-single-card', 'ending-report-screen', 'ending-cutscene-playing');
+    const creditsButton = document.getElementById('ending-credits-btn');
+    if (creditsButton) creditsButton.hidden = endingId !== 'ending_good';
     if (this.dom.endingStats) this.dom.endingStats.classList.remove('hidden');
 
     const ENDING_CONFIG = {
@@ -2123,7 +2218,28 @@ export class GameView {
     const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
     const reportModules = modules;
 
-    if ((endingId === 'ending_good' || endingId === 'ending_normal') && reportModules.length) {
+    if (endingId === 'ending_good' && reportModules.length) {
+      const mayaModule = reportModules.find((module) => module.id === 'maya');
+      this.dom.endingDesc.innerHTML = `
+        <article class="good-ending-final-card">
+          <div class="good-ending-final-card__eyebrow">EPILOG // 72 JAM BERAKHIR</div>
+          <p class="good-ending-final-card__lead">${escapeHtml(endingText)}</p>
+          ${mayaModule ? `<p class="good-ending-final-card__personal">${escapeHtml(mayaModule.body)}</p>` : ''}
+          <div class="good-ending-final-card__readiness">
+            <div class="good-ending-final-card__readiness-label">KESIAPSIAGAAN TEKNIS</div>
+            <strong>${score} / 100</strong>
+            <span>${escapeHtml(grade.label)}</span>
+          </div>
+          <details class="good-ending-details">
+            <summary>BACA EPILOG LENGKAP</summary>
+            <div class="good-ending-details__body">
+              ${reportModules.map((module) => `<p><strong>${escapeHtml(module.title)}:</strong> ${escapeHtml(module.body)}</p>`).join('')}
+            </div>
+          </details>
+          <p class="good-ending-final-card__score">${escapeHtml(grade.desc)} Ini adalah ringkasan permainan, bukan penilaian resmi.</p>
+        </article>
+      `;
+    } else if ((endingId === 'ending_good' || endingId === 'ending_normal') && reportModules.length) {
       const reportClass = endingId === 'ending_normal' ? 'normal-ending-final-card' : 'good-ending-final-card';
       const reportEyebrow = endingId === 'ending_normal' ? 'HASIL EVAKUASI // RINGKASAN AKHIR' : 'HASIL EVAKUASI // PROTOKOL 72';
       this.dom.endingDesc.innerHTML = `
@@ -2187,6 +2303,11 @@ export class GameView {
     const debriefList = document.getElementById('debrief-list');
     const debriefBox = document.getElementById('debrief-box');
     if (debriefList && debriefBox) {
+      const debriefSummary = debriefBox.querySelector('summary');
+      if (debriefSummary) debriefSummary.textContent = endingId === 'ending_good'
+        ? 'LIHAT EVALUASI TEKNIS'
+        : 'APA YANG SUDAH SIAP & PERLU DIPERBAIKI';
+      debriefBox.open = false;
       const items = modularData?.preparedness?.debriefItems || [];
       debriefList.innerHTML = items.map((item) => `
         <li class="preparedness-debrief-item">

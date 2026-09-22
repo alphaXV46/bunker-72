@@ -26,6 +26,7 @@ globalThis.window = {
 try {
   const { GameModel } = await vite.ssrLoadModule('/src/js/gameModel.js');
   const { StoryEngine, DAY2_DIAGNOSTIC_HOTSPOTS } = await vite.ssrLoadModule('/src/js/storyEngine.js');
+  const { RadioMiniGame } = await vite.ssrLoadModule('/src/js/radioMiniGame.js');
   const { STATIONS } = await vite.ssrLoadModule('/src/js/bunkerStations/stationsConfig.js');
 
   const storyData = JSON.parse(fs.readFileSync('src/data/story.json', 'utf8'));
@@ -76,6 +77,26 @@ try {
       }
     }
   }
+  assert.equal(scenes.day2_systems_check.choices.length, 0, 'Service panel must open before the Air/Power choice');
+  assert.deepEqual(scenes.day2_strategy_choice.choices.map((choice) => choice.id), ['c_day2_focus_air', 'c_day2_focus_power']);
+
+  const waterRoute = makeEngine('day1_supplies');
+  waterRoute.engine.view = { isTyping: false, pulseKnowledge() {}, renderProtocolLog() {} };
+  waterRoute.engine.audio = { playBadChoice() {}, playClick() {} };
+  waterRoute.engine.renderScene = (id) => { waterRoute.model.currentSceneId = id; };
+  waterRoute.engine.handleChoiceSelect(scenes.day1_supplies.choices.find((choice) => choice.id === 'c_day1_water_waste'));
+  assert.equal(waterRoute.model.inventory.drink, 1, 'Loose water use must consume one bottle');
+  assert.equal(waterRoute.model.flags.water_used_freely, true);
+  assert.match(resolveText('day2_family_check', waterRoute.model.flags), /satu botol sudah habis/i);
+  assert.doesNotMatch(resolveText('day2_family_check', waterRoute.model.flags), /botol cadangan yang ditandai/i);
+  assert.match(resolveText('day3_water_pressure', waterRoute.model.flags), /satu botol habis pada malam pertama/i);
+  const oldWaterSave = makeModel('day2_family_check', {}, [{ choiceId: 'c_day1_water_waste' }]);
+  assert.equal(oldWaterSave.flags.water_used_freely, true);
+  assert.equal(oldWaterSave.inventory.drink, 1, 'Old saves must pay the new bottle cost once');
+  const reloadedWaterSave = new GameModel();
+  reloadedWaterSave.init('day2_family_check', oldWaterSave.knowledge, oldWaterSave.history,
+    oldWaterSave.flags, oldWaterSave.inventory, oldWaterSave.hunger, oldWaterSave.thirst, oldWaterSave.health);
+  assert.equal(reloadedWaterSave.inventory.drink, 1, 'Reload must not spend the bottle twice');
 
   // 3. Wet-mask branch is temporary particle protection and explicitly returns to follow-up.
   const wetMask = scenes.day1_lockdoor.choices.find((choice) => choice.id === 'c_day1_air_wetmask');
@@ -162,6 +183,20 @@ try {
   assert.doesNotMatch(failedText, /Hendra/i);
   assert.match(radioSource, /rentang fiksi permainan|SIARAN SIMULASI|RELAY SIMULASI SAR/i);
   assert.doesNotMatch(radioSource, /frekuensi evakuasi BNPB|kanal darurat resmi/i);
+  const radio = Object.create(RadioMiniGame.prototype);
+  radio.modalEl = { classList: { remove() {} }, setAttribute() {} };
+  radio.dom = {};
+  radio.finalResultResolved = false;
+  radio.open({ finalAttempt: true, radioPowerLimited: true, powerStrained: true });
+  radio.currentFreq = radio.targetFreq;
+  assert.equal(radio._getSignalStrength(), 85, 'Water processing and air priority must weaken an unsupported radio call');
+  assert.equal(radio._getFinalQuality(radio._getSignalStrength()), 'weak');
+  radio.open({ finalAttempt: true, radioPowerLimited: true, powerStrained: true, inspectedRadio: true });
+  radio.currentFreq = radio.targetFreq;
+  assert.equal(radio._getFinalQuality(radio._getSignalStrength()), 'clear', 'Day 1 radio inspection must recover signal margin with precise tuning');
+  radio.open({ finalAttempt: true, extraBattery: true });
+  radio.currentFreq = radio.targetFreq;
+  assert.equal(radio._getSignalStrength(), 100, 'Committed VHF battery must protect the signal margin');
 
   // 8. First-aid wording keeps the Health mutation but removes unsafe medical claims.
   assert.doesNotMatch(engineSource, /Nyeri dadaku mulai mereda|obat ini bekerja cepat|Obat-obatan ini sangat krusial/i);
