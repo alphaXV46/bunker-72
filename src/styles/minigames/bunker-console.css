@@ -579,6 +579,161 @@
 .mg-number-row.is-locked .mg-receptacle b { color: var(--mg-green); }
 .mg-number-row.is-locked .mg-row-status { color: var(--mg-green); font-weight: bold; }
 
+.mg-hatch-layout {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 255px;
+}
+
+.mg-hatch-readout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 12px;
+  border: 1px solid #2d393f;
+  background: #0b1114;
+}
+
+.mg-hatch-readout > div {
+  display: grid;
+  gap: 4px;
+}
+
+.mg-hatch-readout b {
+  color: var(--mg-ink);
+  font-size: clamp(0.68rem, 1vw, 0.82rem);
+  letter-spacing: 1px;
+}
+
+.mg-hatch-readout > strong {
+  color: var(--mg-cyan);
+  font-family: 'VT323', monospace;
+  font-size: clamp(1.8rem, 3.2vw, 2.45rem);
+  line-height: 0.85;
+}
+
+.mg-hatch-track {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 150px;
+  overflow: hidden;
+  border: 2px solid #46565c;
+  border-radius: 4px;
+  outline: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(91,192,190,0.08), transparent 45%),
+    repeating-linear-gradient(90deg, transparent 0 38px, rgba(255,255,255,0.025) 38px 39px),
+    linear-gradient(180deg, #1a2529, #0b1215);
+  box-shadow: inset 0 0 26px rgba(0,0,0,0.72), 0 5px 15px rgba(0,0,0,0.25);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.mg-hatch-track:focus-visible {
+  outline: 2px solid var(--mg-amber);
+  outline-offset: 3px;
+}
+
+.mg-hatch-rail {
+  position: absolute;
+  top: 50%;
+  left: 6%;
+  right: 6%;
+  height: 12px;
+  transform: translateY(-50%);
+  border: 2px solid #313e43;
+  border-radius: 99px;
+  background: repeating-linear-gradient(90deg, #202d32 0 18px, #35484f 18px 21px);
+  box-shadow: inset 0 2px 4px #050809, 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.mg-hatch-sweet-zone {
+  position: absolute;
+  top: 23%;
+  bottom: 23%;
+  box-sizing: border-box;
+  display: grid;
+  place-content: center;
+  gap: 3px;
+  border: 2px solid var(--mg-green);
+  border-radius: 4px;
+  color: var(--mg-green);
+  background: repeating-linear-gradient(135deg, rgba(99,230,190,0.12) 0 8px, transparent 8px 16px);
+  box-shadow: inset 0 0 16px rgba(99,230,190,0.12), 0 0 12px rgba(99,230,190,0.16);
+  pointer-events: none;
+  text-align: center;
+  z-index: 1;
+}
+
+.mg-hatch-sweet-zone b { font-size: clamp(0.6rem, 0.9vw, 0.74rem); letter-spacing: 1.2px; }
+.mg-hatch-sweet-zone small { font-size: 0.45rem; letter-spacing: 0.8px; }
+
+.mg-hatch-needle {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 56px;
+  transform: translate(-50%, -50%);
+  color: var(--mg-amber);
+  pointer-events: none;
+  transition: left 0.08s linear, color 0.12s ease, filter 0.12s ease;
+}
+
+.mg-hatch-needle i {
+  display: block;
+  width: 42px;
+  height: 42px;
+  border: 4px solid var(--mg-amber);
+  border-radius: 50%;
+  background: radial-gradient(circle, #263a3f 0 24%, #0b1114 27% 62%, #41585e 65% 68%, #111a1d 70%);
+  box-shadow: 0 4px 0 #050809, 0 0 14px rgba(255,209,102,0.32);
+}
+
+.mg-hatch-needle b { font-size: 0.47rem; letter-spacing: 0.9px; text-shadow: 0 1px #000; }
+.mg-hatch-track.is-aligned .mg-hatch-needle { color: var(--mg-green); }
+.mg-hatch-track.is-aligned .mg-hatch-needle i { border-color: var(--mg-green); box-shadow: 0 4px 0 #050809, 0 0 17px rgba(99,230,190,0.45); }
+.mg-hatch-track.is-holding .mg-hatch-needle i { filter: brightness(1.15) saturate(1.1); }
+.mg-hatch-track.is-resisting .mg-hatch-needle { color: var(--mg-red); }
+.mg-hatch-track.is-resisting .mg-hatch-needle i { border-color: var(--mg-red); animation: mg-jolt 0.24s ease infinite; }
+
+.mg-hatch-resistance {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  height: 5px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--mg-amber), var(--mg-red));
+  box-shadow: 0 0 12px rgba(239,91,91,0.38);
+  pointer-events: none;
+  transition: width 0.08s linear;
+}
+
+.mg-hatch-track.is-resistance-reset { animation: mg-jolt 0.38s ease; }
+
+.mg-hatch-readout--secondary {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 45px;
+  color: var(--mg-amber);
+  font-size: clamp(0.64rem, 0.95vw, 0.78rem);
+  letter-spacing: 0.7px;
+}
+
+.mg-hatch-readout--secondary small {
+  color: var(--mg-muted);
+  font-size: 0.54rem;
+  letter-spacing: 0.5px;
+}
+
 .mg-card-layout {
   display: flex;
   flex-direction: column;

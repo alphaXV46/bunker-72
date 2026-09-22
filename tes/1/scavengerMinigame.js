@@ -28,7 +28,7 @@ const ITEM_ASSETS = {
   radio: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Radio Portable', desc: 'Info & Sinyal SAR' },
   snack: { image: new URL('../assets/items/snacks.png',     import.meta.url).href, label: 'Snack Darurat',   desc: '+5 Makanan Cepat' },
   toy:   { image: new URL('../assets/items/car_toy.png',    import.meta.url).href, label: 'Mainan Anak',     desc: 'Moral Keluarga' },
-  battery: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Baterai Ekstra VHF', desc: 'Cadangan pemancar VHF' },
+  battery: { image: new URL('../assets/items/radio_icon.png', import.meta.url).href, label: 'Baterai Ekstra', desc: 'Cadangan daya' },
   mask: { image: new URL('../assets/items/kit_icon.png', import.meta.url).href, label: 'Masker Medis', desc: 'Perlindungan napas' }
 };
 
@@ -577,7 +577,7 @@ const PROLOGUE_ITEMS = Object.freeze([
   { uid: 'drink-1',   type: 'drink',   id: 'drink',   name: 'Air Bersih',     x: 190,  y: 660, w: 36, h: 36, roomId: 'kitchen', room: 'Ruang Makan' },
   { uid: 'kit-0',     type: 'kit',     id: 'kit',     name: 'Kotak P3K',      x: 350,  y: 215, w: 36, h: 36, roomId: 'master',  room: 'Kamar Utama' },
   { uid: 'radio-0',   type: 'radio',   id: 'radio',   name: 'Radio Portable', x: 1280, y: 650, w: 36, h: 36, roomId: 'office',  room: 'Ruang Kerja' },
-  { uid: 'battery-0', type: 'battery', id: 'battery', name: 'Baterai Ekstra VHF', x: 910,  y: 490, w: 36, h: 36, roomId: 'living',  room: 'Ruang Keluarga' },
+  { uid: 'battery-0', type: 'battery', id: 'battery', name: 'Baterai Ekstra', x: 910,  y: 490, w: 36, h: 36, roomId: 'living',  room: 'Ruang Keluarga' },
   { uid: 'toy-0',     type: 'toy',     id: 'toy',     name: 'Mainan Anak',    x: 1465, y: 250, w: 36, h: 36, roomId: 'child',   room: 'Kamar Anak' },
 ]);
 

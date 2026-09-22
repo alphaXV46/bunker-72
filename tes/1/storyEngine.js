@@ -56,77 +56,8 @@ const DAY1_HOTSPOTS = Object.freeze([
   { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 58, y: 45, w: 12, h: 19, text: 'Loker P3K berisi kasa dan antiseptik yang masih kering. Kotak ini mudah dijangkau bila ada yang terluka.', reward: { item: 'kit', amount: 1 } },
   { id: 'ventilation', flag: 'inspected_ventilation', label: 'Ventilasi', x: 57, y: 18, w: 12, h: 20, text: 'Kisi ventilasi berdebu, tetapi di balik panel ada filter cadangan yang belum terpasang. Pengetahuan teknis +1.', knowledge: 1, setFlags: ['found_spare_filter'] },
   { id: 'power', flag: 'inspected_power', label: 'Panel Daya', x: 25, y: 24, w: 6, h: 14, text: 'Panel daya menyala stabil. Menandai sakelar pemutus utama akan mempercepat respons jika arus kembali melonjak. Pengetahuan teknis +1.', knowledge: 1 },
-  { id: 'radio', flag: 'inspected_radio', label: 'Radio VHF', x: 34, y: 62, w: 13, h: 12, text: 'Radio VHF masih menerima dengung statik. Rentang sinyal komunikasi bisa dicari nanti, setelah udara benar-benar aman.' },
+  { id: 'radio', flag: 'inspected_radio', label: 'Radio VHF', x: 34, y: 62, w: 13, h: 12, text: 'Radio VHF masih menerima dengung statik. Frekuensi darurat bisa dicari nanti, setelah udara benar-benar aman.' },
   { id: 'family_storage', flag: 'inspected_family_storage', label: 'Penyimpanan Keluarga', x: 84, y: 73, w: 13, h: 18, text: 'Kotak penyimpanan keluarga berisi selimut dan foto lama. Menaruhnya dekat dipan membuat malam pertama terasa sedikit lebih manusiawi.' },
-]);
-export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
-  // Geometry is normalized from the 1672x941 source image, not the viewport.
-  {
-    id: 'ventilation',
-    flag: 'day2_diagnostic_air',
-    primary: true,
-    label: 'Ventilasi',
-    x: 53.83,
-    y: 3.72,
-    w: 11.36,
-    h: 18.60,
-    text: 'Aliran udara melemah dan suara blower berubah ritmenya. Kisi serta jalurnya belum putus total, tetapi modul penyaring perlu ditangani setelah sumber gangguan lain dipetakan.',
-  },
-  {
-    id: 'power_panel',
-    flag: 'day2_diagnostic_power',
-    primary: true,
-    label: 'Panel Daya',
-    x: 64.29,
-    y: 26.57,
-    w: 5.68,
-    h: 17.54,
-    text: 'Beban darurat naik-turun dan indikator inverter berkedip. Panel masih bekerja, namun distribusinya tidak stabil setelah guncangan.',
-  },
-  {
-    id: 'structure',
-    flag: 'day2_diagnostic_structure',
-    primary: true,
-    label: 'Segel Pintu Bunker',
-    x: 70.87,
-    y: 15.94,
-    w: 17.05,
-    h: 46.23,
-    text: 'Segel pintu tetap utuh dan tidak ada tanda bunker akan runtuh. Bingkai serta mekanisme pengunci bergeser sedikit; stabilizer mekanis perlu diselaraskan sebelum servis lanjutan.',
-  },
-  {
-    id: 'supply_rack',
-    flag: 'day2_diagnostic_supplies',
-    primary: true,
-    label: 'Rak Persediaan',
-    x: 30.80,
-    y: 18.60,
-    w: 19.14,
-    h: 36.66,
-    text: 'Rak bergetar tetapi masih menahan muatan. Jumlah perbekalan tetap mengikuti inventaris yang sudah diamankan—tidak ada barang baru yang muncul dari diagnosis ini.',
-  },
-  {
-    id: 'radio',
-    flag: 'day2_diagnostic_radio',
-    primary: false,
-    label: 'Radio VHF',
-    x: 39.47,
-    y: 65.89,
-    w: 5.98,
-    h: 9.56,
-    text: 'Radio masih menerima dengung pendek di sela statik. Tidak ada sesi radio sekarang; pola gangguan ini layak dipantau untuk operasi komunikasi Hari Ketiga.',
-  },
-  {
-    id: 'medical_counter',
-    flag: 'day2_diagnostic_medical',
-    primary: false,
-    label: 'Meja Medis',
-    x: 51.14,
-    y: 38.79,
-    w: 15.25,
-    h: 13.28,
-    text: 'Perlengkapan medis dan masker yang sudah dimiliki keluarga tetap tersimpan. Pemeriksaan ini hanya memastikan aksesnya tidak tertutup; tidak ada saran medis baru atau konsumsi item.',
-  },
 ]);
 const EXPEDITION_LOCATIONS = Object.freeze(Object.values(EXPEDITION_CONFIGS).map(({ id, label, risk, resourceHint }) => ({ id, label, risk, resourceHint })));
 
@@ -197,7 +128,6 @@ export class StoryEngine {
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
     this.pendingMinigameChoice = null;
-    this.pendingRequiredInteraction = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds = new Set();
     this.sarahAnalysisIndex = 0;
@@ -289,7 +219,6 @@ export class StoryEngine {
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
     this.pendingMinigameChoice = null;
-    this.pendingRequiredInteraction = null;
     this.bunkerEntryUnlocked = false;
     this._unlockedMinigameChoiceIds?.clear();
     this.sarahAnalysisIndex = 0;
@@ -391,15 +320,6 @@ export class StoryEngine {
     this.model.currentSceneId = sceneId;
     if (scene.setFlags?.length) {
       scene.setFlags.forEach((flag) => this.model.setFlag(flag));
-    }
-
-    const requiredInteraction = this._getRequiredInteraction(scene);
-    if (requiredInteraction && this.model.flags[requiredInteraction.completionFlag] === true) {
-      // A save may have been captured at the interaction scene after its
-      // completion flag was committed. Recover at the destination checkpoint
-      // without replaying the station or duplicating its history entry.
-      this.renderScene(requiredInteraction.nextSceneId);
-      return;
     }
 
     // ── Audio ──
@@ -511,23 +431,6 @@ export class StoryEngine {
       return;
     }
 
-    if (sceneId === 'day2_diagnostic_sweep') {
-      const day2Hotspots = mergeHotspotGeometry('day2_diagnostic_sweep', DAY2_DIAGNOSTIC_HOTSPOTS);
-      const showDiagnostics = () => this.view.renderDay2DiagnosticHotspots(
-        day2Hotspots,
-        this.model.flags,
-        (hotspotId) => this.handleDay2Diagnostic(hotspotId),
-        () => this.renderScene('day2_rotor_alignment'),
-        DAY2_DIAGNOSTIC_HOTSPOTS,
-      );
-      this.view.typeText(modifiedText, showDiagnostics, {
-        ...choicesPayload,
-        choices: [],
-        day2DiagnosticReady: showDiagnostics,
-      });
-      return;
-    }
-
     if (sceneId === 'backstory_sarah_office') {
       const showOffice = () => this.renderSarahOfficeHotspots();
       this.view.typeText(modifiedText, showOffice, { ...choicesPayload, choices: [], interactiveReady: showOffice });
@@ -562,19 +465,6 @@ export class StoryEngine {
         ...choicesPayload,
         choices: [],
         expeditionMapReady: showPlanningMap,
-      });
-      return;
-    }
-
-    if (requiredInteraction) {
-      const showRequiredInteraction = () => this.view.renderRequiredInteraction(
-        requiredInteraction,
-        () => this.handleRequiredInteraction(requiredInteraction)
-      );
-      this.view.typeText(modifiedText, showRequiredInteraction, {
-        ...choicesPayload,
-        choices: [],
-        requiredInteractionReady: showRequiredInteraction,
       });
       return;
     }
@@ -713,98 +603,6 @@ export class StoryEngine {
     // Advance to next scene checkpoint. The single canonical save snapshot
     // will be persisted atomically with sceneId: 'prolog_expedition_call'.
     this.renderScene('prolog_expedition_call');
-  }
-
-  /**
-   * Validates the small scene-level contract for mandatory station actions.
-   * The shape is intentionally data-driven so future stations do not need
-   * scene-ID-specific controller branches.
-   */
-  _getRequiredInteraction(scene) {
-    const interaction = scene?.requiredInteraction;
-    if (!interaction || interaction.type !== 'bunkerStation') return null;
-    if (!interaction.station || !interaction.actionText || !interaction.completionFlag || !interaction.nextSceneId) return null;
-    return interaction;
-  }
-
-  /** Starts a required station only after the narrative has finished typing. */
-  handleRequiredInteraction(interaction) {
-    if (isVisualEditorActive()) return false;
-    const resolved = this._getRequiredInteraction({ requiredInteraction: interaction });
-    if (!resolved || this.model.flags[resolved.completionFlag] === true) return false;
-    if (this.pendingRequiredInteraction) return false;
-
-    this.pendingRequiredInteraction = resolved;
-    this.audio.playClick();
-    this.bunkerMinigame.openStation(resolved.station, {
-      allowFailure: resolved.allowFailure,
-      onComplete: (result) => this.completeRequiredInteraction(resolved, result),
-      onCancel: () => {
-        if (this.pendingRequiredInteraction?.completionFlag === resolved.completionFlag) {
-          this.pendingRequiredInteraction = null;
-        }
-      },
-      onFailure: () => {
-        if (this.pendingRequiredInteraction?.completionFlag === resolved.completionFlag) {
-          this.pendingRequiredInteraction = null;
-        }
-      },
-    });
-    return true;
-  }
-
-  /** Commits a required action once, records it as protocol, then checkpoints. */
-  completeRequiredInteraction(interaction, result = { success: true }) {
-    const resolved = this._getRequiredInteraction({ requiredInteraction: interaction });
-    if (!resolved || result?.success === false) return false;
-    if (!this.model.completeRequiredInteraction(resolved.completionFlag)) {
-      return false;
-    }
-
-    this.pendingRequiredInteraction = null;
-    this.bunkerMinigame?.close();
-    this.model.history.push({
-      hour: this.getScene(this.model.currentSceneId)?.hour ?? '--',
-      text: resolved.historyText || `[${resolved.station.toUpperCase()}] Interaksi wajib selesai.`,
-      choiceId: `required_${resolved.station}`,
-      effect: 0,
-    });
-    this.view.renderProtocolLog(this.model.history);
-    this.audio.playClick();
-    // renderScene owns the destination checkpoint save.
-    this.renderScene(resolved.nextSceneId);
-    return true;
-  }
-
-  /** Records one unique Day 2 diagnostic observation without changing score or inventory. */
-  handleDay2Diagnostic(hotspotId) {
-    if (isVisualEditorActive()) return;
-    const hotspot = DAY2_DIAGNOSTIC_HOTSPOTS.find((spot) => spot.id === hotspotId);
-    if (!hotspot || this.model.flags[hotspot.flag] === true) return;
-
-    this.model.setFlag(hotspot.flag);
-    const primaryCount = DAY2_DIAGNOSTIC_HOTSPOTS.filter((spot) =>
-      spot.primary === true && this.model.flags[spot.flag] === true
-    ).length;
-    if (primaryCount >= 3) this.model.setFlag('day2_diagnostics_complete');
-
-    this.model.history.push({
-      hour: this.getScene(this.model.currentSceneId)?.hour ?? '31 Jam',
-      text: `[DIAGNOSIS] ${hotspot.label}: ${hotspot.text}`,
-      choiceId: `diagnostic_day2_${hotspot.id}`,
-      effect: 0,
-    });
-    this.view.renderProtocolLog(this.model.history);
-    this.view.showSceneHotspotFeedback?.(hotspot.text);
-    const day2Hotspots = mergeHotspotGeometry('day2_diagnostic_sweep', DAY2_DIAGNOSTIC_HOTSPOTS);
-    this.view.renderDay2DiagnosticHotspots(
-      day2Hotspots,
-      this.model.flags,
-      (id) => this.handleDay2Diagnostic(id),
-      () => this.renderScene('day2_rotor_alignment'),
-      DAY2_DIAGNOSTIC_HOTSPOTS,
-    );
-    this.onSave?.(this.model.toSaveData());
   }
 
   handleDay1Inspection(hotspotId) {
@@ -1431,11 +1229,11 @@ export class StoryEngine {
           : "Tenggorokan saya rasanya jauh lebih segar sekarang. Terima kasih."
       },
       kit:   {
-        speaker: "Sarah",
-        avatar: "ibu",
+        speaker: "Ayah",
+        avatar: "ayah",
         text: healthVal <= 40
-          ? "Aku bantu pertolongan pertama dulu. Setelah itu istirahat dan tetap dipantau—kondisinya mulai lebih stabil."
-          : "Kasa dan antiseptik ini cukup untuk pertolongan pertama. Istirahat dulu; kondisinya stabil untuk sekarang."
+          ? "Nyeri dadaku mulai mereda... obat ini bekerja cepat. Terima kasih."
+          : "Stamina saya mulai pulih. Obat-obatan ini sangat krusial."
       }
     };
     const react = reactions[key];
@@ -1597,40 +1395,18 @@ export class StoryEngine {
       cancelAnimationFrame(this.view.typingRafId);
       this.view.typingRafId = null;
     }
-    if (this.model.currentSceneId === 'day2_diagnostic_sweep') {
-      const day2Hotspots = mergeHotspotGeometry('day2_diagnostic_sweep', DAY2_DIAGNOSTIC_HOTSPOTS);
-      this.view.renderDay2DiagnosticHotspots(
-        day2Hotspots,
-        this.model.flags,
-        (hotspotId) => this.handleDay2Diagnostic(hotspotId),
-        () => this.renderScene('day2_rotor_alignment'),
-        DAY2_DIAGNOSTIC_HOTSPOTS,
-      );
-    } else if (this.model.currentSceneId === 'day2_expedition_map') {
+    if (this.model.currentSceneId === 'day2_expedition_map') {
       this.view.renderExpeditionMap(
         EXPEDITION_LOCATIONS,
         this.model.expeditionVisitedLocations,
         Math.max(0, 2 - this.model.expeditionVisitedLocations.length),
         (locationId) => this.startExpedition(locationId)
       );
-    } else if (scene.autoNextSceneId) {
-      this.view.dom.choicesPanel.innerHTML = '';
-      this.view.currentChoicesPayload = null;
-      this.pendingClickNextSceneId = scene.autoNextSceneId;
-      this.view.updateBackButton?.();
     } else {
-      const requiredInteraction = this._getRequiredInteraction(scene);
-      if (requiredInteraction && this.model.flags[requiredInteraction.completionFlag] !== true) {
-        this.view.renderRequiredInteraction(
-          requiredInteraction,
-          () => this.handleRequiredInteraction(requiredInteraction)
-        );
-      } else {
-        this.view.renderChoices(
-          this._prepareSceneChoices(scene.choices), this.model.currentSceneId, this.model.flags,
-          (choice) => this.handleChoiceSelect(choice)
-        );
-      }
+      this.view.renderChoices(
+        this._prepareSceneChoices(scene.choices), this.model.currentSceneId, this.model.flags,
+        (choice) => this.handleChoiceSelect(choice)
+      );
     }
   }
 
@@ -1648,7 +1424,6 @@ export class StoryEngine {
     this.pendingClickNextSceneId = null;
     this.pendingBunkerEntryChoice = null;
     this.pendingMinigameChoice = null;
-    this.pendingRequiredInteraction = null;
     this._unlockedMinigameChoiceIds?.clear();
 
     const prevBypass = this._debugBypassSave;

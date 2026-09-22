@@ -30,23 +30,14 @@ export const STATIONS = {
     tutorial: 'Ketuk masing-masing soket tepat saat angka berputar cocok dengan kotak target.',
     defaultSuccessMessage: 'SEKUENSI 1—2—3 TERKUNCI // STRUKTUR STABIL',
   },
-  service_hatch: {
-    id: 'service_hatch',
-    code: 'MAINT-38',
-    kicker: 'AKSES PANEL SERVIS // KOMPARTEMEN INTERNAL',
-    name: 'AKSES PANEL SERVIS',
-    shortName: 'PANEL SERVIS',
-    tutorial: 'Geser collar mekanisme akses ke zona ALIGN, lalu tahan klik kiri untuk memutar aktuator melalui tiap segmen resistansi.',
-    defaultSuccessMessage: 'PANEL SERVIS TERBUKA // AKSES KOMPARTEMEN SIAP',
-  },
   wires: {
     id: 'wires',
-    code: 'PATCH-04 DISTRIBUSI',
+    code: 'PATCH-04 BATERAI',
     kicker: 'DISTRIBUSI DAYA // REKONFIGURASI',
-    name: 'KONFIGURASI PATCH BAY',
-    shortName: 'PATCH BAY',
+    name: 'SAMBUNG KABEL CADANGAN',
+    shortName: 'KABEL WARNA',
     tutorial: 'Tarik kabel dari setiap terminal kiri ke soket kanan dengan warna yang serasi.',
-    defaultSuccessMessage: 'DISTRIBUSI DAYA AKTIF // SIRKUIT SIAP',
+    defaultSuccessMessage: 'SEMUA JALUR KABEL TERUJI // SIRKUIT ONLINE',
   },
 };
 

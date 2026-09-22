@@ -49,11 +49,20 @@ try {
     'prolog_medical_second',
     'prolog_return_home',
     'prolog_evac_decision',
+    'prolog_threshold',
+    'prolog_surface',
+    'prolog_title',
+    'day1_power_boot',
+    'day2_diagnostic_sweep',
+    'day2_rotor_alignment',
     'day2_systems_check',
+    'day2_service_hatch',
+    'day2_strategy_choice',
     'day2_air_response',
     'day2_power_response',
     'day2_family_check',
     'day2_stabilized',
+    'day3_wiring',
   ]);
   assert(Object.keys(scenes).every((id) => previousStory[id] || intentionalNewScenes.has(id)), 'Unexpected scene added');
   assert(Object.keys(scenes).filter((id) => !previousStory[id]).every((id) => intentionalNewScenes.has(id)), 'Unexpected scene added');
@@ -64,6 +73,7 @@ try {
     'day2_start',
     'day2_expedition_return',
     'day3_final_dilemma',
+    'day3_power_pressure',
   ]);
   for (const [id, scene] of Object.entries(scenes)) {
     const mechanics = (s) => ({ hour:s.hour, phase:s.phase, next:s.autoNextSceneId,
@@ -74,11 +84,14 @@ try {
   const runtimeEdges = {
     backstory_sarah_office:['backstory_sarah_baseline'], backstory_sarah_update:['backstory_sarah_decision'],
     prolog_packing:['prolog_expedition_call'], day1_inspection:['day1_lockdoor'],
+    day2_diagnostic_sweep:['day2_rotor_alignment'],
     day3_radio_rescue:['day3_radio_clear','day3_radio_weak','day3_radio_failed'],
     ending_eval:ENDING_IDS, trigger_ending_eval:ENDING_IDS,
   };
   const graph = new Map(Object.entries(scenes).map(([id,s])=>[id,[
-    ...(s.autoNextSceneId?[s.autoNextSceneId]:[]), ...s.choices.map(c=>c.nextSceneId).filter(Boolean), ...(runtimeEdges[id]||[])
+    ...(s.autoNextSceneId?[s.autoNextSceneId]:[]),
+    ...(s.requiredInteraction?.nextSceneId ? [s.requiredInteraction.nextSceneId] : []),
+    ...s.choices.map(c=>c.nextSceneId).filter(Boolean), ...(runtimeEdges[id]||[])
   ]]));
   graph.set('trigger_ending_eval', ENDING_IDS);
   for(const [id,targets] of graph)for(const target of targets)assert(graph.has(target),`${id} -> missing ${target}`);
@@ -155,23 +168,44 @@ try {
   assert.equal(model.currentSceneId,'prolog_evac_decision');
   engine.handleChoiceSelect(scenes.prolog_evac_decision.choices[0]);
   assert.equal(model.currentSceneId,'prolog_intro');
-  for(let i=0;i<8&&model.currentSceneId!=='prolog_title';i++)engine.handleDialogueClick();
+  engine.handleDialogueClick();
+  engine.handleDialogueClick();
+  assert.equal(model.currentSceneId, 'prolog_threshold');
   // Station completion supplied at the integration boundary; no puzzle solution claim.
-  engine.bunkerMinigame.openStation=(_,options)=>options.onComplete();
-  engine.handleChoiceSelect(scenes.prolog_title.choices[0]);engine.handleChoiceSelect(scenes.day1_power_boot.choices[0]);
+  engine.bunkerMinigame.openStation=(_,options)=>options.onComplete({success:true});
+  engine.handleRequiredInteraction(scenes.prolog_threshold.requiredInteraction);
+  assert.equal(model.currentSceneId, 'prolog_surface');
+  engine.handleDialogueClick();
+  engine.handleDialogueClick();
+  assert.equal(model.currentSceneId, 'day1_power_boot');
+  engine.handleRequiredInteraction(scenes.day1_power_boot.requiredInteraction);
   ['ventilation','power','radio'].forEach(id=>engine.handleDay1Inspection(id));
   engine.renderScene('day1_lockdoor');
   for(const id of ['c_day1_air_spare_filter','c_day1_air_safe_inventory','c_day1_water_rational','c_day1_sanitation_good','c_day1_rest_good','c_day1_maya_light']) {
     const c=scenes[model.currentSceneId].choices.find(c=>c.id===id);assert(c,`${model.currentSceneId} lacks ${id}`);engine.handleChoiceSelect(c);
   }
   assert.equal(model.currentSceneId,'day2_start');
-  for(const id of ['c_day2_assess_systems','c_day2_focus_air','c_day2_air_clean_manual','c_day2_finalize_day']) {
+  engine.handleChoiceSelect(scenes.day2_start.choices.find(c=>c.id === 'c_day2_assess_systems'));
+  assert.equal(model.currentSceneId, 'day2_diagnostic_sweep');
+  ['ventilation', 'power_panel', 'structure'].forEach((hotspotId) => engine.handleDay2Diagnostic(hotspotId));
+  assert.equal(model.flags.day2_diagnostics_complete, true);
+  engine.renderScene('day2_rotor_alignment');
+  engine.handleRequiredInteraction(scenes.day2_rotor_alignment.requiredInteraction);
+  assert.equal(model.currentSceneId, 'day2_systems_check');
+  engine.handleDialogueClick();
+  assert.equal(model.currentSceneId, 'day2_service_hatch');
+  engine.handleRequiredInteraction(scenes.day2_service_hatch.requiredInteraction);
+  assert.equal(model.currentSceneId, 'day2_strategy_choice');
+  for(const id of ['c_day2_focus_air','c_day2_air_clean_manual','c_day2_finalize_day']) {
     const c=scenes[model.currentSceneId].choices.find(c=>c.id===id);assert(c,`${model.currentSceneId} lacks ${id}`);engine.handleChoiceSelect(c);
   }
   assert.equal(model.currentSceneId,'day2_stabilized');
   for(const id of ['c_day2_return_day3','c_day3_check_water','c_day3_water_filter','c_day3_power_radio']) {
     engine.handleChoiceSelect(scenes[model.currentSceneId].choices.find(c=>c.id===id));
   }
+  engine.handleRequiredInteraction(scenes.day3_wiring.requiredInteraction);
+  assert.equal(model.flags.day3_wiring_complete, true);
+  assert.equal(model.currentSceneId, 'day3_radio_rescue');
   engine.handleFinalRadioResult({quality:'weak',frequency:98.4,strength:65});
   engine.handleChoiceSelect(scenes.day3_radio_weak.choices[0]);
   engine.handleChoiceSelect(scenes.day3_final_dilemma.choices.at(-1));

@@ -10,6 +10,7 @@ import { STATIONS } from './bunkerStations/stationsConfig.js';
 import { CardStation } from './bunkerStations/cardStation.js';
 import { PowerStation } from './bunkerStations/powerStation.js';
 import { RotorStation } from './bunkerStations/rotorStation.js';
+import { ServiceHatchStation } from './bunkerStations/serviceHatchStation.js';
 import { WireStation } from './bunkerStations/wireStation.js';
 
 export { STATIONS };
@@ -33,13 +34,14 @@ export class BunkerMinigame {
       card: new CardStation(),
       power: new PowerStation(),
       rotor: new RotorStation(),
+      service_hatch: new ServiceHatchStation(),
       wires: new WireStation(),
     };
   }
 
   /**
    * Opens a specific standalone minigame station.
-   * @param {'card'|'power'|'rotor'|'wires'|'numbers'} stationId
+   * @param {'card'|'power'|'rotor'|'service_hatch'|'wires'|'numbers'} stationId
    * @param {Object} options
    */
   openStation(stationId = 'card', options = {}) {
@@ -79,6 +81,15 @@ export class BunkerMinigame {
         allowFailure: options.allowFailure,
         onComplete: (id) => this.finishStation(id || stationId),
         onFailure: (id, message) => this.failStation(id || stationId, message),
+        onCancel: (result) => {
+          const onCancel = this.activeOptions?.onCancel;
+          this.close();
+          onCancel?.(result);
+        },
+        sweetSpotCenter: options.sweetSpotCenter,
+        random: options.random,
+        segmentCount: options.segmentCount,
+        holdDurationMs: options.holdDurationMs,
         setFeedback: (msg, tone) => this.setFeedback(msg, tone),
       });
     }

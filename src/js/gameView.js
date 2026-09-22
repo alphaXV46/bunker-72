@@ -1342,6 +1342,37 @@ export class GameView {
     });
   }
 
+  renderDay2DiagnosticHotspots(hotspots, flags = {}, onInspect, onFinish, baseHotspots = hotspots) {
+    const primaryHotspots = hotspots.filter((spot) => spot.primary === true);
+    const inspectedCount = primaryHotspots.filter((spot) => flags[spot.flag] === true).length;
+    this.renderSceneHotspots({
+      hotspots,
+      ariaLabel: 'Titik diagnosis pascagempa',
+      layerClass: 'day2-hotspot-layer',
+      hotspotClass: 'day2-hotspot',
+      statusTitle: 'DIAGNOSIS PASCA-GEMPA',
+      statusText: `${inspectedCount}/${primaryHotspots.length} titik primer · 3 cukup untuk lanjut`,
+      getState: (spot) => {
+        const inspected = flags[spot.flag] === true;
+        return {
+          read: inspected,
+          disabled: inspected,
+          marker: inspected ? '✓' : spot.primary ? '+' : '·',
+          ariaLabel: `${spot.label}${inspected ? ' (sudah didiagnosis)' : spot.primary ? ' (titik primer)' : ' (opsional)'}`,
+          hint: spot.primary ? 'Titik primer diagnosis' : 'Observasi opsional — tidak dihitung',
+        };
+      },
+      onActivate: onInspect,
+      baseHotspots,
+      progression: {
+        className: 'day2-hotspot-finish',
+        label: inspectedCount >= 3 ? 'LANJUTKAN DIAGNOSIS' : 'DIAGNOSIS BELUM LENGKAP',
+        disabled: inspectedCount < 3,
+        onActivate: (finishButton) => onFinish?.(finishButton),
+      },
+    });
+  }
+
   renderDay1Hotspots(hotspots, flags = {}, onInspect, onFinish, baseHotspots = hotspots) {
     const inspectedCount = hotspots.filter((spot) => flags[spot.flag]).length;
     this.renderSceneHotspots({
@@ -1584,12 +1615,16 @@ export class GameView {
     if (returnFocus?.isConnected) returnFocus.focus();
   }
 
-  showDay1InspectionFeedback(text) {
+  showSceneHotspotFeedback(text) {
     if (!this.dom.dialogueText) return;
     this.dom.dialogueText.textContent = text;
     this.activeText = text;
     this.isTyping = false;
     this.updateBackButton();
+  }
+
+  showDay1InspectionFeedback(text) {
+    this.showSceneHotspotFeedback(text);
   }
 
   renderExpeditionMap(locations, visited = [], remainingVisits = 0, onSelect) {
@@ -1688,6 +1723,58 @@ export class GameView {
     });
     this.dom.choicesPanel.appendChild(panel);
     this.updateBackButton();
+  }
+
+  /**
+   * Renders a mandatory story action without framing it as a narrative choice.
+   * The action is still a native button so mouse, Tab, Enter, and Space work
+   * through the browser's normal keyboard semantics.
+   *
+   * @param {object} requiredInteraction
+   * @param {Function} onActivate
+   */
+  renderRequiredInteraction(requiredInteraction, onActivate) {
+    this.clearDay1Hotspots();
+    this.dom.choicesPanel.innerHTML = '';
+    this.currentChoicesPayload = null;
+    this.isReviewingNarrative = false;
+    this.canReviewNarrative = false;
+    this.dom.storyBox.classList.add('has-interactive-choices');
+
+    const card = document.getElementById('floating-interactive-card');
+    const toggleLabel = document.getElementById('toggle-btn-label');
+    if (card && toggleLabel) {
+      card.classList.remove('show-dialogue');
+      card.classList.add('show-choices');
+      toggleLabel.textContent = 'AKSI WAJIB';
+    }
+
+    const panel = document.createElement('div');
+    panel.className = 'required-interaction-panel';
+    panel.setAttribute('role', 'group');
+    panel.setAttribute('aria-label', 'Aksi wajib untuk melanjutkan cerita');
+
+    const label = document.createElement('span');
+    label.className = 'required-interaction-label';
+    label.textContent = 'AKSI WAJIB';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'choice-btn required-action-btn';
+    button.setAttribute('aria-label', requiredInteraction.actionText);
+    button.innerHTML = '<span class="required-action-mark" aria-hidden="true">ACTION</span><span class="choice-copy"></span><span class="choice-arrow" aria-hidden="true">›</span>';
+    button.querySelector('.choice-copy').textContent = requiredInteraction.actionText;
+    button.addEventListener('mouseenter', () => this.controller?.audio?.playHover?.());
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!button.disabled) onActivate?.();
+    });
+
+    panel.append(label, button);
+    this.dom.choicesPanel.appendChild(panel);
+    this.updateBackButton();
+    this.layoutEditor?.refresh();
   }
 
   /**
@@ -1943,6 +2030,12 @@ export class GameView {
       return;
     }
 
+    if (p?.day2DiagnosticReady) {
+      p.day2DiagnosticReady();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
     if (p?.expeditionMapReady) {
       p.expeditionMapReady();
       this._pendingChoicesPayload = null;
@@ -1951,6 +2044,12 @@ export class GameView {
 
     if (p?.interactiveReady) {
       p.interactiveReady();
+      this._pendingChoicesPayload = null;
+      return;
+    }
+
+    if (p?.requiredInteractionReady) {
+      p.requiredInteractionReady();
       this._pendingChoicesPayload = null;
       return;
     }

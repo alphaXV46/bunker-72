@@ -88,7 +88,7 @@ export const EXPEDITION_CONFIGS = Object.freeze({
       { id: 'food', name: 'Makanan Kaleng', x: 1030, y: 190, w: 36, h: 36, room: 'Minimarket' },
       { id: 'drink', name: 'Air Bersih', x: 930, y: 560, w: 36, h: 36, room: 'Minimarket' },
       { id: 'drink', name: 'Air Bersih', x: 1040, y: 560, w: 36, h: 36, room: 'Minimarket' },
-      { id: 'battery', name: 'Baterai Ekstra', x: 760, y: 240, w: 36, h: 36, room: 'Gudang Minimarket' },
+      { id: 'battery', name: 'Baterai Ekstra VHF', x: 760, y: 240, w: 36, h: 36, room: 'Gudang Minimarket' },
       { id: 'snack', name: 'Snack Darurat', x: 1110, y: 300, w: 36, h: 36, room: 'Minimarket' },
     ],
     hazards: [

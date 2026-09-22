@@ -48,6 +48,23 @@ try {
     get: (target, key) => target[key] ?? noop,
   });
 
+  const completeDay2Diagnosis = (engine) => {
+    engine.bunkerMinigame.openStation = (_, options) => options.onComplete({ success: true });
+    engine.handleChoiceSelect(scenes.day2_start.choices.find((choice) => choice.id === 'c_day2_assess_systems'));
+    ['ventilation', 'power_panel', 'structure'].forEach((hotspotId) => engine.handleDay2Diagnostic(hotspotId));
+    engine.renderScene('day2_rotor_alignment');
+    engine.handleRequiredInteraction(scenes.day2_rotor_alignment.requiredInteraction);
+    engine.handleDialogueClick();
+    engine.handleRequiredInteraction(scenes.day2_service_hatch.requiredInteraction);
+    assert.equal(engine.model.currentSceneId, 'day2_strategy_choice');
+  };
+
+  const completeDay3Wiring = (engine) => {
+    engine.handleRequiredInteraction(scenes.day3_wiring.requiredInteraction);
+    assert.equal(engine.model.flags.day3_wiring_complete, true);
+    assert.equal(engine.model.currentSceneId, 'day3_radio_rescue');
+  };
+
   // =========================================================================
   // 1. SAVE SCHEMA AND STORY REVISION BASELINE
   // =========================================================================
@@ -153,11 +170,10 @@ try {
     // Advance to Day 2
     engine.renderScene('day2_start');
     assert.equal(model.currentSceneId, 'day2_start');
-    engine.handleChoiceSelect(scenes.day2_start.choices.find(c => c.id === 'c_day2_assess_systems'));
-    assert.equal(model.currentSceneId, 'day2_systems_check');
+    completeDay2Diagnosis(engine);
 
     // Focus Air
-    engine.handleChoiceSelect(scenes.day2_systems_check.choices.find(c => c.id === 'c_day2_focus_air'));
+    engine.handleChoiceSelect(scenes.day2_strategy_choice.choices.find(c => c.id === 'c_day2_focus_air'));
     assert.equal(model.currentSceneId, 'day2_air_response');
 
     // Clean manually to save filter for Day 3
@@ -184,6 +200,7 @@ try {
     engine.handleChoiceSelect(scenes.day3_power_pressure.choices.find(c => c.id === 'c_day3_power_dual'));
     assert.equal(model.flags.battery_committed, true);
     assert.equal(model.flags.radio_power_stable, true);
+    completeDay3Wiring(engine);
 
     // Radio attempt -> clear
     engine.handleFinalRadioResult({ quality: 'clear', frequency: 98.4, strength: 90 });
@@ -237,8 +254,8 @@ try {
 
     // Day 2: Focus Air -> Use Spare Filter
     engine.renderScene('day2_start');
-    engine.handleChoiceSelect(scenes.day2_start.choices.find(c => c.id === 'c_day2_assess_systems'));
-    engine.handleChoiceSelect(scenes.day2_systems_check.choices.find(c => c.id === 'c_day2_focus_air'));
+    completeDay2Diagnosis(engine);
+    engine.handleChoiceSelect(scenes.day2_strategy_choice.choices.find(c => c.id === 'c_day2_focus_air'));
     engine.handleChoiceSelect(scenes.day2_air_response.choices.find(c => c.id === 'c_day2_air_use_spare_filter'));
     assert.equal(model.flags.day2_air_cleared, true);
     assert.equal(model.flags.spare_filter_used, true);
@@ -253,6 +270,7 @@ try {
     engine.handleChoiceSelect(scenes.day3_water_pressure.choices.find(c => c.id === 'c_day3_water_filter'));
     engine.handleChoiceSelect(scenes.day3_power_pressure.choices.find(c => c.id === 'c_day3_power_route'));
     assert.equal(model.flags.power_routed, true);
+    completeDay3Wiring(engine);
 
     engine.handleFinalRadioResult({ quality: 'clear', frequency: 98.4, strength: 90 });
     engine.handleChoiceSelect(scenes.day3_radio_clear.choices[0]);
@@ -293,8 +311,8 @@ try {
     });
 
     engine.renderScene('day2_start');
-    engine.handleChoiceSelect(scenes.day2_start.choices.find(c => c.id === 'c_day2_assess_systems'));
-    engine.handleChoiceSelect(scenes.day2_systems_check.choices.find(c => c.id === 'c_day2_focus_power'));
+    completeDay2Diagnosis(engine);
+    engine.handleChoiceSelect(scenes.day2_strategy_choice.choices.find(c => c.id === 'c_day2_focus_power'));
     assert.equal(model.currentSceneId, 'day2_power_response');
 
     // Use Mask
@@ -348,8 +366,8 @@ try {
     });
 
     engine.renderScene('day2_start');
-    engine.handleChoiceSelect(scenes.day2_start.choices.find(c => c.id === 'c_day2_assess_systems'));
-    engine.handleChoiceSelect(scenes.day2_systems_check.choices.find(c => c.id === 'c_day2_focus_air'));
+    completeDay2Diagnosis(engine);
+    engine.handleChoiceSelect(scenes.day2_strategy_choice.choices.find(c => c.id === 'c_day2_focus_air'));
     engine.handleChoiceSelect(scenes.day2_air_response.choices.find(c => c.id === 'c_day2_air_clean_manual'));
 
     assert.equal(model.flags.day2_air_cleared, true);

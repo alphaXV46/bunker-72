@@ -24,6 +24,8 @@ import {
 import { EXPEDITION_CONFIGS } from './expeditionConfig.js';
 
 const DEFAULT_FLAGS = Object.freeze({
+  bunker_card_access_complete: false,
+  day1_power_online: false,
   sarah_warning_response: null,
   sarah_office_read_ids: [],
   sarah_baseline_reviewed: false,
@@ -73,10 +75,20 @@ const DEFAULT_FLAGS = Object.freeze({
   late_evacuation: false,
   spare_filter_used: false,
   day2_crisis_applied: false,
+  day2_diagnostic_air: false,
+  day2_diagnostic_power: false,
+  day2_diagnostic_structure: false,
+  day2_diagnostic_supplies: false,
+  day2_diagnostic_radio: false,
+  day2_diagnostic_medical: false,
+  day2_diagnostics_complete: false,
+  day2_rotor_aligned: false,
+  day2_service_hatch_open: false,
   day2_air_cleared: false,
   day2_power_conserved: false,
   day2_power_draw_heavy: false,
   day2_fatigue_applied: false,
+  day3_wiring_complete: false,
 });
 
 // ─── FLAG RECONSTRUCTION MAP ────────────────────────────────────────────────
@@ -84,6 +96,8 @@ const DEFAULT_FLAGS = Object.freeze({
 // Text-content matching has been fully removed (GDD v2.2 migration complete).
 const FLAG_CHOICE_MAP = Object.freeze({
   'c_day1_air_noinspect':    'air_uninspected',
+  'c_day1_air_wetmask':      'air_uninspected',
+  'c_day1_air_newseal':      'air_seal_good',
   'c_day1_air_fix':          'air_remedied',
   'c_day1_air_spare_filter': 'air_seal_good',
   'c_day2_assess_systems': 'day2_crisis_applied',
@@ -93,6 +107,15 @@ const FLAG_CHOICE_MAP = Object.freeze({
   'c_day2_air_clean_manual': 'day2_air_cleared',
   'c_day2_power_use_mask': 'day2_power_conserved',
   'c_day2_power_endure': 'day2_power_conserved',
+  'diagnostic_day2_ventilation': 'day2_diagnostic_air',
+  'diagnostic_day2_power_panel': 'day2_diagnostic_power',
+  'diagnostic_day2_structure': 'day2_diagnostic_structure',
+  'diagnostic_day2_supply_rack': 'day2_diagnostic_supplies',
+  'diagnostic_day2_radio': 'day2_diagnostic_radio',
+  'diagnostic_day2_medical_counter': 'day2_diagnostic_medical',
+  'required_rotor': 'day2_rotor_aligned',
+  'required_service_hatch': 'day2_service_hatch_open',
+  'required_wires': 'day3_wiring_complete',
   'c_day3_water_filter':     'water_filtered',
   'c_day3_water_reserve': 'water_reserve_used',
   'c_day3_water_ration': 'water_rationed',
@@ -211,6 +234,13 @@ export class GameModel {
   setFlag(flagKey, value = true) {
     if (!flagKey) return;
     this.flags[flagKey] = value;
+  }
+
+  /** Commits a scene-level required interaction exactly once. */
+  completeRequiredInteraction(completionFlag) {
+    if (!completionFlag || this.flags[completionFlag] === true) return false;
+    this.flags[completionFlag] = true;
+    return true;
   }
 
   /**
@@ -382,6 +412,15 @@ export class GameModel {
     }
     if (history.some(e => e.choiceId === 'c_day2_power_use_mask')) {
       flags.medical_mask_used = true;
+    }
+    const primaryDay2Diagnostics = [
+      'day2_diagnostic_air',
+      'day2_diagnostic_power',
+      'day2_diagnostic_structure',
+      'day2_diagnostic_supplies',
+    ];
+    if (primaryDay2Diagnostics.filter((flag) => flags[flag] === true).length >= 3) {
+      flags.day2_diagnostics_complete = true;
     }
     if (history.some(e => e.choiceId === 'c_prolog_pack_battery')) {
       flags.extra_battery = true;

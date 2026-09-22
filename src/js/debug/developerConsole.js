@@ -395,7 +395,8 @@ class DeveloperConsole {
               <option value="card">Card Key</option>
               <option value="power">Power Station</option>
               <option value="rotor">Rotor Station</option>
-              <option value="wires">Wire Splicing</option>
+              <option value="service_hatch">Service Hatch</option>
+              <option value="wires">Patch Bay / Wiring</option>
             </select>
             <button type="button" class="bdc-btn" id="bdc-btn-open-bunker">Buka</button>
             <button type="button" class="bdc-btn btn-warn" id="bdc-btn-solve-bunker">Instant Solve</button>
@@ -648,7 +649,8 @@ class DeveloperConsole {
     // ── 6. Minigames (Bunker & Radio) ──
     el('bdc-btn-open-bunker')?.addEventListener('click', () => {
       const station = el('bdc-bunker-station-select')?.value || 'card';
-      this.storyEngine.bunkerMinigame?.openStation(station);
+      // Standalone inspection/solve must never advance the active story.
+      this.storyEngine.bunkerMinigame?.openStation(station, { onComplete: () => {} });
     });
     el('bdc-btn-solve-bunker')?.addEventListener('click', () => {
       const bm = this.storyEngine.bunkerMinigame;

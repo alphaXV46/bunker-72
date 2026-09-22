@@ -103,8 +103,8 @@ export class RadioMiniGame {
     }
     if (this.dom.broadcastBox) {
       this.dom.broadcastBox.textContent = finalAttempt
-        ? 'Panggilan simulasi ke jaringan Basarnas/SAR. Angka MHz di sini adalah rentang fiksi permainan; mutu sinyal menentukan seberapa lengkap posisi bunker terbaca.'
-        : 'Mencari siaran simulasi. Receiver VHF bunker dapat dipakai untuk memantau informasi.';
+        ? 'Panggilan akhir Basarnas/SAR. Putar kenop, lalu kirim saat Anda siap; mutu sinyal menentukan seberapa lengkap posisi bunker terbaca.'
+        : 'Mencari siaran darurat. Receiver VHF tetap bunker dapat dipakai untuk memantau informasi.';
       this.dom.broadcastBox.classList.remove('broadcast-active');
     }
 
@@ -165,7 +165,7 @@ export class RadioMiniGame {
         this.dom.signalStatusText.textContent = labels[finalQuality];
         this.dom.signalStatusText.style.color = finalQuality === 'clear' ? 'var(--accent-green-border)' : finalQuality === 'weak' ? 'var(--warning-yellow-border)' : '#a8b2ba';
       } else if (nearBroadcast) {
-        this.dom.signalStatusText.textContent = 'SIARAN SIMULASI TERDETEKSI';
+        this.dom.signalStatusText.textContent = 'SIARAN DARURAT TERDETEKSI';
         this.dom.signalStatusText.style.color = 'var(--accent-green-border)';
       } else if (strength > 40) {
         this.dom.signalStatusText.textContent = 'GELOMBANG TERDETEKSI';
@@ -195,9 +195,9 @@ export class RadioMiniGame {
     if (this.isFinalAttempt) {
       const quality = this._getFinalQuality(strength);
       const messages = {
-        clear: `[RELAY SIMULASI SAR // ${this.targetFreq.toFixed(1)} MHz] Posisi Bunker 72 terbaca jelas. Tetap lindungi ventilasi; tim darat mengonfirmasi sektor Anda.`,
-        weak: `[RELAY SIMULASI SAR // ${this.targetFreq.toFixed(1)} MHz] ...Bunker... tujuh dua... koordinat sebagian diterima. Tetap di tempat; pencarian diperluas.`,
-        failed: `[STATIK // RELAY SIMULASI SAR] ...SAR... ulangi... [SINYAL PUTUS]. Pesan lokasi tidak dapat dipastikan, tetapi keluarga tetap menunggu jendela evakuasi.`,
+        clear: `[BASARNAS / SAR ${this.targetFreq.toFixed(1)} MHz] Posisi Bunker 72 terbaca jelas. Tetap lindungi ventilasi; tim darat mengonfirmasi sektor Anda.`,
+        weak: `[BASARNAS / SAR ${this.targetFreq.toFixed(1)} MHz] ...Bunker... tujuh dua... koordinat sebagian diterima. Tetap di tempat; pencarian diperluas.`,
+        failed: `[STATIK] ...SAR... ulangi... [SINYAL PUTUS]. Pesan lokasi tidak dapat dipastikan, tetapi keluarga tetap menunggu jendela evakuasi.`,
       };
       if (this.dom.broadcastBox) {
         this.dom.broadcastBox.textContent = messages[quality];
@@ -214,7 +214,7 @@ export class RadioMiniGame {
     }
 
     if (this.dom.broadcastBox) {
-      this.dom.broadcastBox.textContent = `[SIARAN SIMULASI ${this.targetFreq.toFixed(1)} MHz] Tetap di dalam bunker dan hemat daya. Basarnas/SAR sedang menyisir sektor pesisir saat kondisi memungkinkan.`;
+      this.dom.broadcastBox.textContent = `[SIARAN DARURAT ${this.targetFreq.toFixed(1)} MHz] Tetap di dalam bunker dan hemat daya. Basarnas/SAR sedang menyisir sektor pesisir saat kondisi memungkinkan.`;
       this.dom.broadcastBox.classList.add('broadcast-active');
     }
   }

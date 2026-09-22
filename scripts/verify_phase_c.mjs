@@ -140,6 +140,17 @@ try {
     clearChoices: noop,
   }, { get: (target, key) => target[key] ?? noop });
 
+  const completeDay2Diagnosis = (engine) => {
+    engine.bunkerMinigame.openStation = (_, options) => options.onComplete({ success: true });
+    engine.handleChoiceSelect(scenes.day2_start.choices.find((choice) => choice.id === 'c_day2_assess_systems'));
+    ['ventilation', 'power_panel', 'structure'].forEach((hotspotId) => engine.handleDay2Diagnostic(hotspotId));
+    engine.renderScene('day2_rotor_alignment');
+    engine.handleRequiredInteraction(scenes.day2_rotor_alignment.requiredInteraction);
+    engine.handleDialogueClick();
+    engine.handleRequiredInteraction(scenes.day2_service_hatch.requiredInteraction);
+    assert.equal(engine.model.currentSceneId, 'day2_strategy_choice');
+  };
+
   // Same pre-choice inventory: Hendra costs remaining expedition time, never a kit.
   for (const kit of [0, 1, 2]) {
     for (const help of [true, false]) {
@@ -187,7 +198,7 @@ try {
       view: mockView,
       audio: new Proxy({}, { get: () => noop }),
       onSave: noop,
-      bunkerMinigame: { close: noop },
+      bunkerMinigame: { close: noop, openStation: noop },
     });
 
     // 1. Choose Minimarket in Opportunity 1
@@ -422,7 +433,7 @@ try {
       view: mockView,
       audio: new Proxy({}, { get: () => noop }),
       onSave: noop,
-      bunkerMinigame: { close: noop },
+      bunkerMinigame: { close: noop, openStation: noop },
     });
 
     // Day 2 start progression to Day 3
@@ -439,9 +450,8 @@ try {
       engine.handleChoiceSelect(day2ReturnChoices[0]);
     } else {
       assert.equal(day2StartChoices[0].id, 'c_day2_assess_systems');
-      engine.handleChoiceSelect(day2StartChoices[0]);
-      assert.equal(model.currentSceneId, 'day2_systems_check');
-      engine.handleChoiceSelect(scenes.day2_systems_check.choices[0]);
+      completeDay2Diagnosis(engine);
+      engine.handleChoiceSelect(scenes.day2_strategy_choice.choices[0]);
       assert.equal(model.currentSceneId, 'day2_air_response');
       engine.handleChoiceSelect(scenes.day2_air_response.choices.find(c => c.id === 'c_day2_air_clean_manual'));
       assert.equal(model.currentSceneId, 'day2_family_check');

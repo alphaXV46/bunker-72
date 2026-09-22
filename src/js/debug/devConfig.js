@@ -51,6 +51,11 @@ export const STORY_SCENE_CATALOG = Object.freeze([
 
   // Day 2
   { id: 'day2_start',            phase: 'Day 2', label: 'Hari 2 — Gempa Susulan Subuh' },
+  { id: 'day2_diagnostic_sweep', phase: 'Day 2', label: 'Hari 2 — Sesi Diagnosis Hotspot' },
+  { id: 'day2_rotor_alignment',  phase: 'Day 2', label: 'Hari 2 — Penyelarasan Stabilizer' },
+  { id: 'day2_systems_check',    phase: 'Day 2', label: 'Hari 2 — Diagnosis Sistem' },
+  { id: 'day2_service_hatch',    phase: 'Day 2', label: 'Hari 2 — Panel Servis' },
+  { id: 'day2_strategy_choice',   phase: 'Day 2', label: 'Hari 2 — Pilihan Air atau Daya' },
   { id: 'day2_expedition_map',   phase: 'Day 2', label: 'Hari 2 — Peta Rute Ekspedisi' },
   { id: 'day2_hendra_encounter', phase: 'Day 2', label: 'Hari 2 — Pertemuan Hendra' },
   { id: 'day2_expedition_return',phase: 'Day 2', label: 'Hari 2 — Kembali ke Bunker' },
@@ -59,6 +64,7 @@ export const STORY_SCENE_CATALOG = Object.freeze([
   { id: 'day3_start',            phase: 'Day 3', label: 'Hari 3 — Pagi Hari Terakhir' },
   { id: 'day3_water_pressure',   phase: 'Day 3', label: 'Hari 3 — Kontaminasi Air' },
   { id: 'day3_power_pressure',   phase: 'Day 3', label: 'Hari 3 — Alokasi Arus Terakhir' },
+  { id: 'day3_wiring',            phase: 'Day 3', label: 'Hari 3 — Konfigurasi Patch Bay' },
   { id: 'day3_radio_rescue',     phase: 'Day 3', label: 'Hari 3 — Sinyal Radio VHF SAR' },
   { id: 'day3_final_dilemma',    phase: 'Day 3', label: 'Hari 3 — Dilema Jam ke-70' },
   { id: 'day3_final_hours',      phase: 'Day 3', label: 'Hari 3 — Menunggu Tim Evakuasi' },

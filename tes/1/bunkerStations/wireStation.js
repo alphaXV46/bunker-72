@@ -1,5 +1,5 @@
 /**
- * wireStation.js — Station PATCH-04 DISTRIBUSI (Konfigurasi Patch Bay)
+ * wireStation.js — Station PATCH-04 BATERAI (Sambung Kabel Cadangan)
  *
  * A direct cable-matching task: pull one exposed lead from the left bank to
  * its matching socket on the right. SVG paths keep each cable thick, curved,
@@ -46,7 +46,7 @@ export class WireStation {
         <span class="mg-wire-screw mg-wire-screw--tl" aria-hidden="true"></span><span class="mg-wire-screw mg-wire-screw--tr" aria-hidden="true"></span>
         <span class="mg-wire-screw mg-wire-screw--bl" aria-hidden="true"></span><span class="mg-wire-screw mg-wire-screw--br" aria-hidden="true"></span>
       </div>
-      <div class="mg-instruction-strip"><span class="mg-strip-icon">⌁</span><span>Tarik ujung kabel dari kiri ke socket warna yang sama di kanan untuk mengaktifkan distribusi daya.</span><span class="mg-strip-code">PATCH-04 DISTRIBUSI</span></div>`;
+      <div class="mg-instruction-strip"><span class="mg-strip-icon">⌁</span><span>Tarik ujung kabel dari kiri ke socket warna yang sama di kanan.</span><span class="mg-strip-code">PATCH-04</span></div>`;
 
     const board = panel.querySelector('#mg-wire-board');
     const cableLayer = panel.querySelector('#mg-wire-cables');
