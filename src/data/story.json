@@ -550,6 +550,7 @@
           "id": "c_day1_radio_minigame",
           "text": "Putar Kenop Radio VHF (Pencarian sinyal komunikasi SAR dalam simulasi)",
           "nextSceneId": "day1_lockdoor",
+          "forbiddenFlags": ["day1_radio_tuned"],
           "knowledgeEffect": 0,
           "log": "Radio VHF diputar untuk pencarian sinyal.",
           "triggerRadioMiniGame": true

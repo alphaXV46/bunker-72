@@ -272,6 +272,7 @@ async function initGame() {
       modalEl: radioModalEl,
       audio: storyEngine.audio,
       onFinalResult: (result) => storyEngine.handleFinalRadioResult(result),
+      onInformationalResult: () => storyEngine.handleDay1RadioLocked(),
     });
   }
 
@@ -279,7 +280,7 @@ async function initGame() {
   if (quickRadioBtn) {
     quickRadioBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      storyEngine?.radioMiniGame?.open();
+      storyEngine?.handleInventoryClick('radio');
     });
   }
 

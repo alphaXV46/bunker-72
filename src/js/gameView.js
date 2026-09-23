@@ -78,6 +78,7 @@ export class GameView {
     this.informationPanelEscapeHandler = null;
     this.informationPanelReturnFocus = null;
     this.dayTransitionKeyHandler = null;
+    this.radioTuningAvailable = false;
 
     // The real editor is registered only by the development bootstrap. The
     // release build receives a no-op adapter with the same small contract.
@@ -175,6 +176,7 @@ export class GameView {
     this.dom.endingView.classList.remove('ending-bg-fatal');
     this.dom.endingView.scrollTop = 0;
     this.dom.endingView.classList.add('ending-cutscene-playing');
+    this._setEndingReportInert(true);
     cutscene.classList.add('is-active');
     cutscene.setAttribute('aria-hidden', 'false');
     this._renderBadEndingBeat();
@@ -192,6 +194,11 @@ export class GameView {
     cutscene.setAttribute('aria-hidden', 'true');
     this.dom.endingView.classList.remove('ending-cutscene-playing');
     this.dom.endingView.classList.add('ending-bg-fatal');
+    this.dom.endingView.classList.add('ending-report-screen');
+    this._setEndingReportInert(false);
+    this.dom.endingView.scrollTop = 0;
+    this.dom.endingTitle.setAttribute('tabindex', '-1');
+    this.dom.endingTitle.focus();
   }
 
   _renderGoodEndingBeat() {
@@ -257,7 +264,7 @@ export class GameView {
     this.dom.endingView.classList.remove('ending-bg-best');
     this.dom.endingView.scrollTop = 0;
     this.dom.endingView.classList.add('ending-cutscene-playing');
-    this._setGoodEndingReportInert(true);
+    this._setEndingReportInert(true);
     cutscene.classList.add('is-active');
     cutscene.setAttribute('aria-hidden', 'false');
     this._renderGoodEndingBeat();
@@ -277,13 +284,13 @@ export class GameView {
     this.dom.endingView.classList.remove('ending-cutscene-playing');
     this.dom.endingView.classList.add('ending-bg-best');
     this.dom.endingView.classList.add('ending-report-screen');
-    this._setGoodEndingReportInert(false);
+    this._setEndingReportInert(false);
     this.dom.endingView.scrollTop = 0;
     this.dom.endingTitle.setAttribute('tabindex', '-1');
     this.dom.endingTitle.focus();
   }
 
-  _setGoodEndingReportInert(inert) {
+  _setEndingReportInert(inert) {
     this.dom.endingView.querySelectorAll(':scope > .ending-header, :scope > .ending-content-box, :scope > .ending-stats, :scope > .debrief-box, :scope > .choices-panel')
       .forEach((section) => { section.inert = inert; });
   }
@@ -840,7 +847,7 @@ export class GameView {
 
       if (key === 'radio') {
         if (countEl) countEl.textContent = '∞';
-        item.classList.toggle('disabled', isDisabledScene);
+        item.classList.toggle('disabled', isDisabledScene || !this.radioTuningAvailable);
         return;
       }
 
@@ -1376,6 +1383,12 @@ export class GameView {
     };
     void this.hotspotEditor?.setContext(this._activeHotspotContext);
     return layer;
+  }
+
+  setRadioTuningAvailable(available) {
+    this.radioTuningAvailable = available;
+    const button = document.getElementById('quick-radio-btn');
+    if (button) button.disabled = !available;
   }
 
   _applyHotspotGeometry(sceneKey, hotspots = []) {
@@ -2159,7 +2172,7 @@ export class GameView {
    * @param {object} flags            - Player state flags reconstructed from history.
    */
   renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null) {
-    this._setGoodEndingReportInert(false);
+    this._setEndingReportInert(false);
     this.dom.endingView.scrollTop = 0;
     if (this.goodEndingRevealTimer) {
       clearTimeout(this.goodEndingRevealTimer);
@@ -2188,7 +2201,7 @@ export class GameView {
 
     const ENDING_CONFIG = {
       ending_bad: {
-        title:      modularData?.rescueTitle || 'BAD ENDING — PENYELAMATAN KRITIS',
+        title:      'BAD ENDING — PENYELAMATAN KRITIS',
         titleClass: 'ending-bad',
         bgClass:    'ending-bg-fatal',
       },
@@ -2209,7 +2222,7 @@ export class GameView {
     this.dom.endingTitle.textContent = cfg.title;
     this.dom.endingTitle.classList.add(cfg.titleClass);
     this.dom.endingView.classList.add(cfg.bgClass);
-    if (endingId === 'ending_good') this.dom.endingView.classList.add('ending-single-card');
+    if (endingId === 'ending_good' || endingId === 'ending_bad') this.dom.endingView.classList.add('ending-single-card');
     if (endingId === 'ending_normal') this.dom.endingView.classList.add('ending-normal-single-card');
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
@@ -2218,10 +2231,11 @@ export class GameView {
     const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
     const reportModules = modules;
 
-    if (endingId === 'ending_good' && reportModules.length) {
+    if ((endingId === 'ending_good' || endingId === 'ending_bad') && reportModules.length) {
       const mayaModule = reportModules.find((module) => module.id === 'maya');
+      const badEnding = endingId === 'ending_bad';
       this.dom.endingDesc.innerHTML = `
-        <article class="good-ending-final-card">
+        <article class="good-ending-final-card${badEnding ? ' bad-ending-final-card' : ''}">
           <div class="good-ending-final-card__eyebrow">EPILOG // 72 JAM BERAKHIR</div>
           <p class="good-ending-final-card__lead">${escapeHtml(endingText)}</p>
           ${mayaModule ? `<p class="good-ending-final-card__personal">${escapeHtml(mayaModule.body)}</p>` : ''}

@@ -458,6 +458,7 @@ export class StoryEngine {
 
     // ── View updates ──
     const isDisabledScene = this.model.isInventoryDisabledScene(sceneId);
+    this.view.setRadioTuningAvailable?.(sceneId === 'day1_lockdoor' && this.model.flags.day1_radio_locked !== true);
 
     this.view.renderHud(scene, this.model.knowledge, sceneId, this.model.flags,
       this.model.hunger, this.model.thirst, this.model.health);
@@ -1052,6 +1053,14 @@ export class StoryEngine {
     this.renderScene(`day3_radio_${quality}`);
   }
 
+  handleDay1RadioLocked() {
+    if (this.model.currentSceneId !== 'day1_lockdoor' || this.model.flags.day1_radio_locked === true) return;
+    this.model.setFlag('day1_radio_locked');
+    this.view.setRadioTuningAvailable?.(false);
+    this.view.updateInventoryUI(this.model.isInventoryDisabledScene(this.model.currentSceneId), this.model.inventory);
+    this.onSave?.(this.model.toSaveData());
+  }
+
   /**
    * Handles a player's choice selection.
    * If text is still typing, skip it and defer the actual choice.
@@ -1077,6 +1086,7 @@ export class StoryEngine {
     if (choice.forbiddenFlags?.length && choice.forbiddenFlags.some((f) => this.model.flags[f] === true)) {
       return;
     }
+    if (choice.id === 'c_day1_radio_minigame' && this.model.currentSceneId !== 'day1_lockdoor') return;
 
     if (choice.id === 'c_sarah_baseline_complete' && this.model.completeSarahBaselineReview()) {
       this.onSave?.(this.model.toSaveData());
@@ -1280,6 +1290,8 @@ export class StoryEngine {
 
     const prevHealth = this.model.health;
 
+    if (choice.id === 'c_day1_radio_minigame') this.model.setFlag('day1_radio_tuned');
+
     // Apply knowledge effect (clamped to [0, KNOWLEDGE_MAX]).
     const effect = typeof choice.knowledgeEffect === 'number' ? choice.knowledgeEffect : 0;
     this.model.modifyKnowledge(effect);
@@ -1333,7 +1345,7 @@ export class StoryEngine {
 
     if (choice.triggerRadioMiniGame === true) {
       setTimeout(() => {
-        this.radioMiniGame?.open();
+        if (this.model.currentSceneId === choice.nextSceneId) this.radioMiniGame?.open();
       }, 300);
     }
 
@@ -1385,10 +1397,13 @@ export class StoryEngine {
     if (this.model.isInventoryDisabledScene(this.model.currentSceneId)) return;
 
     if (key === 'radio') {
-      this.audio.playRadioSound();
-      if (this.radioMiniGame) {
-        this.radioMiniGame.open();
+      if (this.model.currentSceneId !== 'day1_lockdoor' || this.model.flags.day1_radio_locked === true) return;
+      if (this.model.flags.day1_radio_tuned === true) {
+        this.radioMiniGame?.open();
+        return;
       }
+      const choice = this.getScene('day1_lockdoor')?.choices?.find((entry) => entry.id === 'c_day1_radio_minigame');
+      if (choice) this.handleChoiceSelect(choice);
       return;
     }
 

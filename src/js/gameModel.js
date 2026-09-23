@@ -32,6 +32,8 @@ const DEFAULT_FLAGS = Object.freeze({
   sarah_update_reviewed: false,
   promised_maya: false,
   radio_reward_claimed: false,
+  day1_radio_tuned: false,
+  day1_radio_locked: false,
   radio_quality: null,
   water_rational_good: false,
   water_used_freely: false,
@@ -339,6 +341,9 @@ export class GameModel {
     this.flags.sarah_office_read_ids = normalizeSarahOfficeReadIds(this.flags.sarah_office_read_ids);
     this.flags.sarah_baseline_reviewed = this.flags.sarah_baseline_reviewed === true;
     this.flags.sarah_update_reviewed = this.flags.sarah_update_reviewed === true;
+    this.flags.day1_radio_tuned = this.flags.day1_radio_tuned === true
+      || this.history.some((entry) => entry?.choiceId === 'c_day1_radio_minigame');
+    this.flags.day1_radio_locked = this.flags.day1_radio_locked === true;
 
     // Keep the Hendra decision as one mutually-exclusive outcome even when a
     // legacy save contains more than one stale social flag.

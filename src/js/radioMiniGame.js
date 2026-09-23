@@ -1,18 +1,19 @@
 /**
- * Diegetic VHF receiver. Informational tuning stays repeatable, while the
- * Day 3 rescue transmission is a single graded, fail-forward interaction.
+ * Diegetic VHF receiver with one informational lock and one final SAR result.
  */
 export class RadioMiniGame {
-  constructor({ modalEl, audio, onFinalResult }) {
+  constructor({ modalEl, audio, onFinalResult, onInformationalResult }) {
     this.modalEl = modalEl;
     this.audio = audio;
     this.onFinalResult = onFinalResult;
+    this.onInformationalResult = onInformationalResult;
     this.targetFreq = 98.4;
     this.currentFreq = 91.2;
     this.isLocked = false;
     this.isFinalAttempt = false;
     this.finalResultResolved = false;
     this.sessionCompleted = false;
+    this.sessionStarted = false;
     this.signalBonus = 0;
     this.signalPenalty = 0;
     this.clearThreshold = 88;
@@ -80,11 +81,23 @@ export class RadioMiniGame {
     this.dom.lockBtn?.addEventListener('click', () => this.attemptLockSignal());
   }
 
-  /** Opens a repeatable informational receiver or one final SAR transmission. */
+  /** Reopens an unfinished session without changing its target frequency. */
   open(options = {}) {
     const finalAttempt = options.finalAttempt === true;
+    // Day 3 replaces any unfinished Day 1 monitoring session.
+    if (finalAttempt && this.sessionStarted && !this.isFinalAttempt) {
+      this.sessionStarted = false;
+    }
+    if (this.sessionStarted) {
+      if (this.sessionCompleted || this.isFinalAttempt !== finalAttempt) return false;
+      this.modalEl.classList.remove('hidden');
+      this.modalEl.setAttribute('aria-hidden', 'false');
+      this.audio?.playRadioSound();
+      return true;
+    }
     if (finalAttempt && this.finalResultResolved) return false;
 
+    this.sessionStarted = true;
     this.isFinalAttempt = finalAttempt;
     this.sessionCompleted = false;
     this.isLocked = false;
@@ -132,6 +145,7 @@ export class RadioMiniGame {
     }
     this.finalResultResolved = false;
     this.sessionCompleted = false;
+    this.sessionStarted = false;
     this.isFinalAttempt = false;
   }
 
@@ -221,5 +235,6 @@ export class RadioMiniGame {
       this.dom.broadcastBox.textContent = `[SIARAN SIMULASI ${this.targetFreq.toFixed(1)} MHz] Tetap di dalam bunker dan hemat daya. Basarnas/SAR sedang menyisir sektor pesisir saat kondisi memungkinkan.`;
       this.dom.broadcastBox.classList.add('broadcast-active');
     }
+    this.onInformationalResult?.();
   }
 }

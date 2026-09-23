@@ -3577,10 +3577,15 @@ body.disable-crt .crt-flicker { display: none !important; }
   border-radius: 0 !important;
 }
 
-.radio-quick-btn:hover {
+.radio-quick-btn:hover:not(:disabled) {
   background: rgba(255, 209, 102, 0.25) !important;
   border-color: #ffd166 !important;
   color: #ffffff !important;
+}
+
+.radio-quick-btn:disabled {
+  opacity: 0.36;
+  cursor: not-allowed;
 }
 
 .card-nav-toggle-btn {
@@ -4316,13 +4321,17 @@ body.disable-crt .crt-flicker { display: none !important; }
   text-shadow: 0 2px 4px #000;
 }
 
-#good-ending-next {
+#good-ending-next,
+#bad-ending-next {
   display: block;
   width: min(230px, 100%);
   margin-left: auto;
   margin-bottom: 0;
   border-left-color: var(--accent-green-border);
 }
+
+#bad-ending-speaker { color: var(--accent-red-border); }
+#bad-ending-next { border-left-color: var(--accent-red-border); }
 
 @keyframes good-ending-fade-in {
   from { opacity: 0; }
@@ -6543,6 +6552,10 @@ body.disable-crt .crt-flicker { display: none !important; }
   animation: good-ending-report-enter 650ms ease-out both;
 }
 
+#ending-view.active.ending-single-card.ending-report-screen.ending-bg-fatal {
+  background: radial-gradient(circle at 50% 0%, #2b1d20 0%, #151014 48%, #07090b 100%);
+}
+
 @keyframes good-ending-report-enter {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -6626,6 +6639,21 @@ body.disable-crt .crt-flicker { display: none !important; }
 }
 
 .good-ending-details__body strong { color: var(--accent-green-border); }
+
+#ending-view .bad-ending-final-card .good-ending-final-card__eyebrow,
+#ending-view .bad-ending-final-card .good-ending-final-card__readiness,
+#ending-view .bad-ending-final-card .good-ending-details summary,
+#ending-view .bad-ending-final-card .good-ending-details__body strong {
+  color: var(--accent-red-border);
+}
+
+#ending-view .bad-ending-final-card .good-ending-details {
+  border-color: rgba(255, 93, 93, 0.32);
+}
+
+#ending-view .bad-ending-final-card .good-ending-final-card__score {
+  border-top-color: rgba(255, 93, 93, 0.3);
+}
 
 #credits-view.credits-after-ending.active {
   background: radial-gradient(circle at 50% 12%, #1b2928, #090d10 58%, #050607);

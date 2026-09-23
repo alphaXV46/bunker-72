@@ -9,8 +9,16 @@
 import { COLORS } from './stationsConfig.js';
 
 const COLORS_IN_ORDER = ['red', 'yellow', 'blue', 'green'];
-const RIGHT_ORDER = ['blue', 'green', 'red', 'yellow'];
 const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const shuffledColors = () => {
+  const colors = [...COLORS_IN_ORDER];
+  for (let i = colors.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [colors[i], colors[j]] = [colors[j], colors[i]];
+  }
+  return colors;
+};
 
 export class WireStation {
   constructor() {
@@ -31,6 +39,8 @@ export class WireStation {
   mount(panel, { introHtml, onComplete, setFeedback }) {
     this.destroy();
     this.wireConnections = {};
+    const leftOrder = shuffledColors();
+    const rightOrder = shuffledColors();
 
     const socket = (color, side) => `
       <button class="mg-wire-terminal mg-wire-terminal--${side} wire-${color}" type="button" data-color="${color}" aria-label="Socket ${COLORS[color].label} ${side === 'left' ? 'kabel' : 'tujuan'}">
@@ -41,8 +51,8 @@ export class WireStation {
       <div class="mg-wire-head"><span>HUBUNGKAN WARNA</span><b id="mg-wire-count">0 / 4</b></div>
       <div class="mg-wire-board" id="mg-wire-board">
         <svg class="mg-wire-cables" id="mg-wire-cables" aria-hidden="true"></svg>
-        <div class="mg-wire-column mg-wire-column--left">${COLORS_IN_ORDER.map((color) => socket(color, 'left')).join('')}</div>
-        <div class="mg-wire-column mg-wire-column--right">${RIGHT_ORDER.map((color) => socket(color, 'right')).join('')}</div>
+        <div class="mg-wire-column mg-wire-column--left">${leftOrder.map((color) => socket(color, 'left')).join('')}</div>
+        <div class="mg-wire-column mg-wire-column--right">${rightOrder.map((color) => socket(color, 'right')).join('')}</div>
         <span class="mg-wire-screw mg-wire-screw--tl" aria-hidden="true"></span><span class="mg-wire-screw mg-wire-screw--tr" aria-hidden="true"></span>
         <span class="mg-wire-screw mg-wire-screw--bl" aria-hidden="true"></span><span class="mg-wire-screw mg-wire-screw--br" aria-hidden="true"></span>
       </div>
