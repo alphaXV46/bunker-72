@@ -17,8 +17,8 @@ export const SERVICE_HATCH_CONFIG = Object.freeze({
   sweetSpotMin: 0.32,
   sweetSpotMax: 0.68,
   sweetSpotTravel: 0.18,
-  sweetSpotCycleMs: 5600,
-  sweetSpotFinalCycleMs: 3900,
+  sweetSpotCycleMs: 4900,
+  sweetSpotFinalCycleMs: 3400,
   resistanceResetMs: 960,
 });
 
@@ -135,6 +135,12 @@ export class ServiceHatchStation {
     const inSweetSpot = () => Math.abs(this.position - this.movingSweetSpotCenter) <= this.sweetSpotWidth / 2;
     let previousMotionTime = now();
     let motionPhase = 0;
+    const randomSource = typeof random === 'function' ? random : Math.random;
+    const sampleMotion = () => clamp01(randomSource());
+    const motionDirection = sampleMotion() < 0.5 ? -1 : 1;
+    let motionRate = 1;
+    let motionRateTarget = 1;
+    let motionChangeInMs = 0;
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     const travel = reducedMotion ? 0 : Math.min(
       SERVICE_HATCH_CONFIG.sweetSpotTravel,
@@ -209,7 +215,13 @@ export class ServiceHatchStation {
       const current = Number.isFinite(timestamp) ? timestamp : now();
       const motionDeltaMs = Math.min(100, Math.max(0, current - previousMotionTime));
       previousMotionTime = current;
-      motionPhase += (2 * Math.PI * motionDeltaMs)
+      motionChangeInMs -= motionDeltaMs;
+      if (motionChangeInMs <= 0) {
+        motionRateTarget = 0.92 + sampleMotion() * 0.2;
+        motionChangeInMs = 650 + sampleMotion() * 600;
+      }
+      motionRate += (motionRateTarget - motionRate) * Math.min(1, motionDeltaMs / 450);
+      motionPhase += motionDirection * (2 * Math.PI * motionDeltaMs * motionRate)
         / resolveServiceHatchCycleMs(this.segmentIndex, this.segmentCount);
       this.movingSweetSpotCenter = this.sweetSpotCenter + travel
         * Math.sin(motionPhase);

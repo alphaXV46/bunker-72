@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import { SERVICE_HATCH_CONFIG, ServiceHatchStation } from '../src/js/bunkerStations/serviceHatchStation.js';
+import {
+  SERVICE_HATCH_CONFIG,
+  ServiceHatchStation,
+  resolveServiceHatchCycleMs,
+} from '../src/js/bunkerStations/serviceHatchStation.js';
 
 let time = 0;
 let nextFrameId = 1;
@@ -35,8 +39,7 @@ const element = () => ({
   },
 });
 
-const mount = (segmentCount = 1, holdDurationMs = 900) => {
-  const startTime = time;
+const mount = (segmentCount = 1, holdDurationMs = 900, random = () => 0.5) => {
   const station = new ServiceHatchStation();
   const nodes = new Map([
     '#mg-hatch-track', '#mg-hatch-needle', '.mg-hatch-sweet-zone',
@@ -57,6 +60,7 @@ const mount = (segmentCount = 1, holdDurationMs = 900) => {
   station.mount(panel, {
     introHtml: '',
     sweetSpotCenter: 0.5,
+    random,
     segmentCount,
     holdDurationMs,
     setFeedback() {},
@@ -66,18 +70,17 @@ const mount = (segmentCount = 1, holdDurationMs = 900) => {
   return {
     station,
     track,
-    startTime,
     sweetZone: nodes.get('.mg-hatch-sweet-zone'),
     get completions() { return completions; },
     get cancellations() { return cancellations; },
   };
 };
 
-const nextCenter = (game) => game.station.sweetSpotCenter + SERVICE_HATCH_CONFIG.sweetSpotTravel
-  * Math.sin((2 * Math.PI * (time + 100 - game.startTime)) / SERVICE_HATCH_CONFIG.sweetSpotCycleMs);
+const currentCenter = (game) => Number.parseFloat(game.sweetZone.style.left) / 100
+  + SERVICE_HATCH_CONFIG.sweetSpotWidth / 2;
 
 const followPointer = (game, pointerId) => {
-  game.track.dispatch('pointermove', { pointerId, clientX: nextCenter(game) * 100 });
+  game.track.dispatch('pointermove', { pointerId, clientX: currentCenter(game) * 100 });
   frame();
 };
 
@@ -101,7 +104,7 @@ assert(keyboard.station.position >= 0.49, 'arrow keys should reach the alignment
 keyboard.track.dispatch('keydown', { code: 'Space', key: ' ' });
 assert.equal(keyboard.track.captured, undefined, 'keyboard input must not capture a pointer');
 for (let i = 0; i < 10; i += 1) {
-  const target = nextCenter(keyboard);
+  const target = currentCenter(keyboard);
   while (Math.abs(keyboard.station.position - target) > 0.025) {
     keyboard.track.dispatch('keydown', { key: keyboard.station.position < target ? 'ArrowRight' : 'ArrowLeft' });
   }
@@ -140,4 +143,48 @@ assert.equal(stationary.completions, 0, 'holding still should not beat a moving 
 stationary.station.destroy();
 assert.equal(frames.size, 0);
 
-console.log('PASS: moving service hatch target, pointer, keyboard, completion, and cleanup');
+const cycles = Array.from({ length: 6 }, (_, index) => resolveServiceHatchCycleMs(index, 6));
+assert.equal(cycles[0], SERVICE_HATCH_CONFIG.sweetSpotCycleMs);
+assert.equal(cycles[5], SERVICE_HATCH_CONFIG.sweetSpotFinalCycleMs);
+assert(cycles.every((cycle, index) => index === 0 || cycle < cycles[index - 1]), 'each segment must move faster');
+
+const leftStart = mount(1, 900, () => 0.2);
+frame();
+assert(currentCenter(leftStart) < 0.5, 'random seed can start the target moving left');
+leftStart.station.destroy();
+const rightStart = mount(1, 900, () => 0.8);
+frame();
+assert(currentCenter(rightStart) > 0.5, 'random seed can start the target moving right');
+rightStart.station.destroy();
+
+const slowerRhythm = mount(1, 900, () => 0.6);
+for (let i = 0; i < 8; i += 1) frame();
+const slowerPosition = currentCenter(slowerRhythm);
+slowerRhythm.station.destroy();
+const fasterRhythm = mount(1, 900, () => 0.9);
+for (let i = 0; i < 8; i += 1) frame();
+assert(currentCenter(fasterRhythm) > slowerPosition, 'random seed should vary the movement rhythm');
+fasterRhythm.station.destroy();
+assert.equal(frames.size, 0);
+
+const rhythmSamples = [0.8, 0.15, 0.7, 0.3, 0.95, 0.45];
+let rhythmIndex = 0;
+const progression = mount(
+  6,
+  SERVICE_HATCH_CONFIG.holdDurationMs,
+  () => rhythmSamples[rhythmIndex++ % rhythmSamples.length],
+);
+progression.track.dispatch('pointerdown', { pointerId: 6, button: 0, clientX: 50 });
+const reachedSegments = new Set([1]);
+for (let i = 0; i < 260 && progression.completions === 0; i += 1) {
+  const before = currentCenter(progression);
+  followPointer(progression, 6);
+  const after = currentCenter(progression);
+  assert(Math.abs(after - before) < 0.04, 'zone must not jump when speed changes');
+  if (!progression.completions) reachedSegments.add(progression.station.segmentIndex + 1);
+}
+assert.deepEqual([...reachedSegments], [1, 2, 3, 4, 5, 6]);
+assert.equal(progression.completions, 1, 'following all six progressively faster segments should succeed');
+assert.equal(frames.size, 0);
+
+console.log('PASS: randomized six-segment service hatch motion, pointer, keyboard, completion, and cleanup');
