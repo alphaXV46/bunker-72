@@ -36,7 +36,7 @@ export const STATIONS = {
     kicker: 'AKSES PANEL SERVIS // KOMPARTEMEN INTERNAL',
     name: 'AKSES PANEL SERVIS',
     shortName: 'PANEL SERVIS',
-    tutorial: 'Geser collar mekanisme akses ke zona ALIGN, lalu tahan klik kiri untuk memutar aktuator melalui tiap segmen resistansi.',
+    tutorial: 'Tekan dan geser collar mengikuti zona ALIGN, lalu tahan. Gerakannya bertambah cepat pada setiap segmen.',
     defaultSuccessMessage: 'PANEL SERVIS TERBUKA // AKSES KOMPARTEMEN SIAP',
   },
   wires: {
