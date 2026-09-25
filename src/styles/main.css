@@ -112,13 +112,13 @@
 }
 
 #ending-view .good-ending-final-card__readiness {
-  width: fit-content;
-  max-width: 100%;
-  padding: 8px 0;
+  width: 100%;
+  padding: 14px 0;
   background: transparent;
   border: 0;
   border-top: 1px solid currentColor;
   border-bottom: 1px solid rgba(231, 237, 240, 0.34);
+  text-align: center;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
 }
 
@@ -4462,9 +4462,9 @@ body.disable-crt .crt-flicker { display: none !important; }
 
 .good-ending-final-card__readiness {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px 14px;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   margin-top: 14px;
   padding: 10px 12px;
   background: rgba(102, 224, 142, 0.08);
@@ -4474,14 +4474,16 @@ body.disable-crt .crt-flicker { display: none !important; }
 
 .good-ending-final-card__readiness-label {
   color: var(--text-pixel);
-  font-size: clamp(0.68rem, 0.8vw, 0.82rem);
-  letter-spacing: 1.5px;
+  font-family: 'VT323', monospace;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  line-height: 1;
+  letter-spacing: 2px;
 }
 
 .good-ending-final-card__readiness strong {
   font-family: 'VT323', monospace;
-  font-size: clamp(2.25rem, 3.2vw, 3rem);
-  line-height: 0.9;
+  font-size: clamp(4rem, 7vw, 6.5rem);
+  line-height: 1;
   text-shadow: 0 0 12px currentColor;
 }
 
