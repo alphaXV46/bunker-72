@@ -33,25 +33,7 @@
 
     <section id="menu-view" class="view-screen">
       <div class="menu-title-container">
-        <div class="menu-kicker">SATGAS SIMULASI DARURAT / PROTOKOL 72</div>
-        <h1 class="game-title">72 JAM PERTAMA</h1>
-        <p class="game-subtitle">BUNKER 72 - NARRATIVE SURVIVAL</p>
-      </div>
-
-      <div class="menu-decor">
-        <div class="menu-decor-header">
-          <div class="flashing-warning">STATUS DARURAT: AKTIVITAS VULKANIK EKSTREM</div>
-          <div class="bunker-status-lights">
-            <span class="light active-red"></span>
-            <span class="light active-green"></span>
-            <span class="light"></span>
-          </div>
-        </div>
-        <div class="menu-readout">
-          <span>Durasi simulasi: 72 jam</span>
-          <span>Parameter utama: kesiapsiagaan</span>
-          <span>Target: keluarga selamat sampai evakuasi resmi</span>
-        </div>
+        <h1 class="game-title">BUNKER 72</h1>
       </div>
 
       <div class="menu-buttons-container">
@@ -61,6 +43,10 @@
 
         <button id="continue-btn" class="bunker-menu-btn" data-hover-sound="true" disabled>
           <span class="btn-text">LANJUTKAN</span>
+        </button>
+
+        <button id="ending-archive-btn" class="bunker-menu-btn hidden" data-hover-sound="true" disabled>
+          <span class="btn-text">CATATAN AKHIR</span>
         </button>
 
         <button id="credits-btn" class="bunker-menu-btn" data-hover-sound="true">
@@ -400,8 +386,11 @@
         </div>
 
         <div class="settings-actions">
+          <button id="settings-replay-btn" class="bunker-menu-btn choice-btn text-center" type="button">
+            <span class="btn-text">MAIN ULANG</span>
+          </button>
           <button id="settings-menu-btn" class="bunker-menu-btn choice-btn text-center">
-            <span class="btn-text">KEMBALI KE MENU UTAMA</span>
+            <span class="btn-text">MENU UTAMA</span>
           </button>
           <button id="settings-close-btn" class="bunker-menu-btn choice-btn text-center">
             <span class="btn-text">TUTUP</span>

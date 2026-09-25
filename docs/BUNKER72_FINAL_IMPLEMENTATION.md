@@ -85,19 +85,21 @@ Ending evaluation (`getEndingResult`) is purely deterministic and evaluates tech
 
 ### Ending Outcomes
 1. **`ending_good` (Bertahan dengan Stabil)**:
-   - **Conditions**: Preparedness $\ge 60$ points, Health $\ge 55$, vital conditions stable.
+   - **Conditions**: Preparedness $\ge 80$ points, Health $\ge 55$, hunger and thirst both above 30, and vital conditions stable.
    - **Experience**: The family's technical diligence preserved sufficient operating margin. Rescued in stable physical and emotional health.
 2. **`ending_normal` (Selamat dengan Konsekuensi)**:
-   - **Conditions**: Preparedness $< 60$ or Health $< 55$ (with Health $> 0$).
-   - **Experience**: The family survives, but resources were depleted, emergency power was exhausted, and physical fatigue is noticeable.
+   - **Conditions**: Any run that meets neither Good nor Bad conditions. This is the intended common first-playthrough outcome.
+   - **Experience**: The family survives a difficult 72 hours and begins checkup and recovery. Gaps in preparation or physical condition keep the rescue from being optimal.
 3. **`ending_bad` (Penyelamatan Kritis)**:
-   - **Conditions**: Health $= 0$.
-   - **Experience**: Canonical **critical rescue**—NOT family death. Bunker systems reach maximum failure threshold; SAR breaches the shelter and evacuates Aris, Sarah, and Maya alive in severe physical exhaustion, requiring immediate intensive medical care. Age 10+ compliant with zero graphic violence or fatality.
+   - **Conditions**: Health $= 0$; or, in the active sealed72 story, thirst $\le 10$, Health $\le 70$, Preparedness $\le 60$, and at least three accumulated failures among wasteful water use, exposed sanitation, unmasked Day 2 fatigue, and failed SAR radio contact. Critical thirst now causes additional health loss over time.
+   - **Experience**: Canonical **critical rescue**—NOT family death. Compounding shortages and safety failures leave the family in severe physical exhaustion; SAR opens the shelter and evacuates Aris, Sarah, and Maya alive for urgent care. Age 10+ compliant with zero graphic violence or fatality.
+
+The sealed72 thresholds above are tuned so a reasonably prepared first run tends toward Normal. The archived `legacy_phase7` timeline keeps its prior Good threshold of 60, Good health minimum of 55, and Bad trigger at Health 0.
 
 ### Independence of Technical & Social Systems
 - Helping Hendra (`c_prolog_hendra_help`, `helped_stranger`) consumes Supply Opportunity #2 / remaining expedition time (`prolog_opt2_consumed = true`). It does **not** automatically consume `inventory.kit` and does not preclude Good with sound technical choices.
 - Choosing Family First (`stranger_family_first`) leaves Opportunity #2 available without moral penalties or hidden narrative locks. Both choices preserve the same pre-choice inventory; later supply collection or legitimate item use is separate.
-- A failed radio attempt (`radio_quality: 'failed'`) can still achieve the Good ending ($\ge 60$ score) through sector searches and residential records.
+- A failed radio attempt (`radio_quality: 'failed'`) can still achieve the Good ending ($\ge 80$ score) through strong preparation in the other technical categories.
 - Sarah's BMKG advisory response (`sarah_warning_response`) influences public context in the epilogue without modifying technical preparedness.
 
 ---

@@ -166,9 +166,9 @@ const FLAG_CHOICE_MAP = Object.freeze({
 });
 
 const SARAH_PUBLIC_IMPACT_BODIES = Object.freeze({
-  escalate: 'Karena Sarah mendorong koordinasi lebih awal, beberapa wilayah memperoleh waktu tambahan untuk mengaktifkan titik kumpul dan memeriksa jalur evakuasi. Setelah keadaan mulai stabil, pesan dari sejumlah keluarga mencatat bahwa waktu itu membantu mereka bergerak lebih cepat. Sarah tahu hasil tersebut lahir dari kerja banyak pihak, tetapi lega rekomendasinya ikut membuka ruang untuk bersiap.',
-  verify: 'Keputusan Sarah untuk menunggu verifikasi menghasilkan informasi lintas instansi yang lebih lengkap sebelum tindak lanjut diperluas. Namun, waktu persiapan menjadi lebih sempit dan beberapa jalur sudah padat ketika warga mulai bergerak. Sebagian keluarga sempat terpisah sebelum akhirnya dipertemukan kembali di posko; bagi Sarah, hasil itu tetap menyimpan lega sekaligus beban.',
-  maintain: 'Karena respons saat itu dipertahankan sambil menunggu evaluasi berikutnya, sebagian wilayah hanya memiliki waktu persiapan yang pendek ketika kondisi memburuk. Beberapa akses sudah sulit dilalui, sementara posko masih mencatat warga yang belum kembali atau belum ditemukan. Pencarian terus dilakukan, dan Sarah menyimpan catatan itu sebagai pengingat tentang beratnya keputusan di tengah ketidakpastian.',
+  escalate: 'Koordinasi lebih awal memberi beberapa wilayah waktu memeriksa jalur dan membuka titik kumpul. Sarah lega rekomendasinya membantu kerja banyak pihak.',
+  verify: 'Verifikasi memperjelas informasi, tetapi menyisakan sedikit waktu. Jalur padat; beberapa keluarga baru bertemu kembali di posko.',
+  maintain: 'Respons yang dipertahankan menyisakan waktu persiapan singkat. Sebagian warga belum ditemukan saat posko membuka pencarian.',
 });
 
 export class GameModel {
@@ -513,10 +513,12 @@ export class GameModel {
       THIRST_DECAY_PER_INTERVAL,
       HUNGER_WARNING_THRESHOLD,
       THIRST_WARNING_THRESHOLD,
+      THIRST_CRITICAL_THRESHOLD,
       HEALTH_PENALTY_HUNGER,
       HEALTH_PENALTY_THIRST,
       HEALTH_PENALTY_LOW_HUNGER,
       HEALTH_PENALTY_LOW_THIRST,
+      HEALTH_PENALTY_CRITICAL_THIRST,
     } = SURVIVAL;
     
     let hungerDecayRate = HUNGER_DECAY_PER_INTERVAL;
@@ -539,6 +541,9 @@ export class GameModel {
     const intervalFraction = elapsedHours / DECAY_INTERVAL_HOURS;
     if (this.hunger > 0 && this.hunger <= HUNGER_WARNING_THRESHOLD) healthPenalty += intervalFraction * HEALTH_PENALTY_LOW_HUNGER;
     if (this.thirst > 0 && this.thirst <= THIRST_WARNING_THRESHOLD) healthPenalty += intervalFraction * HEALTH_PENALTY_LOW_THIRST;
+    if (this.storyRevision === STORY_REVISIONS.SEALED72 && this.thirst <= THIRST_CRITICAL_THRESHOLD) {
+      healthPenalty += intervalFraction * HEALTH_PENALTY_CRITICAL_THIRST;
+    }
     if (this.hunger <= 0) healthPenalty += intervalFraction * HEALTH_PENALTY_HUNGER;
     if (this.thirst <= 0) healthPenalty += intervalFraction * HEALTH_PENALTY_THIRST;
 
@@ -649,15 +654,31 @@ export class GameModel {
   /** The one authoritative ending decision. No social or emotional flag is read here. */
   getEndingResult() {
     const preparedness = this.calculatePreparednessReport();
-    const criticalRescueCondition = this.health <= 0;
+    const isSealed72 = this.storyRevision === STORY_REVISIONS.SEALED72;
+    const accumulatedFailures = [
+      this.flags.water_used_freely === true,
+      this.flags.sanitation_exposed === true,
+      this.flags.day2_fatigue_applied === true,
+      preparedness.radioQuality === 'failed',
+    ].filter(Boolean).length;
+    const criticalResourceFailure = isSealed72
+      && this.thirst <= SURVIVAL.THIRST_CRITICAL_THRESHOLD
+      && this.health <= ENDING_RULES.BAD_HEALTH_MAX
+      && preparedness.score <= ENDING_RULES.BAD_PREPAREDNESS_MAX
+      && accumulatedFailures >= ENDING_RULES.BAD_FAILURE_MIN;
+    const criticalRescueCondition = this.health <= 0 || criticalResourceFailure;
     const criticalSurvivalStable = this.health >= ENDING_RULES.GOOD_HEALTH_MIN
+      && (!isSealed72 || (this.hunger > SURVIVAL.HUNGER_WARNING_THRESHOLD
+        && this.thirst > SURVIVAL.THIRST_WARNING_THRESHOLD))
       && this.flags.air_uninspected !== true
       && this.flags.smoke_poisoned !== true
       && this.flags.water_poisoned !== true
       && this.flags.water_ruined !== true;
     const endingId = criticalRescueCondition
       ? 'ending_bad'
-      : criticalSurvivalStable && preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN
+      : criticalSurvivalStable && preparedness.score >= (isSealed72
+        ? ENDING_RULES.GOOD_PREPAREDNESS_MIN
+        : ENDING_RULES.LEGACY_GOOD_PREPAREDNESS_MIN)
         ? 'ending_good'
         : 'ending_normal';
     return { endingId, preparedness, criticalRescueCondition, criticalSurvivalStable };
@@ -680,9 +701,9 @@ export class GameModel {
     const isSealed72 = this.storyRevision === STORY_REVISIONS.SEALED72;
     const hendraRescueNote = !isSealed72
       ? (hendraOutcome === 'helped'
-          ? ' Hendra kemudian menguatkan petunjuk sektor yang sudah diterima tim.'
+          ? ' Hendra menguatkan petunjuk sektor tim.'
           : hendraOutcome === 'guided'
-            ? ' Petunjuk yang pernah Aris berikan membantu Hendra mencapai perlindungan lain.'
+            ? ' Arahan Aris membantu Hendra mencapai perlindungan lain.'
             : '')
       : '';
     const sarahPublicImpactBody = SARAH_PUBLIC_IMPACT_BODIES[this.flags.sarah_warning_response] || null;
@@ -697,7 +718,7 @@ export class GameModel {
         icon: '◈',
         title: 'PENYELAMATAN KRITIS',
         tone: 'rescue',
-        body: 'Tim SAR menjangkau shelter dan mengevakuasi Aris, Sarah, dan Maya dalam kondisi sangat lemah. Ketiganya selamat dan segera mendapat penanganan medis; pemulihan mereka membutuhkan waktu.',
+        body: 'Tim SAR mengevakuasi keluarga dalam kondisi sangat lemah. Ketiganya selamat dan segera dirawat.',
       });
       // 2. Sarah Public Impact
       if (sarahPublicImpactModule) modules.push(sarahPublicImpactModule);
@@ -707,7 +728,7 @@ export class GameModel {
         icon: '◌',
         title: 'KONDISI KELUARGA',
         tone: 'family',
-        body: 'Aris, Sarah, dan Maya bertahan bersama melewati batas daya tahan fisik mereka. Di posko darurat, perawatan intensif segera diberikan untuk memulai pemulihan panjang mereka.',
+        body: 'Di posko, Aris, Sarah, dan Maya mendapat perawatan intensif. Pemulihan mereka akan panjang.',
       });
       // 4. Bunker / System Condition
       modules.push({
@@ -715,7 +736,7 @@ export class GameModel {
         icon: '◫',
         title: 'KONDISI BUNKER',
         tone: 'bunker',
-        body: 'Beberapa sistem perlindungan gagal bertahan dan beroperasi melampaui batas toleransi. Keluarga harus meninggalkan perlengkapan saat dievakuasi; bunker perlu diperiksa petugas sebelum dapat digunakan kembali.',
+        body: 'Petugas memeriksa udara, sanitasi, dan persediaan sebelum bunker dipakai lagi.',
       });
       // 5. Preparedness Debrief
       modules.push({
@@ -723,7 +744,7 @@ export class GameModel {
         icon: '⌁',
         title: 'CATATAN KESIAPSIAGAAN',
         tone: 'preparedness',
-        body: 'Evaluasi teknis ini menggarisbawahi pentingnya inspeksi awal dan cadangan logistik untuk memperlebar batas bertahan keluarga saat krisis serupa terjadi.',
+        body: 'Inspeksi awal dan cadangan logistik perlu diperkuat untuk krisis berikutnya.',
       });
       // 6. Hendra (brief acknowledgment without delaying medical care)
       if (isSealed72 && hendraOutcome === 'helped') {
@@ -732,21 +753,21 @@ export class GameModel {
           icon: '◍',
           title: 'HENDRA',
           tone: 'hendra',
-          body: 'Di area transit evakuasi, Hendra yang berhasil mencapai posko bukit sempat mengenali Aris di sisi barat rekahan. Ia menyampaikan terima kasih singkat sebelum tim medis melanjutkan penanganan darurat bagi keluarga.',
+          body: 'Hendra mencapai posko bukit dan sempat berterima kasih kepada Aris sebelum keluarga dibawa ke ruang perawatan.',
         });
       }
     } else {
       // 1. Rescue / Immediate survival outcome
       const rescueBodies = isSealed72
         ? {
-            clear: 'Transmisi jelas membuat Basarnas/SAR mengidentifikasi Bunker 72 dengan cepat.',
-            weak: 'Koordinat yang terputus-putus membuat Basarnas/SAR memperluas pola pencarian sebelum menemukan bunker.',
-            failed: 'Panggilan radio tidak dapat dipastikan. Lokasi keluarga akhirnya ditemukan melalui penyisiran sektor bertahap dan pendataan warga di kawasan pemukiman, bukan karena transmisi yang sempurna.',
+            clear: 'Transmisi jelas membantu tim SAR menemukan Bunker 72 dengan cepat.',
+            weak: 'Koordinat terputus-putus; tim SAR memperluas pencarian hingga menemukan bunker.',
+            failed: 'Panggilan radio tak terkonfirmasi. Tim SAR menemukan bunker lewat penyisiran sektor dan pendataan warga.',
           }
         : {
-            clear: `Transmisi jelas membuat Basarnas/SAR mengidentifikasi Bunker 72 dengan cepat.${hendraRescueNote}`,
-            weak: `Koordinat yang terputus-putus membuat Basarnas/SAR memperluas pola pencarian sebelum menemukan bunker.${hendraRescueNote}`,
-            failed: `Panggilan radio tidak dapat dipastikan. Lokasi keluarga akhirnya ditemukan melalui penyisiran sektor bertahap dan pendataan warga di kawasan pemukiman, bukan karena transmisi yang sempurna.${hendraRescueNote}`,
+            clear: `Transmisi jelas membantu tim SAR menemukan Bunker 72 dengan cepat.${hendraRescueNote}`,
+            weak: `Koordinat terputus-putus; tim SAR memperluas pencarian hingga menemukan bunker.${hendraRescueNote}`,
+            failed: `Panggilan radio tak terkonfirmasi. Tim SAR menemukan bunker lewat penyisiran sektor dan pendataan warga.${hendraRescueNote}`,
           };
       modules.push({ id: 'rescue', icon: '⌁', title: 'OPERASI PENYELAMATAN', tone: 'rescue', body: rescueBodies[preparedness.radioQuality] });
 
@@ -755,23 +776,23 @@ export class GameModel {
 
       // 3. Aris & Sarah (Joint effort)
       const familyBody = this.flags.sarah_comforted_maya
-        ? 'Sarah menjaga ketenangan keluarga dan memantau perkembangan situasi, sementara Aris mengendalikan fungsi teknis bunker. Keduanya saling menopang hingga pintu palka dibuka.'
+        ? 'Sarah menenangkan keluarga; Aris menjaga sistem bunker. Mereka saling menopang hingga bantuan tiba.'
         : this.flags.maya_comforted
-          ? 'Kombinasi keteguhan Sarah mendampingi keluarga dan kesiapan teknis Aris memastikan bunker tetap bertahan. Keduanya berbagi beban hingga bantuan tiba.'
-          : 'Aris dan Sarah saling melengkapi peran penting mereka: kesiapan teknis bunker berpadu dengan keteguhan menjaga ketenangan keluarga hingga pintu terbuka.';
+          ? 'Sarah mendampingi Maya; Aris menjaga bunker. Mereka berbagi beban hingga bantuan tiba.'
+          : 'Aris menjaga sistem, Sarah menjaga keluarga. Mereka bertahan bersama hingga palka terbuka.';
       modules.push({ id: 'family', icon: '◌', title: 'ARIS & SARAH', tone: 'family', body: familyBody });
 
       // 4. Maya (Emotional payoff)
       const hasToy = this.flags.toy_packed === true || this.flags.maya_toy_callback === true || this.flags.toy_bonded === true;
       const mayaBody = hasToy && this.flags.promised_maya
-        ? 'Mobil merah itu masih berada di genggaman Maya. Janji kecil sebelum bencana akhirnya terjawab utuh: Ayah benar-benar pulang.'
+        ? 'Maya masih menggenggam mobil merahnya. Janji Aris sebelum bencana akhirnya terpenuhi.'
         : hasToy
-          ? 'Maya membawa mainan mobil merahnya keluar dari bunker—sebuah benda kecil yang membuat malam panjang terasa tidak sepenuhnya asing.'
+          ? 'Maya membawa mobil merahnya keluar dari bunker.'
           : this.flags.maya_comforted
-            ? 'Maya mengingat bahwa Aris mendampinginya saat bunker terasa paling gelap, membantunya tetap tabah.'
+            ? 'Maya ingat Aris tetap di sisinya saat bunker terasa paling gelap.'
             : this.flags.sarah_comforted_maya
-              ? 'Maya melewati malam-malam sulit dekat Sarah, sementara Aris menjaga fungsi bunker yang tersisa.'
-              : 'Maya selamat bersama keluarganya; kehangatan keluarga tetap utuh meski pemulihan dari tiga hari yang menegangkan akan membutuhkan waktu.';
+              ? 'Maya melewati malam-malam sulit dekat Sarah.'
+              : 'Maya selamat bersama keluarganya. Mereka kini menghadapi masa pemulihan.';
       modules.push({ id: 'maya', icon: '◇', title: 'MAYA', tone: 'maya', body: mayaBody });
 
       // 5. Hendra (IF helped in sealed72; or all 3 in legacy)
@@ -783,14 +804,14 @@ export class GameModel {
               icon: '◍',
               title: 'HENDRA',
               tone: 'hendra',
-              body: 'Di dekat posko tanggap darurat, Hendra yang berhasil mencapai bukit evakuasi mengenali Aris dan menghampirinya. Ucapan terima kasihnya sederhana namun tulus—pertolongan Aris saat gempa susulan di sisi barat rekahan memberinya kesempatan selamat sampai ke posko bukit.',
+              body: 'Hendra selamat sampai posko bukit. Ia menemui Aris dan berterima kasih atas bantuan di dekat rekahan.',
             });
           }
         } else {
           const hendraBodies = {
-            helped: 'Hendra mengingat bantuan Aris di perjalanan ekspedisi. Pertemuan itu menjadi bagian dari cerita para penyintas setelah evakuasi.',
-            guided: 'Arahan Aris membantu Hendra memilih jalur perlindungan yang lebih aman. Mereka bertemu lagi sebagai dua penyintas yang sama-sama berhasil keluar.',
-            family_first: 'Aris memilih kembali kepada Sarah dan Maya ketika persediaan serta kondisi luar tidak memungkinkan berhenti. Nasib Hendra tidak dijadikan vonis atas keputusan itu.',
+            helped: 'Hendra selamat dan mengingat bantuan Aris di perjalanan.',
+            guided: 'Arahan Aris membantu Hendra mencapai perlindungan. Mereka bertemu lagi setelah evakuasi.',
+            family_first: 'Aris kembali kepada Sarah dan Maya. Nasib Hendra tetap tidak diketahui.',
           };
           modules.push({ id: 'hendra', icon: '◍', title: 'HENDRA', tone: 'hendra', body: hendraBodies[hendraOutcome] });
         }
@@ -798,37 +819,41 @@ export class GameModel {
 
       // 6. Bunker / Technical Aftermath
       const bunkerParts = [];
-      if (this.flags.structural_damage) bunkerParts.push('Retakan struktur meninggalkan pekerjaan besar bagi tim setelah evakuasi.');
-      else bunkerParts.push('Struktur Bunker 72 menahan tekanan terburuk hingga tim tiba.');
+      if (this.flags.structural_damage) bunkerParts.push('Retakan bunker perlu diperbaiki setelah evakuasi.');
+      else bunkerParts.push('Struktur bunker bertahan hingga tim tiba.');
       if (isSealed72) {
         if (this.flags.day2_air_cleared) {
           if (this.flags.spare_filter_used && !this.flags.final_air_protected) {
-            bunkerParts.push('Penggantian filter pada Hari 2 memulihkan sirkulasi udara lebih cepat, meski cadangan filter habis sebelum jam terakhir.');
+            bunkerParts.push('Filter baru memulihkan udara pada Hari 2, tetapi cadangannya habis sebelum jam terakhir.');
           } else if (this.flags.day2_power_draw_heavy) {
-            bunkerParts.push('Pembersihan blower manual memulihkan sirkulasi, meski beban motor menyerap margin daya darurat bunker.');
+            bunkerParts.push('Blower kembali mengalirkan udara, tetapi memakai lebih banyak daya.');
           } else {
-            bunkerParts.push('Penanganan ventilasi pada krisis Hari 2 menjaga sirkulasi udara tetap aman.');
+            bunkerParts.push('Perbaikan Hari 2 menjaga sirkulasi udara.');
           }
         } else if (this.flags.day2_power_conserved) {
           if (this.flags.day2_fatigue_applied) {
-            bunkerParts.push('Penghematan daya darurat menjaga cadangan daya bunker bertahan, meski keluarga harus menahan kelelahan di udara pengap.');
+            bunkerParts.push('Daya bertahan lebih lama, meski udara pengap melelahkan keluarga.');
           } else {
-            bunkerParts.push('Penyesuaian beban listrik darurat berhasil menghemat daya hingga fase akhir.');
+            bunkerParts.push('Pengaturan beban menghemat daya hingga akhir.');
           }
         }
       }
-      if (this.flags.battery_committed) bunkerParts.push('Baterai ekstra menopang pemancar radio VHF secara mandiri tanpa membebani daya darurat bunker.');
-      else if (this.flags.power_saved || this.flags.power_routed) bunkerParts.push('Pengaturan sirkuit memberi daya cukup untuk fungsi yang paling penting.');
-      if (this.flags.final_power_conserved) bunkerParts.push('Pada jam terakhir, sirkuit tambahan dimatikan sehingga indikator dasar bunker tetap menyala saat tim tiba.');
-      if (this.flags.medical_mask_used) bunkerParts.push('Masker disiapkan untuk mengurangi paparan debu; masker tidak menyediakan oksigen atau menggantikan ventilasi.');
+      if (this.flags.battery_committed) bunkerParts.push('Baterai ekstra memasok radio VHF tanpa menguras daya bunker.');
+      else if (this.flags.power_saved || this.flags.power_routed) bunkerParts.push('Sirkuit penting tetap mendapat daya.');
+      if (this.flags.final_power_conserved) bunkerParts.push('Sirkuit tambahan dimatikan; indikator bertahan sampai tim tiba.');
+      if (this.flags.medical_mask_used) bunkerParts.push('Masker mengurangi debu, tetapi tidak menggantikan ventilasi atau memasok oksigen.');
       modules.push({ id: 'bunker', icon: '▣', title: 'BUNKER 72', tone: 'bunker', body: bunkerParts.join(' ') });
 
       // 7. Preparedness Debrief
-      const preparationBody = preparedness.score >= 75
-        ? 'Kesiapsiagaan teknis yang kuat memberi keluarga lebih banyak pilihan ketika semua sistem mulai terbatas.'
-        : preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN
-          ? 'Dasar kesiapsiagaan cukup kuat untuk menopang keluarga, meski tidak semua langkah dapat dilakukan sempurna.'
-          : 'Keluarga tetap selamat, tetapi beberapa perlindungan teknis yang terlambat membuat jam-jam terakhir jauh lebih berat.';
+      const preparationBody = endingId === 'ending_normal'
+        ? (this.hunger <= SURVIVAL.HUNGER_WARNING_THRESHOLD || this.thirst <= SURVIVAL.THIRST_WARNING_THRESHOLD)
+          ? 'Persiapan teknis membantu, tetapi kebutuhan makan atau minum belum terjaga hingga evakuasi.'
+          : this.health < ENDING_RULES.GOOD_HEALTH_MIN
+            ? 'Kondisi fisik keluarga melemah sebelum tim tiba; pemulihan perlu dipantau.'
+            : 'Beberapa perlindungan teknis masih perlu diperkuat agar evakuasi lebih stabil.'
+        : preparedness.score >= 75
+          ? 'Kesiapsiagaan teknis memberi keluarga lebih banyak pilihan saat sistem melemah.'
+          : 'Kesiapsiagaan dasar membantu keluarga bertahan meski beberapa langkah terlambat.';
       modules.push({ id: 'preparedness', icon: '⌂', title: 'KESIAPSIAGAAN', tone: 'preparedness', body: preparationBody });
     }
 

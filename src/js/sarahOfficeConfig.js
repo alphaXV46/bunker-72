@@ -14,7 +14,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 43.2, y: 26.2, w: 14.2, h: 17,
     title: 'Kesiapsiagaan Gempa',
     sourceLabel: 'BMKG · Panduan kesiapsiagaan',
-    content: 'Gempa dapat terjadi tanpa peringatan. Kenali tempat berlindung yang kokoh, jauhi kaca, dan lindungi kepala. Setelah guncangan berhenti, periksa jalur keluar dengan tenang serta waspadai benda jatuh dan kerusakan bangunan. Ikuti informasi resmi BMKG dan arahan petugas setempat sebelum berpindah.',
+    content: 'Gempa bisa datang tanpa peringatan. Berlindung di tempat kokoh, jauhi kaca, dan lindungi kepala. Setelah reda, periksa jalur keluar dan ikuti informasi BMKG serta arahan petugas.',
   }),
   Object.freeze({
     id: 'tsunami_route',
@@ -23,7 +23,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 72.7, y: 4.3, w: 15, h: 20.5,
     title: 'Evakuasi Tsunami',
     sourceLabel: 'BMKG · Informasi gempa dan tsunami',
-    content: 'Jika berada dekat pantai dan merasakan gempa kuat atau lama, segera bergerak menuju tempat tinggi atau titik evakuasi tanpa menunggu. Gunakan rute yang sudah dikenal, bantu anak dan lansia, serta jauhi sungai dan pantai. Pantau informasi resmi BMKG dan ikuti arahan pemerintah daerah.',
+    content: 'Di pesisir, gempa kuat atau lama berarti segera menuju tempat tinggi atau titik evakuasi. Bantu anak dan lansia, jauhi pantai dan sungai, lalu ikuti informasi BMKG serta petugas.',
   }),
   Object.freeze({
     id: 'volcanic_ash_guide',
@@ -32,7 +32,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 89.3, y: 1.2, w: 9.8, h: 24.2,
     title: 'Perlindungan Abu Vulkanik',
     sourceLabel: 'PVMBG / Badan Geologi · Mitigasi gunung api',
-    content: 'Ikuti status PVMBG dan arahan evakuasi petugas. Bila tetap di dalam masih aman, tutup pintu dan jendela saat abu turun. Jika harus keluar, gunakan pelindung mata dan masker partikulat yang pas; masker tidak melindungi dari gas atau kekurangan oksigen. Hindari perjalanan dalam abu tebal. Anak perlu didampingi orang dewasa, termasuk saat membersihkan abu.',
+    content: 'Ikuti status PVMBG dan arahan petugas. Jika aman berlindung di dalam, tutup pintu dan jendela. Bila harus keluar, pakai pelindung mata dan masker partikulat; masker tidak melindungi dari gas atau kekurangan oksigen. Hindari abu tebal dan dampingi anak.',
   }),
   Object.freeze({
     id: 'emergency_kit',
@@ -41,7 +41,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 78, y: 81.3, w: 18, h: 18,
     title: 'Tas Darurat Keluarga',
     sourceLabel: 'Daftar kesiapsiagaan keluarga',
-    content: 'Siapkan air minum, makanan tahan lama, obat pribadi, P3K, senter, baterai, radio, masker, peluit, dan salinan dokumen penting. Pilih tas yang mudah dibawa dan letakkan di tempat yang diketahui seluruh keluarga. Periksa masa pakai isinya secara berkala dan sesuaikan dengan kebutuhan anak, lansia, atau hewan peliharaan.',
+    content: 'Isi tas dengan air, makanan tahan lama, obat, P3K, senter, baterai, radio, masker, peluit, dan salinan dokumen. Simpan di tempat yang diketahui keluarga; periksa isinya berkala dan sesuaikan kebutuhan tiap anggota.',
   }),
   Object.freeze({
     id: 'survival_handbook',
@@ -50,7 +50,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 77.2, y: 55, w: 22.3, h: 20.5,
     title: 'Panduan Kesiapsiagaan Keluarga',
     sourceLabel: 'Ringkasan perencanaan keluarga',
-    content: 'Tentukan tempat bertemu, satu kontak di luar daerah, dan pembagian tugas keluarga. Anak mengikuti pendamping; pemeriksaan listrik, gas, dan struktur dilakukan orang dewasa yang mampu atau petugas. Jangan menjalankan generator berbahan bakar di dalam shelter. Kenali kapan harus berlindung dan kapan harus evakuasi mengikuti arahan setempat.',
+    content: 'Sepakati titik temu, kontak luar daerah, dan tugas keluarga. Dampingi anak; serahkan pemeriksaan listrik, gas, dan struktur kepada orang dewasa yang mampu atau petugas. Jangan nyalakan generator berbahan bakar di shelter. Ikuti arahan setempat untuk berlindung atau evakuasi.',
   }),
   Object.freeze({
     id: 'work_notes',
@@ -59,7 +59,7 @@ export const SARAH_OFFICE_HOTSPOTS = Object.freeze([
     x: 28, y: 82.1, w: 36, h: 17.5,
     title: 'Catatan Kerja Sarah',
     sourceLabel: 'Catatan analisis internal',
-    content: 'Sarah merangkum celah yang berulang: keluarga sering mengetahui ancaman, tetapi belum menyepakati rute, persediaan, atau cara berkomunikasi. Data gempa dan tsunami perlu merujuk BMKG, sedangkan informasi aktivitas gunung api mengikuti PVMBG. Langkah berikutnya adalah menyusun analisis dasar yang bisa diterapkan di rumah mereka sendiri.',
+    content: 'Sarah mencatat celah utama: banyak keluarga tahu ancaman, tetapi belum menyiapkan rute, bekal, dan komunikasi. Data gempa dan tsunami merujuk BMKG; aktivitas gunung api merujuk PVMBG. Ia akan menerapkannya di rumah sendiri.',
   }),
   Object.freeze({
     id: 'laptop',

@@ -40,24 +40,28 @@ const DAY_TRANSITIONS = Object.freeze({
   day2_start: {
     kicker: 'HARI 1 SELESAI // JAM KE-30',
     title: 'GEMPA SUSULAN',
-    narrative: 'Lampu darurat padam sesaat. Dari atas bunker terdengar retakan panjang—gempa susulan berkekuatan 5,6 Mw menghantam lereng sekali lagi. Getarannya singkat, tetapi cukup untuk menjatuhkan debu ke jalur ventilasi dan membuat beban listrik berkedip.',
-    detail: 'Keluarga menahan napas sampai dengung blower kembali stabil. Hari Kedua dimulai dalam shelter yang masih berdiri, tetapi sistemnya harus segera diperiksa.',
+    dayTitle: 'DAY 2',
+    tone: 'impact',
+    narrative: 'Gempa susulan 5,6 Mw mengguncang bunker. Debu jatuh ke ventilasi; daya berkedip.',
+    detail: 'Bunker bertahan, tetapi sistemnya harus diperiksa.',
     continueLabel: 'LANJUTKAN KE DAY 2',
   },
   day3_start: {
     kicker: 'MENJELANG HARI KETIGA',
-    title: 'DAY 3',
-    narrative: 'Malam berikutnya berlalu dalam tidur yang terputus-putus. Gemuruh jauh merambat melalui beton, lebih pelan dari kemarin. Sarah merapatkan selimut Maya sementara Aris menjaga lampu terakhir tetap menyala.',
-    detail: 'Di sela desis radio, terdengar kabar abu mulai menipis. Cadangan semakin sedikit, tetapi untuk pertama kalinya, harapan evakuasi terasa dekat.',
+    title: 'MENJELANG FAJAR',
+    dayTitle: 'DAY 3',
+    tone: 'dread',
+    narrative: 'Malam berlalu diiringi gemuruh jauh. Sarah menyelimuti Maya; Aris menjaga lampu terakhir.',
+    detail: 'Radio mengabarkan abu mulai menipis. Cadangan berkurang, bantuan mendekat.',
   },
 });
 const DAY1_HOTSPOTS = Object.freeze([
-  { id: 'supply', flag: 'inspected_supply', label: 'Lemari Persediaan', x: 29, y: 23, w: 24, h: 34, text: 'Rak persediaan masih tertata. Satu kaleng makanan dan botol air bisa dipindahkan ke meja kerja tanpa mengusik cadangan utama.', reward: { item: 'food', amount: 1 } },
-  { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 52, y: 39, w: 10, h: 13, text: 'Loker P3K berisi kasa dan antiseptik yang masih kering. Kotak ini mudah dijangkau bila ada yang terluka.', reward: { item: 'kit', amount: 1 } },
-  { id: 'ventilation', flag: 'inspected_ventilation', label: 'Ventilasi', x: 53.83, y: 3.72, w: 11.36, h: 18.60, text: 'Kisi ventilasi berdebu, tetapi di balik panel ada filter cadangan yang belum terpasang. Pengetahuan teknis +1.', knowledge: 1, setFlags: ['found_spare_filter'] },
-  { id: 'power', flag: 'inspected_power', label: 'Panel Daya', x: 64.29, y: 26.57, w: 5.68, h: 17.54, text: 'Panel daya menyala stabil. Menandai sakelar pemutus utama akan mempercepat respons jika arus kembali melonjak. Pengetahuan teknis +1.', knowledge: 1 },
-  { id: 'radio', flag: 'inspected_radio', label: 'Radio VHF', x: 34, y: 62, w: 13, h: 12, text: 'Radio VHF masih menerima dengung statik. Rentang sinyal komunikasi bisa dicari nanti, setelah udara benar-benar aman.' },
-  { id: 'family_storage', flag: 'inspected_family_storage', label: 'Penyimpanan Keluarga', x: 84, y: 73, w: 13, h: 18, text: 'Kotak penyimpanan keluarga berisi selimut dan foto lama. Menaruhnya dekat dipan membuat malam pertama terasa sedikit lebih manusiawi.' },
+  { id: 'supply', flag: 'inspected_supply', label: 'Lemari Persediaan', x: 29, y: 23, w: 24, h: 34, text: 'Rak tertata. Satu kaleng makanan dan botol air dapat diambil tanpa mengusik cadangan utama.', reward: { item: 'food', amount: 1 } },
+  { id: 'medical', flag: 'inspected_medical', label: 'Loker Medis', x: 52, y: 39, w: 10, h: 13, text: 'Kasa dan antiseptik kering. P3K siap dipakai.', reward: { item: 'kit', amount: 1 } },
+  { id: 'ventilation', flag: 'inspected_ventilation', label: 'Ventilasi', x: 53.83, y: 3.72, w: 11.36, h: 18.60, text: 'Kisi berdebu; filter cadangan ada di balik panel. Pengetahuan teknis +1.', knowledge: 1, setFlags: ['found_spare_filter'] },
+  { id: 'power', flag: 'inspected_power', label: 'Panel Daya', x: 64.29, y: 26.57, w: 5.68, h: 17.54, text: 'Panel stabil. Sakelar pemutus utama kini ditandai. Pengetahuan teknis +1.', knowledge: 1 },
+  { id: 'radio', flag: 'inspected_radio', label: 'Radio VHF', x: 34, y: 62, w: 13, h: 12, text: 'Radio hanya menangkap statik. Cari sinyal setelah udara aman.' },
+  { id: 'family_storage', flag: 'inspected_family_storage', label: 'Penyimpanan Keluarga', x: 84, y: 73, w: 13, h: 18, text: 'Selimut dan foto keluarga masih tersimpan. Letakkan dekat dipan.' },
 ]);
 export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
   // Geometry is normalized from the 1672x941 source image, not the viewport.
@@ -70,7 +74,7 @@ export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
     y: 3.72,
     w: 11.36,
     h: 18.60,
-    text: 'Aliran udara melemah dan suara blower berubah ritmenya. Kisi serta jalurnya belum putus total, tetapi modul penyaring perlu ditangani setelah sumber gangguan lain dipetakan.',
+    text: 'Aliran udara melemah; modul penyaring perlu diperiksa.',
   },
   {
     id: 'power_panel',
@@ -81,7 +85,7 @@ export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
     y: 26.57,
     w: 5.68,
     h: 17.54,
-    text: 'Beban darurat naik-turun dan indikator inverter berkedip. Panel masih bekerja, namun distribusinya tidak stabil setelah guncangan.',
+    text: 'Inverter berkedip. Daya masih mengalir, tetapi distribusinya tidak stabil.',
   },
   {
     id: 'structure',
@@ -92,7 +96,7 @@ export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
     y: 15.94,
     w: 17.05,
     h: 46.23,
-    text: 'Segel pintu tetap utuh dan tidak ada tanda bunker akan runtuh. Bingkai serta mekanisme pengunci bergeser sedikit; stabilizer mekanis perlu diselaraskan sebelum servis lanjutan.',
+    text: 'Bingkai bergeser, tetapi segel tetap utuh. Stabilizer harus diselaraskan.',
   },
   {
     id: 'supply_rack',
@@ -103,7 +107,7 @@ export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
     y: 18.60,
     w: 19.14,
     h: 36.66,
-    text: 'Rak bergetar tetapi masih menahan muatan. Jumlah perbekalan tetap mengikuti inventaris yang sudah diamankan—tidak ada barang baru yang muncul dari diagnosis ini.',
+    text: 'Rak bergeser, tetapi perbekalan tetap aman. Inventaris tidak berubah.',
   },
   {
     id: 'radio',
@@ -114,7 +118,7 @@ export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
     y: 65.89,
     w: 5.98,
     h: 9.56,
-    text: 'Radio masih menerima dengung pendek di sela statik. Tidak ada sesi radio sekarang; pola gangguan ini layak dipantau untuk operasi komunikasi Hari Ketiga.',
+    text: 'Radio menangkap statik dan dengung pendek. Pantau lagi pada Hari Ketiga.',
   },
   {
     id: 'medical_counter',
@@ -125,7 +129,7 @@ export const DAY2_DIAGNOSTIC_HOTSPOTS = Object.freeze([
     y: 38.79,
     w: 15.25,
     h: 13.28,
-    text: 'Perlengkapan medis dan masker yang sudah dimiliki keluarga tetap tersimpan. Pemeriksaan ini hanya memastikan aksesnya tidak tertutup; tidak ada saran medis baru atau konsumsi item.',
+    text: 'P3K dan masker tetap dapat dijangkau. Tidak ada konsumsi item.',
   },
 ]);
 const EXPEDITION_LOCATIONS = Object.freeze(Object.values(EXPEDITION_CONFIGS).map(({ id, label, risk, resourceHint }) => ({ id, label, risk, resourceHint })));
@@ -319,8 +323,9 @@ export class StoryEngine {
    * the view to render the new scene.
    * @param {string} sceneId
    */
-  renderScene(sceneId, { skipDayTransition = false } = {}) {
+  renderScene(sceneId, { skipDayTransition = false, skipPrologueVideo = false } = {}) {
     this._cancelAutoAdvance();
+    if (this.view.closePrologueEruption?.()) this.audio.playBGM();
     if (!skipDayTransition) this.view.closeDayTransition?.();
     // Health zero represents critical rescue, not family death.
     if (this._checkCriticalRescueCondition(sceneId)) return;
@@ -332,7 +337,7 @@ export class StoryEngine {
     if (dayTransition && !skipDayTransition && canShowDayTransition) {
       this.view.showDayTransition({
         ...dayTransition,
-        onDark: () => sceneId === 'day2_start' ? this.audio.playEarthquake() : this.audio.playRumble(),
+        onDark: () => this.audio.playCinematicCue?.(sceneId === 'day2_start' ? 'earthquake' : 'distantEruption'),
         onContinue: () => this.renderScene(sceneId, { skipDayTransition: true }),
       });
       return;
@@ -402,6 +407,26 @@ export class StoryEngine {
       return;
     }
 
+    if (sceneId === 'prolog_intro'
+      && !skipPrologueVideo
+      && this.model.storyRevision === STORY_REVISIONS.SEALED72
+      && this.view.dom?.gameView
+      && typeof this.view.showPrologueEruption === 'function') {
+      if (this.onSave && !this._debugBypassSave) this.onSave(this.model.toSaveData());
+      this.audio.stopDomesticPeace();
+      this.audio.stopRadioSound();
+      this.audio.stopBGM();
+      this.view.showPrologueEruption({
+        audio: this.audio,
+        onComplete: () => {
+          if (this.model.currentSceneId !== sceneId) return;
+          this.audio.playBGM();
+          this.renderScene(sceneId, { skipPrologueVideo: true });
+        },
+      });
+      return;
+    }
+
     // ── Audio ──
     const isDomestic = ['prolog_home', 'prolog_with_ibu', 'prolog_with_anak'].includes(sceneId);
     if (isDomestic) {
@@ -428,6 +453,9 @@ export class StoryEngine {
     if (scene.background === 'prolog4') {
       this.audio.playEarthquake();
     }
+    if (sceneId === 'prolog_aftershock' && this.model.storyRevision === STORY_REVISIONS.SEALED72) {
+      this.audio.playCinematicCue?.('earthquake');
+    }
 
     if (['prolog_alert', 'prolog_question'].includes(sceneId) || this.model.knowledge <= 4 || isEnding && this._isCollapseEnding(sceneId) || scene.alert === true) {
       this.audio.playAlarm();
@@ -437,6 +465,18 @@ export class StoryEngine {
     if (!isEnding && this.onSave && !this._debugBypassSave) {
       // ✅ Single-object save: model serializes itself via toSaveData().
       this.onSave(this.model.toSaveData());
+    }
+
+    if (sceneId === 'prolog_title'
+      && this.model.storyRevision === STORY_REVISIONS.SEALED72
+      && this.view.dom?.gameView
+      && typeof this.view.showPrologDay1Transition === 'function') {
+      this.view.showPrologDay1Transition({
+        title: scene.text,
+        onTitleReveal: () => this.audio.playCinematicCue?.('impact'),
+        onContinue: () => this.renderScene(scene.autoNextSceneId, { skipDayTransition: true }),
+      });
+      return;
     }
 
     // ── Ending path ──
@@ -1578,9 +1618,9 @@ export class StoryEngine {
         this.model.flags.kit_packed || this.model.flags.has_radio || this.model.flags.extra_battery || this.model.flags.toy_packed;
 
       if (this.model.flags.late_evacuation) {
-        processedText = 'Ayah: "Pintu dibanting di detik terakhir saat gempa merontokkan atap teras! Napas kita masih terengah-engah, tapi seluruh anggota keluarga sudah berada di dalam lorong. Begitu tuas hidrolik ini ditarik dan segel terkunci, kita bertahan dengan apa pun yang sempat kita bawa."';
+        processedText = '"Gempa meruntuhkan atap teras. Kita sudah di lorong; gunakan kartu 72-A agar pintu terbuka," kata Aris.';
       } else if (!hasSupplies) {
-        processedText = 'Ayah: "Ransel perbekalan kosong—tak ada waktu untuk mengais barang di dalam rumah! Yang terpenting seluruh anggota keluarga selamat di dalam lorong. Begitu tuas hidrolik ini ditarik dan pintu terkunci, kita harus mengandalkan apa yang tersisa di dalam bunker."';
+        processedText = '"Ransel kosong, tapi kita semua sudah di lorong. Gunakan kartu 72-A; persediaan di bunker masih ada," kata Aris.';
       }
     }
 

@@ -15,6 +15,7 @@ import legacyStoryData from '../data/storyLegacyPhase7.json';
 import { StoryEngine } from './storyEngine.js';
 import {
   CURRENT_STORY_REVISION,
+  ENDING_ARCHIVE_KEY,
   NEW_GAME_START_SCENE_ID,
   SAVE_KEY,
   SAVE_SCHEMA_VERSION,
@@ -44,6 +45,7 @@ const dom = {
   // Menu buttons
   newGameBtn:  document.getElementById('new-game-btn'),
   continueBtn: document.getElementById('continue-btn'),
+  endingArchiveBtn: document.getElementById('ending-archive-btn'),
   creditsBtn:  document.getElementById('credits-btn'),
   endingCreditsBtn: document.getElementById('ending-credits-btn'),
   restartBtn:  document.getElementById('restart-btn'),
@@ -51,6 +53,7 @@ const dom = {
   // Credits / settings overlay buttons
   closeCreditsBtn: document.getElementById('close-credits-btn'),
   settingsMenuBtn: document.getElementById('settings-menu-btn'),
+  settingsReplayBtn: document.getElementById('settings-replay-btn'),
   settingsModal:   document.getElementById('settings-modal'),
 
   // HUD — status bar
@@ -132,6 +135,26 @@ function checkSaveData() {
   return null;
 }
 
+/** The latest completed report is independent of the current run's save. */
+function readEndingArchive() {
+  try {
+    const report = JSON.parse(localStorage.getItem(ENDING_ARCHIVE_KEY) || 'null');
+    if (!report || report.version !== 1 || !['ending_bad', 'ending_normal', 'ending_good'].includes(report.endingId)
+      || !Number.isFinite(report.finalKnowledge) || typeof report.endingText !== 'string'
+      || typeof report.endingSummary !== 'string' || !report.modularEnding || typeof report.modularEnding !== 'object') return null;
+    return report;
+  } catch {
+    return null;
+  }
+}
+
+function refreshEndingArchiveButton() {
+  if (!dom.endingArchiveBtn) return;
+  const available = Boolean(readEndingArchive());
+  dom.endingArchiveBtn.disabled = !available;
+  dom.endingArchiveBtn.classList.toggle('hidden', !available);
+}
+
 // ─── SCREEN MANAGER ──────────────────────────────────────────────────────────
 
 const SCREENS = ['menuView', 'gameView', 'endingView', 'creditsView'];
@@ -155,6 +178,7 @@ function showScreen(screenKey) {
   if (screenKey === 'ending') dom.endingView.scrollTop = 0;
 
   if (screenKey !== 'game') {
+    storyEngine?.view.closePrologueEruption();
     storyEngine?.view.closeDayTransition();
     storyEngine?.view.clearSceneHotspots();
     if (!keepGoodEndingAudio) storyEngine?.audio.stopAll({ suspend: !enteringGoodEnding });
@@ -253,6 +277,14 @@ async function initGame() {
 
     // ✅ endingSummary is 4th argument, flags is 5th, history is 6th, modularEnding is 7th
     onEnd: (endingId, finalKnowledge, endingText, endingSummary, flags, history, modularEnding) => {
+      try {
+        localStorage.setItem(ENDING_ARCHIVE_KEY, JSON.stringify({
+          version: 1, endingId, finalKnowledge, endingText, endingSummary, modularEnding,
+        }));
+      } catch (error) {
+        console.warn('[main] Catatan akhir tidak dapat disimpan:', error);
+      }
+      refreshEndingArchiveButton();
       localStorage.removeItem(SAVE_KEY); // clear save on completion
       storyEngine.view.renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags, history, modularEnding);
       showScreen('ending');
@@ -306,8 +338,9 @@ async function initGame() {
   }
 
   // ── Menu buttons ──
-  dom.newGameBtn.addEventListener('click', () => {
+  const startNewGame = () => {
     localStorage.removeItem(SAVE_KEY);
+    dom.settingsModal?.classList.add('hidden');
     showScreen('game');
     storyEngine.audio.playBGM();
     const { knowledge, hunger, thirst, health } = SURVIVAL.DEFAULTS;
@@ -324,7 +357,8 @@ async function initGame() {
       CURRENT_STORY_REVISION,
       null
     );
-  });
+  };
+  dom.newGameBtn.addEventListener('click', startNewGame);
 
   dom.continueBtn.addEventListener('click', () => {
     const save = checkSaveData();
@@ -366,6 +400,24 @@ async function initGame() {
     dom.creditsView?.classList.remove('credits-after-ending');
     showScreen('credits');
   });
+
+  dom.endingArchiveBtn?.addEventListener('click', () => {
+    const report = readEndingArchive();
+    if (!report) {
+      refreshEndingArchiveButton();
+      return;
+    }
+    storyEngine.view.renderEnding(
+      report.endingId, report.finalKnowledge, report.endingText,
+      report.endingSummary, {}, [], report.modularEnding, { archived: true }
+    );
+    showScreen('ending');
+  });
+
+  dom.settingsReplayBtn?.addEventListener('click', () => {
+    if (!window.confirm('Main ulang dari awal? Progres permainan saat ini akan dihapus.')) return;
+    startNewGame();
+  });
   dom.endingCreditsBtn?.addEventListener('click', () => {
     dom.creditsView?.classList.add('credits-after-ending');
     dom.creditsView.scrollTop = 0;
@@ -383,6 +435,7 @@ async function initGame() {
 
   // Initial state check
   checkSaveData();
+  refreshEndingArchiveButton();
 
   // ── Audio context bootstrap ──
   // AudioContext must be created (or resumed) in response to a user gesture.
@@ -391,6 +444,9 @@ async function initGame() {
     storyEngine?.audio.init();
     storyEngine?.audio.preloadGoodEndingMusic().catch((error) => {
       console.warn('Good Ending music preload failed:', error);
+    });
+    storyEngine?.audio.preloadCinematicCues().catch((error) => {
+      console.warn('Cinematic SFX preload failed:', error);
     });
     document.removeEventListener('click',   initAudioOnFirstInteraction);
     document.removeEventListener('keydown', initAudioOnFirstInteraction);

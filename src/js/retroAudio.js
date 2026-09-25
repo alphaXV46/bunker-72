@@ -1,4 +1,9 @@
 const GOOD_ENDING_MUSIC_URL = new URL('../audio/bgm/music_good_ending.ogg', import.meta.url).href;
+const CINEMATIC_CUES = Object.freeze({
+  impact: new URL('../audio/sfx/impact_cinematic_universfield.ogg', import.meta.url).href,
+  earthquake: new URL('../audio/sfx/earthquake_rumble_themediaguy.ogg', import.meta.url).href,
+  distantEruption: new URL('../audio/sfx/explosion_soundreality.ogg', import.meta.url).href,
+});
 
 export class RetroAudio {
   constructor() {
@@ -17,6 +22,8 @@ export class RetroAudio {
     this.radioSource = null;
     this.radioTimeout = null;
     this.activeSources = new Set();
+    this.cinematicMediaElement = null;
+    this.cinematicCueEpoch = 0;
     this.domesticInterval = null;
     this.isDomesticPlaying = false;
   }
@@ -62,6 +69,7 @@ export class RetroAudio {
     } else {
       this._isMuted = true;
     }
+    this._syncCinematicMediaVolume();
     if (!this.ctx || !this.masterGain) return;
     this.masterGain.gain.setTargetAtTime(
       vol,
@@ -72,6 +80,7 @@ export class RetroAudio {
 
   setMuted(muted) {
     this._isMuted = !!muted;
+    this._syncCinematicMediaVolume();
     if (!this.ctx || !this.masterGain) return;
     this.masterGain.gain.setTargetAtTime(
       muted ? 0 : this._lastVolume,
@@ -116,6 +125,57 @@ export class RetroAudio {
       } catch (e) {}
       this.bgmSource.disconnect();
       this.bgmSource = null;
+    }
+  }
+
+  setCinematicMediaElement(element) {
+    this.cinematicMediaElement = element;
+    this._syncCinematicMediaVolume();
+  }
+
+  _syncCinematicMediaVolume() {
+    if (!this.cinematicMediaElement) return;
+    this.cinematicMediaElement.muted = this._isMuted;
+    this.cinematicMediaElement.volume = Math.max(0, Math.min(1, this._lastVolume));
+  }
+
+  preloadCinematicCues() {
+    return Promise.all(Object.values(CINEMATIC_CUES).map((url) => this.getAudioBuffer(url)));
+  }
+
+  async playCinematicCue(name) {
+    const url = CINEMATIC_CUES[name];
+    if (!url) return;
+    this.init();
+    if (!this.ctx) return;
+    const epoch = this.cinematicCueEpoch;
+    try {
+      const buffer = await this.getAudioBuffer(url);
+      if (epoch !== this.cinematicCueEpoch || this.ctx.state !== 'running') return;
+      const source = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      const filter = name === 'distantEruption' ? this.ctx.createBiquadFilter() : null;
+      source.buffer = buffer;
+      gain.gain.value = name === 'impact' ? 0.55 : name === 'distantEruption' ? 0.23 : 0.8;
+      if (filter) {
+        filter.type = 'lowpass';
+        filter.frequency.value = 320;
+        source.connect(filter);
+        filter.connect(gain);
+      } else {
+        source.connect(gain);
+      }
+      gain.connect(this.masterGain);
+      this.activeSources.add(source);
+      source.onended = () => {
+        this.activeSources.delete(source);
+        source.disconnect();
+        filter?.disconnect();
+        gain.disconnect();
+      };
+      source.start();
+    } catch (error) {
+      console.warn(`Cinematic SFX "${name}" could not play:`, error);
     }
   }
 
@@ -185,6 +245,8 @@ export class RetroAudio {
   }
 
   stopAll({ suspend = true } = {}) {
+    this.cinematicCueEpoch += 1;
+    this.cinematicMediaElement?.pause();
     this.stopGoodEndingMusic();
     this.stopDomesticPeace();
     this.stopRadioSound();

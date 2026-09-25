@@ -30,8 +30,10 @@ try {
   });
   assert(!/tersegel|akses bunker (?:sudah )?berhasil|sudah berada di dalam/i.test(sealedScenes.prolog_threshold.text),
     'Pre-card threshold narration must not claim successful bunker access');
-  assert(/diterima|menutup rapat|tersegel/i.test(sealedScenes.prolog_surface.text),
-    'Post-card surface narration must establish accepted access and sealing');
+  assert(/diterima.*terbuka.*masuk/i.test(sealedScenes.prolog_surface.text),
+    'Post-card surface narration must establish accepted access and entry');
+  assert(/menutup rapat.*tersegel/i.test(sealedScenes.prolog_inside.text),
+    'Inside narration must establish door sealing after entry');
   assert.equal(sealedScenes.prolog_threshold.choices.length, 0);
   assert.equal(sealedScenes.prolog_title.choices.length, 0);
   assert.equal(sealedScenes.day1_power_boot.choices.length, 0);

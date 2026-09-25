@@ -58,7 +58,10 @@ try {
   // 1. Card chronology and required Day 1 power action.
   assert.match(scenes.prolog_threshold.text, /belum masuk sampai kredensial.*diterima/i);
   assert.doesNotMatch(scenes.prolog_threshold.text, /sudah tersegel|segel utama menyala/i);
-  assert.match(scenes.prolog_surface.text, /kartu.*diterima.*keluarga.*masuk.*menutup rapat.*tersegel/i);
+  assert.match(scenes.prolog_surface.text, /kartu.*diterima.*pintu.*terbuka.*keluarga.*masuk/i);
+  assert.match(scenes.prolog_inside.text, /keluarga|Aris.*Sarah.*Maya/i);
+  assert.match(scenes.prolog_inside.text, /menutup rapat.*tersegel/i);
+  assert.equal(scenes.prolog_surface.autoNextSceneId, 'prolog_inside');
   assert.equal(scenes.prolog_threshold.requiredInteraction.station, 'card');
   assert.equal(scenes.prolog_threshold.requiredInteraction.nextSceneId, 'prolog_surface');
   assert.equal(scenes.day1_power_boot.requiredInteraction.station, 'power');
@@ -191,9 +194,11 @@ try {
   radio.currentFreq = radio.targetFreq;
   assert.equal(radio._getSignalStrength(), 85, 'Water processing and air priority must weaken an unsupported radio call');
   assert.equal(radio._getFinalQuality(radio._getSignalStrength()), 'weak');
+  radio.resetFinalResult();
   radio.open({ finalAttempt: true, radioPowerLimited: true, powerStrained: true, inspectedRadio: true });
   radio.currentFreq = radio.targetFreq;
   assert.equal(radio._getFinalQuality(radio._getSignalStrength()), 'clear', 'Day 1 radio inspection must recover signal margin with precise tuning');
+  radio.resetFinalResult();
   radio.open({ finalAttempt: true, extraBattery: true });
   radio.currentFreq = radio.targetFreq;
   assert.equal(radio._getSignalStrength(), 100, 'Committed VHF battery must protect the signal margin');

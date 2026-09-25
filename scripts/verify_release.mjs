@@ -51,6 +51,7 @@ try {
     'prolog_evac_decision',
     'prolog_threshold',
     'prolog_surface',
+    'prolog_inside',
     'prolog_title',
     'day1_power_boot',
     'day2_diagnostic_sweep',
@@ -179,6 +180,9 @@ try {
   engine.handleRequiredInteraction(scenes.prolog_threshold.requiredInteraction);
   assert.equal(model.currentSceneId, 'prolog_surface');
   engine.handleDialogueClick();
+  assert.equal(model.currentSceneId, 'prolog_inside');
+  engine.handleDialogueClick();
+  assert.equal(model.currentSceneId, 'prolog_title');
   engine.handleDialogueClick();
   assert.equal(model.currentSceneId, 'day1_power_boot');
   engine.handleRequiredInteraction(scenes.day1_power_boot.requiredInteraction);

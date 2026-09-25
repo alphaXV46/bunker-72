@@ -911,6 +911,12 @@ export class ScavengerMinigame {
         return;
       }
 
+      if (this.isTutorialActive) {
+        if (k === 'enter' || k === ' ') this._dismissTutorial();
+        e.preventDefault();
+        return;
+      }
+
       this.keys[k] = true;
       if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', ' ', 'e', 'q', '1', '2', '3', '4', '5'].includes(k)) {
         e.preventDefault();
@@ -954,6 +960,7 @@ export class ScavengerMinigame {
     this._bindEvents();
     this.isActive = true;
     this._resetRunState();
+    this.isTutorialActive = this.mode === 'prologue';
     this.lastTime = performance.now();
     this._createDOM();
     void this.devTools?.loadSavedDrafts();
@@ -963,8 +970,8 @@ export class ScavengerMinigame {
     this._updateTimerHUD();
     this.animId = requestAnimationFrame((t) => this._loop(t));
 
-    // Audio cue
-    retroAudio.playSiren?.();
+    // Start the emergency cue with the gameplay, after the prologue tutorial.
+    if (!this.isTutorialActive) retroAudio.playSiren?.();
   }
 
   _createDOM() {
@@ -980,11 +987,8 @@ export class ScavengerMinigame {
     this.hudHeader.className = 'scavenger-hud-header';
     const timerLabel = this.timerEnabled ? (this.mode === 'prologue' ? 'WAKTU SIAGA:' : 'EVAKUASI:') : 'EKSPEDISI:';
     this.hudHeader.innerHTML = `
-      <div class="scavenger-timer-badge${this.timerEnabled ? '' : ' no-timer'}" id="scavenger-timer">
-        <span class="timer-icon">${this.timerEnabled ? '⚠' : '◷'}</span> ${timerLabel} <strong id="timer-val">${this.timerEnabled ? timerDefaultStr : 'TANPA BATAS WAKTU'}</strong>
-      </div>
-      <div class="scavenger-room-badge" id="scavenger-room" style="background: rgba(14, 18, 26, 0.92); border: 1px solid #5bc0be; color: #5bc0be; font-family: 'Share Tech Mono', monospace; padding: 6px 14px; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 1px; box-shadow: 0 4px 16px rgba(0,0,0,0.7);">
-        📍 <span id="room-name-val">${this.config?.label || 'RUANG KELUARGA'}</span>
+      <div class="scavenger-timer-badge${this.timerEnabled ? '' : ' no-timer'}${this.timerEnabled && this.mode === 'prologue' ? ' standby-timer' : ''}" id="scavenger-timer">
+        <span class="timer-icon">${this.timerEnabled ? '⚠' : '◷'}</span><span class="timer-label">${timerLabel}</span><strong id="timer-val">${this.timerEnabled ? timerDefaultStr : 'TANPA BATAS WAKTU'}</strong>
       </div>
       ${this.mode === 'expedition' ? `<div class="scavenger-expedition-objective">⌖ ${this.config?.objective || 'Kembali ke titik aman.'}</div>` : ''}
       <div class="scavenger-backpack-badge" id="scavenger-backpack">
@@ -1046,6 +1050,35 @@ export class ScavengerMinigame {
       ` : ''}
     `;
 
+    this.objectiveHint = document.createElement('div');
+    this.objectiveHint.className = 'scavenger-objective-hint';
+    this.objectiveHint.textContent = 'TUJUAN: Kumpulkan bekal, lalu kembali ke palka.';
+    this.objectiveHint.hidden = this.mode !== 'prologue';
+
+    if (this.mode === 'prologue') {
+      this.tutorialOverlay = document.createElement('div');
+      this.tutorialOverlay.className = 'scavenger-tutorial-overlay';
+      this.tutorialOverlay.setAttribute('role', 'dialog');
+      this.tutorialOverlay.setAttribute('aria-modal', 'true');
+      this.tutorialOverlay.setAttribute('aria-labelledby', 'scavenger-tutorial-title');
+      this.tutorialOverlay.innerHTML = `
+        <section class="scavenger-tutorial-card">
+          <p class="scavenger-tutorial-kicker">PANDUAN SINGKAT</p>
+          <h2 id="scavenger-tutorial-title">KUMPULKAN BEKAL</h2>
+          <p class="scavenger-tutorial-goal">Ambil barang seperlunya, lalu kembali ke palka sebelum waktu siaga habis. Ransel memuat maksimal ${this.maxCapacity} barang.</p>
+          <div class="scavenger-tutorial-controls">
+            <span><b>WASD / ↑↓←→</b> Bergerak</span>
+            <span><b>E / SPASI</b> Ambil barang / masuk palka</span>
+            <span><b>1–${this.maxCapacity}</b> Pilih barang • <b>Q</b> Buang barang</span>
+            <span class="scavenger-tutorial-touch">Layar sentuh: gunakan tombol arah dan tombol aksi.</span>
+          </div>
+          <button class="scavenger-tutorial-start" type="button">MULAI SCAVENGER <span>↵</span></button>
+        </section>
+      `;
+      this.tutorialOverlay.querySelector('.scavenger-tutorial-start')
+        ?.addEventListener('click', () => this._dismissTutorial());
+    }
+
     // Mobile / Touch D-Pad Overlay
     this.touchControls = document.createElement('div');
     this.touchControls.className = 'scavenger-touch-controls';
@@ -1070,7 +1103,9 @@ export class ScavengerMinigame {
     if (this.editorInfo) this.wrapper.appendChild(this.editorInfo);
     if (this.editorFeedback) this.wrapper.appendChild(this.editorFeedback);
     this.wrapper.appendChild(this.desktopHints);
+    this.wrapper.appendChild(this.objectiveHint);
     this.wrapper.appendChild(this.touchControls);
+    if (this.tutorialOverlay) this.wrapper.appendChild(this.tutorialOverlay);
     this.container.appendChild(this.wrapper);
 
     this._setupTouchEvents();
@@ -1154,6 +1189,7 @@ export class ScavengerMinigame {
   }
 
   _handleInteract() {
+    if (this.isTutorialActive) return;
     // 1. Proximity item pickup — the same nearest-item contract is also used
     // by tooltips and touch interaction, with a room guard in prologue mode.
     const nearbyItem = this._getNearestInteractableItem();
@@ -1213,6 +1249,7 @@ export class ScavengerMinigame {
   }
 
   _dropSelectedItem() {
+    if (this.isTutorialActive) return;
     if (this.selectedInventoryIndex < 0 || this.selectedInventoryIndex >= this.backpack.length) {
       this._showNotification('Pilih slot ransel yang berisi barang untuk membuang.');
       retroAudio.playBuzz?.();
@@ -1758,7 +1795,7 @@ export class ScavengerMinigame {
 
     // Developer camera input must continue while editor mode pauses gameplay.
     this.devTools?.update(dt);
-    if (!this.isPaused) {
+    if (!this.isPaused && !this.isTutorialActive) {
       this._update(dt * (this.timeScale || 1.0));
     }
     if (!this.isPaused || this.renderDirty) {
@@ -1785,12 +1822,6 @@ export class ScavengerMinigame {
 
     this._triggerTensionEvents();
     this._updateTimerHUD();
-
-    // Update Room Badge HUD
-    const roomEl = document.getElementById('room-name-val');
-    if (roomEl) {
-      roomEl.textContent = this._getCurrentRoomName();
-    }
 
     // Notification Timer
     if (this.notificationTimer > 0) {
@@ -2424,8 +2455,9 @@ export class ScavengerMinigame {
       this._renderNotification(ctx);
     }
 
-    // 2. Tactical Radar Minimap (Top-Right Screen Corner)
-    this._renderTacticalMinimap(ctx);
+    // 2. Keep the tactical radar for expeditions; house navigation relies on
+    // exploration without a radar overlay.
+    if (this.mode === 'expedition') this._renderTacticalMinimap(ctx);
 
     // 3. Debug Mode Status Watermark
     if (this.devTools?.debugColliders && !this.devTools.editorHelpHidden) {
@@ -2939,6 +2971,12 @@ export class ScavengerMinigame {
     if (timerEl && this.timerEnabled) {
       const s = Math.ceil(this.timeLeft);
       timerEl.textContent = `00:${s < 10 ? '0' : ''}${s}`;
+      if (timerEl.dataset.tickSecond !== String(s)) {
+        timerEl.dataset.tickSecond = String(s);
+        timerEl.classList.remove('timer-second-tick');
+        void timerEl.offsetWidth;
+        timerEl.classList.add('timer-second-tick');
+      }
       const timerBadge = timerEl.parentElement;
       if (s <= 10) {
         timerBadge?.classList.add('urgent-flash');
@@ -2947,6 +2985,17 @@ export class ScavengerMinigame {
       }
       timerBadge?.classList.toggle('critical-flash', s <= 5);
     }
+  }
+
+  _dismissTutorial() {
+    if (!this.isTutorialActive) return;
+    this.isTutorialActive = false;
+    this.tutorialOverlay?.classList.add('is-dismissed');
+    this.tutorialOverlay?.setAttribute('aria-hidden', 'true');
+    this.lastTime = performance.now();
+    this._clearPressedKeys?.();
+    retroAudio.playSiren?.();
+    this._requestRender();
   }
 
   setGodMode(enabled) {
@@ -3034,6 +3083,7 @@ export class ScavengerMinigame {
     this._bindEvents();
     this.isActive = true;
     this._resetRunState();
+    this.isTutorialActive = this.mode === 'prologue';
     this.isPaused = false;
     if (!this._isDeveloperModeActive()) this._developerPauseSnapshot = null;
     this.devTools?.syncDeveloperModePause();
@@ -3043,6 +3093,10 @@ export class ScavengerMinigame {
       this._createDOM();
     } else {
       this._updateHUD();
+      if (this.isTutorialActive) {
+        this.tutorialOverlay?.classList.remove('is-dismissed');
+        this.tutorialOverlay?.setAttribute('aria-hidden', 'false');
+      }
     }
     this._updateTimerHUD();
     if (!this.animId) this.animId = requestAnimationFrame((t) => this._loop(t));

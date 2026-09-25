@@ -401,7 +401,7 @@ input[type="range"] {
 #menu-view {
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: clamp(64px, 10vh, 120px);
   padding: 36px;
   background:
     linear-gradient(rgba(8,9,11,0.18), rgba(8,9,11,0.5)),
@@ -422,12 +422,13 @@ input[type="range"] {
 
 .game-title {
   font-family: 'VT323', monospace;
-  font-size: clamp(5.4rem, 8vw, 7.2rem);
+  font-size: clamp(6rem, 18vw, 13rem);
   line-height: 0.9;
-  margin: 8px 0 0;
+  margin: 0;
   color: #f3f8f6;
-  text-shadow: 4px 4px 0 #15181d, 0 0 22px rgba(255,209,102,0.22), 8px 8px 0 var(--accent-red);
+  text-shadow: 5px 5px 0 #15181d, 9px 9px 0 var(--accent-red), 0 18px 30px rgba(0, 0, 0, 0.75);
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .game-subtitle {
@@ -541,6 +542,8 @@ input[type="range"] {
   flex-direction: column;
   gap: 12px;
 }
+
+#ending-archive-btn.hidden { display: none; }
 
 .bunker-menu-btn {
   position: relative;
@@ -951,6 +954,9 @@ input[type="range"] {
 .story-box.bg-prolog-2 { background-image: url('../assets/backgrounds/bg_prolog2.webp'); }
 .story-box.bg-prolog-3 { background-image: url('../assets/backgrounds/bg_prolog3.webp'); }
 .story-box.bg-prolog-4 { background-image: url('../assets/backgrounds/bg_prolog4.webp'); }
+.story-box.bg-prolog-bunker-door-closed { background-image: url('../assets/backgrounds/bg_prolog_bunker_door_closed.webp'); }
+.story-box.bg-prolog-bunker-door-open { background-image: url('../assets/backgrounds/bg_prolog_bunker_door_open.webp'); }
+.story-box.bg-prolog-family-inside-bunker { background-image: url('../assets/backgrounds/bg_prolog_family_inside_bunker.webp'); }
 .story-box.bg-prolog-minimarket { background-image: url('../assets/backgrounds/bg_prolog_minimarket.webp'); }
 .story-box.bg-prolog-medical { background-image: url('../assets/backgrounds/bg_prolog_medical.webp'); }
 .story-box.bg-prolog-hendra { background-image: url('../assets/backgrounds/bg_prolog_hendra.webp'); }
@@ -1599,6 +1605,18 @@ body.title-card-active #settings-btn { display: none !important; }
 @keyframes urgent-blink {
   from { background: rgba(14, 18, 26, 0.92); }
   to { background: rgba(180, 20, 20, 0.85); }
+}
+
+.scavenger-timer-badge.standby-timer.urgent-flash {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 59, 59, 0.76);
+  animation: none;
+}
+
+.scavenger-timer-badge.standby-timer.critical-flash {
+  box-shadow: none;
+  text-shadow: 0 0 10px rgba(255, 25, 25, 0.55), 0 0 26px rgba(255, 0, 0, 0.28);
 }
 
 .scavenger-canvas {
@@ -2567,14 +2585,14 @@ body.title-card-active #settings-btn { display: none !important; }
   background-position: center;
   background-repeat: no-repeat;
   border: none;
-  padding: 24px 26px 26px;
+  padding: 20px 26px 18px;
   box-shadow: 0 8px 0 #040608, 0 16px 32px rgba(0, 0, 0, 0.6);
   box-sizing: border-box;
   text-align: center;
 }
 
 .settings-card-header {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(114, 128, 138, 0.25);
 }
@@ -2601,7 +2619,7 @@ body.title-card-active #settings-btn { display: none !important; }
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .settings-option-row {
@@ -2763,18 +2781,20 @@ body.title-card-active #settings-btn { display: none !important; }
 
 /* Action buttons */
 .settings-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
+#settings-close-btn { grid-column: 1 / -1; }
+
 .settings-actions .bunker-menu-btn {
-  min-height: 48px;
+  min-height: 44px;
   padding: 0 10px;
 }
 
 .settings-actions .bunker-menu-btn .btn-text {
-  font-size: 1.6rem;
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
   letter-spacing: 2px;
 }
 
@@ -2963,8 +2983,7 @@ body.title-card-active #settings-btn { display: none !important; }
   #menu-view      { padding: 18px; }
 
   .game-title {
-    font-size: 3.1rem;
-    text-shadow: 3px 3px 0 #15181d, 6px 6px 0 var(--accent-red);
+    font-size: clamp(4.25rem, 18vw, 9rem);
   }
 
   .game-subtitle  { font-size: 0.78rem; letter-spacing: 2px; }
@@ -3337,7 +3356,7 @@ body.title-card-active #settings-btn { display: none !important; }
   .resource-item img { width: 22px; height: 22px; }
   .dialogue-text  { font-size: 0.8rem; }
   .choice-btn     { min-height: 44px; font-size: 0.78rem; }
-  .game-title     { font-size: 2.6rem; }
+  .game-title     { font-size: clamp(4.25rem, 18vw, 6rem); }
   .game-subtitle  { font-size: 0.72rem; letter-spacing: 2px; }
 }
 
@@ -3857,12 +3876,12 @@ body.disable-crt .crt-flicker { display: none !important; }
 @media (max-height: 760px) {
   /* Menu view compactness */
   #menu-view {
-    gap: 12px;
+    gap: clamp(48px, 10vh, 80px);
     padding: 16px 20px;
   }
   .menu-title-container .game-title {
-    font-size: clamp(3.2rem, 6vh, 4.8rem);
-    margin: 4px 0 0;
+    font-size: clamp(4.25rem, min(18vw, 23vh), 11rem);
+    margin: 0;
   }
   .menu-title-container .game-subtitle {
     font-size: 0.85rem;
@@ -3956,11 +3975,11 @@ body.disable-crt .crt-flicker { display: none !important; }
 @media (max-height: 620px) {
   /* Extreme short viewports (e.g. 768p laptop with full taskbar + toolbars) */
   #menu-view {
-    gap: 8px;
+    gap: clamp(30px, 7vh, 50px);
     padding: 10px 16px;
   }
   .menu-title-container .game-title {
-    font-size: clamp(2.4rem, 5vh, 3.4rem);
+    font-size: clamp(4rem, min(18vw, 20vh), 8rem);
   }
   .menu-decor {
     display: none; /* Hide secondary decorative block to leave space for action buttons */
@@ -4461,7 +4480,9 @@ body.disable-crt .crt-flicker { display: none !important; }
 
 .good-ending-final-card__readiness strong {
   font-family: 'VT323', monospace;
-  font-size: clamp(1.35rem, 1.8vw, 1.8rem);
+  font-size: clamp(2.25rem, 3.2vw, 3rem);
+  line-height: 0.9;
+  text-shadow: 0 0 12px currentColor;
 }
 
 .good-ending-final-card__readiness span {
@@ -4486,6 +4507,15 @@ body.disable-crt .crt-flicker { display: none !important; }
 }
 
 .normal-ending-final-card .good-ending-final-card__readiness span {
+  color: var(--warning-yellow-border);
+}
+
+.normal-ending-final-card .good-ending-details {
+  border-color: rgba(255, 209, 102, 0.32);
+}
+
+.normal-ending-final-card .good-ending-details summary,
+.normal-ending-final-card .good-ending-details__body strong {
   color: var(--warning-yellow-border);
 }
 
@@ -5238,6 +5268,37 @@ body.disable-crt .crt-flicker { display: none !important; }
   animation: day-transition-in 360ms ease both;
 }
 
+.prolog-eruption-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 240;
+  background: #000;
+  overflow: hidden;
+}
+.prolog-eruption-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.prolog-eruption-skip {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 240, 231, 0.7);
+  background: rgba(0, 0, 0, 0.66);
+  color: #fff0e7;
+  font: 0.75rem 'Share Tech Mono', monospace;
+  cursor: pointer;
+}
+.prolog-eruption-skip:focus-visible { outline: 3px solid #fff0e7; outline-offset: 3px; }
+@media (max-width: 600px) and (orientation: portrait) {
+  .prolog-eruption-video { object-position: 66% center; }
+}
+
 .day-transition-overlay::before {
   content: '';
   position: absolute;
@@ -5392,12 +5453,110 @@ body.disable-crt .crt-flicker { display: none !important; }
   font: clamp(16px, 2vw, 24px)/1.8 'Share Tech Mono', monospace;
   min-height: 5.4em;
 }
+.day-boundary-overlay {
+  background: radial-gradient(circle at 50% 55%, #13070a 0%, #000 65%);
+}
+.day-boundary-dread {
+  background: radial-gradient(circle at 50% 55%, #071014 0%, #000 68%);
+}
+.day-boundary-overlay .day-transition-panel h2 {
+  margin-bottom: clamp(22px, 4vh, 38px);
+  color: #f8f4df;
+  font: clamp(2.8rem, 7vw, 5.4rem)/0.95 'VT323', monospace;
+  letter-spacing: 0.08em;
+  text-shadow: 3px 3px 0 #111318, 6px 6px 0 var(--accent-red), 0 0 28px rgba(170, 27, 40, 0.35);
+}
+.day-boundary-dread .day-transition-panel h2 {
+  text-shadow: 3px 3px 0 #111318, 6px 6px 0 #752b36, 0 0 30px rgba(91, 192, 190, 0.3);
+}
+.day-boundary-overlay .day-transition-kicker {
+  color: #bd8f90;
+  letter-spacing: 0.18em;
+}
+.day-boundary-overlay .day-transition-narrative,
+.day-boundary-overlay .day-transition-detail {
+  min-height: 0;
+  max-width: 52ch;
+  text-shadow: 0 2px 12px #000;
+}
+.day-boundary-overlay .day-transition-detail { margin-top: 0; }
+.day-boundary-overlay .day-transition-day-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  transform: translate(-50%, -50%) scale(0.96);
+}
+.day-boundary-overlay.is-day-title-visible .day-transition-day-title {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.day-boundary-impact.is-day-title-visible .day-transition-day-title {
+  animation: prolog-day1-flicker 2.3s steps(1, end) both;
+}
+.day-boundary-dread .day-transition-day-title {
+  text-shadow:
+    3px 3px 0 #111318,
+    8px 8px 0 #8f2937,
+    0 0 22px rgba(91, 192, 190, 0.34),
+    0 0 58px rgba(120, 8, 18, 0.3);
+}
+body.day-transition-active #settings-btn,
+body.day-transition-active #bunker72-dev-pill { visibility: hidden; }
+.prolog-day1-overlay {
+  background: #000;
+  animation-duration: 700ms;
+  transition: opacity 1600ms ease;
+}
+body.prolog-day1-active #settings-btn,
+body.prolog-day1-active #bunker72-dev-pill { visibility: hidden; }
+.prolog-day1-title {
+  margin: 0;
+  color: #f8f4df;
+  font: clamp(3.6rem, 9vw, 7.2rem)/0.9 'VT323', monospace;
+  letter-spacing: 0.07em;
+  text-align: center;
+  text-shadow:
+    3px 3px 0 #111318,
+    7px 7px 0 var(--accent-red),
+    0 0 30px rgba(91, 192, 190, 0.3),
+    0 0 48px rgba(160, 30, 42, 0.24);
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 380ms ease, transform 1800ms ease;
+}
+.prolog-day1-overlay.is-title-visible .prolog-day1-title {
+  opacity: 1;
+  transform: scale(1);
+}
+.prolog-day1-overlay.is-day-one .prolog-day1-title {
+  color: #fff0e7;
+  font-size: clamp(4.5rem, 12vw, 9rem);
+  letter-spacing: 0.12em;
+  text-shadow:
+    3px 3px 0 #111318,
+    8px 8px 0 var(--accent-red),
+    0 0 24px rgba(190, 36, 48, 0.6),
+    0 0 64px rgba(120, 8, 18, 0.4);
+}
+.prolog-day1-overlay.is-day-one.is-title-visible .prolog-day1-title {
+  animation: prolog-day1-flicker 2.3s steps(1, end) both;
+}
+@keyframes prolog-day1-flicker {
+  0%, 7%, 12%, 100% { opacity: 1; }
+  8%, 11%, 32% { opacity: 0.35; }
+  33% { opacity: 0.82; }
+}
 .day-cinematic-active > .story-box .floating-interactive-card,
 .day-cinematic-active > .drawer-toggle-btn,
 .day-cinematic-active > .side-tactical-drawer { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .day-transition-overlay { animation-duration: 1ms; transition-duration: 1ms; }
   .day-transition-panel { transition-duration: 1ms; }
+  .prolog-day1-title { transition-duration: 1ms; }
+  .prolog-day1-overlay.is-day-one.is-title-visible .prolog-day1-title { animation: none; }
+  .day-boundary-impact.is-day-title-visible .day-transition-day-title { animation: none; }
 }
 
 /* Phase 4: later multi-source review on Sarah's alert-office background. */
@@ -6290,6 +6449,9 @@ body.disable-crt .crt-flicker { display: none !important; }
     overflow-wrap: anywhere;
   }
   .story-box.cinematic-prologue:is(.bg-prolog-3, .bg-prolog-4) { background-position: 92% center; }
+  .story-box.cinematic-prologue:is(.bg-prolog-bunker-door-open, .bg-prolog-family-inside-bunker) {
+    background-position: 40% center;
+  }
   .story-box.bg-prolog-minimarket { background-position: 62% center; }
   .story-box.bg-prolog-medical { background-position: 62% center; }
   .story-box.bg-prolog-hendra { background-position: 61% center; }
@@ -6452,6 +6614,165 @@ body.disable-crt .crt-flicker { display: none !important; }
   width: 100%;
   gap: 8px;
 }
+
+/* The prologue standby countdown is part of the scene, not a HUD panel. */
+.scavenger-game-wrapper:has(.standby-timer) .scavenger-hud-header {
+  inset: 0;
+  align-items: flex-start;
+}
+
+.scavenger-timer-badge.standby-timer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: rgba(255, 59, 59, 0.76);
+  text-align: center;
+  opacity: 0.78;
+  text-shadow: 0 0 8px rgba(255, 25, 25, 0.38), 0 0 22px rgba(255, 0, 0, 0.2);
+}
+
+.standby-timer .timer-icon { display: none; }
+.standby-timer .timer-label {
+  font-size: clamp(0.85rem, 1.5vw, 1.25rem);
+  letter-spacing: 0.18em;
+  opacity: 0.68;
+}
+.standby-timer #timer-val {
+  display: inline-block;
+  font-size: clamp(3.2rem, 8.5vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  animation: standby-timer-shake 0.46s ease-in-out infinite;
+}
+.standby-timer #timer-val.timer-second-tick {
+  animation: standby-timer-shake 0.46s ease-in-out infinite,
+    standby-timer-second-pulse 1s ease-in-out;
+}
+@keyframes standby-timer-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(-1px, 0.5px) rotate(-0.35deg); }
+  50% { transform: translate(1px, -0.5px) rotate(0.3deg); }
+  75% { transform: translate(-0.5px, -0.5px) rotate(-0.2deg); }
+}
+@keyframes standby-timer-second-pulse {
+  0% { opacity: 0.42; }
+  22% { opacity: 0.96; }
+  58% { opacity: 0.64; }
+  100% { opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .standby-timer #timer-val,
+.standby-timer #timer-val.timer-second-tick { animation: none; }
+}
+
+.scavenger-objective-hint {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  z-index: 62;
+  transform: translateX(-50%);
+  max-width: calc(100% - 28px);
+  padding: 5px 10px;
+  border-left: 2px solid rgba(255, 93, 93, 0.72);
+  background: rgba(8, 10, 14, 0.62);
+  color: rgba(255, 229, 220, 0.82);
+  font: 0.68rem 'Share Tech Mono', monospace;
+  letter-spacing: 0.04em;
+  text-align: center;
+  pointer-events: none;
+}
+.scavenger-objective-hint[hidden] { display: none !important; }
+
+.scavenger-tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 6, 10, 0.82);
+  backdrop-filter: blur(3px);
+}
+.scavenger-tutorial-overlay.is-dismissed { display: none; }
+.scavenger-tutorial-card {
+  width: min(100%, 510px);
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid rgba(255, 93, 93, 0.68);
+  border-left: 4px solid var(--accent-red-border);
+  background: rgba(12, 15, 20, 0.96);
+  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.72), 0 0 32px rgba(143, 29, 35, 0.16);
+  color: var(--text-pixel);
+  font-family: 'Share Tech Mono', monospace;
+}
+.scavenger-tutorial-kicker {
+  margin: 0 0 4px;
+  color: var(--accent-red-border);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+}
+.scavenger-tutorial-card h2 {
+  margin: 0 0 10px;
+  color: #f4e8e4;
+  font: clamp(1.8rem, 6vw, 2.7rem)/0.95 'VT323', monospace;
+  letter-spacing: 0.06em;
+}
+.scavenger-tutorial-goal {
+  margin: 0 0 16px;
+  color: #d3d5d7;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.scavenger-tutorial-controls {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: #aeb5bb;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+.scavenger-tutorial-controls b {
+  color: var(--warning-yellow-border);
+  font-weight: normal;
+}
+.scavenger-tutorial-controls .scavenger-tutorial-touch { color: #8f989f; }
+.scavenger-tutorial-start {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent-red-border);
+  background: rgba(143, 29, 35, 0.3);
+  color: #ffe9e4;
+  font: 0.8rem 'Share Tech Mono', monospace;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.scavenger-tutorial-start:hover,
+.scavenger-tutorial-start:focus-visible {
+  outline: 2px solid rgba(255, 93, 93, 0.38);
+  outline-offset: 2px;
+  background: rgba(143, 29, 35, 0.48);
+}
+@media (pointer: coarse), (max-width: 850px) {
+  .scavenger-objective-hint { bottom: 122px; }
+}
+@media (max-width: 420px) {
+  .scavenger-tutorial-overlay { padding: 12px; }
+  .scavenger-tutorial-goal { font-size: 0.75rem; }
+  .scavenger-tutorial-controls { font-size: 0.7rem; }
+}
 #game-view .story-box.cinematic-prologue .choice-btn {
   min-height: 44px;
   flex-shrink: 0;
@@ -6556,6 +6877,10 @@ body.disable-crt .crt-flicker { display: none !important; }
   background: radial-gradient(circle at 50% 0%, #2b1d20 0%, #151014 48%, #07090b 100%);
 }
 
+#ending-view.active.ending-single-card.ending-report-screen.ending-bg-normal {
+  background: radial-gradient(circle at 50% 0%, #292519 0%, #15130d 48%, #07090b 100%);
+}
+
 @keyframes good-ending-report-enter {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -6639,6 +6964,14 @@ body.disable-crt .crt-flicker { display: none !important; }
 }
 
 .good-ending-details__body strong { color: var(--accent-green-border); }
+
+.preparedness-score-val strong {
+  color: var(--warning-yellow-border);
+  font-family: 'VT323', monospace;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 0.9;
+  text-shadow: 0 0 12px currentColor;
+}
 
 #ending-view .bad-ending-final-card .good-ending-final-card__eyebrow,
 #ending-view .bad-ending-final-card .good-ending-final-card__readiness,

@@ -124,16 +124,16 @@ try {
 
     const result = m.getEndingResult();
     assert.equal(result.endingId, 'ending_good', 'Strong technical play must achieve GOOD ending');
-    assert(result.preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN, 'Preparedness must meet Good threshold (>=60)');
+    assert(result.preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN, 'Preparedness must meet Good threshold');
     assert(m.health >= ENDING_RULES.GOOD_HEALTH_MIN, 'Health must meet Good threshold (>=55)');
   }
 
   // ============================================================================
-  // 4. PLAYTHROUGH ARCHETYPE C: POOR TECHNICAL PLAYTHROUGH
+  // 4. PLAYTHROUGH ARCHETYPE C: ZERO-HEALTH FALLBACK AND LOW PREPAREDNESS
   // ============================================================================
-  console.log('[4/12] Testing Archetype C: Poor Technical Playthrough (BAD / NORMAL naturally)...');
+  console.log('[4/12] Testing Archetype C: HP-zero fallback and low-preparedness NORMAL...');
   {
-    // C1: Exhausted / zero health run -> BAD
+    // C1: Explicit HP-zero fixture -> BAD; natural reachability is verified separately.
     const mBad = new GameModel();
     mBad.init('day3_final_hours', 10, [], {
       radio_quality: 'failed',
@@ -150,7 +150,7 @@ try {
     const epilogueBad = mBad.evaluateModularEnding();
     assert.equal(epilogueBad.endingId, 'ending_bad');
     assert.match(epilogueBad.modules[0].body, /Ketiganya selamat/i, 'BAD ending must confirm family survival');
-    assert.match(epilogueBad.modules[0].body, /penanganan medis/i, 'BAD ending must emphasize medical care');
+    assert.match(epilogueBad.modules[0].body, /dirawat|penanganan medis/i, 'BAD ending must emphasize medical care');
 
     // C2: Weak preparedness with moderate health -> NORMAL
     const mNormal = new GameModel();
@@ -165,7 +165,7 @@ try {
     }, { food: 1, drink: 1, kit: 0 }, 40, 40, 50);
 
     const resultNormal = mNormal.getEndingResult();
-    assert.equal(resultNormal.endingId, 'ending_normal', 'Sub-60 preparedness must yield NORMAL ending');
+    assert.equal(resultNormal.endingId, 'ending_normal', 'Insufficient preparedness with positive health must yield NORMAL ending');
   }
 
   // ============================================================================
@@ -192,7 +192,7 @@ try {
 
     const result = m.getEndingResult();
     assert.equal(result.endingId, 'ending_good', 'Helping Hendra must not prevent GOOD ending with strong technical play');
-    assert(result.preparedness.score >= 60, 'Preparedness score must reach >= 60');
+    assert(result.preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN, 'Preparedness score must meet Good threshold');
 
     const epilogue = m.evaluateModularEnding();
     const hendraCard = epilogue.modules.find(mod => mod.id === 'hendra');
@@ -250,11 +250,14 @@ try {
       extra_battery: true,
       battery_committed: false,
       day2_air_cleared: true,
+      food_packed: true,
+      drink_packed: true,
+      kit_packed: true,
     }, { food: 3, drink: 3, kit: 2 }, 80, 80, 85);
 
     const result = m.getEndingResult();
     assert.equal(result.endingId, 'ending_good', 'Failed radio must NOT prevent GOOD ending when all other technical systems succeed');
-    assert(result.preparedness.score >= 60, `Preparedness score (${result.preparedness.score}) must reach >= 60`);
+    assert(result.preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN, `Preparedness score (${result.preparedness.score}) must meet Good threshold`);
 
     const epilogue = m.evaluateModularEnding();
     const rescueCard = epilogue.modules.find(mod => mod.id === 'rescue');
@@ -298,11 +301,11 @@ try {
     assert(bunkerCard, 'Bunker aftermath card must exist');
 
     // extra_battery is dedicated to radio transmitter
-    assert.match(bunkerCard.body, /pemancar radio VHF/i, 'Extra battery must explicitly refer to radio VHF transmitter');
-    assert.match(bunkerCard.body, /tanpa membebani daya darurat bunker/i, 'Must clarify radio did not draw on bunker power');
+    assert.match(bunkerCard.body, /baterai ekstra.*radio VHF/i, 'Extra battery must explicitly support VHF radio');
+    assert.match(bunkerCard.body, /tanpa menguras daya bunker/i, 'Must clarify radio did not draw on bunker power');
 
     // Shelter power reserves use appropriate terminology
-    assert.match(bunkerCard.body, /daya darurat bunker|cadangan daya/i, 'Must use grounded shelter power reserve phrasing');
+    assert.match(bunkerCard.body, /daya bunker|daya darurat bunker|cadangan daya/i, 'Must use grounded shelter power reserve phrasing');
 
     // Verify choice text in Day 3 power scene
     const day3DualChoice = storySealed.scenes.day3_power_pressure.choices.find(c => c.id === 'c_day3_power_dual');

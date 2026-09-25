@@ -31,6 +31,9 @@ const BAD_ENDING_BACKGROUNDS = {
   final: new URL('../assets/backgrounds/bg_bad_end_3.webp', import.meta.url).href,
 };
 
+const PROLOG_ERUPTION_VIDEO = new URL('../assets/videos/prolog_2_3_explosion.webm', import.meta.url).href;
+const PROLOG_ERUPTION_POSTER = new URL('../assets/backgrounds/bg_prolog2.webp', import.meta.url).href;
+
 // ─── AVATAR ASSET MAP ───────────────────────────────────────────────────────
 const AVATARS = {
   ayah:        new URL('../assets/avatars/ayah/ayah_serius.png', import.meta.url).href,
@@ -78,6 +81,7 @@ export class GameView {
     this.informationPanelEscapeHandler = null;
     this.informationPanelReturnFocus = null;
     this.dayTransitionKeyHandler = null;
+    this.prologueVideo = null;
     this.radioTuningAvailable = false;
 
     // The real editor is registered only by the development bootstrap. The
@@ -148,15 +152,15 @@ export class GameView {
     const beats = [
       {
         background: 'opening', speaker: 'NARATOR',
-        text: 'Lampu darurat meredup dan beberapa sistem bunker berhenti bekerja. Tim SAR akhirnya menjangkau shelter. Palka berhasil dibuka; cahaya lampu penyelamat masuk ke ruang yang pengap.',
+        text: 'Sistem bunker melemah. Tim SAR membuka palka; cahaya masuk ke ruang pengap.',
       },
       {
         background: 'rescue', speaker: 'PETUGAS SAR',
-        text: '“Kami akan membantu kalian keluar.” Aris, Sarah, dan Maya dievakuasi satu per satu. Tim medis segera memeriksa ketiganya dan memberikan pertolongan yang mereka butuhkan.',
+        text: '“Kami bantu kalian keluar.” Petugas mengevakuasi keluarga dan segera memberi pertolongan medis.',
       },
       {
         background: 'final', speaker: 'NARATOR',
-        text: 'Ketiganya selamat, tetapi kelelahan berat dan kegagalan sistem bunker membuat mereka memerlukan perawatan segera. Sebagian perlengkapan tertinggal. Pemulihan akan berlangsung perlahan, bersama dukungan petugas dan keluarga.',
+        text: 'Mereka selamat dalam kondisi lemah. Sebagian perlengkapan tertinggal; pemulihan akan membutuhkan waktu.',
       },
     ];
     const beat = beats[this.badEndingCutsceneStep];
@@ -214,24 +218,24 @@ export class GameView {
       {
         background: 'opening',
         speaker: 'NARATOR',
-        text: 'Palka terbuka. Setelah 72 jam di bawah tanah, Aris, Sarah, dan Maya akhirnya menghirup udara luar bersama.',
+        text: 'Setelah 72 jam, palka terbuka. Keluarga itu menghirup udara luar bersama.',
         revealDelay: 1600,
       },
       {
         background: 'one',
         speaker: 'ARIS',
-        text: '“Kita keluar bersama.” Aris menatap Sarah dan Maya. Mereka melangkah pelan, masih lelah, tetapi tak lagi sendirian.',
+        text: '“Kita keluar bersama.” Aris meraih tangan Sarah dan Maya.',
       },
       {
         background: 'two',
         speaker: 'MAYA',
-        text: '“Aku sempat takut kita tidak akan keluar.” Maya memeluk mereka erat. “Tapi Ayah dan Ibu selalu ada.”',
+        text: '“Aku takut tadi,” kata Maya sambil memeluk mereka. “Tapi kita bersama.”',
         revealDelay: 850,
       },
       {
         background: 'three',
         speaker: 'NARATOR',
-        text: 'Hari-hari pemulihan masih panjang. Namun keluarga itu dapat memulainya bersama, selangkah demi selangkah.',
+        text: 'Pemulihan menunggu. Mereka memulainya bersama.',
         revealDelay: 1000,
       },
     ];
@@ -887,6 +891,9 @@ export class GameView {
       prolog2: 'bg-prolog-2',
       prolog3: 'bg-prolog-3',
       prolog4: 'bg-prolog-4',
+      prolog_bunker_door_closed: 'bg-prolog-bunker-door-closed',
+      prolog_bunker_door_open: 'bg-prolog-bunker-door-open',
+      prolog_family_inside_bunker: 'bg-prolog-family-inside-bunker',
       prolog_minimarket: 'bg-prolog-minimarket',
       prolog_medical: 'bg-prolog-medical',
       prolog_hendra: 'bg-prolog-hendra',
@@ -915,6 +922,7 @@ export class GameView {
     this.dom.storyBox.classList.remove(
       'bg-prolog-peaceful', 'bg-prolog-window',
       'bg-prolog', 'bg-prolog-1', 'bg-prolog-2', 'bg-prolog-3', 'bg-prolog-4',
+      'bg-prolog-bunker-door-closed', 'bg-prolog-bunker-door-open', 'bg-prolog-family-inside-bunker',
       'bg-prolog-minimarket', 'bg-prolog-medical', 'bg-prolog-hendra', 'bg-prolog-route-failure',
       'bg-backstory-airport', 'bg-backstory-house', 'bg-backstory-family-preparedness', 'bg-backstory-aris-company',
       'bg-backstory-sarah-office', 'bg-backstory-sarah-office-interactive', 'bg-backstory-sarah-office-alert',
@@ -1522,12 +1530,12 @@ export class GameView {
     explanationTitle.textContent = 'KENAPA MAKSIMAL TIGA TITIK?';
     const explanation = document.createElement('p');
     explanation.className = 'scene-information-body';
-    explanation.textContent = 'Baterai cadangan hanya cukup untuk menjaga panel kontrol dan blower tetap hidup saat udara distabilkan. Membuka terlalu banyak panel akan membuang waktu dan membuat isolasi bunker tidak aman sebelum filter karbon bekerja.';
+    explanation.textContent = 'Daya terbatas. Terlalu banyak panel terbuka menunda blower dan melemahkan isolasi udara.';
     const decision = document.createElement('p');
     decision.className = 'scene-information-body';
     decision.textContent = inspectedCount >= 3
-      ? 'Tiga titik prioritas sudah cukup untuk mengambil keputusan awal tentang bekal, kondisi medis, dan jalur teknis. Panel harus ditutup sekarang agar keluarga bisa masuk ke tahap penyaringan udara.'
-      : `Kamu baru memeriksa ${inspectedCount} titik. Titik lain sengaja ditinggalkan supaya blower dapat segera dinyalakan; melanjutkan berarti menerima informasi yang sudah terkumpul dan memprioritaskan keselamatan udara.`;
+      ? 'Tiga titik cukup untuk keputusan awal. Tutup panel dan mulai penyaringan udara.'
+      : `${inspectedCount} titik diperiksa. Lanjutkan sekarang agar blower segera menyaring udara.`;
 
     const actions = document.createElement('div');
     actions.className = 'day1-air-transition-actions';
@@ -1565,9 +1573,132 @@ export class GameView {
     continueButton.focus();
   }
 
+  showPrologueEruption({ audio, onComplete = () => {} } = {}) {
+    this.closePrologueEruption();
+    const overlay = document.createElement('div');
+    overlay.className = 'prolog-eruption-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Letusan gunung api');
+
+    const video = document.createElement('video');
+    video.className = 'prolog-eruption-video';
+    video.src = PROLOG_ERUPTION_VIDEO;
+    video.poster = PROLOG_ERUPTION_POSTER;
+    video.preload = 'auto';
+    video.playsInline = true;
+    video.setAttribute('aria-hidden', 'true');
+
+    const skip = document.createElement('button');
+    skip.type = 'button';
+    skip.className = 'prolog-eruption-skip';
+    skip.textContent = 'LEWATI VIDEO';
+
+    let finished = false;
+    const complete = () => {
+      if (finished || this.prologueVideo?.overlay !== overlay) return;
+      finished = true;
+      this.closePrologueEruption();
+      onComplete();
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        complete();
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        skip.focus();
+      }
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        clearTimeout(this.prologueVideo?.watchdog);
+        video.pause();
+      } else if (this.prologueVideo?.overlay === overlay) {
+        this.prologueVideo.watchdog = setTimeout(complete, 25000);
+        Promise.resolve(video.play()).catch(complete);
+      }
+    };
+    video.addEventListener('ended', complete, { once: true });
+    video.addEventListener('error', complete, { once: true });
+    skip.addEventListener('click', complete);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    overlay.append(video, skip);
+    this.dom.gameView.appendChild(overlay);
+    this.prologueVideo = { overlay, video, audio, onKeyDown, onVisibilityChange,
+      watchdog: setTimeout(complete, 25000) };
+    audio?.setCinematicMediaElement(video);
+    skip.focus();
+    Promise.resolve(video.play()).catch(() => {
+      if (!document.hidden) complete();
+    });
+  }
+
+  closePrologueEruption() {
+    const active = this.prologueVideo;
+    if (!active) return false;
+    this.prologueVideo = null;
+    clearTimeout(active.watchdog);
+    document.removeEventListener('keydown', active.onKeyDown);
+    document.removeEventListener('visibilitychange', active.onVisibilityChange);
+    active.video.pause();
+    active.audio?.setCinematicMediaElement(null);
+    active.overlay.remove();
+    return true;
+  }
+
+  showPrologDay1Transition({ title = 'BUNKER 72', onTitleReveal = () => {}, onContinue = () => {} } = {}) {
+    this.closeDayTransition();
+    const overlay = document.createElement('div');
+    overlay.className = 'day-transition-overlay prolog-day1-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'prolog-day1-title');
+    overlay.tabIndex = -1;
+
+    const heading = document.createElement('h2');
+    heading.id = 'prolog-day1-title';
+    heading.className = 'prolog-day1-title';
+    heading.setAttribute('aria-live', 'polite');
+    heading.textContent = title;
+    overlay.appendChild(heading);
+    this.dom.gameView.appendChild(overlay);
+    this.dom.gameView.classList.add('day-cinematic-active');
+    document.body.classList.add('prolog-day1-active');
+
+    this.dayTransitionTimers = [];
+    const later = (fn, delay) => this.dayTransitionTimers.push(setTimeout(fn, delay));
+    later(() => {
+      overlay.classList.add('is-title-visible');
+      onTitleReveal();
+    }, 850);
+    later(() => overlay.classList.remove('is-title-visible'), 2650);
+    later(() => {
+      heading.textContent = 'DAY 1';
+      overlay.classList.add('is-day-one');
+    }, 3500);
+    later(() => overlay.classList.add('is-title-visible'), 3900);
+    later(() => overlay.classList.remove('is-title-visible'), 6200);
+    later(() => onContinue(), 7000);
+    later(() => overlay.classList.add('is-revealing'), 7150);
+    later(() => this.closeDayTransition(), 8750);
+
+    this.dayTransitionKeyHandler = (event) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        overlay.focus();
+      }
+    };
+    document.addEventListener('keydown', this.dayTransitionKeyHandler);
+    overlay.focus();
+  }
+
   showDayTransition({
     kicker = '',
     title = 'PERGANTIAN HARI',
+    dayTitle = '',
+    tone = 'impact',
     narrative = '',
     detail = '',
     onDark = () => {},
@@ -1575,15 +1706,14 @@ export class GameView {
   } = {}) {
     this.closeDayTransition();
     const overlay = document.createElement('div');
-    overlay.className = 'day-transition-overlay';
-    overlay.setAttribute('role', 'presentation');
+    overlay.className = `day-transition-overlay day-boundary-overlay day-boundary-${tone}`;
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'day-transition-title');
     overlay.addEventListener('click', (event) => event.stopPropagation());
 
     const panel = document.createElement('section');
     panel.className = 'day-transition-panel';
-    panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-modal', 'true');
-    panel.setAttribute('aria-labelledby', 'day-transition-title');
 
     const marker = document.createElement('p');
     marker.className = 'day-transition-kicker';
@@ -1597,37 +1727,52 @@ export class GameView {
     const note = document.createElement('p');
     note.className = 'day-transition-detail';
     note.textContent = '';
+    note.hidden = true;
+    const dayHeading = document.createElement('h2');
+    dayHeading.id = 'day-transition-day-title';
+    dayHeading.className = 'prolog-day1-title day-transition-day-title';
+    dayHeading.setAttribute('aria-live', 'polite');
+    dayHeading.textContent = dayTitle || title;
     panel.append(marker, heading, body, note);
-    overlay.appendChild(panel);
+    overlay.append(panel, dayHeading);
     this.dom.gameView.appendChild(overlay);
     this.dom.gameView.classList.add('day-cinematic-active');
+    document.body.classList.add('day-transition-active');
     overlay.tabIndex = -1;
     this.dayTransitionTimers = [];
     const later = (fn, delay) => this.dayTransitionTimers.push(setTimeout(fn, delay));
-    const typeBeat = (element, text, done) => {
+    const typeBeat = (element, text, hold, done) => {
       let index = 0;
       const tick = () => {
         element.textContent = text.slice(0, ++index);
         if (index < text.length) later(tick, 28);
-        else later(done, 2200);
+        else later(done, hold);
       };
       tick();
     };
     later(() => {
       onDark();
       panel.classList.add('is-visible');
-      typeBeat(body, narrative, () => {
+      later(() => typeBeat(body, narrative, 1300, () => {
         body.hidden = true;
-        typeBeat(note, detail, () => {
+        note.hidden = false;
+        typeBeat(note, detail, 1400, () => {
           panel.classList.remove('is-visible');
           later(() => {
-            onContinue();
-            overlay.classList.add('is-revealing');
-            later(() => this.closeDayTransition(), 2200);
-          }, 700);
+            overlay.setAttribute('aria-labelledby', dayHeading.id);
+            overlay.classList.add('is-day-title-visible');
+            later(() => {
+              overlay.classList.remove('is-day-title-visible');
+              later(() => {
+                onContinue();
+                overlay.classList.add('is-revealing');
+                later(() => this.closeDayTransition(), 1800);
+              }, 700);
+            }, tone === 'impact' ? 2300 : 2700);
+          }, 900);
         });
-      });
-    }, 1300);
+      }), 500);
+    }, tone === 'impact' ? 1050 : 1400);
 
     this.dayTransitionKeyHandler = (event) => {
       if (event.key === 'Tab') {
@@ -1643,6 +1788,8 @@ export class GameView {
     this.dayTransitionTimers?.forEach(clearTimeout);
     this.dayTransitionTimers = [];
     this.dom.gameView?.classList.remove('day-cinematic-active');
+    document.body.classList.remove('prolog-day1-active');
+    document.body.classList.remove('day-transition-active');
     this.dom.gameView?.querySelector('.day-transition-overlay')?.remove();
     if (this.dayTransitionKeyHandler) {
       document.removeEventListener('keydown', this.dayTransitionKeyHandler);
@@ -2171,7 +2318,7 @@ export class GameView {
    * @param {string} endingSummary    - Pre-computed by GameModel.getEndingSummary().
    * @param {object} flags            - Player state flags reconstructed from history.
    */
-  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null) {
+  renderEnding(endingId, finalKnowledge, endingText, endingSummary, flags = {}, history = [], modularData = null, { archived = false } = {}) {
     this._setEndingReportInert(false);
     this.dom.endingView.scrollTop = 0;
     if (this.goodEndingRevealTimer) {
@@ -2196,7 +2343,7 @@ export class GameView {
     this.dom.endingView.classList.remove('ending-bg-bad', 'ending-bg-normal', 'ending-bg-best', 'ending-bg-fatal');
     this.dom.endingView.classList.remove('ending-single-card', 'ending-normal-single-card', 'ending-report-screen', 'ending-cutscene-playing');
     const creditsButton = document.getElementById('ending-credits-btn');
-    if (creditsButton) creditsButton.hidden = endingId !== 'ending_good';
+    if (creditsButton) creditsButton.hidden = archived || endingId !== 'ending_good';
     if (this.dom.endingStats) this.dom.endingStats.classList.remove('hidden');
 
     const ENDING_CONFIG = {
@@ -2222,8 +2369,12 @@ export class GameView {
     this.dom.endingTitle.textContent = cfg.title;
     this.dom.endingTitle.classList.add(cfg.titleClass);
     this.dom.endingView.classList.add(cfg.bgClass);
-    if (endingId === 'ending_good' || endingId === 'ending_bad') this.dom.endingView.classList.add('ending-single-card');
-    if (endingId === 'ending_normal') this.dom.endingView.classList.add('ending-normal-single-card');
+    if (endingId === 'ending_good' || endingId === 'ending_bad' || endingId === 'ending_normal') {
+      this.dom.endingView.classList.add('ending-single-card');
+    }
+    if (endingId === 'ending_normal') {
+      this.dom.endingView.classList.add('ending-normal-single-card', 'ending-report-screen');
+    }
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
@@ -2231,12 +2382,15 @@ export class GameView {
     const modules = Array.isArray(modularData?.modules) ? modularData.modules : [];
     const reportModules = modules;
 
-    if ((endingId === 'ending_good' || endingId === 'ending_bad') && reportModules.length) {
+    if (reportModules.length) {
       const mayaModule = reportModules.find((module) => module.id === 'maya');
       const badEnding = endingId === 'ending_bad';
+      const normalEnding = endingId === 'ending_normal';
+      const reportClass = badEnding ? 'bad-ending-final-card' : normalEnding ? 'normal-ending-final-card' : '';
+      const reportEyebrow = normalEnding ? 'HASIL EVAKUASI // RINGKASAN AKHIR' : 'EPILOG // 72 JAM BERAKHIR';
       this.dom.endingDesc.innerHTML = `
-        <article class="good-ending-final-card${badEnding ? ' bad-ending-final-card' : ''}">
-          <div class="good-ending-final-card__eyebrow">EPILOG // 72 JAM BERAKHIR</div>
+        <article class="good-ending-final-card${reportClass ? ` ${reportClass}` : ''}">
+          <div class="good-ending-final-card__eyebrow">${reportEyebrow}</div>
           <p class="good-ending-final-card__lead">${escapeHtml(endingText)}</p>
           ${mayaModule ? `<p class="good-ending-final-card__personal">${escapeHtml(mayaModule.body)}</p>` : ''}
           <div class="good-ending-final-card__readiness">
@@ -2245,7 +2399,7 @@ export class GameView {
             <span>${escapeHtml(grade.label)}</span>
           </div>
           <details class="good-ending-details">
-            <summary>BACA EPILOG LENGKAP</summary>
+            <summary>${normalEnding ? 'BACA RINGKASAN LENGKAP' : 'BACA EPILOG LENGKAP'}</summary>
             <div class="good-ending-details__body">
               ${reportModules.map((module) => `<p><strong>${escapeHtml(module.title)}:</strong> ${escapeHtml(module.body)}</p>`).join('')}
             </div>
@@ -2253,27 +2407,7 @@ export class GameView {
           <p class="good-ending-final-card__score">${escapeHtml(grade.desc)} Ini adalah ringkasan permainan, bukan penilaian resmi.</p>
         </article>
       `;
-    } else if ((endingId === 'ending_good' || endingId === 'ending_normal') && reportModules.length) {
-      const reportClass = endingId === 'ending_normal' ? 'normal-ending-final-card' : 'good-ending-final-card';
-      const reportEyebrow = endingId === 'ending_normal' ? 'HASIL EVAKUASI // RINGKASAN AKHIR' : 'HASIL EVAKUASI // PROTOKOL 72';
-      this.dom.endingDesc.innerHTML = `
-        <article class="${reportClass}">
-          <div class="good-ending-final-card__eyebrow">${reportEyebrow}</div>
-          <h3 class="good-ending-final-card__title">${endingId === 'ending_normal' ? 'NORMAL ENDING — SELAMAT DENGAN KONSEKUENSI' : 'GOOD ENDING — BERTAHAN DENGAN STABIL'}</h3>
-          <div class="good-ending-final-card__body">
-            ${reportModules.map((module) => `<p><strong>${escapeHtml(module.title)}:</strong> ${escapeHtml(module.body)}</p>`).join('')}
-          </div>
-          <div class="good-ending-final-card__readiness">
-            <div class="good-ending-final-card__readiness-label">KESIAPSIAGAAN TEKNIS</div>
-            <strong>${score} / 100</strong>
-            <span>${escapeHtml(grade.label)}</span>
-          </div>
-          <div class="good-ending-final-card__score">${escapeHtml(grade.desc)} Ini adalah ringkasan permainan, bukan penilaian resmi.</div>
-        </article>
-      `;
-      if (endingId === 'ending_normal' && this.dom.endingStats) {
-        this.dom.endingStats.classList.add('hidden');
-      }
+      if (this.dom.endingStats) this.dom.endingStats.classList.add('hidden');
     } else if (modules.length) {
       this.dom.endingDesc.innerHTML = `
         <div class="epilogue-modular-grid">
@@ -2332,8 +2466,12 @@ export class GameView {
       debriefBox.classList.remove('hidden');
     }
 
-    if (endingId === 'ending_good') this._startGoodEndingCutscene();
-    if (endingId === 'ending_bad') this._startBadEndingCutscene();
+    if (archived) {
+      this.dom.endingView.classList.add('ending-report-screen');
+    } else {
+      if (endingId === 'ending_good') this._startGoodEndingCutscene();
+      if (endingId === 'ending_bad') this._startBadEndingCutscene();
+    }
 
   }
 

@@ -9,8 +9,12 @@ export const ENDING_IDS = Object.freeze([
 
 /** Thresholds for the single Bad / Normal / Good evaluator. */
 export const ENDING_RULES = Object.freeze({
-  GOOD_PREPAREDNESS_MIN: 60,
+  GOOD_PREPAREDNESS_MIN: 80,
+  LEGACY_GOOD_PREPAREDNESS_MIN: 60,
   GOOD_HEALTH_MIN: 55,
+  BAD_PREPAREDNESS_MAX: 60,
+  BAD_HEALTH_MAX: 70,
+  BAD_FAILURE_MIN: 3,
 });
 
 /**
@@ -23,10 +27,12 @@ export const SURVIVAL = Object.freeze({
   THIRST_DECAY_PER_INTERVAL: 7,
   HUNGER_WARNING_THRESHOLD: 30,
   THIRST_WARNING_THRESHOLD: 30,
+  THIRST_CRITICAL_THRESHOLD: 10,
   HEALTH_PENALTY_HUNGER: 3,
   HEALTH_PENALTY_THIRST: 5,
   HEALTH_PENALTY_LOW_HUNGER: 1,
   HEALTH_PENALTY_LOW_THIRST: 1.5,
+  HEALTH_PENALTY_CRITICAL_THIRST: 20,
   KNOWLEDGE_MAX: 15,
   DEFAULTS: Object.freeze({
     knowledge: 5,
@@ -45,6 +51,7 @@ export const POWER_THRESHOLDS = Object.freeze({
 });
 
 export const SAVE_KEY = 'bunker72_save_v1';
+export const ENDING_ARCHIVE_KEY = 'bunker72_last_ending_v1';
 export const SAVE_BACKUP_KEY = 'bunker72_save_v1_backup';
 export const SAVE_SCHEMA_VERSION = 4;
 

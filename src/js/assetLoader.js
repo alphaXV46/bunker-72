@@ -26,6 +26,9 @@ import bgProlog1 from '../assets/backgrounds/bg_prolog1.webp';
 import bgProlog2 from '../assets/backgrounds/bg_prolog2.webp';
 import bgProlog3 from '../assets/backgrounds/bg_prolog3.webp';
 import bgProlog4 from '../assets/backgrounds/bg_prolog4.webp';
+import bgPrologBunkerDoorClosed from '../assets/backgrounds/bg_prolog_bunker_door_closed.webp';
+import bgPrologBunkerDoorOpen from '../assets/backgrounds/bg_prolog_bunker_door_open.webp';
+import bgPrologFamilyInsideBunker from '../assets/backgrounds/bg_prolog_family_inside_bunker.webp';
 import bgPrologMinimarket from '../assets/backgrounds/bg_prolog_minimarket.webp';
 import bgPrologMedical from '../assets/backgrounds/bg_prolog_medical.webp';
 import bgPrologHendra from '../assets/backgrounds/bg_prolog_hendra.webp';
@@ -74,6 +77,9 @@ const ASSET_URLS = [
   bgProlog2,
   bgProlog3,
   bgProlog4,
+  bgPrologBunkerDoorClosed,
+  bgPrologBunkerDoorOpen,
+  bgPrologFamilyInsideBunker,
   bgPrologMinimarket,
   bgPrologMedical,
   bgPrologHendra,

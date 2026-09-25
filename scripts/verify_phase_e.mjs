@@ -73,17 +73,17 @@ try {
   // BAD: Family survives, urgent care, no graphic gore
   assert.match(badText, /selamat/i, 'BAD ending must confirm family survival');
   assert.match(badText, /lemah/i, 'BAD ending must reflect weak physical condition');
-  assert.match(badText, /medis/i, 'BAD ending must reflect urgent medical care');
+  assert.match(badText, /perawatan darurat|medis/i, 'BAD ending must reflect urgent medical care');
   assert(!/tewas|mati|mayat|hancur berkeping|berlumuran/i.test(badText),
     'BAD ending must be age-10+ appropriate and avoid graphic violence/death');
 
-  // NORMAL: Survival with cost/stretched margins
+  // NORMAL: Survival with a difficult recovery
   assert.match(normalText, /selamat/i, 'NORMAL ending must confirm family survival');
-  assert.match(normalText, /kelelahan/i, 'NORMAL ending must show fatigue/cost');
-  assert.match(normalText, /cadangan/i, 'NORMAL ending must show stretched/depleted reserves');
+  assert.match(normalText, /72 jam yang berat/i, 'NORMAL ending must show the cost of survival');
+  assert.match(normalText, /pemeriksaan.*pulih/i, 'NORMAL ending must show recovery');
 
   // GOOD: Preparation created margin, stable condition
-  assert.match(goodText, /margin|persiapan teknis/i, 'GOOD ending must credit technical margin');
+  assert.match(goodText, /persiapan|margin/i, 'GOOD ending must credit preparation');
   assert.match(goodText, /stabil/i, 'GOOD ending must reflect stable condition');
 
   // ============================================================================
@@ -212,13 +212,13 @@ try {
     assert.equal(modular.endingId, 'ending_bad');
     const rescueCard = modular.modules[0];
     assert.equal(rescueCard.id, 'rescue');
-    assert.match(rescueCard.body, /Ketiganya selamat dan segera mendapat penanganan medis/);
+    assert.match(rescueCard.body, /Ketiganya selamat dan segera dirawat/);
 
     // Hendra card in BAD ending should be at the very end
     const hendraCard = modular.modules.find((card) => card.id === 'hendra');
     assert(hendraCard, 'Hendra card should exist in BAD ending when helped');
     assert.equal(modular.modules.at(-1).id, 'hendra', 'Hendra card in BAD ending must be positioned at the end');
-    assert.match(hendraCard.body, /terima kasih singkat sebelum tim medis melanjutkan/i,
+    assert.match(hendraCard.body, /berterima kasih.*sebelum keluarga dibawa/i,
       'Hendra card must acknowledge assistance without interrupting urgent medical treatment');
   }
 
@@ -334,7 +334,7 @@ try {
     m3.flags.maya_comforted = true;
     const mod3 = m3.evaluateModularEnding();
     const maya3 = mod3.modules.find((c) => c.id === 'maya');
-    assert.match(maya3.body, /mendampinginya/i);
+    assert.match(maya3.body, /tetap di sisinya|mendampinginya/i);
 
     // All 3 models must have identical preparedness score
     assert.equal(mod1.preparednessScore, mod2.preparednessScore);
@@ -353,7 +353,7 @@ try {
     assert.equal(familyCard.title, 'ARIS & SARAH');
     assert.match(familyCard.body, /Sarah/i);
     assert.match(familyCard.body, /Aris/i);
-    assert.match(familyCard.body, /teknis/i);
+    assert.match(familyCard.body, /menjaga sistem/i);
   }
 
   // ============================================================================
@@ -367,27 +367,27 @@ try {
     mA.flags.spare_filter_used = true;
     mA.flags.final_air_protected = false;
     const bunkerA = mA.evaluateModularEnding().modules.find((c) => c.id === 'bunker');
-    assert.match(bunkerA.body, /Penggantian filter pada Hari 2/i);
+    assert.match(bunkerA.body, /Filter baru memulihkan udara pada Hari 2/i);
 
     // Path B: Day 2 manual cleaning (high power draw)
     const mB = createBaseModel(90);
     mB.flags.day2_air_cleared = true;
     mB.flags.day2_power_draw_heavy = true;
     const bunkerB = mB.evaluateModularEnding().modules.find((c) => c.id === 'bunker');
-    assert.match(bunkerB.body, /Pembersihan blower manual/i);
+    assert.match(bunkerB.body, /Blower kembali mengalirkan udara/i);
 
     // Path C: Day 2 power conserved with fatigue
     const mC = createBaseModel(90);
     mC.flags.day2_power_conserved = true;
     mC.flags.day2_fatigue_applied = true;
     const bunkerC = mC.evaluateModularEnding().modules.find((c) => c.id === 'bunker');
-    assert.match(bunkerC.body, /Penghematan daya darurat/i);
+    assert.match(bunkerC.body, /Daya bertahan lebih lama/i);
 
     // Mask callback
     const mMask = createBaseModel(90);
     mMask.flags.medical_mask_used = true;
     const bunkerMask = mMask.evaluateModularEnding().modules.find((c) => c.id === 'bunker');
-    assert.match(bunkerMask.body, /Masker disiapkan untuk mengurangi paparan debu/i);
+    assert.match(bunkerMask.body, /Masker mengurangi debu/i);
   }
 
   // ============================================================================
@@ -502,7 +502,7 @@ try {
     const modular = mLegacy.evaluateModularEnding();
     const legacyHendra = modular.modules.find((c) => c.id === 'hendra');
     assert(legacyHendra, 'Legacy revision MUST produce Hendra card for family_first');
-    assert.match(legacyHendra.body, /Nasib Hendra tidak dijadikan vonis atas keputusan itu/i,
+    assert.match(legacyHendra.body, /Nasib Hendra tetap tidak diketahui/i,
       'Legacy revision must retain frozen legacy Hendra text');
 
     // Verify Sarah public impact never appears in legacy

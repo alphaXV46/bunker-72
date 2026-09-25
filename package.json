@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "verify:release": "node scripts/verify_release.mjs",
+    "verify:ending-balance": "node scripts/verify_ending_balance.mjs",
     "verify:day2": "node scripts/verify_day2_expansion.mjs",
     "verify:day3": "node scripts/verify_day3_wiring.mjs",
     "verify:content": "node scripts/verify_content_accuracy.mjs"

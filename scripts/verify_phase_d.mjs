@@ -26,6 +26,7 @@ try {
   const { StoryEngine } = await vite.ssrLoadModule('/src/js/storyEngine.js');
   const {
     ENDING_IDS,
+    ENDING_RULES,
     STORY_REVISIONS,
     SAVE_SCHEMA_VERSION,
     parseHour,
@@ -154,7 +155,7 @@ try {
       food_packed: true,
       drink_packed: true,
       day1_water_rational: true,
-    }, { food: 2, drink: 1, kit: 0 }, 75, 75, 85);
+    }, { food: 2, drink: 1, kit: 0 }, 85, 85, 85);
 
     const engine = Object.create(StoryEngine.prototype);
     Object.assign(engine, {
@@ -190,6 +191,8 @@ try {
     // Advance to Day 3
     engine.handleChoiceSelect(scenes.day2_stabilized.choices.find(c => c.id === 'c_day2_return_day3'));
     assert.equal(model.currentSceneId, 'day3_start');
+    assert(model.useInventoryItem('food'));
+    assert(model.useInventoryItem('drink'));
 
     // Water filter on Day 3
     engine.handleChoiceSelect(scenes.day3_start.choices[0]);
@@ -218,7 +221,7 @@ try {
     // Evaluate Ending
     const endRes = model.getEndingResult();
     assert.equal(endRes.endingId, 'ending_good', 'Route A must reach Good Ending');
-    assert(endRes.preparedness.score >= 60, 'Preparedness score must be >= 60');
+    assert(endRes.preparedness.score >= ENDING_RULES.GOOD_PREPAREDNESS_MIN, 'Preparedness score must meet Good threshold');
     assert(model.health >= 55, 'Health must be >= 55');
   }
 
@@ -240,7 +243,7 @@ try {
       kit_packed: true,
       medical_mask_ready: true,
       day1_water_rational: true,
-    }, { food: 2, drink: 2, kit: 1 }, 75, 75, 90);
+    }, { food: 2, drink: 2, kit: 1 }, 85, 85, 90);
 
     const engine = Object.create(StoryEngine.prototype);
     Object.assign(engine, {
@@ -264,6 +267,8 @@ try {
     engine.handleChoiceSelect(scenes.day2_family_check.choices.find(c => c.id === 'c_day2_finalize_day'));
     engine.handleChoiceSelect(scenes.day2_stabilized.choices.find(c => c.id === 'c_day2_return_day3'));
     assert.equal(model.currentSceneId, 'day3_start');
+    assert(model.useInventoryItem('food'));
+    assert(model.useInventoryItem('drink'));
 
     // Day 3 water & power
     engine.handleChoiceSelect(scenes.day3_start.choices[0]);
@@ -437,16 +442,16 @@ try {
 
     // Check conditional text evaluation with forbiddenFlag
     const powerText = engine.processNarrativeText('day3_power_pressure', scenes.day3_power_pressure.text, 'Aris');
-    assert(!powerText.includes('Filter cadangan membuat ventilasi'), 'Text should not mention spare filter when not found');
+    assert(!powerText.includes('Filter cadangan mengurangi kebutuhan putaran blower'), 'Text should not mention spare filter when not found');
 
     model.flags.found_spare_filter = true;
     model.flags.spare_filter_used = false;
     const powerTextWithFilter = engine.processNarrativeText('day3_power_pressure', scenes.day3_power_pressure.text, 'Aris');
-    assert(powerTextWithFilter.includes('Filter cadangan membuat ventilasi'), 'Text should mention spare filter when found and unused');
+    assert(powerTextWithFilter.includes('Filter cadangan mengurangi kebutuhan putaran blower'), 'Text should mention spare filter when found and unused');
 
     model.flags.spare_filter_used = true;
     const powerTextUsed = engine.processNarrativeText('day3_power_pressure', scenes.day3_power_pressure.text, 'Aris');
-    assert(!powerTextUsed.includes('Filter cadangan membuat ventilasi'), 'Text must NOT mention spare filter when forbiddenFlag spare_filter_used is true');
+    assert(!powerTextUsed.includes('Filter cadangan mengurangi kebutuhan putaran blower'), 'Text must NOT mention spare filter when forbiddenFlag spare_filter_used is true');
 
     // Save/Load serialization round-trip
     const saveData = model.toSaveData();
@@ -508,7 +513,7 @@ try {
     assert.match(maskChoice.log, /ventilasi shelter tetap berjalan pada mode hemat yang aman/i, 'Ventilation must be explicitly safe');
 
     // B. Reduced blower mode is explicitly an intended safe emergency mode
-    assert.match(scenes.day2_power_response.text, /ventilasi tetap berfungsi aman dan memadai/i, 'Reduced blower mode must be explicitly safe and adequate');
+    assert.match(scenes.day2_power_response.text, /blower masuk mode darurat hemat daya dan tetap berfungsi aman/i, 'Reduced blower mode must be explicitly safe and adequate');
 
     // C. No detailed real-world ventilation repair procedures remain
     const day2ScenesCombined = [
@@ -531,12 +536,12 @@ try {
     // D. No sealed72 Day 2 text says the bunker is universally or exclusively safe
     assert(!day2ScenesCombined.includes('satu-satunya tempat aman'), 'Universal bunker superiority claim must not appear');
     assert(!day2ScenesCombined.includes('hanya di bunker'), 'Universal bunker superiority claim must not appear');
-    assert.match(scenes.day2_start.text, /belum dibuka kembali|dalam asesmen petugas/i, 'Reason to remain must be closed/unassessed routes');
+    assert.match(scenes.day2_start.text, /jalur timur ditutup|jangan melintasi akses rusak/i, 'Reason to remain must be closed/unassessed routes');
 
     // E. Family-first Hendra route gains no factual Hendra update
     const hendraFamilyCond = scenes.day2_stabilized.conditionalText.find(c => c.requiredFlag === 'stranger_family_first');
     assert(hendraFamilyCond, 'stranger_family_first conditional text must exist in day2_stabilized');
-    assert.match(hendraFamilyCond.text, /tidak tahu bagaimana nasibnya/i, 'Hendra fate must remain strictly unknown');
+    assert.match(hendraFamilyCond.text, /tak tahu nasib Hendra/i, 'Hendra fate must remain strictly unknown');
   }
 
 } finally {

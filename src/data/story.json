@@ -3,7 +3,7 @@
     "backstory_return": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Setelah beberapa tahun tinggal di luar negeri, Aris, Sarah, dan Maya pulang ke Indonesia. Mereka membawa koper, foto lama, dan harapan untuk memulai bab baru lebih dekat dengan keluarga.",
+      "text": "Setelah bertahun-tahun di luar negeri, Aris, Sarah, dan Maya pulang ke Indonesia untuk dekat dengan keluarga.",
       "background": "backstory_airport",
       "phase": "backstory",
       "narrativeTime": "Beberapa tahun sebelum bencana",
@@ -16,7 +16,7 @@
     "backstory_airport": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "\"Rasanya berbeda sekali pulang dengan Maya di sini, ya. Aku rindu suara bahasa Indonesia di bandara.\" Maya menarik tangan mereka, tak sabar melihat rumah baru yang selama ini hanya ia lihat lewat panggilan video.",
+      "text": "\"Akhirnya pulang,\" kata Sarah. Maya menarik tangan mereka, ingin segera melihat rumah baru.",
       "background": "backstory_airport",
       "phase": "backstory",
       "narrativeTime": "Hari kepulangan",
@@ -29,7 +29,7 @@
     "backstory_house": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Rumah di kawasan perbukitan Rakata Selatan masih berbau cat baru. Aris membuka jendela lebar-lebar, sementara Sarah membantu Maya memilih sudut untuk mobil-mobilan merahnya. Rumah ini menjadi awal yang mereka pilih bersama.",
+      "text": "Rumah baru di perbukitan Rakata Selatan masih berbau cat. Maya langsung memilih sudut untuk mobil merahnya.",
       "background": "backstory_house",
       "phase": "backstory",
       "narrativeTime": "Minggu pertama di rumah baru",
@@ -42,7 +42,7 @@
     "backstory_aris_company": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Aris kembali memimpin perusahaan rintisan yang membangun hunian dan sistem bangunan cerdas. Rapatnya membahas struktur, ventilasi, cadangan listrik, dan cara membuat rumah lebih siap menghadapi keadaan darurat.",
+      "text": "Aris kembali memimpin usaha bangunan cerdas. Struktur, ventilasi, dan daya cadangan menjadi pekerjaannya sehari-hari.",
       "background": "backstory_aris_company",
       "phase": "backstory",
       "narrativeTime": "Beberapa bulan setelah kepulangan",
@@ -55,7 +55,7 @@
     "backstory_sarah_work": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Di BMKG, Sarah kembali ke pekerjaan riset dan analisis yang ia sukai. Ia mengolah informasi meteorologi dan geofisika, lalu menyusun catatan risiko agar tim dapat membahas kesiapsiagaan dengan bahasa yang jelas.",
+      "text": "Sarah kembali meneliti risiko di BMKG. Ia menyusun data gempa dan cuaca menjadi saran kesiapsiagaan yang mudah dipahami.",
       "background": "backstory_sarah_office",
       "phase": "backstory",
       "narrativeTime": "Masa penyesuaian kerja",
@@ -68,7 +68,7 @@
     "backstory_sarah_office": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Meja Sarah dipenuhi berkas kesiapsiagaan, peta risiko, dan catatan rapat. Ia merapikan bahan-bahan itu sebelum memilih mana yang perlu dibaca lebih dahulu, lalu membuka satu ringkasan di layar kerjanya.",
+      "text": "Di meja Sarah, peta risiko dan berkas kesiapsiagaan menunggu dibaca. Ia membuka ringkasan di laptop.",
       "background": "backstory_sarah_office_interactive",
       "phase": "backstory",
       "narrativeTime": "Penelitian kesiapsiagaan jangka panjang",
@@ -79,7 +79,7 @@
     "backstory_sarah_baseline": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Sarah menandai satu kesimpulan sederhana: kesiapsiagaan keluarga tidak dimulai saat sirene berbunyi. Ia ingin rumah mereka memiliki persediaan, rencana komunikasi, dan ruang perlindungan yang dipikirkan jauh sebelum keadaan darurat.",
+      "text": "Sarah mencatat tiga kebutuhan keluarga sebelum darurat: persediaan, rencana komunikasi, dan tempat berlindung.",
       "background": "backstory_sarah_office",
       "phase": "backstory",
       "narrativeTime": "Penelitian kesiapsiagaan jangka panjang",
@@ -88,7 +88,7 @@
       "choices": [
         {
           "id": "c_sarah_baseline_complete",
-          "text": "Simpan ringkasan dan bicarakan rencana dengan Aris.",
+          "text": "Simpan ringkasan dan bicara dengan Aris.",
           "nextSceneId": "backstory_family_preparedness",
           "effect": 0
         }
@@ -97,7 +97,7 @@
     "backstory_family_preparedness": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Malam itu Sarah membagikan catatannya kepada Aris. \"Aku tidak ingin kita hidup dalam rasa takut. Aku hanya ingin rumah ini punya pilihan saat keadaan berubah.\" Aris mengangguk, lalu bertanya berapa besar perlindungan yang benar-benar mereka perlukan.",
+      "text": "\"Aku ingin kita punya pilihan saat keadaan berubah,\" kata Sarah. Aris bertanya perlindungan seperti apa yang mereka perlukan.",
       "background": "backstory_family_preparedness",
       "phase": "backstory",
       "narrativeTime": "Beberapa minggu kemudian",
@@ -110,7 +110,7 @@
     "backstory_bunker_plan": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris menerjemahkan kekhawatiran Sarah menjadi rencana yang bisa dibangun: ruang perlindungan, sirkulasi udara, panel daya darurat, penyimpanan air, dan akses keluar yang jelas. \"Kita buat secukupnya, tapi jangan setengah-setengah,\" katanya.",
+      "text": "Aris merancang ruang perlindungan dengan filter udara, daya cadangan, air, dan akses keluar. \"Secukupnya, tapi harus andal.\"",
       "background": "backstory_bunker_plan",
       "phase": "backstory",
       "narrativeTime": "Perencanaan Bunker 72",
@@ -123,7 +123,7 @@
     "backstory_bunker_build": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pembangunan berlangsung bertahap selama berbulan-bulan. Aris memeriksa struktur dan instalasi, Sarah menata kebutuhan dasar, dan Maya datang membawa gambar keluarga untuk ditempel di dinding yang masih kosong.",
+      "text": "Berbulan-bulan mereka membangun bunker. Aris memeriksa instalasi, Sarah menata bekal, dan Maya menempel gambar keluarga di dinding.",
       "background": "backstory_bunker_build",
       "phase": "backstory",
       "narrativeTime": "Bulan-bulan pembangunan",
@@ -136,7 +136,7 @@
     "backstory_bunker_complete": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Saat Bunker 72 selesai, mereka tidak menganggapnya jaminan atas segala hal. Rencana evakuasi keluar wilayah tetap menjadi Rencana A utama bila jalur aman dan terbuka. Bunker perbukitan ini adalah Rencana B: perlindungan cadangan bila akses jalan setempat terputus atau paparan abu tebal membuat perjalanan tidak lagi aman.",
+      "text": "Bunker 72 siap. Evakuasi tetap Rencana A bila jalur aman; bunker menjadi Rencana B saat jalan terputus atau abu membuat perjalanan berbahaya.",
       "background": "backstory_bunker_complete",
       "phase": "backstory",
       "narrativeTime": "Bunker 72 selesai dibangun",
@@ -149,7 +149,7 @@
     "backstory_time_passes": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Waktu berlalu. Bunker menjadi bagian tenang dari rumah, sementara rutinitas keluarga kembali berjalan: pekerjaan Aris, catatan Sarah, sekolah Maya, dan makan malam yang selalu mereka usahakan bersama.",
+      "text": "Hari-hari kembali biasa. Bunker menunggu di bawah rumah, sementara keluarga bekerja, sekolah, dan makan malam bersama.",
       "background": "backstory_bunker_complete",
       "phase": "backstory",
       "narrativeTime": "Beberapa waktu kemudian",
@@ -162,7 +162,7 @@
     "backstory_sarah_update": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Menjelang senja, Sarah menerima pembaruan baru. Informasi aktivitas gunung api berasal dari pemantauan resmi PVMBG/Badan Geologi; data lain menunjukkan kondisi yang perlu dicermati, tetapi belum memberi kepastian sempurna tentang apa yang akan terjadi.",
+      "text": "Menjelang senja, Sarah menerima pembaruan pemantauan PVMBG dan data lain. Ada perubahan yang perlu dicermati, tetapi belum ada kepastian dampaknya.",
       "background": "backstory_sarah_office_alert",
       "phase": "backstory",
       "narrativeTime": "Menjelang bencana",
@@ -173,7 +173,7 @@
     "backstory_sarah_decision": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Sarah menatap rangkaian data dan catatan koordinasi. Ia tidak menetapkan status gunung api, tetapi ia dapat menentukan rekomendasi profesional yang akan ia ajukan melalui jalur resmi.",
+      "text": "Sarah tidak menetapkan status gunung api. Ia harus memilih rekomendasi yang akan diajukan melalui jalur resmi.",
       "background": "backstory_sarah_office_alert",
       "phase": "backstory",
       "narrativeTime": "Menjelang bencana",
@@ -182,21 +182,21 @@
       "choices": [
         {
           "id": "c_sarah_warning_escalate",
-          "text": "Ajukan percepatan koordinasi dan penyampaian informasi kesiapsiagaan melalui jalur resmi.",
+          "text": "Ajukan koordinasi kesiapsiagaan lebih awal.",
           "nextSceneId": "backstory_sarah_response",
           "knowledgeEffect": 0,
           "log": "Sarah mengajukan percepatan koordinasi kesiapsiagaan melalui jalur resmi."
         },
         {
           "id": "c_sarah_warning_verify",
-          "text": "Minta verifikasi lintas instansi sebelum mendukung penyampaian informasi yang lebih luas.",
+          "text": "Minta verifikasi lintas instansi lebih dulu.",
           "nextSceneId": "backstory_sarah_response",
           "knowledgeEffect": 0,
           "log": "Sarah meminta verifikasi lintas instansi atas informasi yang berkembang."
         },
         {
           "id": "c_sarah_warning_maintain",
-          "text": "Pertahankan respons saat ini sambil melanjutkan pemantauan dan evaluasi berikutnya.",
+          "text": "Pertahankan respons dan terus pantau.",
           "nextSceneId": "backstory_sarah_response",
           "knowledgeEffect": 0,
           "log": "Sarah mempertahankan respons saat ini sambil melanjutkan pemantauan."
@@ -206,37 +206,37 @@
     "backstory_sarah_response": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sarah mengirim tindak lanjut melalui kanal resmi. Hasil akhirnya belum dapat diketahui malam itu; proses berikutnya tetap bergantung pada koordinasi dan pembaruan lembaga yang berwenang.",
+      "text": "Sarah mengirim rekomendasinya. Hasilnya bergantung pada verifikasi dan koordinasi lembaga terkait.",
       "conditionalText": [
         {
           "requiredFlag": "day2_air_cleared",
-          "text": " Jalur udara membaik setelah penanganan modul ventilasi, tetapi pembacaan akhir tetap dipantau karena pemulihan belum berarti seluruh sistem kembali seperti semula.",
+          "text": " Aliran udara membaik, tetapi sistem tetap harus dipantau.",
           "append": true
         },
         {
           "requiredFlag": "day2_power_draw_heavy",
-          "text": " Penyesuaian manual membuat cadangan daya bekerja sedikit lebih keras; ventilasi berjalan, tetapi margin daya harus dijaga pada jam-jam berikutnya.",
+          "text": " Ventilasi pulih; perbaikan manual memakai lebih banyak daya.",
           "append": true
         },
         {
           "requiredFlag": "day2_power_conserved",
-          "text": " Daya lebih tenang dan blower tetap berjalan dalam mode darurat hemat; pertukaran udara lebih lambat, bukan berhenti, sehingga kondisi belum sepenuhnya pulih.",
+          "text": " Daya stabil, tetapi mode hemat memperlambat aliran udara.",
           "append": true
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "escalate",
-          "text": " Rekomendasi percepatan koordinasinya diteruskan, dan tim terkait mulai menyiapkan pembahasan lebih cepat."
+          "text": " Rekomendasi koordinasi cepat diteruskan ke tim terkait."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "verify",
-          "text": " Permintaan konfirmasi lintas instansinya dikirim segera agar data yang belum selaras dapat diperiksa kembali."
+          "text": " Sarah meminta konfirmasi lintas instansi."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "maintain",
-          "text": " Respons yang berjalan dipertahankan, sementara Sarah menyiapkan evaluasi berikutnya sesuai jadwal pemantauan."
+          "text": " Respons tetap berjalan sambil menunggu evaluasi berikutnya."
         }
       ],
       "background": "backstory_sarah_office_alert",
@@ -251,7 +251,7 @@
     "backstory_home_bridge": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sore berikutnya, rumah kembali terasa biasa: aroma masakan, suara Maya bermain, dan radio yang menyala pelan di ruang tengah. Tidak ada yang tahu bahwa malam itu akan menguji semua persiapan yang pernah mereka bicarakan.",
+      "text": "Sore berikutnya, Maya bermain di ruang tengah. Radio menyala pelan; makan malam hampir siap.",
       "background": "backstory_house",
       "phase": "backstory",
       "narrativeTime": "Sore sebelum bencana",
@@ -264,35 +264,35 @@
     "prolog_home": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Sore itu di perbukitan Rakata Selatan terasa begitu tenteram. Aris, 28 tahun, pulang kepada Sarah, 26 tahun, dan putri mereka, Maya, 7 tahun. Cahaya senja keemasan menerobos jendela kayu ruang tamu. Di atas karpet, Anak tertawa riang mendorong mobil-mobilan merahnya, sementara dari arah dapur tercium aroma sedap masakan Ibu yang sedang menyiapkan makan malam.",
+      "text": "Senja di Rakata Selatan. Aris pulang; Sarah memasak, dan Maya bermain mobil merah di karpet. Untuk sesaat, rumah terasa tenang.",
       "background": "prolog1",
       "hour": "0 Jam",
       "objective": "72 JAM PERTAMA — ARIS: temani keluarga di rumah.",
       "choices": [
         {
           "id": "c_prolog_talk_ibu",
-          "text": "Hampiri Ibu di dapur dan cicipi masakannya",
+          "text": "Hampiri Sarah di dapur.",
           "nextSceneId": "prolog_with_ibu",
           "knowledgeEffect": 0,
           "log": "Menghampiri Ibu yang sedang memasak di dapur."
         },
         {
           "id": "c_prolog_play_anak",
-          "text": "Duduk di karpet dan temani Anak bermain mobil-mobilan",
+          "text": "Temani Maya bermain.",
           "nextSceneId": "prolog_with_anak",
           "knowledgeEffect": 0,
           "log": "Menemani Anak bermain di ruang tengah."
         },
         {
           "id": "c_prolog_tune_radio",
-          "text": "Putar kenop radio kayu untuk mendengar siaran musik sore",
+          "text": "Dengarkan radio.",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 0,
           "log": "Menyalakan radio kayu di ruang tengah."
         },
         {
           "id": "c_prolog_skip",
-          "text": "[LEWATI KE DARURAT] Langsung ke simulasi alarm evakuasi",
+          "text": "Lewati ke alarm darurat.",
           "nextSceneId": "prolog_alert",
           "knowledgeEffect": 0,
           "log": "Memilih langsung merespons situasi darurat."
@@ -302,21 +302,21 @@
     "prolog_with_ibu": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "\"Mas, pas sekali kamu sudah pulang! Coba cicipi sedikit kuah sayurnya... gurihnya sudah pas belum? Anak dari tadi siang menanyakan kapan Ayahnya pulang. Rasanya hangat sekali kalau kita bisa kumpul lengkap seperti ini.\"",
+      "text": "\"Mas, coba kuahnya. Maya menunggumu sejak siang,\" kata Sarah sambil menyodorkan sendok.",
       "background": "prolog1",
       "hour": "0 Jam",
       "objective": "Bercengkrama dengan keluarga sebelum santap malam.",
       "choices": [
         {
           "id": "c_prolog_ibu_comfort",
-          "text": "️ \"Masakanmu selalu yang terbaik, Sarah. Malam ini kita santap bersama ya.\"",
+          "text": "\"Enak sekali. Kita makan bersama malam ini.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 0,
           "log": "Menikmati kehangatan obrolan keluarga di dapur."
         },
         {
           "id": "c_prolog_ibu_prepare",
-          "text": "\"Enak sekali. Tapi udara di luar terasa agak aneh dan pengap sore ini...\"",
+          "text": "\"Enak, tapi udara di luar terasa pengap.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 1,
           "log": "Merasakan kejanggalan cuaca pesisir."
@@ -326,14 +326,14 @@
     "prolog_with_anak": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "\"Ayah! Lihat, mobil pemadam kebakaranku bisa meluncur kencang! Nguuung... ciitt! Tapi roda belakangnya agak goyang, Yah. Nanti sehabis makan malam, Ayah bantu kencangkan bautnya ya?\"",
+      "text": "\"Ayah, lihat mobil pemadamku! Rodanya goyang. Nanti kita betulkan, ya?\" Maya mengangkat mainannya.",
       "background": "prolog1",
       "hour": "0 Jam",
       "objective": "Temani anak tersayang bermain sejenak.",
       "choices": [
         {
           "id": "c_prolog_anak_promise",
-          "text": "\"Pasti, Jagoan! Nanti Ayah ambil obeng kecil dan kita perbaiki sama-sama.\"",
+          "text": "\"Nanti Ayah bantu betulkan rodanya.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 0,
           "log": "Menjanjikan waktu bermain dan perbaikan mainan untuk Anak.",
@@ -343,7 +343,7 @@
         },
         {
           "id": "c_prolog_anak_snack",
-          "text": "\"Siap komandan! Ini Ayah bawakan camilan kesukaanmu dulu.\"",
+          "text": "\"Ayah bawakan camilan dulu, ya.\"",
           "nextSceneId": "prolog_radio_peaceful",
           "knowledgeEffect": 0,
           "log": "Membagikan camilan sore untuk Anak."
@@ -353,22 +353,22 @@
     "prolog_radio_peaceful": {
       "speaker": "Radio Rakata",
       "avatar": null,
-      "text": "[RADIO SUARA RAKATA 94.2 FM] Alunan petikan gitar akustik mengalun lembut dari corong radio tua. Penyiar bersuara hangat: \"...Selamat petang pendengar setia. Menjelang senja di pesisir barat, hembusan angin laut terpantau tenang... BMKG terus memantau aktivitas gempa dan cuaca. Ikuti pembaruan resmi; tanda alam saja tidak memastikan kapan bencana akan terjadi...\"",
+      "text": "[RADIO RAKATA 94.2 FM] \"Gempa dan cuaca terus dipantau BMKG. Ikuti pembaruan resmi; tanda alam saja tidak dapat memastikan kapan bencana terjadi.\"",
       "conditionalText": [
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "escalate",
-          "text": " Sebelum musik kembali, penyiar menambahkan: \"Sejumlah wilayah pesisir mulai memperkuat kesiapsiagaan setelah koordinasi antarinstansi diperbarui. Warga diminta memeriksa jalur evakuasi dan mengikuti informasi resmi.\" Sarah berhenti sejenak; rekomendasinya telah bergerak melalui jalur yang semestinya."
+          "text": " Penyiar menambahkan: \"Titik kumpul mulai disiapkan. Periksa rute evakuasi dan ikuti informasi resmi.\" Sarah mengenali hasil koordinasinya."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "verify",
-          "text": " Penyiar melanjutkan: \"Verifikasi lintas instansi atas perkembangan terbaru masih berlangsung. Warga diminta mengikuti pembaruan resmi dan menyiapkan kebutuhan dasar.\" Sarah menyimak tanpa komentar; informasi yang lebih lengkap sedang dihimpun."
+          "text": " Penyiar menambahkan: \"Verifikasi lintas instansi berlanjut. Siapkan kebutuhan dasar dan ikuti pembaruan resmi.\""
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "maintain",
-          "text": " Penyiar melanjutkan: \"Pemantauan kondisi wilayah terus dilakukan. Belum ada perubahan besar pada imbauan saat ini, tetapi masyarakat diminta tetap mengikuti informasi resmi.\" Sarah mengenali bahwa evaluasi rutin masih menjadi dasar respons."
+          "text": " Penyiar menambahkan: \"Pemantauan berlanjut. Ikuti informasi resmi meski imbauan belum berubah.\""
         }
       ],
       "background": "prolog1",
@@ -377,14 +377,14 @@
       "choices": [
         {
           "id": "c_prolog_listen_careful",
-          "text": "Simak pembaruan pemantauan yang disebutkan penyiar",
+          "text": "Simak pembaruan radio.",
           "nextSceneId": "prolog_foreshadow",
           "knowledgeEffect": 1,
           "log": "Menyimak pembaruan pemantauan dari radio lokal."
         },
         {
           "id": "c_prolog_prepare_bag",
-          "text": "Lirik ransel siaga di dekat pintu untuk memastikan isinya siap",
+          "text": "Periksa ransel siaga dekat pintu.",
           "nextSceneId": "prolog_foreshadow",
           "knowledgeEffect": 1,
           "log": "Memastikan kesiapsiagaan tas darurat di dekat pintu."
@@ -394,14 +394,14 @@
     "prolog_foreshadow": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Tiba-tiba, lampu bohlam ruang tengah berkedip redup. Alunan musik di radio mendadak lenyap digantikan derau statis berdesing tajam. Di luar jendela, langit senja keemasan berubah seketika menjadi tembaga pekat dan ungu keabuan. Puluhan burung beterbangan panik meninggalkan dahan pohon, disusul dentuman getaran rendah di bawah lantai yang membuat cangkir teh di meja bergemerincing!",
+      "text": "Lampu berkedip. Radio berubah menjadi statik. Cangkir bergetar di meja, dan burung-burung terbang dari pepohonan.",
       "background": "prolog_window",
       "hour": "0 Jam",
       "objective": "Waspadai tanda-tanda ancaman mendadak di luar jendela.",
       "choices": [
         {
           "id": "c_prolog_foreshadow_check",
-          "text": "Berteriak memperingatkan keluarga dan raih ransel!",
+          "text": "Peringatkan keluarga dan raih ransel.",
           "nextSceneId": "prolog_alert",
           "knowledgeEffect": 1,
           "log": "Segera merespons tanda anomali alam di luar rumah."
@@ -411,7 +411,7 @@
     "prolog_alert": {
       "speaker": "TV Darurat",
       "avatar": null,
-      "text": "[SIARAN DARURAT BPBD] Televisi menampilkan pembaruan PVMBG/Badan Geologi tentang meningkatnya aktivitas gunung api. Petugas meminta warga mengikuti rute evakuasi setempat. Di pesisir, peringatan tsunami berarti segera menuju tempat tinggi atau lokasi evakuasi yang ditetapkan, bukan bunker bawah tanah. Keluarga Aris berada di perbukitan; hujan abu mulai mendekat.",
+      "text": "[SIARAN DARURAT BPBD] Aktivitas gunung api meningkat. Ikuti rute evakuasi setempat. Warga pesisir yang mendapat peringatan tsunami harus menuju tempat tinggi, bukan bunker. Abu mendekati perbukitan.",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Simak arahan petugas dan pembaruan resmi.",
@@ -422,7 +422,7 @@
     "prolog_question": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Aris: \"Pembaruan situasi menunjukkan kesiapsiagaan wilayah kita ditingkatkan. Cadangan dasar di shelter sudah tersimpan, tapi kalau akses keluar ditutup beberapa hari, margin kita terlalu tipis. Aku akan jalan cepat ke minimarket atau pos terdekat selagi perjalanan lokal masih diizinkan petugas.\"\n\nSarah: \"Setuju, Mas. Ambil kebutuhan pokok secukupnya dan segera kembali. Aku tetap di sini menjaga Maya, memantau siaran radio, dan mengumpulkan barang-barang rumah yang penting ke dekat titik kumpul akses shelter.\"",
+      "text": "\"Bekal shelter terlalu tipis bila jalan tertutup berhari-hari. Aku ambil kebutuhan pokok selagi petugas masih mengizinkan perjalanan lokal,\" kata Aris.\n\n\"Aku jaga Maya dan kumpulkan barang di dekat palka,\" jawab Sarah.",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Bagi tugas kesiapsiagaan: Aris mencari perbekalan luar, Sarah mengamankan kebutuhan rumah.",
@@ -433,7 +433,7 @@
     "prolog_packing": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Aris sudah berangkat menuju luar. Sekarang giliran Sarah: amankan barang-barang rumah tangga yang penting dan letakkan di titik kumpul dekat akses shelter. Bawa barang yang aman dijangkau dan jangan menunda keselamatan jika waktu habis; Maya menunggu di titik aman.",
+      "text": "Aris berangkat mencari bekal. Sarah mengumpulkan barang yang aman dijangkau di dekat palka; Maya menunggu di titik aman.",
       "background": "packing",
       "hour": "0 Jam",
       "objective": "Kumpulkan barang tambahan rumah tangga ke titik kumpul akses shelter.",
@@ -442,7 +442,7 @@
     "prolog_intro": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pukul 18.07. Sirene evakuasi kota meraung-raung bersahutan di kejauhan. Dari ambang jendela rumah, puncak Krakatau memuntahkan lidah api dan gelombang kejut ke angkasa. Udara pesisir mulai dipenuhi bau belerang tajam dan rintik abu panas yang turun bagai salju hitam.",
+      "text": "Pukul 18.07. Sirene meraung. Abu turun di Rakata Selatan, dan gemuruh letusan terasa sampai rumah.",
       "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Evakuasi keluarga sebelum jalur permukaan tertutup abu.",
@@ -453,7 +453,7 @@
     "prolog_road": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Ibu: \"Jangan lihat ke belakang, Sayang. Genggam jemari Ibu erat-erat. Pintu baja bunker sudah tepat di depan kita. Masuk dulu ke dalam, baru kita bernapas pelan-pelan...\"",
+      "text": "\"Pegang tangan Ibu, Maya. Palkanya sudah dekat,\" kata Sarah sambil berlari.",
       "background": "prolog3",
       "hour": "0 Jam",
       "objective": "Bimbing keluarga melewati akses darurat terakhir.",
@@ -464,8 +464,8 @@
     "prolog_threshold": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Ayah: \"Lampu sensor berkedip hijau—seluruh anggota keluarga sudah berada di ambang lorong akses. Pembaca kartu di sisi palka masih merah; kita belum masuk sampai kredensial bunker diterima.\"",
-      "background": "prolog3",
+      "text": "\"Kita belum masuk sampai kredensial diterima. Coba kartu 72-A lagi,\" kata Aris.",
+      "background": "prolog_bunker_door_closed",
       "hour": "0 Jam",
       "objective": "Verifikasi akses bunker sebelum keluarga masuk.",
       "requiredInteraction": {
@@ -481,10 +481,21 @@
     "prolog_surface": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Kartu 72-A diterima. Pintu akses terbuka dan keluarga segera masuk ke lorong bunker. Tuas hidrolik ditarik; pintu baja luar menutup rapat dan segel utama menyala hijau. Di luar, Krakatau meledak dalam raungan dahsyat yang menggetarkan bumi pesisir. Awan abu pekat menelan jalanan kota, lampu-lampu pemukiman padam satu per satu, dan Rakata Selatan lenyap dalam gulita. Di balik pintu baja setebal dua puluh sentimeter yang baru tersegel, keluarga Anda kini hanya punya 72 jam pertama untuk bertahan hidup.",
-      "background": "prolog4",
+      "text": "Kartu 72-A diterima. Pintu bunker terbuka; keluarga segera masuk.",
+      "background": "prolog_bunker_door_open",
       "hour": "0 Jam",
-      "objective": "Mulai perjuangan bertahan hidup di ruang bawah tanah.",
+      "objective": "Bawa seluruh keluarga melewati pintu bunker.",
+      "autoNextSceneId": "prolog_inside",
+      "autoAdvanceDelay": 1600,
+      "choices": []
+    },
+    "prolog_inside": {
+      "speaker": "Narator",
+      "avatar": null,
+      "text": "Aris, Sarah, dan Maya sudah di dalam. Aris menarik tuas; pintu baja segera menutup rapat dan tersegel. Kini mereka harus bertahan 72 jam.",
+      "background": "prolog_family_inside_bunker",
+      "hour": "0 Jam",
+      "objective": "Mulai 72 jam pertama di dalam Bunker 72.",
       "autoNextSceneId": "prolog_title",
       "autoAdvanceDelay": 1600,
       "choices": []
@@ -492,7 +503,7 @@
     "prolog_title": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "BUNKER 72\n72 JAM PERTAMA",
+      "text": "BUNKER 72",
       "background": "titlecard",
       "hour": "0 Jam",
       "objective": "Mulai 72 jam pertama di dalam Bunker 72.",
@@ -503,7 +514,7 @@
     "day1_power_boot": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Pintu baja luar berhasil tersegel rapat di belakang kita. Suasana di dalam bunker masih gelap—hanya terdengar dengungan dari cadangan daya darurat. Sebelum filter udara dan lampu menyala, kita harus menaikkan tuas daya utama Actuator A-01 dari konsol generator.",
+      "text": "Pintu tersegel, tetapi bunker gelap. \"Naikkan tuas Actuator A-01 agar daya, lampu, dan filter udara menyala,\" kata Aris.",
       "background": "normal",
       "hour": "0 Jam",
       "objective": "Nyalakan bus daya utama untuk mengaktifkan sistem bunker.",
@@ -520,7 +531,7 @@
     "day1_inspection": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Bus daya sudah menyala, tetapi bunker masih bergantung pada cadangan daya darurat. Blower harus segera menstabilkan tekanan dan memaksa udara melewati filter karbon. Membuka terlalu banyak panel akan membuang waktu, menguras cadangan, dan membuat isolasi udara tidak aman. Karena itu Ayah menetapkan triase: pilih maksimal tiga titik yang paling membantu keluarga, lalu kembali ke sistem udara.",
+      "text": "Daya darurat hidup. Sebelum menyalakan blower, Aris punya waktu memeriksa paling banyak tiga titik penting. Setelah itu, sistem udara harus ditangani.",
       "background": "normal",
       "hour": "6 Jam",
       "objective": "Pilih maksimal tiga titik prioritas, lalu stabilkan sistem udara.",
@@ -529,26 +540,26 @@
     "day1_lockdoor": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Pintu sudah tersegel rapat. Tapi lihat indikator filtrasi di atas... lampu merahnya masih berkedip tidak stabil. Paking katup karbon harus kuperiksa langsung sebelum blower dinyalakan. Bau belerang di luar terlalu pekat untuk kita pertaruhkan dengan kecerobohan.",
+      "text": "\"Pintu aman, tetapi indikator filtrasi masih merah. Periksa paking katup sebelum blower dinyalakan,\" kata Aris.",
       "background": "normal",
       "hour": "6 Jam",
       "objective": "Amankan kualitas udara sebelum keluarga beristirahat.",
       "conditionalText": [
         {
           "requiredFlag": "inspected_ventilation",
-          "text": " Panel ventilasi yang tadi kamu buka memperlihatkan debu menumpuk di kisi—setidaknya sekarang kita tahu titik lemahnya.",
+          "text": " Kisi yang diperiksa tadi penuh debu.",
           "append": true
         },
         {
           "requiredFlag": "found_spare_filter",
-          "text": " Filter cadangan sudah berada di tangan. Memasangnya perlahan bisa menghindari kebocoran saat blower mulai berputar.",
+          "text": " Filter cadangan siap dipasang sebelum blower berputar.",
           "append": true
         }
       ],
       "choices": [
         {
           "id": "c_day1_radio_minigame",
-          "text": "Putar Kenop Radio VHF (Pencarian sinyal komunikasi SAR dalam simulasi)",
+          "text": "Periksa radio VHF.",
           "nextSceneId": "day1_lockdoor",
           "forbiddenFlags": ["day1_radio_tuned"],
           "knowledgeEffect": 0,
@@ -557,7 +568,7 @@
         },
         {
           "id": "c_day1_air_noinspect",
-          "text": "Langsung jalankan blower penyaring udara pada kecepatan penuh demi pembersihan kilat.",
+          "text": "Nyalakan blower penuh tanpa memeriksa katup.",
           "nextSceneId": "day1_air_unsafe",
           "knowledgeEffect": -1,
           "log": "Penyaring dinyalakan tanpa inspeksi katup.",
@@ -567,7 +578,7 @@
         },
         {
           "id": "c_day1_air_newseal",
-          "text": "Ganti paking katup karbon dengan segel cadangan baru dan kencangkan baut manual.",
+          "text": "Ganti paking katup dengan segel baru.",
           "nextSceneId": "day1_air_safe",
           "knowledgeEffect": 2,
           "log": "Katup udara diperiksa dan diganti segel baru sebelum mesin aktif.",
@@ -577,7 +588,7 @@
         },
         {
           "id": "c_day1_air_spare_filter",
-          "text": "Pasang filter cadangan yang ditemukan di balik kisi ventilasi, lalu uji aliran perlahan.",
+          "text": "Pasang filter cadangan dan uji aliran.",
           "nextSceneId": "day1_air_safe",
           "knowledgeEffect": 3,
           "log": "Filter cadangan dipasang setelah inspeksi ventilasi; aliran udara stabil.",
@@ -594,7 +605,7 @@
         },
         {
           "id": "c_day1_air_wetmask",
-          "text": "Gunakan masker kain hanya sebagai perlindungan sementara dari debu dan partikel. Masker tidak memperbaiki ventilasi; setelah itu, sistem udara tetap harus diperiksa.",
+          "text": "Pakai masker kain sementara untuk debu dan partikel; masker tidak memperbaiki ventilasi.",
           "nextSceneId": "day1_air_unsafe",
           "knowledgeEffect": 0,
           "log": "Masker kain digunakan sebagai perlindungan sementara dari partikel; sistem ventilasi tetap belum diperiksa.",
@@ -607,11 +618,11 @@
     "day1_air_safe": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Napas anak kita sudah mulai teratur. Lihat wajahnya, tidak sepucat tadi saat kita baru masuk. Memeriksa katup dengan teliti sebelum mesin berputar adalah keputusan yang tepat, Mas. Di ruang sempit ini, ventilasi yang terawat membantu menjaga udara tetap layak.",
+      "text": "Napas Maya mulai teratur. Sarah tetap mengawasi indikator udara. \"Jangan berhenti memeriksa alirannya, Mas.\"",
       "conditionalText": [
         {
           "requiredFlag": "air_seal_good",
-          "text": " Segel yang terpasang rapat mengurangi masuknya debu. Indikator dan aliran udara tetap perlu dipantau."
+          "text": " Segel rapat mengurangi debu masuk; indikator tetap harus dipantau."
         }
       ],
       "background": "normal",
@@ -620,7 +631,7 @@
       "choices": [
         {
           "id": "c_day1_air_safe_inventory",
-          "text": "Atur persediaan logistik makanan, air, baterai, dan P3K.",
+          "text": "Atur makanan, air, baterai, dan P3K.",
           "nextSceneId": "day1_supplies",
           "knowledgeEffect": 0,
           "log": "Inventaris logistik dimulai."
@@ -630,14 +641,14 @@
     "day1_air_unsafe": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah... kenapa mataku perih sekali? Tenggorokanku terasa kering dan aku ingin batuk... Bisa kita periksa udaranya, Yah?",
+      "text": "\"Ayah, mataku perih dan aku batuk. Udaranya kenapa?\" tanya Maya.",
       "background": "normal",
       "hour": "12 Jam",
       "objective": "Pulihkan kualitas udara secepatnya!",
       "choices": [
         {
           "id": "c_day1_air_fix",
-          "text": "Matikan mesin, betulkan posisi segel katup yang miring, lalu nyalakan kembali.",
+          "text": "Matikan blower, betulkan segel, lalu nyalakan lagi.",
           "nextSceneId": "day1_air_fix",
           "knowledgeEffect": 1,
           "log": "Kebocoran katup diperbaiki setelah paparan singkat."
@@ -647,14 +658,14 @@
     "day1_air_fix": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Ada celah udara pada paking katup akibat hentakan awal. Kuncinya sudah kubetulkan dan mesin kembali stabil. Maafkan Ayah, Nak... sekarang udaranya sudah aman untuk bernapas.",
+      "text": "\"Pakingnya miring. Sudah kubetulkan; aliran udara kembali stabil,\" kata Aris.",
       "background": "normal",
       "hour": "12 Jam",
       "objective": "Lanjutkan inventarisasi logistik darurat.",
       "choices": [
         {
           "id": "c_day1_airfix_inventory",
-          "text": "Periksa dan atur ransum makanan, jeriken air, baterai, serta kotak P3K.",
+          "text": "Periksa persediaan makanan, air, baterai, dan P3K.",
           "nextSceneId": "day1_supplies",
           "knowledgeEffect": 0,
           "log": "Inventaris logistik dimulai."
@@ -664,14 +675,14 @@
     "day1_supplies": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-18. Dinding beton terasa dingin. Ibu duduk di sudut dipan lipat sambil memeluk Anak yang mulai tertidur lelap. Jeriken air minum dan beberapa kaleng makanan di atas meja besi perlu diatur agar cukup hingga bantuan tiba.",
+      "text": "Jam ke-18. Maya tertidur. Air dan makanan di meja harus dibagi agar cukup sampai bantuan tiba.",
       "background": "normal",
       "hour": "18 Jam",
       "objective": "Tetapkan strategi pembagian air minum harian.",
       "choices": [
         {
           "id": "c_day1_water_waste",
-          "text": "Bebaskan minum kapan saja jika tenggorokan terasa kering akibat sisa debu.",
+          "text": "Bebaskan minum saat tenggorokan kering.",
           "nextSceneId": "day1_water_waste",
           "knowledgeEffect": -1,
           "log": "Air dipakai terlalu longgar.",
@@ -679,7 +690,7 @@
         },
         {
           "id": "c_day1_water_rational",
-          "text": "Beri tanda takaran jatah harian pada botol air dan simpan satu botol penuh sebagai cadangan mutlak.",
+          "text": "Tandai jatah air dan simpan satu botol cadangan.",
           "nextSceneId": "day1_water_rational",
           "knowledgeEffect": 1,
           "log": "Ransum air dihitung dengan cadangan.",
@@ -692,11 +703,11 @@
     "day1_water_rational": {
       "speaker": "Ayah",
       "avatar": "ayah",
-      "text": "Kita tidak tahu seberapa lama badai abu vulkanik di atas akan menahan regu evakuasi. Menempelkan takaran jatah pada botol air akan menjaga kita dari dehidrasi tanpa menghabiskan pasokan terlalu dini. Sekarang, kita harus menetapkan lokasi sanitasi tertutup.",
+      "text": "\"Kita tak tahu kapan bantuan tiba. Tandai jatah air harian dan simpan cadangan,\" kata Aris. Sanitasi berikutnya harus diatur.",
       "conditionalText": [
         {
           "requiredFlag": "water_rational_good",
-          "text": " Pembagian persediaan membantu kita memantau kebutuhan. Jangan mengabaikan rasa haus; kebutuhan minum tiap orang berbeda."
+          "text": " Jatah membantu memantau persediaan, tetapi kebutuhan minum tiap orang tetap berbeda."
         }
       ],
       "background": "normal",
@@ -705,7 +716,7 @@
       "choices": [
         {
           "id": "c_day1_sanitation_good",
-          "text": "Tempatkan ember sanitasi berpenutup rapat di sudut ventilasi buang dengan cairan disinfektan.",
+          "text": "Taruh ember limbah tertutup di area ventilasi buang.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
           "log": "Zona bersih dan limbah dipisahkan.",
@@ -713,7 +724,7 @@
         },
         {
           "id": "c_day1_sanitation_door",
-          "text": "Letakkan wadah limbah terbuka tepat di samping pintu keluar utama agar mudah dibuang nanti.",
+          "text": "Taruh limbah terbuka di dekat pintu.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu.",
@@ -724,14 +735,14 @@
     "day1_water_waste": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Satu botol pertama habis lebih cepat dari perkiraan. Sarah menatap rak, lalu menutup jeriken rapat. \"Kita masih bisa mengaturnya, Mas. Tapi mulai sekarang setiap botol harus dihitung.\" Mereka beralih menata area sanitasi sebelum malam tiba.",
+      "text": "Botol pertama habis terlalu cepat. \"Mulai sekarang, tiap botol kita hitung,\" kata Sarah sambil menutup jeriken.",
       "background": "normal",
       "hour": "18 Jam",
       "objective": "Perbaiki pengelolaan air dan amankan sanitasi ruangan.",
       "choices": [
         {
           "id": "c_day1_waterwaste_sanitation_good",
-          "text": "Pisahkan area tidur, area makan, dan area limbah dengan wadah fisik bersegel.",
+          "text": "Pisahkan area tidur, makan, dan limbah tertutup.",
           "nextSceneId": "day1_sanitation_good",
           "knowledgeEffect": 1,
           "log": "Zona bersih dan limbah dipisahkan.",
@@ -739,7 +750,7 @@
         },
         {
           "id": "c_day1_waterwaste_sanitation_door",
-          "text": "Semprotkan disinfektan pekat secara berkala pada tumpukan limbah terbuka.",
+          "text": "Semprot limbah terbuka dengan disinfektan.",
           "nextSceneId": "day1_sanitation_bad",
           "knowledgeEffect": -1,
           "log": "Barang dan limbah bercampur dekat pintu.",
@@ -750,14 +761,14 @@
     "day1_sanitation_good": {
       "speaker": "Ibu",
       "avatar": "ibu",
-      "text": "Bau karbol dari ember sanitasi berpenutup ini memang tajam, tapi setidaknya udara di sekitar dipan tidur tetap segar dan higienis. Anak sudah tidur lelap tanpa terbatuk. Mari kita istirahat bergantian untuk memulihkan stamina.",
+      "text": "Ember limbah tertutup dan terpisah dari dipan. \"Sekarang kita bisa bergantian istirahat,\" kata Sarah.",
       "background": "normal",
       "hour": "24 Jam",
       "objective": "Selesaikan hari pertama dan biarkan keluarga beristirahat.",
       "choices": [
         {
           "id": "c_day1_rest_good",
-          "text": "Tidur bergantian di atas alas dipan kering dan pasang selimut darurat untuk Anak.",
+          "text": "Tidur bergantian di dipan dan selimuti Maya.",
           "nextSceneId": "day1_maya_fear",
           "knowledgeEffect": 1,
           "log": "Keluarga beristirahat bergantian.",
@@ -768,14 +779,14 @@
     "day1_sanitation_bad": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah... bau di pojokan bikin perutku mual. Boleh nggak mobil-mobilanku ditaruh di dalam jaket Ayah aja? Biar nggak kena bau acem...",
+      "text": "\"Ayah, bau di pojok bikin mual. Mobilku boleh disimpan di jaket Ayah?\" tanya Maya.",
       "background": "normal",
       "hour": "24 Jam",
       "objective": "Selesaikan hari pertama di tengah ketidaknyamanan ruangan.",
       "choices": [
         {
           "id": "c_day1_rest_bad",
-          "text": "Tidur bersamaan langsung di atas lantai semen tanpa alas demi kepraktisan.",
+          "text": "Tidur bersama di lantai tanpa alas.",
           "nextSceneId": "day1_maya_fear",
           "knowledgeEffect": -1,
           "log": "Bunker dibiarkan berantakan semalaman.",
@@ -786,26 +797,26 @@
     "day1_maya_fear": {
       "speaker": "Anak",
       "avatar": "anak",
-      "text": "Ayah... setiap lantai bergetar, aku takut lagi. Boleh duduk dekat Ayah dan menyalakan lampu sebentar? Aku ingin melihat wajah kalian.",
+      "text": "\"Kalau lantainya bergetar lagi, aku boleh duduk dekat Ayah?\" Maya mencari tangan Aris.",
       "background": "normal",
       "hour": "24 Jam",
       "objective": "Tenangkan kepanikan Maya di tengah gulita malam pertama.",
       "conditionalText": [
         {
           "requiredFlag": "promised_maya",
-          "text": " Maya meraba lengan Ayah. Janji yang dibuat sebelum pintu ditutup masih ia ingat.",
+          "text": " Maya masih mengingat janji Aris sebelum mereka masuk.",
           "append": true
         },
         {
           "requiredFlag": "toy_packed",
-          "text": " Dari dalam ransel, sudut mobil-mobilan merah tampak di bawah cahaya darurat.",
+          "text": " Mobil merahnya terlihat di dalam ransel.",
           "append": true
         }
       ],
       "choices": [
         {
           "id": "c_day1_maya_light",
-          "text": "Nyalakan lampu darurat meja berdaya rendah dan peluk Maya hingga ia merasa aman.",
+          "text": "Nyalakan lampu hemat daya dan peluk Maya.",
           "nextSceneId": "day2_start",
           "knowledgeEffect": 0,
           "log": "Ayah menyalakan lampu darurat kecil dan mendekap Maya hingga tenang.",
@@ -813,7 +824,7 @@
         },
         {
           "id": "c_day1_maya_toy",
-          "text": "Jika mobil-mobilan sudah dipacking, genggamkan ke jemari Maya dan ceritakan kisah harapan.",
+          "text": "Berikan mobil Maya jika terbawa, lalu tenangkan dia.",
           "nextSceneId": "day2_start",
           "knowledgeEffect": 0,
           "log": "Mobil-mobilan merah diberikan ke tangan Maya sebagai simbol keberanian.",
@@ -827,7 +838,7 @@
         },
         {
           "id": "c_day1_maya_strict",
-          "text": "Biarkan Sarah duduk di sisi Maya sementara Aris memeriksa indikator teknis sekali lagi.",
+          "text": "Sarah mendampingi Maya; Aris memeriksa panel.",
           "nextSceneId": "day2_start",
           "knowledgeEffect": 1,
           "log": "Sarah menenangkan Maya sementara Aris melakukan pemeriksaan teknis malam hari.",
@@ -841,16 +852,16 @@
     "day2_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO BPBD] ...jalur timur ditutup setelah gempa susulan; jangan melintasi akses rusak... abu masih pekat di lereng barat... [STATIK]\n\nJam ke-30. Palka berderit setelah guncangan 5,6 Mw. Kipas tersendat dan meteran daya berkedip. Sarah menarik Maya mendekat. Aris menatap panel: mereka tetap di bunker sesuai arahan petugas, tetapi sistemnya harus diperiksa sekarang.",
+      "text": "[RADIO BPBD] \"Jalur timur ditutup setelah gempa susulan. Jangan melintasi akses rusak.\"\n\nJam ke-30. Palka berderit; kipas dan daya tersendat. Aris harus memeriksa sistem.",
       "conditionalText": [
         {
           "requiredFlag": "air_uninspected",
-          "text": " Udara pagi ini terasa sedikit apek dan tercium bau asam tipis yang membuat dada terasa berat.",
+          "text": " Udara terasa apek; bau asam tipis masih tercium.",
           "append": true
         },
         {
           "requiredFlag": "promised_maya",
-          "text": " Maya menggenggam mobil-mobilannya erat saat lantai bergetar.",
+          "text": " Maya memeluk mobil merahnya saat lantai bergetar.",
           "append": true
         }
       ],
@@ -860,7 +871,7 @@
       "choices": [
         {
           "id": "c_day2_assess_systems",
-          "text": "Periksa panel kontrol utama dan evaluasi gangguan sistem setelah gempa susulan.",
+          "text": "Periksa gangguan sistem setelah gempa.",
           "nextSceneId": "day2_diagnostic_sweep",
           "knowledgeEffect": 0,
           "log": "Aris memeriksa panel kontrol utama untuk mengevaluasi dampak gempa susulan."
@@ -870,7 +881,7 @@
     "day2_diagnostic_sweep": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-31. Aris menyalakan lampu kerja dan memetakan gejala yang muncul setelah gempa susulan. Tidak ada satu indikator pun yang menjelaskan seluruh gangguan: suara udara, beban listrik, bingkai pintu, dan rak persediaan harus diperiksa satu per satu sebelum mereka memilih tindakan perbaikan.",
+      "text": "Jam ke-31. Aris memeriksa gejala gempa satu per satu: udara, daya, pintu, dan persediaan.",
       "background": "normal",
       "hour": "31 Jam",
       "objective": "Diagnosis tiga dari empat titik primer sebelum menjalankan perbaikan mekanis.",
@@ -879,7 +890,7 @@
     "day2_rotor_alignment": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-34. Tiga titik primer sudah cukup memperlihatkan pola: gempa susulan memengaruhi lebih dari satu sistem, tetapi segel bunker masih menahan tekanan. Aris menemukan mekanisme stabilizer yang bergeser dan harus menyelaraskannya lebih dulu agar servis berikutnya tidak menambah getaran pada ventilasi maupun panel daya.",
+      "text": "Jam ke-34. Segel masih menahan tekanan, tetapi stabilizer bergeser. Aris harus menyelaraskannya sebelum servis lanjutan.",
       "background": "normal",
       "hour": "34 Jam",
       "objective": "Selaraskan stabilizer mekanis sebelum membuka panel servis.",
@@ -896,14 +907,14 @@
     "prolog_expedition_call": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Sarah menata barang-barang yang berhasil dihimpun ke dekat titik kumpul akses shelter. Maya duduk tenang di sampingnya. Di luar, Aris sedang melangkah cepat menyusuri jalan pemukiman selagi pergerakan lokal masih diizinkan petugas.\n\n\"Bekal rumah sudah diamankan di dekat palka. Maya aman bersamaku. Sekarang giliran Aris memastikan kebutuhan pokok dari luar sebelum akses ditutup.\"",
+      "text": "Sarah mengamankan bekal rumah dan menjaga Maya di dekat palka. Aris masih di luar, mencari kebutuhan pokok sebelum akses ditutup.",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Pantau pergerakan Aris dalam mencari perbekalan luar.",
       "choices": [
         {
           "id": "c_prolog_accept_supply_run",
-          "text": "Buka peta lingkungan dan pantau titik perbekalan Aris.",
+          "text": "Buka peta tujuan perbekalan Aris.",
           "nextSceneId": "prolog_expedition_map",
           "knowledgeEffect": 0,
           "log": "Sarah menata bekal di titik kumpul selagi Aris mencari perbekalan luar."
@@ -913,21 +924,21 @@
     "prolog_expedition_map": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Di luar, langit mulai diselimuti kabut abu vulkanik tipis. Sirene berkala terdengar di kejauhan, tetapi jalan lingkungan masih bisa dilalui warga. Peta persimpangan menunjukkan dua lokasi layanan darurat yang masih beroperasi di sisi barat dan timur pemukiman, serta jalan penghubung menuju jalur bukit.\n\nAris harus memilih tujuan pertamanya secara cermat:",
+      "text": "Jalan lingkungan masih terbuka. Di peta, Aris melihat minimarket dan pos kesehatan. Ia hanya punya waktu singkat untuk memilih tujuan pertama.",
       "background": "prolog2",
       "hour": "0 Jam",
       "objective": "Pilih lokasi perbekalan pertama sebelum situasi memburuk.",
       "choices": [
         {
           "id": "c_prolog_choose_minimarket",
-          "text": "Tuju Minimarket warga (Persediaan bahan pangan, air minum, dan baterai darurat)",
+          "text": "Ke minimarket: makanan, air, baterai.",
           "nextSceneId": "prolog_minimarket",
           "knowledgeEffect": 0,
           "log": "Aris menuju Minimarket untuk mencari tambahan perbekalan."
         },
         {
           "id": "c_prolog_choose_medical",
-          "text": "Tuju Pos Kesehatan darurat (Kotak P3K dan masker pelindung debu/abu vulkanik)",
+          "text": "Ke pos kesehatan: P3K dan masker.",
           "nextSceneId": "prolog_medical",
           "knowledgeEffect": 0,
           "log": "Aris menuju Pos Kesehatan darurat untuk mencari perlengkapan medis."
@@ -937,14 +948,14 @@
     "prolog_minimarket": {
       "speaker": "Aris",
       "avatar": "ayah",
-          "text": "Pintu geser minimarket hampir ditutup. Pengelola toko masih berjaga di depan kasir, menyiapkan meja alokasi darurat untuk warga sekitar yang membutuhkan barang pokok sebelum evakuasi mandiri.\n\nPengelola: \"Kami tutup dalam beberapa menit, Mas. Ambil secukupnya yang dibutuhkan keluarga—makanan kaleng, air minum kemasan, dan baterai ekstra untuk radio VHF masih ada satu paket.\"\n\nAris menerima jatah darurat tersebut secara sah, membayar secukupnya, dan berterima kasih.",
+          "text": "Minimarket hampir tutup. Pengelola menyerahkan paket makanan, air, dan baterai VHF. \"Ambil secukupnya untuk keluarga, Mas.\" Aris membayar lalu bergegas.",
       "background": "prolog_minimarket",
       "hour": "0 Jam",
       "objective": "Amankan bekal dari minimarket dan lanjutkan perjalanan.",
       "choices": [
         {
           "id": "c_prolog_minimarket_take",
-          "text": "Terima paket makanan, air, dan baterai ekstra VHF, lalu lanjutkan langkah.",
+          "text": "Ambil paket bekal dan lanjutkan.",
           "nextSceneId": "prolog_hendra_encounter",
           "knowledgeEffect": 0,
           "log": "Aris menerima alokasi perbekalan darurat dari Minimarket."
@@ -954,14 +965,14 @@
     "prolog_medical": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Pos Kesehatan darurat di jalan lingkar beroperasi dengan kapasitas terbatas. Seorang petugas medis membagikan perlengkapan pertolongan pertama dasar dan masker partikulat kepada warga yang melintas.\n\nPetugas: \"Ini masker pelindung partikulat debu dan abu vulkanik. Bukan tabung oksigen dan bukan pelindung dari semua gas beracun, tapi krusial agar saluran napas tidak iritasi oleh debu silika. Satu kotak P3K cadangan juga kami alokasikan.\"\n\nAris menerima paket pertolongan pertama dan masker pelindung debu dengan penuh rasa hormat.",
+      "text": "Di pos kesehatan, petugas menyerahkan P3K dan masker partikulat. \"Masker mengurangi debu, bukan melindungi dari gas atau kekurangan oksigen. Segera cari perlindungan.\"",
       "background": "prolog_medical",
       "hour": "0 Jam",
       "objective": "Amankan perlengkapan medis dan masker pelindung debu.",
       "choices": [
         {
           "id": "c_prolog_medical_take",
-          "text": "Terima kotak P3K dan masker pelindung debu, lalu lanjutkan langkah.",
+          "text": "Ambil P3K dan masker, lalu lanjutkan.",
           "nextSceneId": "prolog_hendra_encounter",
           "knowledgeEffect": 0,
           "log": "Aris menerima P3K dan masker pelindung debu dari Pos Kesehatan."
@@ -971,14 +982,14 @@
     "prolog_hendra_encounter": {
       "speaker": "Hendra",
       "avatar": "penyintas",
-      "text": "Aris melangkah melintasi jalan penghubung di dekat deretan rumah warga. Di samping teras luar sebuah rumah, suara parau memanggil: \"Tolong! Ada orang di luar?! Tolong saya!\"\n\nSeorang pria sebaya bernama Hendra duduk terduduk di halaman samping teras, terhalang runtuhan pagar bambu dan tumpukan bata gembur. Ia sadar penuh, berkomunikasi dengan jelas tanpa luka parah, tetapi kakinya tersangkut material runtuhan ringan sehingga tidak leluasa bangkit sendiri.\n\nHendra: \"Mas, tolong singkirkan bata dan kayu pagar ini sebentar! Kaki saya tersangkut, saya sulit menariknya sendiri!\"",
+      "text": "Di dekat teras, Hendra memanggil Aris. Kakinya tersangkut bata dan pagar yang runtuh, tetapi ia sadar dan bisa bicara. \"Mas, bantu singkirkan ini!\"",
       "background": "prolog_hendra",
       "hour": "0 Jam",
       "objective": "Tentukan sikap: bantu Hendra menyingkirkan puing atau prioritaskan waktu untuk keluarga.",
       "choices": [
         {
           "id": "c_prolog_hendra_help",
-          "text": "Bantu singkirkan material yang menghalangi agar Hendra bisa berdiri bebas.",
+          "text": "Singkirkan puing agar Hendra bisa berdiri.",
           "nextSceneId": "prolog_hendra_helped",
           "knowledgeEffect": 0,
           "log": "Aris membantu membersihkan material yang menghalangi Hendra.",
@@ -986,7 +997,7 @@
         },
         {
           "id": "c_prolog_hendra_family",
-          "text": "Jelaskan dengan jujur bahwa keluarga menunggu di rumah dan waktu evakuasi sangat mendesak.",
+          "text": "Jelaskan keluarga menunggu, lalu lanjut pulang.",
           "nextSceneId": "prolog_hendra_passed",
           "knowledgeEffect": 0,
           "log": "Aris memprioritaskan keselamatan keluarga dan tidak berhenti lebih lama."
@@ -996,7 +1007,7 @@
     "prolog_hendra_helped": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Aris segera berlutut, menggeser tumpukan bata gembur dan menarik sisa pagar kayu yang menahan kaki Hendra. Hendra menarik kakinya perlahan, mengibaskan debu, lalu bangkit berdiri dan mencoba menapakkan kaki. Ia bisa bergerak mandiri tanpa cedera parah.\n\nHendra: \"Terima kasih banyak, Mas! Saya kira saya bakal tertahan lama di sini... Kaki saya masih aman untuk jalan.\"\n\nTepat saat mereka hendak berpisah jalan, gemuruh tajam membelah tanah! Gempa susulan berkekuatan besar mengguncang kawasan sekitar. Keduanya spontan berhenti melangkah, lekas bergerak menjauhi dinding teras dan tiang yang rawan roboh, lalu merunduk di area terbuka terdekat sambil melindungi kepala hingga guncangan mereda.",
+      "text": "Aris menyingkirkan puing ringan. Hendra dapat berdiri dan berjalan sendiri. \"Terima kasih, Mas!\" Gempa susulan datang; keduanya menjauhi bangunan dan melindungi kepala sampai guncangan reda.",
       "background": "prolog_hendra",
       "hour": "0 Jam",
       "objective": "Lindungi diri di area terbuka dari gempa susulan dan evaluasi kerusakan rute.",
@@ -1007,14 +1018,14 @@
     "prolog_hendra_passed": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Aris menahan berat di dadanya: \"Maaf, Pak! Anak dan istri saya menunggu di rumah—situasi makin genting dan saya harus lekas pulang!\"\n\nHendra mengangguk pasrah seraya memegangi kakinya: \"Iya, Mas... hati-hati. Segera selamatkan keluarga!\"\n\nAris bergegas meninggalkan lokasi dan tiba di persimpangan jalan lingkungan. Sebelum situasi memburuk lebih jauh, Aris masih memiliki waktu sempit untuk singgah ke satu titik perbekalan lain, atau langsung bergegas pulang.",
+      "text": "\"Maaf, keluarga saya menunggu. Saya harus pulang,\" kata Aris. Hendra mengangguk. Di persimpangan, Aris masih sempat memilih satu perhentian atau langsung pulang.",
       "background": "prolog_hendra",
       "hour": "0 Jam",
       "objective": "Tentukan rute berikutnya: singgah cepat ke perbekalan kedua atau langsung bergerak pulang.",
       "choices": [
         {
           "id": "c_prolog_opt2_medical",
-          "text": "Singgah cepat ke Pos Kesehatan di persimpangan ini sebelum situasi memburuk.",
+          "text": "Singgah ke pos kesehatan.",
           "nextSceneId": "prolog_medical_second",
           "forbiddenFlags": [
             "prolog_medical_visited"
@@ -1024,7 +1035,7 @@
         },
         {
           "id": "c_prolog_opt2_minimarket",
-          "text": "Singgah cepat ke Minimarket di persimpangan ini sebelum situasi memburuk.",
+          "text": "Singgah ke minimarket.",
           "nextSceneId": "prolog_minimarket_second",
           "forbiddenFlags": [
             "prolog_minimarket_visited"
@@ -1034,7 +1045,7 @@
         },
         {
           "id": "c_prolog_opt2_skip_home",
-          "text": "Waktu semakin sempit; lewati perhentian kedua dan langsung bergerak pulang.",
+          "text": "Lewati perhentian kedua dan pulang.",
           "nextSceneId": "prolog_aftershock",
           "knowledgeEffect": 0,
           "log": "Aris memilih tidak singgah lagi dan langsung bergerak pulang."
@@ -1044,14 +1055,14 @@
     "prolog_minimarket_second": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris berbelok cepat menuju minimarket lingkungan. Pintu toko sedang diturunkan setengah, namun pengelola toko yang mengenali warga segera menyerahkan paket bekal darurat yang masih tersisa di meja.\n\nPengelola: \"Bawa ini, Mas Aris! Makanan kaleng, air minum, dan baterai ekstra VHF. Cepat kembali ke keluarga sebelum debu makin pekat!\"\n\nAris mengamankan paket tersebut dan bergegas kembali menuju jalan utama.",
+      "text": "Pengelola minimarket yang hampir tutup menyerahkan paket makanan, air, dan baterai VHF. \"Cepat kembali ke keluarga!\" Aris mengambilnya.",
       "background": "prolog_minimarket",
       "hour": "0 Jam",
       "objective": "Bawa bekal tambahan dan bergegas menuju rute pulang.",
       "choices": [
         {
           "id": "c_prolog_minimarket_second_take",
-          "text": "Amankan perbekalan darurat dan bergegas menuju jalan pulang.",
+          "text": "Amankan bekal, lalu pulang.",
           "nextSceneId": "prolog_aftershock",
           "knowledgeEffect": 0,
           "log": "Aris mengamankan perbekalan tambahan dari Minimarket."
@@ -1061,14 +1072,14 @@
     "prolog_medical_second": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris bergegas menuju Pos Kesehatan darurat. Petugas sedang mengemasi berkas dan sisa obat, tetapi dengan cepat menyerahkan paket pertolongan pertama dan masker pelindung partikulat.\n\nPetugas: \"Ini satu kotak P3K dan masker partikulat debu untuk keluarga di rumah. Segera cari perlindungan sebelum abu tebal turun!\"\n\nAris menyimpan masker dan kotak P3K tersebut, lalu bergegas menuju jalan utama.",
+      "text": "Petugas pos kesehatan menyerahkan P3K dan masker partikulat. \"Abu makin tebal. Segera pulang.\" Aris menyimpan paket itu.",
       "background": "prolog_medical",
       "hour": "0 Jam",
       "objective": "Bawa perlengkapan medis tambahan dan bergegas menuju rute pulang.",
       "choices": [
         {
           "id": "c_prolog_medical_second_take",
-          "text": "Amankan kotak P3K dan masker pelindung, lalu bergegas menuju jalan pulang.",
+          "text": "Amankan P3K dan masker, lalu pulang.",
           "nextSceneId": "prolog_aftershock",
           "knowledgeEffect": 0,
           "log": "Aris mengamankan perlengkapan medis tambahan dari Pos Kesehatan."
@@ -1078,7 +1089,7 @@
     "prolog_aftershock": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Tepat saat Aris bergegas melintasi jalan lingkar menuju arah pemukiman, gemuruh tajam membelah tanah dari kedalaman lereng! Gempa susulan berkekuatan besar mengguncang hebat kawasan sekitar.\n\nAris seketika menghentikan langkah, bergerak menjauhi deretan pagar dan tiang listrik yang bergetar keras, lalu merunduk di ruang terbuka jalan sambil melindungi kepala hingga guncangan besar berangsur mereda.",
+      "text": "Gempa susulan mengguncang jalan lingkar. Aris menjauhi tiang dan pagar, lalu melindungi kepala di area terbuka sampai guncangan reda.",
       "background": "prolog_hendra",
       "hour": "0 Jam",
       "objective": "Lindungi diri di area terbuka dari gempa susulan dan evaluasi kerusakan rute.",
@@ -1089,15 +1100,15 @@
     "prolog_route_failure": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Debu tebal membubung saat guncangan berhenti. Jalan penghubung di depan mengalami amblasan parah—tebing bahu jalan runtuh sedalam beberapa meter dan tiang listrik beton tumbang melintang, memutus total akses ke arah bukit evakuasi. Rekahan tanah yang menganga memisahkan sisi barat pemukiman dari lereng bukit di sisi timur.",
+      "text": "Jalan ke posko bukit amblas; tiang beton menutup akses. Rekahan memisahkan permukiman dari jalur evakuasi.",
       "conditionalText": [
         {
           "requiredFlag": "helped_stranger",
-          "text": "\n\nAris melihat Hendra berdiri di seberang rekahan, di sisi timur yang langsung terhubung dengan jalan setapak bukit. Hendra menguji langkah kakinya dan memberi isyarat bahwa ia bisa berjalan mandiri.\n\nAris berseru melintasi rekahan: \"Pak Hendra! Dari sisi situ jalan setapak ke posko bukit masih aman! Terus mendaki ke atas, jangan putar balik!\"\n\nHendra mengangguk mantap dari seberang: \"Iya, Mas! Terima kasih banyak! Saya langsung naik ke posko!\"\n\nHendra bergegas melangkah menanjak menuju Pos Evakuasi bukit, sementara Aris harus segera kembali ke rumah."
+          "text": "\n\nDi seberang rekahan, Hendra berdiri dan bisa berjalan. \"Terus ke posko bukit, Pak!\" seru Aris. Hendra mengangguk lalu mendaki; Aris kembali ke rumah."
         },
         {
           "requiredFlag": "stranger_family_first",
-          "text": "\n\nAris berdiri seorang diri di tepi patahan jalan sisi barat. Jalur penghubung menuju bukit sudah putus total oleh rekahan tanah dan tiang listrik yang tumbang. Dari tempatnya berdiri, Hendra tak lagi terlihat di tengah kabut debu, dan Aris tidak tahu bagaimana nasibnya setelah guncangan tadi. Dengan akses ke bukit tertutup sepenuhnya, satu-satunya prioritas Aris kini adalah bergegas kembali ke rumah melindungi Sarah dan Maya."
+          "text": "\n\nHendra tak terlihat di balik debu. Aris tak tahu nasibnya. Ia berbalik untuk menjemput Sarah dan Maya."
         }
       ],
       "background": "prolog_route_failure",
@@ -1106,7 +1117,7 @@
       "choices": [
         {
           "id": "c_prolog_return_home_direct",
-          "text": "Akses bukit terputus total; segera kembali ke rumah bersama Sarah dan Maya.",
+          "text": "Jalur bukit putus. Kembali ke keluarga.",
           "nextSceneId": "prolog_return_home",
           "knowledgeEffect": 0,
           "log": "Aris segera kembali ke rumah setelah akses jalan terputus."
@@ -1116,14 +1127,14 @@
     "prolog_return_home": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Pintu pagar terbuka tergesa dan Aris melangkah masuk dengan napas memburu. Sarah menghela napas lega seketika, sementara Maya langsung memeluk pinggang ayahnya erat-erat. Aris meletakkan perbekalan yang dibawanya di dekat tumpukan bekal darurat di teras.\n\nSarah: \"Mas, syukurlah kamu kembali... Aku terus memantau radio. BMKG baru saja memperbarui info gempa susulan berkekuatan besar, dan BPBD mengumumkan jalur penghubung timur menuju posko evakuasi bukit ditutup total akibat amblasan tanah. BPBD mengimbau warga di lereng barat untuk tidak memaksakan melintas dan mencari perlindungan mandiri yang aman.\"\n\nAris: \"Aku melihatnya sendiri di persimpangan, Sarah. Jalurnya ambles sedalam beberapa meter dan tertutup tiang beton roboh. Membawa Maya berjalan kaki menyeberangi rekahan itu saat gempa susulan masih rawan sudah bukan pilihan aman.\"",
+      "text": "Aris pulang. Maya langsung memeluknya. \"BPBD menutup jalur bukit karena amblasan,\" kata Sarah. \"Aku melihat rekahannya,\" jawab Aris. \"Kita tak bisa membawa Maya melintasinya.\"",
       "background": "prolog_window",
       "hour": "0 Jam",
       "objective": "Evaluasi situasi dan bahas keputusan rencana evakuasi bersama Sarah.",
       "choices": [
         {
           "id": "c_prolog_evaluate_bunker",
-          "text": "Evaluasi Rencana A dan Rencana B bersama Sarah.",
+          "text": "Tinjau rencana evakuasi bersama Sarah.",
           "nextSceneId": "prolog_evac_decision",
           "knowledgeEffect": 0,
           "log": "Aris dan Sarah membahas kelayakan rute evakuasi pascaruntuhnya akses."
@@ -1133,14 +1144,14 @@
     "prolog_evac_decision": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Sarah menatap peta rute dan jendela luar saat butiran abu mulai turun ke atap: \"Kalau jalurnya masih terbuka, Rencana A kita tetap jalan ke posko bukit. Tapi sekarang aksesnya rusak parah, dan membawa Maya melintasi rekahan tanah di bawah hujan abu jelas bukan pilihan aman.\"\n\nAris: \"Posisi rumah kita memang sengaja kita pilih di perbukitan tinggi, di luar jangkauan tsunami pesisir dan di luar jalur utama luncuran awan panas. Bahaya nyata di sini sekarang adalah hujan abu vulkanik, reruntuhan material, dan isolasi jaringan jalan. Bunker kita punya struktur beton bawah tanah, ventilasi terfilter, cadangan daya darurat, dan air bersih. Selama akses tertutup, masuk ke shelter ini adalah Rencana B paling rasional untuk menjaga kita bertiga tetap aman.\"\n\nSarah mengangguk tegas: \"Setuju, Mas. Ambil tas perbekalan, kita bawa Maya masuk ke palka sekarang.\"",
+      "text": "\"Jika jalan aman, kita evakuasi ke posko,\" kata Sarah. \"Sekarang jalurnya putus dan abu turun. Bunker di perbukitan ini Rencana B kita.\" Aris mengangguk. Mereka mengangkat bekal dan membawa Maya ke palka.",
       "background": "prolog_window",
       "hour": "0 Jam",
       "objective": "Konfirmasi keputusan untuk berlindung di Bunker 72.",
       "choices": [
         {
           "id": "c_prolog_confirm_bunker_plan",
-          "text": "Konfirmasi Rencana B: angkut seluruh perbekalan dan masuk ke Bunker 72 bersama keluarga.",
+          "text": "Bawa keluarga dan bekal masuk ke Bunker 72.",
           "nextSceneId": "prolog_intro",
           "knowledgeEffect": 1,
           "log": "Keluarga memutuskan mengaktifkan Rencana B: berlindung di Bunker 72."
@@ -1150,16 +1161,16 @@
     "day2_systems_check": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-36. Stabilizer sudah tenang, tetapi meteran ventilasi dan daya masih naik-turun. Menyelaraskan rotor hanya menghentikan getaran; masalah utama belum selesai.\n\n\"Buka panel servis dulu, Mas,\" kata Sarah. \"Baru setelah itu kita pilih udara atau daya.\"",
+      "text": "Jam ke-36. Rotor stabil, tetapi udara dan daya masih terganggu. \"Buka panel servis dulu. Lalu pilih prioritas,\" kata Sarah.",
       "conditionalText": [
         {
           "requiredFlag": "inspected_ventilation",
-          "text": "\n\nAris mengingat posisinya dari pemeriksaan Hari 1: jalur ventilasi utama tetap utuh, hanya modul penyaring yang memerlukan penyesuaian teknis agar aliran kembali normal.",
+          "text": "\n\nCatatan Hari 1 menunjukkan jalur utama utuh; modul penyaring perlu disetel.",
           "append": true
         },
         {
           "requiredFlag": "inspected_power",
-          "text": "\n\nCatatan pembagian beban dari inspeksi Hari 1 masih menempel di samping meteran: Aris tahu persis jalur penerangan sekunder yang dapat dilepas tanpa mengganggu fungsi inti.",
+          "text": "\n\nAris melihat tanda sakelar sekunder yang bisa dilepas tanpa mematikan sistem inti.",
           "append": true
         }
       ],
@@ -1173,7 +1184,7 @@
     "day2_service_hatch": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-38. Panel servis kecil menuju kompartemen internal macet setelah guncangan. Aris menemukan collar mekanisme akses yang harus dijaga tetap pada jalur tekanannya saat diputar perlahan; memaksa mekanisme hanya akan menguncinya kembali. Setelah panel terbuka, mereka bisa menyiapkan respons Air atau Power berdasarkan kondisi nyata yang sudah dipetakan.",
+      "text": "Jam ke-38. Panel servis macet. Aris harus memutar collar perlahan; memaksanya akan mengunci panel lagi.",
       "background": "normal",
       "hour": "38 Jam",
       "objective": "Buka panel servis yang macet tanpa memaksa mekanisme akses.",
@@ -1190,16 +1201,16 @@
     "day2_strategy_choice": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-42. Panel servis terbuka dan pembacaan sistem sudah cukup untuk mengambil keputusan. Rotor menjaga mekanisme tetap tenang, tetapi ventilasi belum pulih dan cadangan daya tetap terbatas. Aris memilih satu prioritas yang dapat ditangani sekarang, sambil membiarkan konsekuensi jalur lainnya tetap terlihat.",
+      "text": "Jam ke-42. Panel terbuka. Ventilasi belum pulih dan daya terbatas. Aris hanya bisa menangani satu prioritas sekarang.",
       "conditionalText": [
         {
           "requiredFlag": "inspected_ventilation",
-          "text": " Catatan inspeksi Hari 1 membantu Aris mengenali jalur filter tanpa mengubah kebutuhan perbaikannya.",
+          "text": " Catatan Hari 1 menunjukkan jalur filter yang harus diperbaiki.",
           "append": true
         },
         {
           "requiredFlag": "inspected_power",
-          "text": " Catatan pembagian beban Hari 1 membantu Aris memilih sakelar sekunder yang aman untuk diturunkan.",
+          "text": " Catatan Hari 1 menunjukkan sakelar sekunder yang aman dimatikan.",
           "append": true
         }
       ],
@@ -1209,14 +1220,14 @@
       "choices": [
         {
           "id": "c_day2_focus_air",
-          "text": "Prioritaskan pemulihan ventilasi: tangani modul saringan agar sirkulasi udara lekas bersih.",
+          "text": "Prioritaskan ventilasi dan saringan.",
           "nextSceneId": "day2_air_response",
           "knowledgeEffect": 0,
           "log": "Aris memprioritaskan pembersihan dan penyesuaian sistem ventilasi."
         },
         {
           "id": "c_day2_focus_power",
-          "text": "Prioritaskan stabilitas daya: kurangi beban sirkuit dan alihkan blower ke mode darurat hemat daya yang aman.",
+          "text": "Hemat daya; jalankan blower dalam mode aman.",
           "nextSceneId": "day2_power_response",
           "knowledgeEffect": 0,
           "log": "Aris memprioritaskan pengurangan beban listrik untuk menghemat cadangan daya."
@@ -1226,12 +1237,12 @@
     "day2_air_response": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris membuka kompartemen ventilasi di samping palka. Getaran gempa tadi menyebabkan penumpukan debu di jalur saringan sehingga sirkulasi udara terhambat. Komponen ventilasi harus disetel kembali agar aliran udara kembali lancar.",
+      "text": "Debu menyumbat jalur saringan. Aris harus memulihkan aliran udara lewat filter cadangan atau perbaikan manual.",
       "conditionalText": [
         {
           "requiredFlag": "found_spare_filter",
           "forbiddenFlag": "spare_filter_used",
-          "text": "\n\nFilter cadangan yang ditemukan saat inspeksi Hari 1 masih tersimpan rapi di loker samping, siap dipasang.",
+          "text": "\n\nFilter cadangan dari Hari 1 masih ada di loker.",
           "append": true
         }
       ],
@@ -1241,7 +1252,7 @@
       "choices": [
         {
           "id": "c_day2_air_use_spare_filter",
-          "text": "Ganti unit saringan dengan filter cadangan bersih dari loker untuk memulihkan aliran udara.",
+          "text": "Ganti saringan dengan filter cadangan.",
           "nextSceneId": "day2_family_check",
           "requireFlags": [
             "found_spare_filter"
@@ -1258,7 +1269,7 @@
         },
         {
           "id": "c_day2_air_clean_manual",
-          "text": "Bersihkan jalur servis dan setel kembali komponen ventilasi agar aliran udara pulih.",
+          "text": "Bersihkan jalur dan setel ventilasi.",
           "nextSceneId": "day2_family_check",
           "setFlags": [
             "day2_air_cleared",
@@ -1272,11 +1283,11 @@
     "day2_power_response": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Aris mematikan lampu sekunder. Tegangan kembali stabil; blower masuk mode darurat hemat daya dan tetap berfungsi aman, meski aliran udara lebih lambat.\n\nSaat ia membuka kompartemen kabel, debu halus beterbangan di wajahnya. Ia berhenti sejenak sebelum melanjutkan pemeriksaan.",
+      "text": "Aris mematikan lampu sekunder. Blower masuk mode darurat hemat daya dan tetap berfungsi aman. Debu beterbangan saat panel dibuka.",
       "conditionalText": [
         {
           "requiredFlag": "medical_mask_ready",
-          "text": "\n\nMasker partikulat dari pos kesehatan darurat tersedia di dekat meja kerja, siap digunakan untuk melindungi pernapasan dari debu saat memeriksa kompartemen servis.",
+          "text": "\n\nMasker partikulat dari pos kesehatan tersedia untuk panel berdebu.",
           "append": true
         }
       ],
@@ -1286,7 +1297,7 @@
       "choices": [
         {
           "id": "c_day2_power_use_mask",
-          "text": "Kenakan masker partikulat saat memeriksa kompartemen servis yang berdebu agar terhindar dari paparan partikel halus.",
+          "text": "Pakai masker saat memeriksa panel berdebu.",
           "nextSceneId": "day2_family_check",
           "requireFlags": [
             "medical_mask_ready"
@@ -1299,7 +1310,7 @@
         },
         {
           "id": "c_day2_power_endure",
-          "text": "Selesaikan pemeriksaan panel tanpa masker, lalu dampingi keluarga beristirahat di dipan selagi mode hemat berjalan.",
+          "text": "Periksa panel tanpa masker, lalu istirahat.",
           "nextSceneId": "day2_family_check",
           "setFlags": [
             "day2_power_conserved"
@@ -1312,37 +1323,37 @@
     "day2_family_check": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Sarah memeriksa rak yang terguncang, lalu menyeka dahi Maya. Desau mesin mulai stabil.\n\n\"Bu, sekarang aman?\" tanya Maya.\n\n\"Lebih baik dari tadi,\" jawab Sarah sambil memeluknya. \"Kita tetap harus hati-hati.\"",
+      "text": "Desau mesin mulai stabil. \"Sudah aman, Bu?\" tanya Maya. \"Lebih baik. Kita tetap waspada,\" jawab Sarah.",
       "conditionalText": [
         {
           "requiredFlag": "water_rational_good",
-          "text": " Botol cadangan yang ditandai pada Hari 1 masih utuh di rak; mereka punya sedikit ruang untuk memilih saat air kembali dibutuhkan.",
+          "text": " Botol cadangan dari Hari 1 masih utuh.",
           "append": true
         },
         {
           "requiredFlag": "water_used_freely",
-          "text": " Satu botol sudah habis sejak malam pertama. Sarah menghitung ulang sisanya sebelum menutup rak.",
+          "text": " Satu botol sudah habis; Sarah menghitung sisanya.",
           "append": true
         },
         {
           "requiredFlag": "sanitation_secured",
-          "text": " Ember limbah tetap tertutup setelah guncangan; sudut tidur masih bersih.",
+          "text": " Ember limbah tetap tertutup; area tidur bersih.",
           "append": true
         },
         {
           "requiredFlag": "sanitation_exposed",
-          "text": " Wadah limbah terbuka tergeser oleh guncangan. Sarah membersihkan lantai sebelum Maya kembali ke dipan.",
+          "text": " Wadah limbah terbuka bergeser; Sarah membersihkan lantai.",
           "append": true
         },
         {
           "requiredFlag": "toy_packed",
-          "text": " Maya mengeluarkan mobil-mobilan merahnya dari saku, memutar rodanya perlahan di atas kasur lipat. Mainan kecil itu membantunya tetap tenang.",
+          "text": " Maya memutar roda mobil merahnya di atas dipan dan mulai tenang.",
           "append": true
         },
         {
           "requiredFlag": "toy_packed",
           "requiredValue": false,
-          "text": " Sarah mendekap Maya erat seraya menyanyikan lagu pelan, sementara Aris mengusap pundak putrinya dengan hangat.",
+          "text": " Sarah memeluk Maya dan menyanyikan lagu pelan.",
           "append": true
         }
       ],
@@ -1352,7 +1363,7 @@
       "choices": [
         {
           "id": "c_day2_finalize_day",
-          "text": "Pastikan semua katup dan panel terkunci aman, lalu dampingi keluarga beristirahat.",
+          "text": "Kunci panel dan istirahat bersama keluarga.",
           "nextSceneId": "day2_stabilized",
           "knowledgeEffect": 0,
           "log": "Pemeriksaan logistik dan pendampingan keluarga selesai."
@@ -1362,56 +1373,56 @@
     "day2_stabilized": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Jam ke-54. Dengung mesin kembali teratur, tetapi cadangan terus menipis. Sarah mencoret hari kedua pada kalender darurat. \"Kita sudah sejauh ini,\" katanya kepada Maya. Dari radio, belum ada izin melewati jalur yang rusak. Mereka tetap di bunker dan menyiapkan diri untuk hari terakhir.",
+      "text": "Jam ke-54. Mesin kembali teratur, tetapi cadangan menipis. Jalur evakuasi masih ditutup. \"Kita bersiap untuk hari terakhir,\" kata Sarah.",
       "conditionalText": [
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "escalate",
-          "text": " Dari radio terdengar pembaruan: beberapa titik kumpul yang aktif lebih awal memberi warga kesempatan untuk berlindung sebelum jalan tertutup debu tebal."
+          "text": " Radio melaporkan titik kumpul yang dibuka lebih awal membantu warga berlindung."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "verify",
-          "text": " Dari radio terdengar konfirmasi lintas instansi bahwa jalur bukit timur kini dijaga ketat oleh petugas SAR."
+          "text": " Radio melaporkan jalur bukit timur dijaga petugas SAR."
         },
         {
           "requiredFlag": "sarah_warning_response",
           "requiredValue": "maintain",
-          "text": " Dari radio terdengar laporan tentang beberapa titik evakuasi yang masih menampung warga di tengah hujan abu pekat."
+          "text": " Radio melaporkan posko masih menerima warga di tengah abu."
         },
         {
           "requiredFlag": "medical_mask_ready",
-          "text": " Masker pelindung debu yang dibawa Aris tersimpan rapi dekat pintu palka.",
+          "text": " Masker yang dibawa Aris tersimpan dekat palka.",
           "append": true
         },
         {
           "requiredFlag": "day2_air_cleared",
-          "text": " Prioritas Air memperbaiki aliran udara, meski sistem masih perlu dipantau sampai jam terakhir.",
+          "text": " Prioritas Air memperbaiki aliran udara; pantau sampai akhir.",
           "append": true
         },
         {
           "requiredFlag": "day2_power_draw_heavy",
-          "text": " Pembersihan manual membuat beban daya lebih berat; aliran udara membaik dengan margin listrik yang lebih tipis.",
+          "text": " Pembersihan manual memperbaiki udara, tetapi beban daya lebih berat.",
           "append": true
         },
         {
           "requiredFlag": "day2_power_conserved",
-          "text": " Prioritas Power menstabilkan daya; ventilasi bertahan dalam mode darurat hemat dengan pertukaran udara yang lebih lambat.",
+          "text": " Prioritas Power menstabilkan daya; blower bertahan dalam mode darurat hemat.",
           "append": true
         },
         {
           "requiredFlag": "extra_battery",
-          "text": " Baterai ekstra VHF yang diamankan Aris diletakkan di samping radio; cadangan ini khusus membantu pemancar/transceiver pada transmisi esok hari, bukan cadangan daya bunker.",
+          "text": " Baterai ekstra VHF siap untuk radio esok hari; baterai itu bukan daya bunker.",
           "append": true
         },
         {
           "requiredFlag": "helped_stranger",
-          "text": " Aris teringat Hendra di seberang rekahan jalan; semoga ia sudah sampai di posko evakuasi bukit dengan selamat.",
+          "text": " Aris berharap Hendra sudah mencapai posko bukit.",
           "append": true
         },
         {
           "requiredFlag": "stranger_family_first",
-          "text": " Aris teringat pria yang ditemuinya di persimpangan tadi siang; Aris tidak tahu bagaimana nasibnya setelah guncangan susulan itu, dan hanya bisa berharap ia menemukan keselamatan sendiri.",
+          "text": " Aris tak tahu nasib Hendra setelah gempa susulan.",
           "append": true
         }
       ],
@@ -1421,7 +1432,7 @@
       "choices": [
         {
           "id": "c_day2_return_day3",
-          "text": "Kencangkan katup pengaman, dampingi Maya, dan bersiap menghadapi Hari Ketiga.",
+          "text": "Amankan katup dan bersiap untuk Hari Ketiga.",
           "nextSceneId": "day3_start",
           "knowledgeEffect": 0,
           "log": "Pemeriksaan shelter selesai; keluarga bersiap menghadapi Hari Ketiga."
@@ -1431,11 +1442,11 @@
     "day3_start": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "[RADIO] ...Basarnas membuka jendela pencarian saat abu menipis... seluruh penghuni bunker diminta menghemat daya dan tetap berada di lokasi... [STATIK]\n\nHari ketiga. Di meja tinggal beberapa botol, lampu indikator berkedip pelan, dan Maya memeluk lututnya di ujung dipan.",
+      "text": "[RADIO] \"Abu mulai menipis. Tim SAR membuka jendela pencarian. Hemat daya dan tetap di tempat.\"\n\nHari ketiga. Persediaan menipis; lampu berkedip.",
       "conditionalText": [
         {
           "requiredFlag": "structural_damage",
-          "text": " Puing-puing semen rontok berserakan di lantai, mengingatkan kita pada keretakan setelah guncangan kemarin."
+          "text": " Serpihan beton di lantai menunjukkan retakan akibat gempa kemarin."
         }
       ],
       "statConditions": [
@@ -1443,7 +1454,7 @@
           "stat": "health",
           "operator": "lt",
           "value": 40,
-          "text": "[REDAKSI FISIK] Napas Anda terengah-engah, pandangan mulai mengabur akibat kondisi fisik yang melemah. ",
+          "text": "[KONDISI FISIK] Napas terengah; pandangan mulai kabur. ",
           "position": "prepend"
         }
       ],
@@ -1453,7 +1464,7 @@
       "choices": [
         {
           "id": "c_day3_check_water",
-          "text": "Periksa cadangan air dan tentukan apa yang boleh dipakai sekarang.",
+          "text": "Periksa cadangan air.",
           "nextSceneId": "day3_water_pressure",
           "knowledgeEffect": 0,
           "log": "Pasokan air terakhir diperiksa."
@@ -1463,26 +1474,26 @@
     "day3_water_pressure": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Air aman tinggal sedikit. Cadangan tangki tertutup mengandung endapan; sistem pengolahan bunker dirancang untuk cadangan ini. Air yang diduga tercemar bahan kimia atau abu tidak otomatis aman setelah disaring atau direbus. Aris mempertimbangkan cadangan botol, pengolahan tangki, dan pembagian persediaan.",
+      "text": "Air botol hampir habis. Tangki tertutup masih bisa diolah dengan sistem bunker, tetapi air yang diduga tercemar kimia atau abu tidak otomatis aman setelah disaring atau direbus.",
       "conditionalText": [
         {
           "requiredFlag": "water_rational_good",
-          "text": " Botol yang disisihkan pada malam pertama masih tersedia; keputusan lama itu memberi mereka ruang bernapas.",
+          "text": " Botol cadangan dari malam pertama masih utuh.",
           "position": "append"
         },
         {
           "requiredFlag": "water_used_freely",
-          "text": " Rak terasa lebih kosong setelah satu botol habis pada malam pertama.",
+          "text": " Rak kosong setelah satu botol habis pada malam pertama.",
           "position": "append"
         },
         {
           "requiredFlag": "water_filtered",
-          "text": " Sistem penyaringan yang pernah disiapkan masih memberi kita pilihan memulihkan sebagian air, walau ia akan memakai daya.",
+          "text": " Sistem pengolahan tersedia, tetapi membutuhkan daya.",
           "position": "append"
         },
         {
           "requiredFlag": "medical_mask_ready",
-          "text": " Kotak medis dari pos kesehatan sudah tersedia bila tenggorokan Maya kembali iritasi.",
+          "text": " P3K tersedia bila Maya membutuhkannya.",
           "position": "append"
         }
       ],
@@ -1492,14 +1503,14 @@
       "choices": [
         {
           "id": "c_day3_water_reserve",
-          "text": "Pakai satu botol air aman sekarang agar Maya dan Sarah kembali stabil.",
+          "text": "Gunakan satu botol air aman sekarang.",
           "nextSceneId": "day3_power_pressure",
           "knowledgeEffect": 0,
           "log": "Satu cadangan air aman dipakai untuk menstabilkan keluarga."
         },
         {
           "id": "c_day3_water_filter",
-          "text": "Jalankan sistem pengolahan cadangan tangki tertutup, meski daya cadangan berkurang.",
+          "text": "Olah air dari tangki tertutup; pakai daya.",
           "nextSceneId": "day3_power_pressure",
           "knowledgeEffect": 1,
           "log": "Filter bunker digunakan untuk memulihkan air; panel daya ikut terbebani.",
@@ -1507,7 +1518,7 @@
         },
         {
           "id": "c_day3_water_ration",
-          "text": "Perketat jatah; simpan air aman untuk bila kondisi benar-benar jatuh.",
+          "text": "Perketat jatah air aman.",
           "nextSceneId": "day3_power_pressure",
           "knowledgeEffect": 0,
           "log": "Keluarga memilih menahan jatah air demi cadangan akhir."
@@ -1517,27 +1528,27 @@
     "day3_power_pressure": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Panel daya turun ke mode darurat. Radio, blower, dan filter air tidak bisa semuanya bekerja penuh sampai malam. Aris menahan sakelar utama sebelum memutuskan sirkuit mana yang dipertahankan.",
+      "text": "Daya tersisa tak cukup untuk menjalankan radio, blower, dan pengolahan air sekaligus. Aris harus memilih prioritas.",
       "conditionalText": [
         {
           "requiredFlag": "power_strained",
-          "text": " Pengolahan air baru saja menyerap cadangan daya. Jika blower tetap diprioritaskan tanpa jalur bantu, kekuatan panggilan radio akan turun.",
+          "text": " Pengolahan air menguras daya; panggilan radio bisa melemah bila blower tetap diutamakan.",
           "position": "append"
         },
         {
           "requiredFlag": "extra_battery",
-          "text": " Baterai ekstra VHF dari minimarket tetap terpisah dari panel bunker—cadangan ini hanya membantu pemancar/transceiver saat komunikasi, bukan memberi daya ke sistem bunker.",
+          "text": " Baterai VHF hanya membantu radio, bukan sistem bunker.",
           "position": "append"
         },
         {
           "requiredFlag": "inspected_power",
-          "text": " Tanda yang Aris buat saat memeriksa panel pada Hari 1 masih terlihat: ada jalur bantu yang dapat dipisah tanpa mematikan blower.",
+          "text": " Tanda Aris pada panel menunjukkan jalur bantu yang bisa dipisah.",
           "position": "append"
         },
         {
           "requiredFlag": "found_spare_filter",
           "forbiddenFlag": "spare_filter_used",
-          "text": " Filter cadangan membuat ventilasi tidak perlu dipaksa ke putaran tertinggi.",
+          "text": " Filter cadangan mengurangi kebutuhan putaran blower.",
           "position": "append"
         }
       ],
@@ -1547,7 +1558,7 @@
       "choices": [
         {
           "id": "c_day3_power_radio",
-          "text": "Prioritaskan radio untuk panggilan SAR; turunkan blower ke mode hemat.",
+          "text": "Utamakan radio; blower masuk mode hemat.",
           "nextSceneId": "day3_wiring",
           "knowledgeEffect": 0,
           "log": "Daya diprioritaskan untuk radio, sementara blower diturunkan ke mode hemat.",
@@ -1555,7 +1566,7 @@
         },
         {
           "id": "c_day3_power_air",
-          "text": "Jaga blower dan filter; radio hanya mendapat daya singkat saat panggilan.",
+          "text": "Utamakan blower dan filter; batasi radio.",
           "nextSceneId": "day3_wiring",
           "knowledgeEffect": 0,
           "log": "Ventilasi diprioritaskan; waktu panggilan radio menjadi lebih terbatas.",
@@ -1563,7 +1574,7 @@
         },
         {
           "id": "c_day3_power_dual",
-          "text": "Hubungkan baterai ekstra untuk pemancar radio VHF; cadangan daya bunker yang tersisa tetap menjadi daya darurat bunker untuk menopang ventilasi.",
+          "text": "Pasang baterai ekstra untuk pemancar radio VHF; cadangan daya bunker tetap menjadi daya darurat bunker untuk ventilasi.",
           "nextSceneId": "day3_wiring",
           "knowledgeEffect": 1,
           "log": "Baterai ekstra VHF dipasang ke pemancar radio; daya darurat bunker difokuskan untuk ventilasi.",
@@ -1572,7 +1583,7 @@
         },
         {
           "id": "c_day3_power_route",
-          "text": "Pisahkan sirkuit bantu yang sudah ditandai agar radio dan blower sama-sama mendapat daya hemat.",
+          "text": "Pisahkan sirkuit agar radio dan blower hemat daya.",
           "nextSceneId": "day3_wiring",
           "knowledgeEffect": 1,
           "log": "Jalur bantu dipisah dengan aman berdasarkan inspeksi panel sebelumnya.",
@@ -1584,7 +1595,7 @@
     "day3_wiring": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Jam ke-64. Strategi daya sudah dipilih; sekarang Aris menerapkannya secara fisik melalui Patch Bay. Ia mengarahkan distribusi daya bunker sesuai prioritas tadi, sementara baterai ekstra VHF tetap menjadi sumber bantu khusus transceiver—bukan sumber daya bunker.",
+      "text": "Jam ke-64. Aris mengatur Patch Bay. Baterai ekstra VHF membantu radio, bukan sumber daya bunker.",
       "background": "rusak",
       "hour": "64 Jam",
       "objective": "Konfigurasikan distribusi daya bunker melalui Patch Bay sebelum membuka transmisi radio.",
@@ -1601,21 +1612,21 @@
     "day3_radio_rescue": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Jendela pencarian dibuka. Hanya ada satu kesempatan untuk mengirim posisi Bunker 72 sebelum daya dialihkan lagi. Sarah mencatat patokan lokasi, sementara Maya memegang tangan Aris tanpa bicara.",
+      "text": "Jendela pencarian dibuka. Sarah menyiapkan koordinat Bunker 72. Hanya satu kesempatan mengirim posisi sebelum daya dialihkan.",
       "conditionalText": [
         {
           "requiredFlag": "inspected_radio",
-          "text": " Pemeriksaan radio pada Hari 1 membuat Aris mengenali rentang frekuensi darurat lebih cepat.",
+          "text": " Inspeksi Hari 1 membantu Aris menemukan frekuensi darurat.",
           "position": "append"
         },
         {
           "requiredFlag": "extra_battery",
-          "text": " Baterai ekstra VHF membantu menjaga transceiver lebih stabil saat transmisi dimulai.",
+          "text": " Baterai ekstra VHF menstabilkan transmisi.",
           "position": "append"
         },
         {
           "requiredFlag": "helped_stranger",
-          "text": " Aris sempat teringat Hendra; semoga ia juga menemukan jalur aman menuju posko.",
+          "text": " Aris berharap Hendra juga mencapai posko.",
           "position": "append"
         }
       ],
@@ -1625,7 +1636,7 @@
       "choices": [
         {
           "id": "c_day3_radio_attempt",
-          "text": "Buka receiver VHF dan kirim posisi bunker sekarang.",
+          "text": "Kirim posisi Bunker 72 lewat VHF.",
           "nextSceneId": "day3_radio_clear",
           "knowledgeEffect": 0,
           "log": "Aris memulai transmisi akhir posisi Bunker 72 kepada SAR."
@@ -1635,14 +1646,14 @@
     "day3_radio_clear": {
       "speaker": "Radio",
       "avatar": null,
-      "text": "[BASARNAS / SAR] Posisi diterima jelas. Tim darat mengonfirmasi sektor Bunker 72 dan meminta keluarga mempertahankan perlindungan sampai palka dapat dijangkau.",
+      "text": "[BASARNAS / SAR] \"Posisi Bunker 72 diterima. Tetap berlindung; tim menuju palka.\"",
       "background": "rusak",
       "hour": "70 Jam",
       "objective": "Hadapi dua jam terakhir dengan sistem yang tersisa.",
       "choices": [
         {
           "id": "c_day3_radio_clear_continue",
-          "text": "Catat konfirmasi dan siapkan keluarga untuk jam-jam terakhir.",
+          "text": "Catat konfirmasi dan bersiap menunggu.",
           "nextSceneId": "day3_final_dilemma",
           "knowledgeEffect": 0,
           "log": "Konfirmasi SAR yang jelas dicatat oleh keluarga."
@@ -1652,14 +1663,14 @@
     "day3_radio_weak": {
       "speaker": "Radio",
       "avatar": null,
-      "text": "[BASARNAS / SAR] ...Bunker... tujuh dua... koordinat sebagian diterima. Tim pencari memperluas sektor; tetap di tempat dan hemat semua daya yang tersisa.",
+      "text": "[BASARNAS / SAR] \"...Bunker tujuh dua... koordinat sebagian diterima. Tetap di tempat dan hemat daya.\"",
       "background": "rusak",
       "hour": "70 Jam",
       "objective": "Jaga bunker sementara pencarian diperluas.",
       "choices": [
         {
           "id": "c_day3_radio_weak_continue",
-          "text": "Simpan radio dan siapkan keluarga menghadapi jam terakhir.",
+          "text": "Simpan radio dan bersiap menunggu.",
           "nextSceneId": "day3_final_dilemma",
           "knowledgeEffect": 0,
           "log": "Pesan SAR terputus-putus, tetapi sektor pencarian telah menerima petunjuk."
@@ -1669,14 +1680,14 @@
     "day3_radio_failed": {
       "speaker": "Aris",
       "avatar": "ayah",
-      "text": "Statik menelan panggilan terakhir. Tidak ada jawaban yang bisa dipastikan. Aris mematikan receiver agar sisa daya tidak habis—kegagalan sinyal bukan alasan untuk menyerah pada dua jam terakhir.",
+      "text": "Statik menelan panggilan. Aris mematikan radio untuk menghemat daya. \"Kita tetap bertahan sampai bantuan tiba.\"",
       "background": "rusak",
       "hour": "70 Jam",
       "objective": "Bertahan sampai jendela evakuasi berakhir.",
       "choices": [
         {
           "id": "c_day3_radio_failed_continue",
-          "text": "Tutup receiver, tenangkan keluarga, dan lanjutkan prosedur bertahan.",
+          "text": "Matikan radio dan tenangkan keluarga.",
           "nextSceneId": "day3_final_dilemma",
           "knowledgeEffect": 0,
           "log": "Transmisi gagal dipastikan; keluarga melanjutkan prosedur bertahan."
@@ -1686,16 +1697,16 @@
     "day3_final_dilemma": {
       "speaker": "Sarah",
       "avatar": "ibu",
-      "text": "Lampu turun lagi. Sarah memeriksa napas Maya dan menatap panel yang berkedip. Masih ada satu tindakan sebelum bantuan tiba: jaga aliran udara dengan filter cadangan, siapkan masker saat menangani debu, atau matikan sirkuit tambahan agar indikator bertahan.",
+      "text": "Lampu kembali redup. Sarah memeriksa Maya. Satu tindakan tersisa: jaga aliran udara, kurangi paparan debu, atau hemat daya indikator.",
       "conditionalText": [
         {
           "requiredFlag": "maya_toy_callback",
-          "text": " Maya menggenggam mobil merahnya di bawah selimut, berusaha tetap tenang.",
+          "text": " Maya menggenggam mobil merahnya di bawah selimut.",
           "position": "append"
         },
         {
           "requiredFlag": "maya_comforted",
-          "text": " Maya menatap Aris, lalu mengangguk kecil seperti ia mengingat malam pertama mereka di bunker.",
+          "text": " Maya menatap Aris dan mengingat malam pertama.",
           "position": "append"
         }
       ],
@@ -1705,7 +1716,7 @@
       "choices": [
         {
           "id": "c_day3_final_keep_air",
-          "text": "Pasang filter cadangan dan biarkan blower berputar rendah sampai bantuan tiba.",
+          "text": "Pasang filter cadangan; jaga blower rendah.",
           "nextSceneId": "day3_final_hours",
           "knowledgeEffect": 0,
           "log": "Filter cadangan dipasang untuk menjaga udara pada jam terakhir.",
@@ -1715,7 +1726,7 @@
         },
         {
           "id": "c_day3_final_mask",
-          "text": "Siapkan masker untuk mengurangi debu saat perawatan singkat; tetap pantau ventilasi.",
+          "text": "Siapkan masker; tetap pantau ventilasi.",
           "nextSceneId": "day3_final_hours",
           "knowledgeEffect": 0,
           "log": "Masker medis disiapkan sebagai perlindungan singkat untuk Maya.",
@@ -1724,7 +1735,7 @@
         },
         {
           "id": "c_day3_final_conserve",
-          "text": "Matikan sirkuit tambahan, duduk bersama, dan simpan daya untuk indikator bunker.",
+          "text": "Matikan sirkuit tambahan; simpan daya indikator.",
           "nextSceneId": "day3_final_hours",
           "knowledgeEffect": 0,
           "log": "Sirkuit tambahan dimatikan agar daya dasar bunker bertahan.",
@@ -1735,39 +1746,39 @@
     "day3_final_hours": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Menjelang jam ke-72, lampu darurat berkedip sekali lagi. Maya mencari tangan Aris. \"Kalau lampunya padam, kita tetap bersama, kan?\" Aris menggenggamnya. \"Sampai pintu itu terbuka.\" Di luar, abu mulai mereda. Mereka menjaga sistem yang tersisa dan menunggu suara dari palka.",
+      "text": "Mendekati jam ke-72, Maya menggenggam tangan Aris. \"Kita tetap bersama?\" \"Sampai pintu terbuka,\" jawabnya. Di luar, abu mereda.",
       "conditionalText": [
         {
           "requiredFlag": "final_air_protected",
-          "text": " Blower rendah dan filter cadangan menahan udara tetap bisa dihirup.",
+          "text": " Blower rendah dan filter menjaga aliran udara.",
           "position": "append"
         },
         {
           "requiredFlag": "medical_mask_used",
-          "text": " Masker siap untuk mengurangi debu; masker tidak menyediakan oksigen atau melindungi dari gas berbahaya.",
+          "text": " Masker mengurangi debu, tetapi tidak memasok oksigen atau menahan gas berbahaya.",
           "position": "append"
         },
         {
           "requiredFlag": "final_power_conserved",
-          "text": " Panel bertahan pada mode dasar; indikator masih menyala.",
+          "text": " Panel dasar dan indikator tetap menyala.",
           "position": "append"
         },
         {
           "requiredFlag": "radio_quality",
           "requiredValue": "clear",
-          "text": " Konfirmasi lokasi Bunker 72 sudah diterima jelas; tim darat SAR sedang menuju sektor ini.",
+          "text": " Konfirmasi lokasi Bunker 72 diterima jelas.",
           "position": "append"
         },
         {
           "requiredFlag": "radio_quality",
           "requiredValue": "weak",
-          "text": " Pesan hanya diterima sebagian; sektor pencarian sudah dipersempit, tetapi keluarga belum mendapat kepastian waktu.",
+          "text": " Pesan diterima sebagian; waktu kedatangan tim belum pasti.",
           "position": "append"
         },
         {
           "requiredFlag": "radio_quality",
           "requiredValue": "failed",
-          "text": " Tidak ada transmisi akhir yang dapat dipastikan. Tim masih mungkin menemukan keluarga lewat penyisiran sektor, alamat rumah yang tercatat, dan catatan respons lokal.",
+          "text": " Radio tak terkonfirmasi. Tim masih bisa menemukan bunker lewat penyisiran sektor dan pendataan warga.",
           "position": "append"
         }
       ],
@@ -1777,7 +1788,7 @@
       "choices": [
         {
           "id": "c_day3_final_hours_wait",
-          "text": "Tetap di bunker dan tunggu evaluasi jendela penyelamatan.",
+          "text": "Tetap di bunker dan tunggu tim SAR.",
           "nextSceneId": "ending_eval",
           "knowledgeEffect": 0,
           "log": "Keluarga bertahan bersama hingga evaluasi jam ke-72."
@@ -1787,14 +1798,14 @@
     "ending_eval": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Jam ke-72 tiba. Kondisi keluarga dan kesiapsiagaan teknis menentukan tingkat bantuan yang dibutuhkan saat penyelamatan.",
+      "text": "Jam ke-72. Kondisi keluarga dan bunker menentukan bantuan yang mereka perlukan.",
       "background": "rusak",
       "hour": "72 Jam",
       "objective": "Evaluasi kontak penyelamatan jam ke-72.",
       "choices": [
         {
           "id": "c_ending_eval_trigger",
-          "text": "Periksa status penyelamatan luar.",
+          "text": "Periksa status penyelamatan.",
           "nextSceneId": "trigger_ending_eval",
           "knowledgeEffect": 0,
           "log": "Pemeriksaan sinyal evakuasi jam ke-72 dimulai."
@@ -1804,7 +1815,7 @@
     "ending_bad": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Tim SAR membuka pintu palka dan mengevakuasi Aris, Sarah, dan Maya. Ketiganya selamat dalam kondisi sangat lemah dan segera mendapat penanganan medis darurat. Kerusakan sistem perlindungan membuat pemulihan mereka membutuhkan waktu, namun keluarga tetap utuh bersama.",
+      "text": "Tim SAR membuka palka. Aris, Sarah, dan Maya selamat, tetapi sangat lemah dan perlu perawatan darurat. Pemulihan mereka akan panjang.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1812,7 +1823,7 @@
     "ending_normal": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pintu palka akhirnya dibuka oleh tim penyelamat. Tiga hari di bawah tanah menyisakan kelelahan fisik, cadangan yang menipis, dan peralatan yang aus, namun Aris, Sarah, dan Maya selamat dan siap memulai masa pemulihan.",
+      "text": "Tim SAR membuka palka. Aris, Sarah, dan Maya selamat setelah 72 jam yang berat. Mereka menjalani pemeriksaan dan mulai pulih di posko.",
       "background": "rusak",
       "hour": "72 Jam",
       "choices": []
@@ -1820,7 +1831,7 @@
     "ending_good": {
       "speaker": "Narator",
       "avatar": null,
-      "text": "Pintu palka terbuka menyambut tim penyelamat dan udara luar yang mulai tenang. Persiapan teknis memberi keluarga margin yang cukup untuk bertahan dalam kondisi relatif stabil di tengah dampak bencana yang masih luas.",
+      "text": "Palka terbuka. Persiapan mereka menjaga kondisi keluarga tetap stabil selama 72 jam. Kini mereka keluar bersama tim penyelamat.",
       "background": "normal",
       "hour": "72 Jam",
       "choices": []
